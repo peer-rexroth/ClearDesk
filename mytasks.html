@@ -359,8 +359,8 @@
   .bulk-bar select, .bulk-bar input[type=date] { font-size: 12px; border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 5px 8px; background: var(--bg); color: var(--text); font-family: var(--font); }
   .task-row.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
 
-  .task-list { flex: 1; overflow-y: auto; padding: 0 14px 20px; }
-  .task-list-header, .task-row { grid-template-columns: 44px minmax(0,1fr) 170px 100px 120px 130px 76px; }
+  .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 14px 20px; }
+  .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 170px 100px 120px 130px 76px; min-width: max-content; }
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
   .task-row { display: grid; grid-template-areas: "check title project priority status due del" ". sub sub sub sub sub ."; column-gap: 10px; row-gap: 6px; align-items: center; padding: 10px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
