@@ -228,6 +228,28 @@ parity.
   outside-click handler sees a detached target and closes them.
 - Sidebar order is Projects (with the "projects shown" control beside the +)
   then a collapsible Tags section (`mytasks_tags_collapsed`).
+- **The drawer is a docked side panel, not an overlay.** `#drawer` is a flex
+  sibling of `.main` inside `.layout` (width 0 → 420px), with no backdrop, so
+  the list stays visible and clicking another row swaps the panel; ↑/↓ move
+  the selection *and* the panel (list view). Esc / ✕ close it. Its old
+  `box-shadow` only applies when open — a fixed drawer parked just off-screen
+  used to bleed a grey strip down the right edge of every screen. While it is
+  open the list drops its Project column (`.layout:has(.drawer.open)`) and the
+  toast moves left so neither is covered. Under 800px it floats again.
+- **Row menu** (`#rowMenu`: right-click, the row's ⋯ button, or the Menu /
+  Shift+F10 key — modelled on Milestone's). Targets the whole selection when
+  the row is part of a multi-selection, else that row, and **never changes
+  the selection** (so no bulk bar pops in and shoves the list down). Actions
+  go through `rowMenuRun`, which reuses `updateTaskField` for one task and the
+  `bulk*` helpers for several; those helpers take an optional explicit id
+  list for exactly this reason. It is `position:fixed` on `<body>`, so
+  `placeRowMenu` converts viewport px to CSS px using a scale measured from a
+  real element (rect width / layout width) to stay correct under the UI-scale
+  zoom. macOS note: Ctrl+click is a right-click there; multi-select is Cmd.
+- **Linked-file chip** (`fileSyncChipHtml`/`onFileSyncChipClick`): one button
+  like Milestone's — amber *Link file* (opens the Link/Create modal), green
+  *Linked* (click → confirm → unlink), red *Reconnect*. It replaced the old
+  split button + filename + unlink icon.
 
 ## Shared state that spans views
 

@@ -723,6 +723,53 @@
   .tags-section.collapsed .filter-chips { display: none; }
   .tags-section.collapsed .sidebar-section-label { margin-bottom: 0; }
   .sidebar-section.tags-section { border-bottom: none; border-top: 1px solid var(--border); }
+
+  /* ── Side panel drawer, linked-file chip, row menu ───────────────────────
+     The drawer is a docked flex sibling of .main instead of a fixed overlay:
+     no blur/backdrop (the list stays visible and clickable, and a click on
+     another row swaps the panel), and with no fixed box-shadow bleeding in
+     from just off-screen, the grey strip that used to run down the right
+     edge of every screen is gone. Below 800px it floats over the page again. */
+  .drawer { position: relative; top: auto; right: auto; height: auto; width: 0; max-width: none; flex-shrink: 0; overflow: hidden; border-left: 0 solid var(--border-2); box-shadow: none; transform: none; z-index: auto; transition: width .2s ease, background-color .2s ease; }
+  .drawer.open { width: 420px; border-left-width: 1px; transform: none; }
+  .drawer > * { min-width: 420px; }
+  @media (max-width: 800px) {
+    .drawer.open { position: fixed; top: 56px; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 151; box-shadow: var(--shadow); }
+    .drawer > * { min-width: 0; }
+  }
+
+  /* With the panel open the list loses ~420px: drop the Project column (it is
+     in the panel) and tighten the rest so Priority/Status/Due stay visible. */
+  .layout:has(.drawer.open) .task-list-header,
+  .layout:has(.drawer.open) .task-row { grid-template-columns: 44px minmax(150px,1fr) 0 96px 110px 90px 64px; column-gap: 8px; }
+  .layout:has(.drawer.open) .task-row > .task-cell:not(.priority):not(.status):not(.due),
+  .layout:has(.drawer.open) .task-list-header > :nth-child(3) { visibility: hidden; overflow: hidden; }
+  body:has(.drawer.open) .toast { right: auto; left: 24px; }
+
+  .file-chip.warn { color: var(--amber-text); border-color: var(--amber-text); }
+  .file-chip.ok i { color: var(--green-text); }
+  .file-chip.bad { color: var(--red-text); border-color: var(--red-text); }
+
+  .row-menu { display: none; position: fixed; z-index: 400; min-width: 230px; max-width: 300px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); max-height: calc(100vh - 16px); overflow-y: auto; }
+  .row-menu.open { display: block; }
+  .row-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); text-align: left; cursor: pointer; }
+  .row-menu-item i { width: 16px; text-align: center; color: var(--text-3); }
+  .row-menu-item:hover:not(:disabled) { background: var(--bg-3); }
+  .row-menu-item:disabled { opacity: .45; cursor: default; }
+  .row-menu-item.danger, .row-menu-item.danger i { color: var(--red-text); }
+  .row-menu-hint { margin-left: auto; font-size: 12px; color: var(--text-3); }
+  .row-menu-sep { height: 1px; background: var(--border); margin: 6px 2px; }
+  .row-menu-label { padding: 6px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
+  .row-menu-chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 6px 6px; }
+  .row-menu-chip { padding: 3px 6px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; font-family: var(--font); cursor: pointer; }
+  .row-menu-chip:hover { background: var(--bg-3); }
+  .row-menu-chip.current { border-color: var(--border-2); background: var(--bg-2); }
+  .row-menu-chip i { color: var(--text-3); font-size: 12px; }
+  @media (hover: none) { .row-actions { opacity: 1; } }
+
+  .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border: 1px solid var(--purple-text); border-radius: 14px; background: transparent; color: var(--purple-text); font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; }
+  .sel-chip:hover { background: var(--purple-bg); }
+  .sel-chip i { font-size: 11px; opacity: .8; }
 </style>
 </head>
 <body>
@@ -764,6 +811,7 @@
   </div>
 </div>
 <div class="sync-banner" id="syncBanner" role="status"></div>
+<div class="row-menu" id="rowMenu" role="menu"></div>
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
@@ -852,10 +900,9 @@
     </div>
     <div class="board" id="board" style="display:none"></div>
   </div>
+  <div class="drawer" id="drawer"></div>
 </div>
 
-<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
-<div class="drawer" id="drawer"></div>
 
 <!-- Confirm modal -->
 <div class="modal-bg" id="confirmModalBg" onclick="if(event.target===this) closeAllModals()">
@@ -1652,7 +1699,7 @@ function renderList(){
     if(t.repeat && t.repeat!=='none'){
       dueCell += `<i class="fa-solid fa-repeat" style="color:var(--text-3);font-size:11px;margin-left:5px" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
     }
-    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')">
+    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
       <div class="task-check-cell">
         ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:'<span class="subtask-toggle"></span>'}
         <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
@@ -1716,6 +1763,7 @@ function renderList(){
         ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
         <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
         <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
       </div>
     </div>`;
   }).join('') + (doneTotal>MAX_COMPLETED_SHOWN
@@ -1737,7 +1785,7 @@ function boardCardHtml(t){
   const priorityIcon = t.priority==='high' ? `<i class="fa-solid fa-flag board-card-priority-icon" title="High priority"></i>` : '';
   return `<div class="board-card ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''}" data-id="${t.id}" draggable="true"
       ondragstart="handleCardDragStart(event,'${t.id}')" ondragend="handleCardDragEnd(event)"
-      onmousedown="selectBoardCard('${t.id}')" onclick="openTask('${t.id}')">
+      onmousedown="selectBoardCard('${t.id}')" onclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
     ${tagStrips?`<div class="board-card-tagstrips">${tagStrips}</div>`:''}
     <div class="board-card-top">
       <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
@@ -2011,6 +2059,102 @@ function handleRowClick(e, id){
   lastClickedTaskId = id;
   openTask(id);
 }
+// ── Row menu (right-click / "⋯" / Menu key) — same actions as Milestone's ─────
+// Acts on the whole selection when the clicked row is part of a multi-selection,
+// otherwise on just that row; it never changes the selection itself, so opening
+// it doesn't make the bulk bar appear and shove the list down.
+let rowMenuIds = [];
+function closeRowMenu(){ document.getElementById('rowMenu')?.classList.remove('open'); }
+function rowMenuHtml(ids){
+  const n = ids.length;
+  const ts = ids.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
+  if(!ts.length) return '';
+  const item = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}"><i class="${icon}"></i><span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+  const chips = (field, list, cur, badge)=>`<div class="row-menu-chips">${list.map(x=>`<button type="button" class="row-menu-chip${cur===x.id?' current':''}" onclick="rowMenuRun('${field}','${x.id}')">${badge?`<span class="badge ${badge}-${x.id}">${esc(x.label)}</span>`:`<i class="fa-solid fa-${x.icon||'folder'}"></i> ${esc(x.label)}`}</button>`).join('')}</div>`;
+  const same = k=>ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
+  const allDone = ts.every(t=>t.status==='done');
+  const sep = '<div class="row-menu-sep"></div>';
+  const label = x=>`<div class="row-menu-label">${x}</div>`;
+  const dueQ = [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear']];
+  const parts = [];
+  if(n===1) parts.push(item('fa-solid fa-pen-to-square','Open details','rowMenuRun(\'open\')'));
+  parts.push(item(allDone?'fa-regular fa-circle':'fa-regular fa-circle-check', allDone?'Mark not started':'Mark complete', 'rowMenuRun(\'toggledone\')'));
+  parts.push(sep, label('Priority'), chips('priority', PRIORITIES, same('priority'), 'badge-priority'));
+  parts.push(label('Status'), chips('status', STATUSES, same('status'), 'badge-status'));
+  parts.push(label('Due'), `<div class="row-menu-chips">${dueQ.map(d=>`<button type="button" class="row-menu-chip" onclick="rowMenuRun('due','${d[0]}')">${d[1]}</button>`).join('')}</div>`);
+  parts.push(label('Move to'), chips('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,18),icon:p.icon})), same('projectId')));
+  parts.push(sep);
+  if(n===1) parts.push(item('fa-solid fa-plus','Add subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-clone','Duplicate','rowMenuRun(\'duplicate\')'));
+  parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'Del'}));
+  return parts.join('');
+}
+// x/y are viewport px from the event. The menu is position:fixed on <body>, and
+// the UI-scale zoom on <html> means CSS px != viewport px, so convert with the
+// scale measured off a real element (rect width / layout width).
+function placeRowMenu(menu, x, y, measureEl){
+  menu.style.left = '0px'; menu.style.top = '0px';
+  menu.classList.add('open');
+  let k = 1;
+  if(measureEl && measureEl.offsetWidth){ k = measureEl.getBoundingClientRect().width / measureEl.offsetWidth || 1; }
+  const vw = window.innerWidth / k, vh = window.innerHeight / k;
+  let left = x / k, top = y / k;
+  const w = menu.offsetWidth, h = menu.offsetHeight;
+  if(left + w > vw - 8) left = Math.max(8, vw - w - 8);
+  if(top + h > vh - 8) top = Math.max(8, vh - h - 8);
+  menu.style.left = left + 'px'; menu.style.top = top + 'px';
+}
+function showRowMenu(id, x, y, measureEl){
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  rowMenuIds = (selectedTaskIds.has(id) && selectedTaskIds.size>1) ? [...selectedTaskIds] : [id];
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  menu.innerHTML = rowMenuHtml(rowMenuIds);
+  placeRowMenu(menu, x, y, measureEl);
+}
+function openRowMenu(e, id){
+  if(e.target && e.target.closest && e.target.closest('input, textarea, select')) return;   // a text box keeps the browser's own menu
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const host = (e.currentTarget && e.currentTarget.closest) ? e.currentTarget.closest('.task-row, .board-card') || e.currentTarget : e.currentTarget;
+  let x = e.clientX, y = e.clientY;
+  if(e.type==='click' && e.currentTarget && e.currentTarget.getBoundingClientRect){   // the ⋯ button: open under it, right-aligned
+    const r = e.currentTarget.getBoundingClientRect();
+    x = r.right - 230; y = r.bottom + 4;
+  }
+  showRowMenu(id, x, y, host);
+}
+function openRowMenuForKeyboard(id){
+  const row = document.querySelector(`.task-row[data-id="${id}"]`); if(!row) return;
+  const r = row.getBoundingClientRect();
+  showRowMenu(id, r.left + 60, r.bottom, row);
+}
+function rowMenuRun(kind, value){
+  const ids = rowMenuIds.slice();
+  closeRowMenu();
+  if(!ids.length) return;
+  const today = todayStr();
+  if(kind==='open'){ openTask(ids[0]); }
+  else if(kind==='toggledone'){
+    const allDone = ids.every(id=>(tasks.find(t=>t.id===id)||{}).status==='done');
+    if(ids.length===1) toggleTaskDone(ids[0]); else bulkSetStatus(allDone ? 'todo' : 'done', ids);
+  }
+  else if(kind==='priority'){ ids.length===1 ? updateTaskField(ids[0],'priority',value) : bulkSetPriority(value, ids); }
+  else if(kind==='status'){ ids.length===1 ? updateTaskField(ids[0],'status',value) : bulkSetStatus(value, ids); }
+  else if(kind==='project'){ ids.length===1 ? updateTaskField(ids[0],'projectId',value) : bulkMoveProject(value, ids); }
+  else if(kind==='due'){
+    const v = value==='today' ? today : value==='tomorrow' ? isoAddDays(today,1) : value==='week' ? isoAddDays(today,7) : null;
+    ids.length===1 ? updateTaskField(ids[0],'dueDate',v) : bulkSetDueDate(v, ids);
+  }
+  else if(kind==='subtask'){
+    const id = ids[0];
+    activeTaskId = null;
+    inlineAddSubtaskTaskId = id; inlineAddParentSubId = null; inlineAddParentStepId = null;
+    collapsedTaskIds.delete(id); kbdSelectedTaskId = id;
+    render();
+    (document.getElementById('inlineSubtaskInput') || document.getElementById('inlineSubtaskInputBoard'))?.focus();
+  }
+  else if(kind==='duplicate'){ duplicateTask(ids[0]); }
+  else if(kind==='delete'){ ids.length===1 ? deleteTask(ids[0]) : bulkDelete(ids); }
+}
 function clearSelection(){ selectedTaskIds.clear(); renderList(); renderBulkBar(); }
 function renderBulkBar(){
   const bar = document.getElementById('bulkBar'); if(!bar) return;
@@ -2022,7 +2166,7 @@ function renderBulkBar(){
   const repeatOpts = REPEATS.map(r=>`<option value="${r.id}">${esc(r.label)}</option>`).join('');
   const n = selectedTaskIds.size;
   bar.innerHTML = `
-    <span class="bulk-count">${n} selected</span>
+    <button type="button" class="sel-chip" onclick="clearSelection()" title="Clear the selection (Esc)">${n} selected <i class="fa-solid fa-xmark"></i></button>
     <select onchange="if(this.value)bulkSetStatus(this.value); this.value='';">
       <option value="">Set status…</option>${statusOpts}
     </select>
@@ -2037,12 +2181,12 @@ function renderBulkBar(){
     <select onchange="if(this.value)bulkSetRepeat(this.value); this.value='';">
       <option value="">Set repeat…</option>${repeatOpts}
     </select>
+    <button class="btn btn-sm" onclick="bulkSetStatus('done')" title="Mark the selected tasks complete"><i class="fa-regular fa-circle-check"></i> Complete</button>
     <button class="btn btn-sm btn-danger" onclick="bulkDelete()"><i class="fa-solid fa-trash"></i> Delete</button>
-    <button class="btn btn-sm" onclick="clearSelection()"><i class="fa-solid fa-xmark"></i> Clear</button>
   `;
 }
-function bulkSetStatus(status){
-  const ids = [...selectedTaskIds];
+function bulkSetStatus(status, idsArg){
+  const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   const prev = ids.map(id=>{ const t=tasks.find(x=>x.id===id); return t?{id, status:t.status, completedAt:t.completedAt}:null; }).filter(Boolean);
   ids.forEach(id=>{ const t=tasks.find(x=>x.id===id); if(t){ t.status=status; t.completedAt = status==='done' ? Date.now() : null; t.updatedAt=Date.now(); } });
   save(); render();
@@ -2051,8 +2195,8 @@ function bulkSetStatus(status){
     save(); render();
   });
 }
-function bulkSetPriority(priority){
-  const ids = [...selectedTaskIds];
+function bulkSetPriority(priority, idsArg){
+  const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   const prev = ids.map(id=>{ const t=tasks.find(x=>x.id===id); return t?{id, priority:t.priority}:null; }).filter(Boolean);
   ids.forEach(id=>{ const t=tasks.find(x=>x.id===id); if(t){ t.priority=priority; t.updatedAt=Date.now(); } });
   save(); render();
@@ -2061,9 +2205,9 @@ function bulkSetPriority(priority){
     save(); render();
   });
 }
-function bulkMoveProject(projectId){
+function bulkMoveProject(projectId, idsArg){
   if(projectId==='proj-deleted') return; // system-managed, not user-assignable
-  const ids = [...selectedTaskIds];
+  const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   const prev = ids.map(id=>{ const t=tasks.find(x=>x.id===id); return t?{id, projectId:t.projectId}:null; }).filter(Boolean);
   ids.forEach(id=>{ const t=tasks.find(x=>x.id===id); if(t){ t.projectId=projectId; t.updatedAt=Date.now(); } });
   save(); render();
@@ -2072,8 +2216,8 @@ function bulkMoveProject(projectId){
     save(); render();
   });
 }
-function bulkSetDueDate(dueDate){
-  const ids = [...selectedTaskIds];
+function bulkSetDueDate(dueDate, idsArg){
+  const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   const prev = ids.map(id=>{ const t=tasks.find(x=>x.id===id); return t?{id, dueDate:t.dueDate}:null; }).filter(Boolean);
   ids.forEach(id=>{ const t=tasks.find(x=>x.id===id); if(t){ t.dueDate = dueDate || null; t.updatedAt = Date.now(); } });
   save(); render();
@@ -2083,8 +2227,8 @@ function bulkSetDueDate(dueDate){
     save(); render();
   });
 }
-function bulkSetRepeat(repeat){
-  const ids = [...selectedTaskIds];
+function bulkSetRepeat(repeat, idsArg){
+  const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   const prev = ids.map(id=>{ const t=tasks.find(x=>x.id===id); return t?{id, repeat:t.repeat, dueDate:t.dueDate}:null; }).filter(Boolean);
   ids.forEach(id=>{
     const t = tasks.find(x=>x.id===id); if(!t) return;
@@ -2098,8 +2242,8 @@ function bulkSetRepeat(repeat){
     save(); render();
   });
 }
-function bulkDelete(){
-  const ids = [...selectedTaskIds];
+function bulkDelete(idsArg){
+  const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   if(!ids.length) return;
   openConfirmModal({
     title: `Delete ${ids.length} task${ids.length===1?'':'s'}?`,
@@ -2127,12 +2271,11 @@ function bulkDelete(){
 }
 
 function renderDrawer(){
-  const overlay = document.getElementById('drawerOverlay');
   const drawer = document.getElementById('drawer');
   const t = activeTaskId ? tasks.find(x=>x.id===activeTaskId) : null;
-  if(!t){ overlay.classList.remove('open'); drawer.classList.remove('open'); drawer.innerHTML=''; return; }
+  if(!t){ drawer.classList.remove('open'); drawer.innerHTML=''; return; }
 
-  overlay.classList.add('open'); drawer.classList.add('open');
+  drawer.classList.add('open');
 
   const projOptions = visibleProjects().map(p=>`<option value="${p.id}" ${p.id===t.projectId?'selected':''}${p.name.length>15?` title="${esc(p.name)}"`:''}>${esc(abbreviateName(p.name, 15))}</option>`).join('');
   const statusOptions = STATUSES.map(s=>`<option value="${s.id}" ${s.id===t.status?'selected':''}>${esc(s.label)}</option>`).join('');
@@ -3450,6 +3593,7 @@ function shortcutsListHtml(){
     group('General'),
     row('Open a task', 'Click'),
     row('Rename the selected task', 'F2'),
+    row('Open the row menu', 'Right-click'),
     row('Rename a subtask', 'Double-click text'),
     row('Change priority, status or due date', 'Click its badge'),
     row('Show shortcuts', '?'),
@@ -3541,11 +3685,11 @@ function setUiScale(v){
 
 document.addEventListener('click', e=>{
   if(!e.target.closest('#libDropdown')) closeLibMenu();
-  if(!e.target.closest('#linkSplitBtn')) closeLinkMenu();
   if(!e.target.closest('#uiScaleDropdown')) closeUiScaleMenu();
   if(!e.target.closest('#helpDropdown')) closeHelpMenu();
   if(!e.target.closest('#filterDropdown')) closeFilterMenu();
   if(!e.target.closest('#cellPop')) closeCellPop();
+  if(!e.target.closest('#rowMenu')) closeRowMenu();
   const btn = e.target.closest('button');
   if(btn) btn.blur();
   const cb = e.target.closest('[role="checkbox"]');
@@ -3553,7 +3697,7 @@ document.addEventListener('click', e=>{
 });
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
-    closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+    closeCellPop(); closeRowMenu(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
     closeAllModals(); closeDrawer(); inlineAddSubtaskTaskId=null; inlineAddParentSubId=null; inlineAddParentStepId=null; renamingTaskId=null; renamingSubtask=null; renamingSubSubtask=null; renamingSubSubSubtask=null; selectedTaskIds.clear(); kbdSelectedTaskId=null;
     if(viewMode==='board'){ renderBoard(); } else { renderList(); }
     renderBulkBar();
@@ -3724,14 +3868,18 @@ function addInlineSubSubSubtask(taskId, subId, stepId){
   document.getElementById(inputId)?.focus();
 }
 function handleListKeyNav(e){
-  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='Delete' && e.key!=='F2') return;
+  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='Delete' && e.key!=='F2' && e.key!=='ContextMenu' && !(e.shiftKey && e.key==='F10')) return;
   if(isTypingTarget(document.activeElement)) return;
   if(document.querySelector('.modal-bg.open')) return;
-  if(activeTaskId) return;
+  if(activeTaskId && e.key!=='ArrowDown' && e.key!=='ArrowUp') return;
   const list = getVisibleListTasks().tasks;
   if(!list.length) return;
   if(e.key==='F2'){
     if(kbdSelectedTaskId && list.some(t=>t.id===kbdSelectedTaskId)){ e.preventDefault(); startRenameTask(kbdSelectedTaskId); }
+    return;
+  }
+  if(e.key==='ContextMenu' || e.key==='F10'){
+    if(kbdSelectedTaskId && list.some(t=>t.id===kbdSelectedTaskId)){ e.preventDefault(); openRowMenuForKeyboard(kbdSelectedTaskId); }
     return;
   }
   if(e.key==='Delete'){
@@ -3787,6 +3935,7 @@ function handleListKeyNav(e){
     if(prevId){ document.querySelector(`.task-row[data-id="${prevId}"]`)?.classList.remove('kbd-selected'); }
     document.querySelector(`.task-row[data-id="${kbdSelectedTaskId}"]`)?.classList.add('kbd-selected');
   }
+  if(activeTaskId) openTask(kbdSelectedTaskId);   // the side panel follows the selection
   document.querySelector(`.task-row[data-id="${kbdSelectedTaskId}"]`)?.scrollIntoView({block:'nearest'});
 }
 
@@ -4032,29 +4181,6 @@ async function _clearFileLink(){
   await _fsDel().catch(()=>{});
   updateFileSyncUI();
 }
-function linkSplitBtnHtml(){
-  return `<div class="split-btn" id="linkSplitBtn">
-    <button class="split-btn-main" onclick="linkFile()" title="Link an existing .json data file">
-      <i class="fa-solid fa-link"></i> Link file
-    </button>
-    <button class="split-btn-chevron" onclick="event.stopPropagation();toggleLinkMenu()" title="More options">
-      <i class="fa-solid fa-chevron-down"></i>
-    </button>
-    <div class="split-btn-menu" id="linkMenu">
-      <div class="split-btn-menu-item" onclick="linkFile();closeLinkMenu()">
-        <i class="fa-solid fa-folder-open split-btn-menu-icon"></i>
-        <div><div class="split-btn-menu-label">Link existing file…</div><div class="split-btn-menu-desc">Open a .json data file and sync to it</div></div>
-      </div>
-      <div class="split-btn-menu-item" onclick="createNewLinkedFile();closeLinkMenu()">
-        <i class="fa-solid fa-file-circle-plus split-btn-menu-icon"></i>
-        <div><div class="split-btn-menu-label">Create new file…</div><div class="split-btn-menu-desc">Save current data to a new file</div></div>
-      </div>
-    </div>
-  </div>`;
-}
-function toggleLinkMenu(){ document.getElementById('linkMenu')?.classList.toggle('open'); }
-function closeLinkMenu(){ document.getElementById('linkMenu')?.classList.remove('open'); }
-
 async function createNewLinkedFile(){
   if(!window.showSaveFilePicker){ showToast('File linking requires Chrome or Edge', true); return; }
   try{
@@ -4161,25 +4287,37 @@ function showSyncBanner(handle){
 }
 function hideSyncBanner(){ const el = document.getElementById('syncBanner'); if(!el) return; el.classList.remove('show'); el.innerHTML = ''; }
 function dismissSyncBanner(){ syncBannerDismissed = true; try{ sessionStorage.setItem('mytasks_syncbanner_dismissed','1'); }catch(_){} hideSyncBanner(); }
+// One compact status chip, like Milestone's: amber "Link file" when only the
+// browser holds the data, green "Linked" when saved to a file, red "Reconnect"
+// when the browser dropped file permission. Click acts on the state: link
+// (opens the Link/Create modal), unlink (asks first), or reconnect.
+function fileSyncChipHtml(state, name){
+  const cfg = {
+    unlinked: { icon:'fa-link',                 label:'Link file', cls:'warn', title:'Not saved to a file — only kept in this browser. Click to choose a file.' },
+    linked:   { icon:'fa-check',                label:'Linked',    cls:'ok',   title:`Saved to ${name} — click to unlink` },
+    lapsed:   { icon:'fa-triangle-exclamation', label:'Reconnect', cls:'bad',  title:`Permission to ${name} was lost — click to reconnect` }
+  }[state];
+  return `<button class="btn btn-sm file-chip ${cfg.cls}" onclick="onFileSyncChipClick('${state}')" title="${esc(cfg.title)}"><i class="fa-solid ${cfg.icon}"></i> ${cfg.label}</button>`;
+}
+function onFileSyncChipClick(state){
+  if(state==='unlinked') openFileSyncModal();
+  else if(state==='lapsed') reconnectFile();
+  else openConfirmModal({
+    title: 'Unlink file?',
+    body: `Your tasks stay in this browser, but stop being saved to ${fileHandle ? fileHandle.name : 'the file'}. You can link it again any time.`,
+    action: ()=>unlinkFile()
+  });
+}
 function updateFileSyncUI(){
   const el = document.getElementById('fileSyncIndicator');
   if(!el) return;
   if(!window.showOpenFilePicker){ el.style.display = 'none'; return; }
-  if(!fileHandle){ fadeSwapHTML(el, linkSplitBtnHtml()); return; }
+  if(!fileHandle){ fadeSwapHTML(el, fileSyncChipHtml('unlinked')); return; }
   fileHandle.queryPermission({mode:'readwrite'}).then(perm=>{
     if(!el) return;
-    if(perm==='granted'){
-      hideSyncBanner();
-      fadeSwapHTML(el, `
-        <span style="font-size:12px;color:var(--green-text);display:flex;align-items:center;gap:5px;max-width:150px">
-          <i class="fa-solid fa-file-circle-check" style="flex-shrink:0"></i>
-          <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(fileHandle.name)}">${esc(fileHandle.name)}</span>
-        </span>
-        <button class="btn btn-sm" onclick="unlinkFile()" title="Unlink file" style="padding:4px 8px;line-height:1"><i class="fa-solid fa-link-slash"></i></button>`);
-    } else {
-      fadeSwapHTML(el, `<button class="btn btn-sm" onclick="reconnectFile()" style="color:var(--amber-text);border-color:var(--amber-text)" title="Reconnect to ${esc(fileHandle.name)}"><i class="fa-solid fa-triangle-exclamation"></i> Reconnect</button>`);
-    }
-  }).catch(()=>{ if(el) fadeSwapHTML(el, linkSplitBtnHtml()); });
+    if(perm==='granted'){ hideSyncBanner(); fadeSwapHTML(el, fileSyncChipHtml('linked', fileHandle.name)); }
+    else fadeSwapHTML(el, fileSyncChipHtml('lapsed', fileHandle.name));
+  }).catch(()=>{ if(el) fadeSwapHTML(el, fileSyncChipHtml('unlinked')); });
 }
 async function initFileSync(){
   if(!window.showOpenFilePicker) return;

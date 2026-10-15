@@ -151,3 +151,96 @@ test('sync banner shows for an unlinked file and stays hidden once dismissed', f
   showSyncBanner(null);
   assertFalse(el.classList.contains('show'), 'a dismissed banner stays hidden for the session');
 });
+
+// ── Row menu, side panel, linked-file chip ───────────────────────────────────
+test('bulk helpers act on an explicit id list and leave the selection alone', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
+  selectedTaskIds = new Set();
+  bulkSetPriority('high', ['a', 'c']);
+  assertEqual(tasks.find(t => t.id === 'a').priority, 'high');
+  assertEqual(tasks.find(t => t.id === 'b').priority, 'medium');
+  assertEqual(tasks.find(t => t.id === 'c').priority, 'high');
+  assertEqual(selectedTaskIds.size, 0, 'a row-menu action must not create a selection');
+});
+
+test('rowMenuRun on a single row changes just that task through updateTaskField', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
+  rowMenuIds = ['a'];
+  rowMenuRun('status', 'doing');
+  assertEqual(tasks[0].status, 'doing');
+  assertEqual(tasks[1].status, 'todo');
+});
+
+test('rowMenuRun due shortcuts set today / tomorrow / next week / clear', function () {
+  tasks = [uxTask({ id: 'a' })];
+  rowMenuIds = ['a']; rowMenuRun('due', 'tomorrow');
+  assertEqual(tasks[0].dueDate, isoAddDays(todayStr(), 1));
+  rowMenuIds = ['a']; rowMenuRun('due', 'week');
+  assertEqual(tasks[0].dueDate, isoAddDays(todayStr(), 7));
+  rowMenuIds = ['a']; rowMenuRun('due', 'clear');
+  assertEqual(tasks[0].dueDate, null);
+});
+
+test('rowMenuRun on several rows applies to all of them', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
+  rowMenuIds = ['a', 'b'];
+  rowMenuRun('project', 'proj-work');
+  assertEqual(tasks[0].projectId, 'proj-work');
+  assertEqual(tasks[1].projectId, 'proj-work');
+  assertEqual(tasks[2].projectId, 'proj-inbox');
+});
+
+test('rowMenuRun toggledone completes a mixed selection, then reopens it', function () {
+  tasks = [uxTask({ id: 'a', status: 'done' }), uxTask({ id: 'b' })];
+  rowMenuIds = ['a', 'b']; rowMenuRun('toggledone');
+  assertTrue(tasks.every(t => t.status === 'done'));
+  rowMenuIds = ['a', 'b']; rowMenuRun('toggledone');
+  assertTrue(tasks.every(t => t.status === 'todo'));
+});
+
+test('rowMenuHtml offers single-task items only for one row', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
+  const one = rowMenuHtml(['a']);
+  assertIncludes(one, 'Open details');
+  assertIncludes(one, 'Add subtask');
+  assertIncludes(one, 'Duplicate');
+  const many = rowMenuHtml(['a', 'b']);
+  assertFalse(many.includes('Open details'));
+  assertIncludes(many, 'Delete 2 tasks');
+});
+
+test('opening the row menu does not change the selection', function () {
+  tasks = [uxTask({ id: 'a' })];
+  selectedTaskIds = new Set();
+  showRowMenu('a', 10, 10, null);
+  assertEqual(selectedTaskIds.size, 0);
+  assertDeepEqual(rowMenuIds, ['a']);
+});
+
+test('a right-click on a row inside a multi-selection targets the whole selection', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
+  selectedTaskIds = new Set(['a', 'b']);
+  showRowMenu('a', 10, 10, null);
+  assertDeepEqual(rowMenuIds, ['a', 'b']);
+  showRowMenu('c', 10, 10, null);
+  assertDeepEqual(rowMenuIds, ['c']);
+});
+
+test('fileSyncChipHtml renders the three Milestone-style states', function () {
+  assertIncludes(fileSyncChipHtml('unlinked'), 'Link file');
+  assertIncludes(fileSyncChipHtml('unlinked'), 'warn');
+  assertIncludes(fileSyncChipHtml('linked', 'my.json'), 'Linked');
+  assertIncludes(fileSyncChipHtml('linked', 'my.json'), 'my.json');
+  assertIncludes(fileSyncChipHtml('lapsed', 'my.json'), 'Reconnect');
+});
+
+test('the side panel stays open and follows the selection with the arrow keys', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
+  sortBy = 'created';
+  openTask('a');
+  const first = getVisibleListTasks().tasks[0].id;
+  kbdSelectedTaskId = first;
+  handleListKeyNav({ key: 'ArrowDown', preventDefault() {}, shiftKey: false });
+  assertEqual(activeTaskId, kbdSelectedTaskId, 'the panel should show the newly selected task');
+  assertTrue(kbdSelectedTaskId !== first);
+});
