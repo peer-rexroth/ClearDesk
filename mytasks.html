@@ -615,6 +615,75 @@
   .backup-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: var(--radius); border: 0.5px solid var(--border-2); }
   .backup-row-date { font-size: 13px; font-weight: 600; }
   .backup-row-desc { font-size: 12px; color: var(--text-2); margin-top: 1px; }
+
+  /* ── Polish pass (modelled on Milestone's UI) ─────────────────────────────
+     Geometry/type only — no colors, so every scheme inherits it unchanged.
+     Placed last so it wins over the earlier base rules at equal specificity.
+     - UI text steps up ~1px (11→12, 12→13, 13→14, 14→15): the old sizes read
+       small even at Large.
+     - Hairline 0.5px borders become 1px, which stays crisp on non-retina
+       displays and matches Milestone.
+     - Soft shadow on floating surfaces (menus, modals, board cards, hovered
+       rows), and a tinted band behind the toolbar like Milestone's subbar. */
+  :root { --shadow: 0 1px 2px rgba(20,20,30,.04), 0 4px 16px rgba(20,20,30,.06); }
+  html[data-theme="dark"] { --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35); }
+  body { font-size: 16px; }
+  .topbar { height: 56px; border-bottom-width: 1px; }
+  .topbar-brand { font-size: 23px; }
+  .topbar-actions { gap: 6px; }
+  .topbar-divider { width: 1px; height: 22px; }
+  .btn { font-size: 14px; border-width: 1px; padding: 7px 14px; }
+  .btn-sm { font-size: 13px; padding: 6px 11px; }
+  .btn-icon { padding: 6px 10px; }
+  .btn:hover { box-shadow: var(--shadow); }
+  .icon-btn { font-size: 13px; }
+  .sidebar { border-right-width: 1px; }
+  .sidebar-search input { font-size: 14px; border-width: 1px; padding: 8px 10px 8px 32px; }
+  .sidebar-section-label, .toolbar-filter-label, .task-list-header, .field label { font-size: 12px; }
+  .nav-item, .project-row { font-size: 14px; padding-top: 8px; padding-bottom: 8px; }
+  .nav-item .count, .project-row .count, .f-chip { font-size: 12px; }
+  .project-row .picon { font-size: 13px; }
+  .sidebar-footer { font-size: 12px; border-top-width: 1px; }
+  .main-toolbar { padding: 14px 20px 12px; border-bottom: 1px solid var(--border); background: var(--bg); margin-bottom: 12px; }
+  .main-title { font-size: 22px; }
+  .main-toolbar select { font-size: 13px; border-width: 1px; padding: 6px 9px; }
+  .view-switch { border-width: 1px; }
+  .view-switch-btn { font-size: 13px; padding: 6px 11px; }
+  .view-switch-btn + .view-switch-btn { border-left-width: 1px; }
+  .quickadd { border-width: 1px; box-shadow: var(--shadow); }
+  .quickadd input { font-size: 15px; padding: 11px 10px; }
+  .task-list-header { border-bottom-width: 1px; padding-bottom: 10px; }
+  .task-row { padding: 11px 10px; border-width: 1px; }
+  .task-row:hover { box-shadow: var(--shadow); }
+  .task-title { font-size: 15px; }
+  .task-title-input { font-size: 15px; border-width: 1px; }
+  .task-subtask-row { font-size: 14px; }
+  .task-subtask-text-input, .task-subtask-add-row input, .subtask-row .sub-text,
+  .subtask-row .sub-text-input, .add-row input { font-size: 14px; border-width: 1px; }
+  .task-cell-empty, .badge-project, .board-empty, .show-more-row { font-size: 13px; }
+  .badge { font-size: 12px; padding: 3px 9px; }
+  .board-col { border-width: 1px; }
+  .board-col-header { font-size: 13px; border-bottom-width: 1px; padding: 12px 14px; }
+  .board-col-header .count { font-size: 12px; }
+  .board-card-title { font-size: 14px; }
+  .board-card { border-width: 1px; box-shadow: var(--shadow); }
+  .bulk-bar { border-width: 1px; box-shadow: var(--shadow); }
+  .bulk-bar .bulk-count, .bulk-bar select, .bulk-bar input[type=date] { font-size: 13px; }
+  .split-btn-menu, .modal { box-shadow: var(--shadow); }
+  .split-btn-menu-label { font-size: 13px; }
+  .split-btn-menu-desc { font-size: 12px; }
+  .modal h3 { font-size: 17px; }
+  .modal p { font-size: 14px; }
+  .modal input, .modal select { font-size: 15px; border-width: 1px; }
+  .import-option-text strong { font-size: 14px; }
+  .import-option-text span { font-size: 13px; }
+  .help-modal-header h3 { font-size: 18px; }
+  .help-section-title { font-size: 12px; }
+  .help-row { font-size: 14px; }
+  .drawer-header input.title-input { font-size: 18px; }
+  .drawer-footer .meta, .subtask-progress { font-size: 12px; }
+  .field input[type=text], .field input[type=date], .field textarea, .field select { font-size: 15px; border-width: 1px; }
+  .ui-scale-panel-header { font-size: 13px; }
 </style>
 </head>
 <body>
@@ -643,11 +712,11 @@
     </div>
     <button class="btn btn-icon btn-sm" onclick="toggleCompactMode()" title="Toggle compact view"><i class="fa-solid fa-expand" id="compactIcon"></i></button>
     <div class="lib-dropdown" id="uiScaleDropdown">
-      <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size"><i class="fa-solid fa-text-height"></i></button>
+      <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size"><i class="fa-solid fa-text-height"></i> Size</button>
       <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:150px"></div>
     </div>
     <button class="btn btn-icon btn-sm" onclick="openShortcutsModal()" title="Keyboard shortcuts"><i class="fa-solid fa-keyboard"></i></button>
-    <button class="btn btn-icon btn-sm" onclick="openThemeModal()" title="Color scheme"><i class="fa-solid fa-palette"></i></button>
+    <button class="btn btn-icon btn-sm" onclick="openThemeModal()" title="Color scheme"><i class="fa-solid fa-palette"></i> Colors</button>
     <button class="btn btn-icon btn-sm" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke" id="themeIcon"></i></button>
     <button class="btn btn-icon btn-sm" onclick="openHelpModal()" title="Help"><i class="fa-regular fa-circle-question"></i></button>
     <button class="btn btn-icon btn-sm" onclick="openAboutModal()" title="About"><i class="fa-solid fa-circle-info"></i></button>
