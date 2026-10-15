@@ -684,6 +684,45 @@
   .drawer-footer .meta, .subtask-progress { font-size: 12px; }
   .field input[type=text], .field input[type=date], .field textarea, .field select { font-size: 15px; border-width: 1px; }
   .ui-scale-panel-header { font-size: 13px; }
+
+  /* ── UX pass: inline cell editing, quick-add preview, sync banner,
+     filter popover, appearance menu, collapsible tags ─────────────────── */
+  .task-cell.editable, .cell-host.editable { position: relative; cursor: pointer; border-radius: var(--radius); }
+  .task-cell.editable:hover, .cell-host.editable:hover { background: var(--bg-3); outline: 4px solid var(--bg-3); }
+  .cell-host { display: inline-flex; }
+  .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 170px; display: flex; flex-direction: column; gap: 2px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
+  .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
+  .cell-pop-opt:hover { background: var(--bg-3); }
+  .cell-pop-opt.current { background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--border-2); }
+  .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
+  .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
+
+  .quickadd-preview { display: none; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 22px 8px; font-size: 13px; color: var(--text-2); }
+  .quickadd-preview.show { display: flex; }
+  .quickadd-preview-hint { margin-left: auto; font-size: 12px; color: var(--text-3); }
+
+  .sync-banner { display: none; align-items: center; gap: 10px; padding: 8px 20px; background: var(--amber-bg); color: var(--amber-text); border-bottom: 1px solid var(--border); font-size: 14px; flex-shrink: 0; }
+  .sync-banner.show { display: flex; }
+  .sync-banner > span { flex: 1; }
+  .sync-banner .icon-btn { color: var(--amber-text); }
+
+  .filter-menu { min-width: 280px; }
+  .filter-menu-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+  .filter-menu-body .toolbar-filter-label:not(:first-child) { margin-top: 4px; }
+  .filter-count:not(:empty) { display: inline-block; min-width: 18px; padding: 0 5px; border-radius: 999px; background: var(--text); color: var(--bg); font-size: 11px; line-height: 18px; text-align: center; }
+  #filterBtn.has-filters { border-color: var(--text); }
+
+  .ap-gap { margin-top: 12px; }
+  .ap-scheme-btn { width: 100%; justify-content: center; margin-top: 14px; }
+  .ui-scale-panel .view-switch-btn { white-space: nowrap; }
+
+  .sidebar-section-actions { display: inline-flex; gap: 2px; }
+  .tags-section .sidebar-section-label { cursor: pointer; margin-bottom: 7px; }
+  .tags-chevron { font-size: 10px; transition: transform .15s; }
+  .tags-section.collapsed .tags-chevron { transform: rotate(-90deg); }
+  .tags-section.collapsed .filter-chips { display: none; }
+  .tags-section.collapsed .sidebar-section-label { margin-bottom: 0; }
+  .sidebar-section.tags-section { border-bottom: none; border-top: 1px solid var(--border); }
 </style>
 </head>
 <body>
@@ -710,18 +749,21 @@
         </div>
       </div>
     </div>
-    <button class="btn btn-icon btn-sm" onclick="toggleCompactMode()" title="Toggle compact view"><i class="fa-solid fa-expand" id="compactIcon"></i></button>
     <div class="lib-dropdown" id="uiScaleDropdown">
-      <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size"><i class="fa-solid fa-text-height"></i> Size</button>
-      <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:150px"></div>
+      <button class="btn btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size, theme, density and color scheme"><i class="fa-solid fa-palette"></i> Appearance <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>
+      <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:210px"></div>
     </div>
-    <button class="btn btn-icon btn-sm" onclick="openShortcutsModal()" title="Keyboard shortcuts"><i class="fa-solid fa-keyboard"></i></button>
-    <button class="btn btn-icon btn-sm" onclick="openThemeModal()" title="Color scheme"><i class="fa-solid fa-palette"></i> Colors</button>
-    <button class="btn btn-icon btn-sm" onclick="toggleTheme()" title="Toggle theme"><i class="fa-solid fa-circle-half-stroke" id="themeIcon"></i></button>
-    <button class="btn btn-icon btn-sm" onclick="openHelpModal()" title="Help"><i class="fa-regular fa-circle-question"></i></button>
-    <button class="btn btn-icon btn-sm" onclick="openAboutModal()" title="About"><i class="fa-solid fa-circle-info"></i></button>
+    <div class="lib-dropdown" id="helpDropdown">
+      <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about"><i class="fa-regular fa-circle-question"></i></button>
+      <div class="split-btn-menu" id="helpMenu" style="left:auto;right:0">
+        <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Help guide</div></div></div>
+        <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard shortcuts</div></div></div>
+        <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About</div></div></div>
+      </div>
+    </div>
   </div>
 </div>
+<div class="sync-banner" id="syncBanner" role="status"></div>
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
@@ -733,10 +775,7 @@
     <div class="sidebar-section">
       <div class="nav-item" id="allTasksNav" role="button" tabindex="0" aria-pressed="false" onclick="setProjectFilter(null)">
         <span><i class="fa-solid fa-inbox" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Tasks</span>
-        <span style="display:flex;align-items:center;gap:2px">
-          <button class="icon-btn" onclick="event.stopPropagation();openAllTasksProjectsModal()" title="Choose which projects appear in All Tasks and on the board"><i class="fa-solid fa-sliders"></i></button>
-          <span class="count" id="allTasksCount"></span>
-        </span>
+        <span class="count" id="allTasksCount"></span>
       </div>
       <div class="nav-item" id="myDayNav" role="button" tabindex="0" aria-pressed="false" onclick="setMyDayFilter()">
         <span><i class="fa-solid fa-sun" style="width:14px;color:var(--text-3);margin-right:6px"></i>My Day</span>
@@ -751,13 +790,16 @@
         <span class="count" id="overdueCount"></span>
       </div>
     </div>
-    <div class="sidebar-section">
-      <div class="sidebar-section-label">Tags</div>
-      <div class="filter-chips" id="tagChips"></div>
-    </div>
     <div class="sidebar-section grow">
-      <div class="sidebar-section-label">Projects <button class="icon-btn" onclick="openProjectModal()" title="New project"><i class="fa-solid fa-plus"></i></button></div>
+      <div class="sidebar-section-label">Projects <span class="sidebar-section-actions">
+        <button class="icon-btn" onclick="openAllTasksProjectsModal()" title="Choose which projects appear in All Tasks and on the board"><i class="fa-solid fa-sliders"></i></button>
+        <button class="icon-btn" onclick="openProjectModal()" title="New project"><i class="fa-solid fa-plus"></i></button>
+      </span></div>
       <div id="projectList"></div>
+    </div>
+    <div class="sidebar-section tags-section" id="tagsSection">
+      <div class="sidebar-section-label" role="button" tabindex="0" onclick="toggleTagsSection()" title="Show or hide tags">Tags <i class="fa-solid fa-chevron-down tags-chevron"></i></div>
+      <div class="filter-chips" id="tagChips"></div>
     </div>
     <div class="sidebar-footer" id="sidebarFooter"></div>
   </div>
@@ -767,15 +809,27 @@
       <div class="main-title" id="mainTitle">All Tasks</div>
       <div class="main-toolbar-right">
         <button class="btn btn-icon btn-sm" id="collapseAllBtnBoard" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks" style="display:none"><i class="fa-solid fa-angles-down" id="collapseAllIconBoard"></i></button>
-        <span class="toolbar-filter-label">Status</span>
-        <div class="filter-chips" id="statusChips"></div>
-        <div class="topbar-divider"></div>
-        <span class="toolbar-filter-label">Priority</span>
-        <div class="filter-chips" id="priorityChips"></div>
+        <div class="lib-dropdown" id="filterDropdown">
+          <button class="btn btn-sm" id="filterBtn" onclick="event.stopPropagation();toggleFilterMenu()" title="Filter by status and priority"><i class="fa-solid fa-filter"></i> Filter <span class="filter-count" id="filterCount"></span></button>
+          <div class="split-btn-menu filter-menu" id="filterMenu" style="left:auto;right:0">
+            <div class="filter-menu-body">
+              <div class="toolbar-filter-label">Status</div>
+              <div class="filter-chips" id="statusChips"></div>
+              <div class="toolbar-filter-label">Priority</div>
+              <div class="filter-chips" id="priorityChips"></div>
+              <button class="btn btn-sm" onclick="clearFilters()"><i class="fa-solid fa-rotate-left"></i> Reset filters</button>
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-icon btn-sm" id="filterClearBtn" style="display:none" onclick="clearFilters()" title="Clear all filters"><i class="fa-solid fa-xmark"></i></button>
         <div class="topbar-divider"></div>
         <div class="view-switch" id="viewSwitch">
           <button class="view-switch-btn" data-view="list" onclick="setViewMode('list')" title="List view"><i class="fa-solid fa-list"></i></button>
           <button class="view-switch-btn" data-view="board" onclick="setViewMode('board')" title="Board view"><i class="fa-solid fa-table-columns"></i></button>
+        </div>
+        <div class="view-switch" id="boardGroupSwitch" style="display:none" title="Board columns">
+          <button class="view-switch-btn" data-group="project" onclick="setBoardGroup('project')" title="One column per project">Project</button>
+          <button class="view-switch-btn" data-group="status" onclick="setBoardGroup('status')" title="One column per status">Status</button>
         </div>
         <select id="sortSelect" onchange="setSortBy(this.value)">
           <option value="smart">Smart order</option>
@@ -789,8 +843,9 @@
     <div class="bulk-bar" id="bulkBar"></div>
     <div class="quickadd">
       <i class="fa-solid fa-plus"></i>
-      <input spellcheck="true" type="text" id="quickAddInput" placeholder="Add a task and press Enter…" onkeydown="quickAddTask(event)">
+      <input spellcheck="true" type="text" id="quickAddInput" placeholder="Add a task — try: Call dentist fri !high #personal" oninput="updateQuickAddPreview()" onkeydown="quickAddTask(event)">
     </div>
+    <div class="quickadd-preview" id="quickAddPreview"></div>
     <div class="task-list" id="taskListWrap">
       <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span>Task</span><span>Project</span><span>Priority</span><span style="margin-left:-4px">Status</span><span style="margin-left:-8px">Due</span><span style="margin-left:-12px"></span></div>
       <div id="taskList"></div>
@@ -858,7 +913,7 @@
 
       <div class="help-section">
         <div class="help-section-title">Creating &amp; editing tasks</div>
-        <div class="help-row"><i class="fa-solid fa-plus"></i><span>Type into <strong style="color:var(--text)">Add a task…</strong> at the top and press <kbd>Enter</kbd>. New tasks go to whichever project you're currently filtered to, or Inbox otherwise.</span></div>
+        <div class="help-row"><i class="fa-solid fa-plus"></i><span>Type into <strong style="color:var(--text)">Add a task…</strong> at the top and press <kbd>Enter</kbd>. New tasks go to whichever project you're currently filtered to, or Inbox otherwise. Shorthand sets fields as you type: <kbd>!high</kbd> <kbd>!low</kbd> for priority, <kbd>#project</kbd>, <kbd>@tag</kbd>, and a date word such as <kbd>today</kbd>, <kbd>tomorrow</kbd>, <kbd>fri</kbd>, <kbd>next week</kbd> or <kbd>in 3 days</kbd>. A preview shows what will be set; <kbd>Shift</kbd>+<kbd>Enter</kbd> adds the text exactly as typed.</span></div>
         <div class="help-row"><i class="fa-solid fa-arrow-pointer"></i><span>Click a task to open the <strong style="color:var(--text)">drawer</strong> — the full editor for project, priority, due date, notes, tags and repeat settings.</span></div>
         <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong style="color:var(--text)">Double-click</strong> a task's title (in list, board, or the drawer) to rename it in place.</span></div>
       </div>
@@ -1441,8 +1496,13 @@ function updateViewModeUI(){
   if(board) board.style.display = viewMode==='board' ? '' : 'none';
   const collapseAllBtnBoard = document.getElementById('collapseAllBtnBoard');
   if(collapseAllBtnBoard) collapseAllBtnBoard.style.display = viewMode==='board' ? '' : 'none';
-  document.querySelectorAll('.view-switch-btn').forEach(btn=>{
+  document.querySelectorAll('#viewSwitch .view-switch-btn').forEach(btn=>{
     btn.classList.toggle('active', btn.dataset.view===viewMode);
+  });
+  const groupSwitch = document.getElementById('boardGroupSwitch');
+  if(groupSwitch) groupSwitch.style.display = viewMode==='board' ? '' : 'none';
+  document.querySelectorAll('#boardGroupSwitch .view-switch-btn').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.group===boardGroup);
   });
 }
 
@@ -1468,6 +1528,11 @@ function renderSidebar(){
   setNavActive('overdueNav', overdueFilter);
   document.getElementById('overdueCount').textContent = tasks.filter(t=>isOverdue(t)).length;
 
+  const activeFilterCount = (filterStatus.length!==STATUSES.length?1:0) + (filterPriority.length!==PRIORITIES.length?1:0) + (filterTags.length>0?1:0);
+  const fc = document.getElementById('filterCount'); if(fc) fc.textContent = activeFilterCount ? String(activeFilterCount) : '';
+  document.getElementById('filterBtn')?.classList.toggle('has-filters', activeFilterCount>0);
+  const fcb = document.getElementById('filterClearBtn'); if(fcb) fcb.style.display = activeFilterCount ? '' : 'none';
+  document.getElementById('tagsSection')?.classList.toggle('collapsed', tagsCollapsed);
   document.getElementById('statusChips').innerHTML = `
     <div class="f-chip ${filterStatus.length===STATUSES.length?'active':''}" role="button" tabindex="0" aria-pressed="${filterStatus.length===STATUSES.length}" onclick="setStatusFilter(null)">All</div>
   ` + STATUSES.map(s=>{
@@ -1587,7 +1652,7 @@ function renderList(){
     if(t.repeat && t.repeat!=='none'){
       dueCell += `<i class="fa-solid fa-repeat" style="color:var(--text-3);font-size:11px;margin-left:5px" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
     }
-    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')">
+    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')">
       <div class="task-check-cell">
         ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:'<span class="subtask-toggle"></span>'}
         <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
@@ -1595,13 +1660,13 @@ function renderList(){
       <div class="task-main">
         ${renamingTaskId===t.id
           ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInput" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-          : `<span class="task-title" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span>`}
+          : `<span class="task-title">${highlightMatch(t.title, searchQuery)}</span>`}
         ${(t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('')}
       </div>
       <div class="task-cell"><span class="badge-project"${proj&&proj.name.length>20?` data-tooltip="${esc(proj.name)}"`:''}><i class="fa-solid fa-${proj?(proj.icon||'folder'):'folder'} picon"></i>${esc(proj?abbreviateName(proj.name):'')}</span></div>
-      <div class="task-cell priority"><span class="badge badge-priority-${t.priority}">${priorityLabel(t.priority)}</span></div>
-      <div class="task-cell status"><span class="badge badge-status-${t.status}">${statusLabel(t.status)}</span></div>
-      <div class="task-cell due">${dueCell}</div>
+      <div class="task-cell priority editable" role="button" tabindex="0" title="Change priority" onclick="openCellPop(event,'${t.id}','priority')"><span class="badge badge-priority-${t.priority}">${priorityLabel(t.priority)}</span></div>
+      <div class="task-cell status editable" role="button" tabindex="0" title="Change status" onclick="openCellPop(event,'${t.id}','status')"><span class="badge badge-status-${t.status}">${statusLabel(t.status)}</span></div>
+      <div class="task-cell due editable" role="button" tabindex="0" title="Set due date" onclick="openCellPop(event,'${t.id}','dueDate')">${dueCell}</div>
       ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks">${t.subtasks.map(s=>`
         <div class="task-subtask-row ${s.done?'done':''}" draggable="true"
           ondragstart="handleHierarchyDragStart(event,'subtask','${s.id}')" ondragend="handleHierarchyDragEnd(event)"
@@ -1666,19 +1731,19 @@ function boardCardHtml(t){
   if(t.dueDate){
     const overdue = isOverdue(t);
     const isToday = t.dueDate === todayStr();
-    dueBadge = `<span class="badge badge-due ${overdue?'overdue':isToday?'today':''}"><i class="fa-regular fa-calendar"></i> ${fmtDate(t.dueDate)}</span>`;
+    dueBadge = `<span class="cell-host editable" role="button" tabindex="0" title="Change due date" onclick="openCellPop(event,'${t.id}','dueDate')"><span class="badge badge-due ${overdue?'overdue':isToday?'today':''}"><i class="fa-regular fa-calendar"></i> ${fmtDate(t.dueDate)}</span></span>`;
   }
   const tagStrips = (t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="tagstrip" style="background:${tc.dot}" title="${esc(tg.label)}"></span>`; }).join('');
   const priorityIcon = t.priority==='high' ? `<i class="fa-solid fa-flag board-card-priority-icon" title="High priority"></i>` : '';
   return `<div class="board-card ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''}" data-id="${t.id}" draggable="true"
       ondragstart="handleCardDragStart(event,'${t.id}')" ondragend="handleCardDragEnd(event)"
-      onmousedown="selectBoardCard('${t.id}')" ondblclick="openTask('${t.id}')">
+      onmousedown="selectBoardCard('${t.id}')" onclick="openTask('${t.id}')">
     ${tagStrips?`<div class="board-card-tagstrips">${tagStrips}</div>`:''}
     <div class="board-card-top">
       <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
       ${renamingTaskId===t.id
         ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInputBoard" style="flex:1" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-        : `<div class="board-card-title" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</div>`}
+        : `<div class="board-card-title">${highlightMatch(t.title, searchQuery)}</div>`}
       ${priorityIcon}
       ${dueBadge}
       ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:''}
@@ -1710,11 +1775,35 @@ function boardCardHtml(t){
       <input spellcheck="true" type="text" id="inlineSubtaskInputBoard" placeholder="Add a subtask and press Enter…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubtask('${t.id}')} else if(event.key==='Tab'){event.preventDefault(); if(!event.shiftKey){indentInlineSubtaskInput('${t.id}');}}">
     </div>`:''}</div>`:''}
     <div class="board-card-meta">
-      <span class="badge badge-status-${t.status}">${statusLabel(t.status)}</span>
+      <span class="cell-host editable" role="button" tabindex="0" title="Change status" onclick="openCellPop(event,'${t.id}','status')"><span class="badge badge-status-${t.status}">${statusLabel(t.status)}</span></span>
     </div>
   </div>`;
 }
+// Board columns are one per project (default) or one per status. The choice is
+// a per-device display preference (localStorage), like the sidebar's Tags
+// collapse — it is not part of the synced data blob.
+let boardGroup = 'project';
+try{ boardGroup = localStorage.getItem('mytasks_boardgroup')==='status' ? 'status' : 'project'; }catch(_){}
+function setBoardGroup(g){
+  boardGroup = g==='status' ? 'status' : 'project';
+  try{ localStorage.setItem('mytasks_boardgroup', boardGroup); }catch(_){}
+  render();
+}
+const STATUS_ICONS = { todo:'fa-regular fa-circle', doing:'fa-solid fa-circle-half-stroke', done:'fa-regular fa-circle-check' };
 function getBoardColumns(){
+  if(boardGroup==='status'){
+    // Status is the grouping axis, so the status filter is ignored (selecting
+    // one can't collapse the board to a single column); the project filter
+    // and everything else still applies — the mirror of project grouping.
+    const cmp = sortComparators[sortBy] || sortComparators.smart;
+    const filtered = tasks.filter(t=>taskMatchesFilters(t, {ignoreStatus:true}));
+    return STATUSES.map(st=>{
+      const sorted = filtered.filter(t=>t.status===st.id).sort(doneLastComparator(cmp));
+      const key = 'status:'+st.id;
+      const { tasks: visible, hiddenCount, doneTotal } = capCompleted(sorted, expandedCompletedProjects.has(key));
+      return { project: null, status: st, key, tasks: visible, allCount: sorted.length, hiddenCount, doneTotal };
+    });
+  }
   const filtered = tasks.filter(t=>taskMatchesFilters(t, {ignoreProject:true}));
   const cmp = sortComparators[sortBy] || sortComparators.smart;
   // allTasksHiddenProjectIds drops the column entirely (not just its tasks)
@@ -1732,6 +1821,20 @@ function renderBoard(){
   if(!board) return;
   const columns = getBoardColumns();
   board.innerHTML = columns.map(col=>{
+    if(col.status){
+      const colTasks = col.tasks;
+      const expanded = expandedCompletedProjects.has(col.key);
+      const showMoreRow = col.doneTotal>MAX_COMPLETED_SHOWN
+        ? `<div class="show-more-row" onclick="toggleShowAllCompletedProject('${col.key}')">${expanded?'Show fewer completed':`Show ${col.hiddenCount} more completed`}</div>`
+        : '';
+      return `<div class="board-col" data-status="${col.status.id}" ondragover="handleBoardDragOver(event,'${col.status.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDropStatus(event,'${col.status.id}')">
+        <div class="board-col-header"><span><i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i> ${esc(col.status.label)}</span><span class="count">${col.allCount}</span></div>
+        <div class="board-col-body">
+          ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
+          ${showMoreRow}
+        </div>
+      </div>`;
+    }
     const p = col.project, colTasks = col.tasks;
     const dimmed = filterProjectId && filterProjectId!==p.id;
     const expanded = expandedCompletedProjects.has(p.id);
@@ -1774,6 +1877,15 @@ function handleBoardDrop(e, projectId){
   if(!t || t.projectId===projectId) return;
   updateTaskField(id, 'projectId', projectId);
 }
+function handleBoardDropStatus(e, statusId){
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if(!draggingTaskId) return;
+  const id = draggingTaskId; draggingTaskId = null;
+  const t = tasks.find(x=>x.id===id);
+  if(!t || t.status===statusId) return;
+  updateTaskField(id, 'status', statusId);
+}
 function selectBoardCard(id){
   const prevId = kbdSelectedTaskId;
   kbdSelectedTaskId = id;
@@ -1781,10 +1893,14 @@ function selectBoardCard(id){
   document.querySelector(`.board-card[data-id="${kbdSelectedTaskId}"]`)?.classList.add('kbd-selected');
 }
 function handleBoardKeyNav(e){
-  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab') return;
+  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='F2') return;
   if(isTypingTarget(document.activeElement)) return;
   if(document.querySelector('.modal-bg.open')) return;
   if(activeTaskId) return;
+  if(e.key==='F2'){
+    if(kbdSelectedTaskId){ e.preventDefault(); startRenameTask(kbdSelectedTaskId); }
+    return;
+  }
 
   const columns = getBoardColumns();
   let colIdx=-1, rowIdx=-1;
@@ -1893,8 +2009,7 @@ function handleRowClick(e, id){
     renderList(); renderBulkBar();
   }
   lastClickedTaskId = id;
-  kbdSelectedTaskId = id;
-  renderList();
+  openTask(id);
 }
 function clearSelection(){ selectedTaskIds.clear(); renderList(); renderBulkBar(); }
 function renderBulkBar(){
@@ -2186,6 +2301,68 @@ function renderDrawer(){
 }
 
 // ── Task CRUD ─────────────────────────────────────────────────────────────────
+// Quick-add shorthand: !high/!med/!low (or !!, !h, !m, !l), #project, @tag, and
+// a date word (today, tomorrow, a weekday, next week, in 3 days, YYYY-MM-DD).
+// Unknown #/@ tokens stay in the title untouched. If parsing would leave an
+// empty title the whole input is kept verbatim. Shift+Enter skips parsing.
+function parseQuickAdd(raw){
+  const trimmed = String(raw).trim();
+  const out = { title: trimmed, projectId: null, priority: null, dueDate: null, tags: [] };
+  const norm = x=>String(x).toLowerCase().replace(/\s+/g,'-');
+  const findBy = (list, key, label)=>{
+    const n = norm(label);
+    return list.find(x=>norm(x[key])===n) || list.find(x=>norm(x[key]).startsWith(n));
+  };
+  const kept = [];
+  trimmed.split(/\s+/).filter(Boolean).forEach(tok=>{
+    let m;
+    if(/^!(!|h|high|1)$/i.test(tok)) out.priority = 'high';
+    else if(/^!(m|med|medium|2)$/i.test(tok)) out.priority = 'medium';
+    else if(/^!(l|low|3)$/i.test(tok)) out.priority = 'low';
+    else if((m = /^#(.+)$/.exec(tok))){
+      const pr = findBy(visibleProjects(), 'name', m[1]);
+      if(pr) out.projectId = pr.id; else kept.push(tok);
+    } else if((m = /^@(.+)$/.exec(tok))){
+      const tg = findBy(TAGS, 'label', m[1]);
+      if(tg){ if(!out.tags.includes(tg.id)) out.tags.push(tg.id); } else kept.push(tok);
+    } else kept.push(tok);
+  });
+  let rest = kept.join(' ');
+  const today = todayStr();
+  const dow = isoWeekday(today);
+  const dayIdx = {sun:0,mon:1,tue:2,wed:3,thu:4,fri:5,sat:6};
+  const nextDow = d=>isoAddDays(today, ((d - dow + 7) % 7) || 7);
+  const tryDate = (re, fn)=>{
+    if(out.dueDate) return;
+    const m = re.exec(rest); if(!m) return;
+    const iso = fn(m); if(!iso) return;
+    out.dueDate = iso;
+    rest = (rest.slice(0,m.index)+' '+rest.slice(m.index+m[0].length)).replace(/\s+/g,' ').trim();
+  };
+  tryDate(/\b(\d{4})-(\d{2})-(\d{2})\b/, m=>(+m[2]>=1 && +m[2]<=12 && +m[3]>=1 && +m[3]<=31) ? m[0] : null);
+  tryDate(/\bin (\d{1,3}) (day|days|week|weeks)\b/i, m=>isoAddDays(today, +m[1]*(/^w/i.test(m[2])?7:1)));
+  tryDate(/\bnext week\b/i, ()=>nextDow(1));
+  tryDate(/\btoday\b/i, ()=>today);
+  tryDate(/\b(tomorrow|tmrw)\b/i, ()=>isoAddDays(today,1));
+  tryDate(/\b(mon|tue|tues|wed|thu|thur|thurs|fri|sat|sun)(day|sday|nesday|rsday|urday)?\b/i, m=>nextDow(dayIdx[m[1].slice(0,3).toLowerCase()]));
+  if(!rest){ return { title: trimmed, projectId: null, priority: null, dueDate: null, tags: [] }; }
+  out.title = rest;
+  return out;
+}
+function updateQuickAddPreview(){
+  const el = document.getElementById('quickAddPreview');
+  const input = document.getElementById('quickAddInput');
+  if(!el || !input) return;
+  const pr = parseQuickAdd(input.value);
+  const chips = [];
+  if(pr.dueDate) chips.push(`<span class="badge badge-due"><i class="fa-regular fa-calendar"></i> ${esc(fmtDate(pr.dueDate))}</span>`);
+  if(pr.priority) chips.push(`<span class="badge badge-priority-${pr.priority}">${esc(priorityLabel(pr.priority))}</span>`);
+  if(pr.projectId){ const p = projById(pr.projectId); if(p) chips.push(`<span class="badge badge-tag"><i class="fa-solid fa-${p.icon||'folder'}"></i> ${esc(p.name)}</span>`); }
+  pr.tags.forEach(id=>{ const tg = tagById(id); if(tg){ const tc = colorOf(tg.color); chips.push(`<span class="badge" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`); } });
+  if(!chips.length){ el.innerHTML = ''; el.classList.remove('show'); return; }
+  el.innerHTML = `<span class="quickadd-preview-label">Will add “${esc(pr.title)}” with</span>` + chips.join('') + `<span class="quickadd-preview-hint">Shift+Enter adds it as typed</span>`;
+  el.classList.add('show');
+}
 function quickAddTask(event){
   // Tab is a no-op here: this is a single-purpose field with no adjacent
   // field to tab into, so pressing Tab (unlike Enter) shouldn't hand focus
@@ -2194,18 +2371,21 @@ function quickAddTask(event){
   if(event.key==='Tab'){ event.preventDefault(); return; }
   if(event.key!=='Enter') return;
   const input = event.target;
-  const title = input.value.trim();
-  if(!title) return;
+  const typed = input.value.trim();
+  if(!typed) return;
+  const pr = event.shiftKey ? { title: typed, projectId:null, priority:null, dueDate:null, tags:[] } : parseQuickAdd(typed);
   tasks.unshift({
-    id: genId(), title, notes:'',
-    projectId: filterProjectId || 'proj-inbox',
+    id: genId(), title: pr.title, notes:'',
+    projectId: pr.projectId || filterProjectId || 'proj-inbox',
     status: 'todo',
-    priority: 'medium',
-    dueDate: null,
+    priority: pr.priority || 'medium',
+    dueDate: pr.dueDate || (myDayFilter ? todayStr() : null),
+    tags: pr.tags,
     subtasks: [],
     createdAt: Date.now(), updatedAt: Date.now()
   });
   input.value = '';
+  updateQuickAddPreview();
   save(); render();
 }
 
@@ -3139,7 +3319,59 @@ function demoteStepToSubSubtask(taskId, subId, stepId){
   save(); render();
 }
 
+// ── Inline cell editing (priority / status / due) ────────────────────────────
+// The popover is appended *inside* the clicked cell (position:absolute against
+// it) rather than to <body>, so it needs no viewport coordinates — those are
+// unreliable under the UI-scale CSS zoom on <html>. Any render() rebuilds the
+// cell and so closes it for free.
+function isoAddDays(iso, n){
+  const [y,m,d] = iso.split('-').map(Number);
+  const dt = new Date(y, m-1, d+n);
+  return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+}
+function isoWeekday(iso){ const [y,m,d] = iso.split('-').map(Number); return new Date(y,m-1,d).getDay(); }
+function closeCellPop(){ const el = document.getElementById('cellPop'); if(el && el.remove) el.remove(); }
+function cellPopOptionsHtml(t, field){
+  if(field==='priority'){
+    return PRIORITIES.map(p=>`<button type="button" class="cell-pop-opt${t.priority===p.id?' current':''}" onclick="pickCell(event,'${t.id}','priority','${p.id}')"><span class="badge badge-priority-${p.id}">${esc(p.label)}</span></button>`).join('');
+  }
+  if(field==='status'){
+    return STATUSES.map(s=>`<button type="button" class="cell-pop-opt${t.status===s.id?' current':''}" onclick="pickCell(event,'${t.id}','status','${s.id}')"><span class="badge badge-status-${s.id}">${esc(s.label)}</span></button>`).join('');
+  }
+  const today = todayStr();
+  const q = (label, iso)=>`<button type="button" class="cell-pop-opt" onclick="pickCell(event,'${t.id}','dueDate',${iso?`'${iso}'`:'null'})">${label}</button>`;
+  return q('Today', today) + q('Tomorrow', isoAddDays(today,1)) + q('Next week', isoAddDays(today,7))
+    + (t.dueDate ? q('Clear date', null) : '')
+    + `<input type="date" class="cell-pop-date" value="${esc(t.dueDate||'')}" onclick="event.stopPropagation()" onchange="pickCell(event,'${t.id}','dueDate',this.value||null)">`;
+}
+function openCellPop(e, id, field){
+  if(e && e.stopPropagation) e.stopPropagation();
+  const host = e && e.currentTarget;
+  const t = tasks.find(x=>x.id===id);
+  const alreadyOpen = host && host.querySelector && host.querySelector('#cellPop');
+  closeCellPop();
+  if(!host || !t || alreadyOpen) return;
+  const pop = document.createElement('div');
+  pop.id = 'cellPop'; pop.className = 'cell-pop';
+  pop.onclick = ev=>ev.stopPropagation();
+  pop.innerHTML = cellPopOptionsHtml(t, field);
+  host.appendChild(pop);
+}
+function pickCell(e, id, field, value){
+  if(e && e.stopPropagation) e.stopPropagation();
+  closeCellPop();
+  updateTaskField(id, field, value);
+}
+
 // ── Filters ───────────────────────────────────────────────────────────────────
+function clearFilters(){
+  filterStatus = STATUSES.map(x=>x.id);
+  filterPriority = PRIORITIES.map(x=>x.id);
+  filterTags = [];
+  save(); render();
+}
+function toggleFilterMenu(){ document.getElementById('filterMenu')?.classList.toggle('open'); }
+function closeFilterMenu(){ document.getElementById('filterMenu')?.classList.remove('open'); }
 function clearSpecialViews(){ myDayFilter = false; thisWeekFilter = false; overdueFilter = false; }
 function setProjectFilter(id){ filterProjectId = id; clearSpecialViews(); save(); render(); }
 function setMyDayFilter(){ clearSpecialViews(); myDayFilter = true; filterProjectId = null; save(); render(); }
@@ -3160,6 +3392,13 @@ function setPriorityFilter(p){
   }
   filterPriority = filterPriority.includes(p) ? filterPriority.filter(x=>x!==p) : [...filterPriority, p];
   save(); render();
+}
+let tagsCollapsed = false;
+try{ tagsCollapsed = localStorage.getItem('mytasks_tags_collapsed')==='1'; }catch(_){}
+function toggleTagsSection(){
+  tagsCollapsed = !tagsCollapsed;
+  try{ localStorage.setItem('mytasks_tags_collapsed', tagsCollapsed?'1':'0'); }catch(_){}
+  document.getElementById('tagsSection')?.classList.toggle('collapsed', tagsCollapsed);
 }
 function setTagFilter(tg){
   filterTags = filterTags.includes(tg) ? filterTags.filter(x=>x!==tg) : [...filterTags, tg];
@@ -3209,8 +3448,10 @@ function shortcutsListHtml(){
     row('Range-select tasks', shift, 'Click'),
     row('Select all visible tasks', mod, 'A'),
     group('General'),
-    row('Open a task', 'Double-click'),
-    row('Rename title or subtask', 'Double-click text'),
+    row('Open a task', 'Click'),
+    row('Rename the selected task', 'F2'),
+    row('Rename a subtask', 'Double-click text'),
+    row('Change priority, status or due date', 'Click its badge'),
     row('Show shortcuts', '?'),
     row('Close drawer/modal, clear selection', 'Esc'),
   ].join('');
@@ -3271,9 +3512,22 @@ function renderUiScaleMenu(){
       <div class="view-switch">${UI_SCALE_STEPS.map(s=>`
         <button type="button" class="view-switch-btn${s.pct===uiScale?' active':''}" title="${esc(s.label)}" onclick="setUiScale(${s.pct})">${esc(s.short)}</button>
       `).join('')}</div>
+      <div class="ui-scale-panel-header ap-gap">Theme</div>
+      <div class="view-switch">
+        <button type="button" class="view-switch-btn${currentTheme!=='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('light')"><i class="fa-solid fa-sun"></i> Light</button>
+        <button type="button" class="view-switch-btn${currentTheme==='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('dark')"><i class="fa-solid fa-moon"></i> Dark</button>
+      </div>
+      <div class="ui-scale-panel-header ap-gap">Density</div>
+      <div class="view-switch">
+        <button type="button" class="view-switch-btn${!compactMode?' active':''}" onclick="event.stopPropagation();setDensityMode(false)">Comfortable</button>
+        <button type="button" class="view-switch-btn${compactMode?' active':''}" onclick="event.stopPropagation();setDensityMode(true)">Compact</button>
+      </div>
+      <button type="button" class="btn btn-sm ap-scheme-btn" onclick="closeUiScaleMenu();openThemeModal()"><i class="fa-solid fa-swatchbook"></i> Color scheme…</button>
     </div>
   `;
 }
+function toggleHelpMenu(){ document.getElementById('helpMenu')?.classList.toggle('open'); }
+function closeHelpMenu(){ document.getElementById('helpMenu')?.classList.remove('open'); }
 function toggleUiScaleMenu(){ renderUiScaleMenu(); document.getElementById('uiScaleMenu')?.classList.toggle('open'); }
 function closeUiScaleMenu(){ document.getElementById('uiScaleMenu')?.classList.remove('open'); }
 function setUiScale(v){
@@ -3289,6 +3543,9 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('#libDropdown')) closeLibMenu();
   if(!e.target.closest('#linkSplitBtn')) closeLinkMenu();
   if(!e.target.closest('#uiScaleDropdown')) closeUiScaleMenu();
+  if(!e.target.closest('#helpDropdown')) closeHelpMenu();
+  if(!e.target.closest('#filterDropdown')) closeFilterMenu();
+  if(!e.target.closest('#cellPop')) closeCellPop();
   const btn = e.target.closest('button');
   if(btn) btn.blur();
   const cb = e.target.closest('[role="checkbox"]');
@@ -3296,6 +3553,7 @@ document.addEventListener('click', e=>{
 });
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
+    closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
     closeAllModals(); closeDrawer(); inlineAddSubtaskTaskId=null; inlineAddParentSubId=null; inlineAddParentStepId=null; renamingTaskId=null; renamingSubtask=null; renamingSubSubtask=null; renamingSubSubSubtask=null; selectedTaskIds.clear(); kbdSelectedTaskId=null;
     if(viewMode==='board'){ renderBoard(); } else { renderList(); }
     renderBulkBar();
@@ -3466,12 +3724,16 @@ function addInlineSubSubSubtask(taskId, subId, stepId){
   document.getElementById(inputId)?.focus();
 }
 function handleListKeyNav(e){
-  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='Delete') return;
+  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='Delete' && e.key!=='F2') return;
   if(isTypingTarget(document.activeElement)) return;
   if(document.querySelector('.modal-bg.open')) return;
   if(activeTaskId) return;
   const list = getVisibleListTasks().tasks;
   if(!list.length) return;
+  if(e.key==='F2'){
+    if(kbdSelectedTaskId && list.some(t=>t.id===kbdSelectedTaskId)){ e.preventDefault(); startRenameTask(kbdSelectedTaskId); }
+    return;
+  }
   if(e.key==='Delete'){
     if(kbdSelectedTaskId && list.some(t=>t.id===kbdSelectedTaskId)){
       e.preventDefault();
@@ -3535,6 +3797,8 @@ function toggleTheme(){
   localStorage.setItem(THEME_KEY, currentTheme);
   save();
 }
+function setThemeMode(mode){ if((mode==='dark') !== (currentTheme==='dark')) toggleTheme(); renderUiScaleMenu(); }
+function setDensityMode(compact){ if(!!compact !== !!compactMode) toggleCompactMode(); renderUiScaleMenu(); }
 function toggleCompactMode(){
   compactMode = !compactMode;
   document.documentElement.setAttribute('data-density', compactMode ? 'compact' : '');
@@ -3881,6 +4145,22 @@ function fadeSwapHTML(el, html){
     requestAnimationFrame(()=>{ el.style.opacity = '1'; });
   }, 120);
 }
+// A slim banner instead of the old blocking first-load modal: the data-safety
+// nudge stays visible but never gets between the user and their tasks. The
+// modal still opens, on request, from the banner's button.
+let syncBannerHandle = null, syncBannerDismissed = false;
+function showSyncBanner(handle){
+  syncBannerHandle = handle || null;
+  if(syncBannerDismissed) return;
+  try{ if(sessionStorage.getItem('mytasks_syncbanner_dismissed')==='1') return; }catch(_){}
+  const el = document.getElementById('syncBanner'); if(!el) return;
+  el.innerHTML = handle
+    ? `<i class="fa-solid fa-triangle-exclamation"></i><span>Sync is paused — <strong>${esc(handle.name)}</strong> needs permission again.</span><button class="btn btn-sm" onclick="openFileSyncModal(syncBannerHandle)">Reconnect</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>`
+    : `<i class="fa-solid fa-triangle-exclamation"></i><span>Your tasks are only stored in this browser. Link a file to back them up and keep them across sessions.</span><button class="btn btn-sm" onclick="openFileSyncModal()">Link a file</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss until next session"><i class="fa-solid fa-xmark"></i></button>`;
+  el.classList.add('show');
+}
+function hideSyncBanner(){ const el = document.getElementById('syncBanner'); if(!el) return; el.classList.remove('show'); el.innerHTML = ''; }
+function dismissSyncBanner(){ syncBannerDismissed = true; try{ sessionStorage.setItem('mytasks_syncbanner_dismissed','1'); }catch(_){} hideSyncBanner(); }
 function updateFileSyncUI(){
   const el = document.getElementById('fileSyncIndicator');
   if(!el) return;
@@ -3889,6 +4169,7 @@ function updateFileSyncUI(){
   fileHandle.queryPermission({mode:'readwrite'}).then(perm=>{
     if(!el) return;
     if(perm==='granted'){
+      hideSyncBanner();
       fadeSwapHTML(el, `
         <span style="font-size:12px;color:var(--green-text);display:flex;align-items:center;gap:5px;max-width:150px">
           <i class="fa-solid fa-file-circle-check" style="flex-shrink:0"></i>
@@ -3905,7 +4186,7 @@ async function initFileSync(){
   updateFileSyncUI();
   try{
     const handle = await _fsGet();
-    if(!handle){ openFileSyncModal(); return; }
+    if(!handle){ showSyncBanner(null); return; }
     fileHandle = handle;
     const perm = await handle.queryPermission({mode:'readwrite'});
     if(perm==='granted'){
@@ -3921,14 +4202,14 @@ async function initFileSync(){
         }
       }catch(_){ /* read failed — keep localStorage data */ }
     } else {
-      openFileSyncModal(handle);
+      showSyncBanner(handle);
     }
     updateFileSyncUI();
   }catch(e){
     fileHandle = null;
     _fsDel().catch(()=>{});
     updateFileSyncUI();
-    openFileSyncModal();
+    showSyncBanner(null);
   }
 }
 

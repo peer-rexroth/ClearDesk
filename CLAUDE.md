@@ -187,6 +187,48 @@ When adding a subtask/step/sub-step feature, decide deliberately whether it
 belongs in all three surfaces or just list view + drawer — don't assume
 parity.
 
+### Opening, editing and capturing (UX pass)
+
+- **A single click on a list row or board card opens the drawer** (`handleRowClick`
+  ends in `openTask`; modifier clicks still multi-/range-select without
+  opening). There is no row-level double-click any more, and the title no
+  longer renames on double-click (the drawer would cover it) — **F2** renames
+  the keyboard-selected task in list and board, and the drawer's title input
+  renames too. Subtask/step double-click rename is unchanged.
+- **Priority, Status and Due cells are inline-editable** (`openCellPop` /
+  `pickCell`): the popover is appended *inside* the clicked cell and positioned
+  with CSS (`position:absolute`), not from `getBoundingClientRect()`, because
+  coordinates are unreliable under the UI-scale zoom on `<html>`. `pickCell`
+  goes through `updateTaskField`, so undo, `completedAt` and the recurring-task
+  path behave exactly as in the drawer. Board cards expose Status and Due the
+  same way (Priority there is the flag icon only).
+- **Quick-add shorthand** (`parseQuickAdd`, live preview in `#quickAddPreview`):
+  `!high/!med/!low` (`!!`, `!h`…), `#project`, `@tag`, and a date word
+  (today, tomorrow, weekday, next week, in N days/weeks, YYYY-MM-DD). Unknown
+  `#`/`@` tokens stay in the title; if parsing would empty the title the raw
+  text is kept; Shift+Enter bypasses parsing. In My Day an undated task
+  defaults to today. Date maths is anchored on `todayStr()` so it agrees with
+  My Day/Overdue.
+- **Filters live in a popover** (`#filterMenu`): the `#statusChips` /
+  `#priorityChips` containers were *moved* into it, so `renderSidebar()` and
+  its tests are unchanged; the Filter button shows a count and a clear (✕)
+  button appears when any filter is active (`clearFilters()`).
+- **Board grouping** (`boardGroup`, `'project'|'status'`, per-device in
+  localStorage `mytasks_boardgroup`, not in the synced blob). In status mode
+  `getBoardColumns()` returns `{project:null, status, key}` columns, ignores
+  the status filter (the grouping axis, mirroring `ignoreProject`) and keeps
+  the project filter; dropping a card sets `status` (`handleBoardDropStatus`).
+  The completed-cap "show more" state uses key `status:<id>` in the same
+  `expandedCompletedProjects` Set.
+- **First-run file-sync prompt is a banner, not a modal** (`#syncBanner`,
+  `showSyncBanner`): dismissed per session; the modal still opens from the
+  banner/topbar button. Topbar: Appearance (text size, theme, density, color
+  scheme) and Help (guide, shortcuts, about) are single dropdowns. Menus that
+  re-render themselves on click must `stopPropagation()`, or the global
+  outside-click handler sees a detached target and closes them.
+- Sidebar order is Projects (with the "projects shown" control beside the +)
+  then a collapsible Tags section (`mytasks_tags_collapsed`).
+
 ## Shared state that spans views
 
 A handful of module-level variables are intentionally shared across list,
