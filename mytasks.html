@@ -262,6 +262,9 @@
      clicks (pointer-events), so the capsule never swallows a click on the title. */
   .task-main { position: relative; }
   .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity .1s ease; }
+  /* the capsule is --bg-3, the same as .icon-btn:hover, so a hovered button used to vanish into it: give it a visible disc */
+  .row-actions .icon-btn { border-radius: 999px; padding: 4px 6px; }
+  .row-actions .icon-btn:hover { background: color-mix(in srgb, var(--text) 14%, transparent); color: var(--text); }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
   .empty-state i { font-size: 30px; margin-bottom: 10px; display: block; opacity: .5; }
@@ -468,11 +471,25 @@
   .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 150px; display: flex; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
   .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
-  .cell-pop-opt:hover { background: var(--sel-bg, var(--bg-3)); color: #fff; }
-  .cell-pop-opt .pop-check { width: 18px; font-size: 11px; visibility: hidden; flex: none; }
-  .cell-pop-opt.current .pop-check { visibility: visible; }
-  .cell-pop-opt .pop-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: none; }
-  .cell-pop-opt:hover .pop-dot { box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); }
+  /* shared menu-row anatomy: tick column, dot or icon, text (cell popovers, row menu, toolbar menus) */
+  .cell-pop-opt:hover, .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: #fff; }
+  .pop-check, .row-menu-item .pop-check { width: 18px; font-size: 11px; visibility: hidden; flex: none; text-align: left; }
+  .row-menu-item .pop-check i, .row-menu-item .pop-icon { width: auto; color: inherit; }
+  .current > .pop-check { visibility: visible; }
+  .pop-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: none; }
+  .pop-icon { width: 16px; margin-right: 8px; text-align: center; font-size: 13px; color: var(--text-3); flex: none; }
+  .row-menu-item .pop-icon { width: 16px; color: var(--text-3); }
+  .cell-pop-opt:hover .pop-dot, .row-menu-item:hover .pop-dot { box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); }
+  .cell-pop-opt:hover .pop-icon, .row-menu-item:hover:not(:disabled) i, .row-menu-item:hover .pop-icon, .row-menu-item:hover .row-menu-hint { color: #fff; }
+  .row-menu-item.menu-opt { gap: 0; padding: 5px 8px; }
+  /* submenus: hover (or click) a parent row to open its flyout beside the menu */
+  .row-menu-sub { position: relative; }
+  .row-menu-flyout { display: none; position: absolute; left: calc(100% - 4px); top: -6px; min-width: 190px; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 1; }
+  .row-menu-flyout.flip { left: auto; right: calc(100% - 4px); }
+  .row-menu-sub:hover > .row-menu-flyout, .row-menu-sub.open > .row-menu-flyout { display: flex; }
+  .row-menu-sub:hover > .sub-parent, .row-menu-sub.open > .sub-parent { background: var(--sel-bg, var(--bg-3)); color: #fff; }
+  .row-menu-sub:hover > .sub-parent i, .row-menu-sub.open > .sub-parent i, .row-menu-sub:hover > .sub-parent .row-menu-hint { color: #fff; }
+  .sub-parent .row-menu-hint i { font-size: 10px; width: auto; }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
 
@@ -537,13 +554,14 @@
   .file-chip.ok i { color: var(--green-text); }
   .file-chip.bad { color: var(--red-text); border-color: var(--red-text); }
 
-  .row-menu { display: none; position: fixed; z-index: 400; min-width: 230px; max-width: 300px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); max-height: calc(100vh - 16px); overflow-y: auto; }
+  .row-menu { display: none; position: fixed; z-index: 400; min-width: 230px; max-width: 300px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); }   /* no overflow clipping: the submenu flyouts hang outside it */
   .row-menu.open { display: block; }
   .row-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); text-align: left; cursor: pointer; }
   .row-menu-item i { width: 16px; text-align: center; color: var(--text-3); }
-  .row-menu-item:hover:not(:disabled) { background: var(--bg-3); }
+  .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: #fff; }
   .row-menu-item:disabled { opacity: .45; cursor: default; }
   .row-menu-item.danger, .row-menu-item.danger i { color: var(--red-text); }
+  .row-menu-item.danger:hover:not(:disabled), .row-menu-item.danger:hover:not(:disabled) i { color: #fff; }
   .row-menu-hint { margin-left: auto; font-size: 12px; color: var(--text-3); }
   .row-menu-sep { height: 1px; background: var(--border); margin: 6px 2px; }
   .row-menu-label { padding: 6px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
@@ -676,7 +694,7 @@
   html[data-scheme="glass"] .sel-chip { background: var(--bg-3); }
 
   /* menus, modals, toast, banner */
-  html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: var(--glass-r-menu); box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
+  html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .row-menu-flyout, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: var(--glass-r-menu); box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
   html[data-scheme="glass"] :is(.row-menu, .modal, .toast) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
   html[data-scheme="glass"] .toast.error { background: var(--red-bg); color: var(--red-text); }
   html[data-scheme="glass"] .row-menu-item, html[data-scheme="glass"] .row-menu-chip, html[data-scheme="glass"] .cell-pop-opt { border-radius: 8px; }
@@ -743,7 +761,7 @@
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox { background: transparent; border-color: rgba(255,255,255,.75); box-shadow: none; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked { background: #fff; border-color: #fff; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked i { color: var(--sel-bg); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover { background: #fff; color: var(--sel-bg); }   /* solid white disc, blue glyph: translucent white on the blue fill was ~2:1 */
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover { background: rgba(255,255,255,.45); color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.18); }   /* same hover language as the pills below: translucent white, white content */
   /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
      the cell says "pop-up button" the way a native one does — a small chevron on the pill,
      shown on the selected row/card only so the rest of the list stays calm. (The pill grows
@@ -755,8 +773,8 @@
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1.4 2.7L4 5.3l2.6-2.6' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 8px 8px no-repeat;
   }
   /* hovering an editable cell in a selected row brightens just its pill, not the whole cell box */
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.38) !important; filter: none; box-shadow: 0 0 0 3px rgba(255,255,255,.18); }
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: #fff; background: rgba(255,255,255,.24); border-radius: 999px; box-shadow: 0 0 0 4px rgba(255,255,255,.24); }
+  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.45) !important; filter: none; box-shadow: 0 0 0 3px rgba(255,255,255,.18); }
+  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: #fff; background: rgba(255,255,255,.45); border-radius: 999px; box-shadow: 0 0 0 4px rgba(255,255,255,.24); }
   .board-card.kbd-selected .board-card-priority-icon { color: #fff; }
   /* the Glass card style (html[data-scheme] .board-card) out-ranks .board-card.kbd-selected, so restate the fill at higher specificity */
   html[data-scheme="glass"] .board-card.kbd-selected { background: var(--sel-bg); border-color: var(--sel-bg); }
@@ -2240,10 +2258,12 @@ function mainSubtitleText(){
 }
 function closeToolMenus(){ document.querySelectorAll('.tool-menu.open').forEach(m=>m.classList.remove('open')); }
 function toolMenuHtml(which){
-  const opt = (kind, val, inner)=>`<div class="split-btn-menu-item" role="menuitem" onclick="toolbarAct('${kind}','${val}')">${inner}</div>`;
-  if(which==='priority') return PRIORITIES.map(p=>opt('priority', p.id, `<span class="badge badge-priority-${p.id}">${esc(p.label)}</span>`)).join('');
-  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear date']].map(d=>opt('due', d[0], `<div class="split-btn-menu-label">${d[1]}</div>`)).join('');
-  return visibleProjects().map(p=>opt('project', p.id, `<i class="fa-solid fa-${p.icon||'folder'} split-btn-menu-icon"></i><div class="split-btn-menu-label">${esc(abbreviateName(p.name, 24))}</div>`)).join('');
+  const ts = selectionIds().map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
+  const same = k=>ts.length && ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
+  const opt = (kind, val, lead, label, cur)=>menuOpt(`toolbarAct('${kind}','${val}')`, lead, label, cur);
+  if(which==='priority') return PRIORITIES.map(p=>opt('priority', p.id, PRIORITY_DOT[p.id], p.label, same('priority')===p.id)).join('');
+  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear date']].map(d=>opt('due', d[0], null, d[1])).join('');
+  return visibleProjects().map(p=>opt('project', p.id, {icon:p.icon}, abbreviateName(p.name, 24), same('projectId')===p.id)).join('');
 }
 function toggleToolMenu(which){
   const id = 'toolMenu' + which.charAt(0).toUpperCase() + which.slice(1);
@@ -2284,25 +2304,45 @@ document.addEventListener('keyup', syncSelectionToolbarSoon);
 // otherwise on just that row; it never changes the selection itself, so opening
 // it doesn't make the bulk bar appear and shove the list down.
 let rowMenuIds = [];
+// Flyout placement: to the right of the menu, flipped to the left when it would leave the
+// window, and nudged up when it would run off the bottom. Both measured in viewport px.
+function placeRowSub(sub){
+  const fly = sub.querySelector('.row-menu-flyout'); if(!fly) return;
+  fly.style.top = ''; fly.classList.remove('flip');
+  const prev = fly.style.display; fly.style.display = 'flex'; fly.style.visibility = 'hidden';
+  const r = fly.getBoundingClientRect(), m = document.getElementById('rowMenu').getBoundingClientRect();
+  fly.style.display = prev; fly.style.visibility = '';
+  if(r.right > window.innerWidth - 8 && m.left - r.width > 8) fly.classList.add('flip');
+  const k = r.height ? r.height / (fly.offsetHeight || r.height) : 1;
+  if(r.bottom > window.innerHeight - 8) fly.style.top = (-6 - (r.bottom - window.innerHeight + 8) / k) + 'px';
+}
+function toggleRowSub(e, btn){
+  e.stopPropagation();
+  const sub = btn.parentElement, was = sub.classList.contains('open');
+  document.querySelectorAll('#rowMenu .row-menu-sub.open').forEach(x=>x.classList.remove('open'));
+  if(!was){ placeRowSub(sub); sub.classList.add('open'); }
+}
 function closeRowMenu(){ document.getElementById('rowMenu')?.classList.remove('open'); }
 function rowMenuHtml(ids){
   const n = ids.length;
   const ts = ids.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
   if(!ts.length) return '';
   const item = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}"><i class="${icon}"></i><span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
-  const chips = (field, list, cur, badge)=>`<div class="row-menu-chips">${list.map(x=>`<button type="button" class="row-menu-chip${cur===x.id?' current':''}" onclick="rowMenuRun('${field}','${x.id}')">${badge?`<span class="badge ${badge}-${x.id}">${esc(x.label)}</span>`:`<i class="fa-solid fa-${x.icon||'folder'}"></i> ${esc(x.label)}`}</button>`).join('')}</div>`;
+  const opts = (field, list, cur, lead)=>list.map(x=>menuOpt(`rowMenuRun('${field}','${x.id}')`, lead(x), x.label, cur===x.id)).join('');
   const same = k=>ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
   const allDone = ts.every(t=>t.status==='done');
   const sep = '<div class="row-menu-sep"></div>';
-  const label = x=>`<div class="row-menu-label">${x}</div>`;
+  // A submenu: a parent row that opens a flyout of menuOpt rows on hover (or on click, for touch/keyboard).
+  const sub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)"><i class="${icon}"></i><span>${text}</span><span class="row-menu-hint"><i class="fa-solid fa-chevron-right"></i></span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
   const dueQ = [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear']];
   const parts = [];
   if(n===1) parts.push(item('fa-solid fa-pen-to-square','Open details','rowMenuRun(\'open\')'));
   parts.push(item(allDone?'fa-regular fa-circle':'fa-regular fa-circle-check', allDone?'Mark not started':'Mark complete', 'rowMenuRun(\'toggledone\')'));
-  parts.push(sep, label('Priority'), chips('priority', PRIORITIES, same('priority'), 'badge-priority'));
-  parts.push(label('Status'), chips('status', STATUSES, same('status'), 'badge-status'));
-  parts.push(label('Due'), `<div class="row-menu-chips">${dueQ.map(d=>`<button type="button" class="row-menu-chip" onclick="rowMenuRun('due','${d[0]}')">${d[1]}</button>`).join('')}</div>`);
-  parts.push(label('Move to'), chips('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,18),icon:p.icon})), same('projectId')));
+  parts.push(sep);
+  parts.push(sub('fa-regular fa-flag', 'Priority', opts('priority', PRIORITIES, same('priority'), x=>PRIORITY_DOT[x.id])));
+  parts.push(sub('fa-regular fa-circle-dot', 'Status', opts('status', STATUSES, same('status'), x=>STATUS_DOT[x.id])));
+  parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('')));
+  parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
   if(n===1) parts.push(item('fa-solid fa-plus','Add subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-clone','Duplicate','rowMenuRun(\'duplicate\')'));
   parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'Del'}));
@@ -3723,7 +3763,13 @@ function closeCellPop(){ const el = document.getElementById('cellPop'); if(el &&
 // Native-menu rows: a tick column (current value), a colour dot, plain text.
 const PRIORITY_DOT = { high:'var(--red-text)', medium:'var(--amber-text)', low:'var(--teal-text)' };
 const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var(--green-text)' };
-function popOptInner(dot, label){ return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span><span class="pop-dot" style="background:${dot}"></span>${esc(label)}`; }
+// One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
+// tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
+function popOptInner(lead, label){
+  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"></i>`;
+  return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
+}
+function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
 function cellPopOptionsHtml(t, field){
   if(field==='priority'){
     return PRIORITIES.map(p=>`<button type="button" class="cell-pop-opt${t.priority===p.id?' current':''}" onclick="pickCell(event,'${t.id}','priority','${p.id}')">${popOptInner(PRIORITY_DOT[p.id], p.label)}</button>`).join('');
@@ -3732,7 +3778,7 @@ function cellPopOptionsHtml(t, field){
     return STATUSES.map(s=>`<button type="button" class="cell-pop-opt${t.status===s.id?' current':''}" onclick="pickCell(event,'${t.id}','status','${s.id}')">${popOptInner(STATUS_DOT[s.id], s.label)}</button>`).join('');
   }
   const today = todayStr();
-  const q = (label, iso)=>`<button type="button" class="cell-pop-opt" onclick="pickCell(event,'${t.id}','dueDate',${iso?`'${iso}'`:'null'})">${label}</button>`;
+  const q = (label, iso)=>`<button type="button" class="cell-pop-opt" onclick="pickCell(event,'${t.id}','dueDate',${iso?`'${iso}'`:'null'})">${popOptInner(null, label)}</button>`;
   return q('Today', today) + q('Tomorrow', isoAddDays(today,1)) + q('Next week', isoAddDays(today,7))
     + (t.dueDate ? q('Clear date', null) : '')
     + `<input type="date" class="cell-pop-date" value="${esc(t.dueDate||'')}" onclick="event.stopPropagation()" onchange="pickCell(event,'${t.id}','dueDate',this.value||null)">`;

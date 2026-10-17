@@ -206,6 +206,14 @@ parity.
 - **Cell popovers are native-style menus** (`popOptInner`): a tick column for the current
   value, a colour dot (`PRIORITY_DOT`/`STATUS_DOT`) and plain text; hover fills the row with
   `--sel-bg` and white text, as in a macOS pop-up. The coloured pills stay in the list itself.
+  The right-click menu and the toolbar dropdowns use the **same row** (`popOptInner` / `menuOpt`;
+  tick for the current value — or the shared value across a multi-selection — then dot or project
+  icon, then text). In the right-click menu Priority, Status, Due and Move to are **submenus**
+  (`.row-menu-sub`: hover or click the parent row; `placeRowSub` flips the flyout left and nudges
+  it up when it would leave the window, `toggleRowSub` is the click/touch path). `.row-menu` must
+  not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
+  were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
+  turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
 - **Quick-add shorthand** (`parseQuickAdd`, live preview in `#quickAddPreview`):
   `!high/!med/!low` (`!!`, `!h`…), `#project`, `@tag`, and a date word
   (today, tomorrow, weekday, next week, in N days/weeks, YYYY-MM-DD). Unknown
@@ -251,7 +259,7 @@ parity.
   a row, Status/Due on a card) reacts on its **pill only**, in every row, never on
   the whole cell box: the pill brightens (`filter: brightness`, which works on every
   badge colour in both themes) and gets a soft pill-shaped halo; an empty cell shows
-  a small pill behind the dash. On a selected row the pill goes translucent white.
+  a small pill behind the dash. On a selected row the pill goes translucent white. The row's action buttons (Duplicate/Delete/⋯) and the empty-Due dash hover the same way — translucent white at 45% with white content — one hover language on the blue row (a solid white disc was tried and read as louder than the pills).
   Editable cells follow macOS conventions otherwise: the pointer stays an **arrow**
   (`cursor: default` — Apple reserves the hand for links), and the pills on the
   *selected* row/card get a small chevron (`::after`, a data-URI SVG) so they read as
