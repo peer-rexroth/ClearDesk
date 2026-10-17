@@ -334,7 +334,10 @@ parity.
   **Clicking is identical in both views**: a card uses `handleRowClick` on *click* (it used to select on
   mousedown through `selectBoardCard`, which had no modifier support), so plain click selects, Cmd/Ctrl-click
   extends and Shift-click selects a range (in on-screen card order on the board), double-click opens the panel,
-  double-click on the title renames. `.board-card.bulk-selected` shares every `kbd-selected` rule. The task
+  double-click on the title *text* renames and a double-click anywhere else on the card (including the blank part
+  of the title line or of a subtask row) opens the panel — the board's title and subtask text are therefore
+  narrow spans (`.board-card-title-text`, `.board-card .task-subtask-row span{flex:0 1 auto}`), not flex:1
+  elements that would turn the whole line into a rename target. `.board-card.bulk-selected` shares every `kbd-selected` rule. The task
   title no longer swallows the click (it used to, so clicking the title text did not select the row).
 - **Subtask rows follow the task row.** Subtask/step/sub-step checkboxes (`.mini-check` in the
   list and board, `.sub-check` in the panel) and the ghost add-row checkbox are *round* like

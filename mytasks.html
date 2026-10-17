@@ -250,7 +250,10 @@
   #taskList .task-subtask-row .subtask-toggle:has(.fa-plus) { opacity: 0; }
   #taskList .task-subtask-row:is(:hover, :focus-within) .subtask-toggle:has(.fa-plus) { opacity: 1; }
   .task-subtask-row span { cursor: text; }
-  .board-card .task-subtask-row span { flex: 1; }
+  /* only the text itself is the rename target, as in the list: the span must not stretch across the row, or a double-click on the
+     blank part of a subtask row would rename instead of opening the panel (the chevron takes the free space instead) */
+  .board-card .task-subtask-row span { flex: 0 1 auto; }
+  .board-card .task-subtask-row .subtask-toggle { margin-left: auto; }
   .task-subtask-text-input { flex: 1; font-size: 13px; font-family: var(--font); border: 0.5px solid var(--border-2); border-radius: 4px; padding: 1px 5px; background: var(--bg); color: var(--text); outline: none; min-width: 60px; }
   .task-subtask-add-row { margin-top: 2px; }
   .task-subtask-add-row input { width: 100%; border: 0.5px dashed var(--border-2); border-radius: var(--radius); padding: 4px 8px; font-size: 13px; background: var(--bg); color: var(--text); outline: none; font-family: var(--font); cursor: text; }
@@ -1996,7 +1999,7 @@ function boardCardHtml(t){
       <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
       ${renamingTaskId===t.id
         ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInputBoard" style="flex:1" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-        : `<div class="board-card-title" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</div>`}
+        : `<div class="board-card-title"><span class="board-card-title-text" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span></div>`}
       ${priorityIcon}
       ${dueBadge}
       ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:''}
