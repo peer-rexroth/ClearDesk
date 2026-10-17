@@ -460,22 +460,49 @@ freely — e.g. `[data-scheme="dracula"][data-theme="dark"]`.
   no teal token; Dracula/Monokai-style dark-only themes have no official
   light mode), say so in the scheme's comment rather than presenting an
   invented value as if it were verified.
-- **Glass** (Apple Liquid Glass–inspired) is the one scheme that changes
-  *layout and material*, not just colors: floating rounded panels
-  (`.topbar/.sidebar/.main/.drawer` with `backdrop-filter`), a wallpaper on
-  `body` (`--wall`; four presets chosen with `data-glass-bg`, picker shown in
-  the Colors modal only while Glass is active, stored per-device in
-  `mytasks_glassbg`), pill buttons with a springy `:active`, and a specular
-  rim (inset highlight + a diagonal `::after` sheen). Rules to keep:
-  `backdrop-filter` can't see through a parent that has its own, so popovers
-  *inside* a panel (Appearance, Filter, cell pop-over) use the near-opaque
-  `--glass-strong` and only body-level surfaces (row menu, modals, toast,
-  banner) blur; the light and dark blocks must define the **same** variables
-  (the light block would otherwise beat bare `html[data-theme="dark"]` for any
-  variable only it sets); `prefers-reduced-transparency`, `prefers-contrast`
-  and browsers without `backdrop-filter` get solid surfaces and a flat
-  wallpaper. Real lens refraction (SVG displacement) was deliberately
-  skipped — nothing scrolls under the glass here, so it would be invisible.
+- **Glass** (Apple Liquid Glass / Mail-style) is the one scheme that changes
+  *layout and material*, not just colors. It copies Apple Mail's rule: **the
+  chrome is glass, the content is flat.** The topbar and sidebar are translucent
+  and blur a soft wallpaper on `body` (`--wall`; four presets chosen with
+  `data-glass-bg`, picker shown in the Colors modal only while Glass is active,
+  stored per-device in `mytasks_glassbg`) — the web stand-in for macOS vibrancy;
+  the toolbar controls are capsules; the list, board and detail panel are opaque
+  and neutral; the window is flush (no floating cards). Rules to keep:
+  - Content is flattened by **scoping variables**, not per-element overrides:
+    `.main` and `.drawer` redefine `--bg/--bg-2/--bg-3/--glass-*/--border*` to
+    opaque neutral values (light and dark), so every descendant rule that reads
+    them is flat automatically. Chrome keeps the translucent values. When adding
+    a Glass rule, reach for those variables rather than hard-coding colors.
+  - `backdrop-filter` can't see through a parent that has its own, so only
+    body-level surfaces (topbar, sidebar, row menu, modals, toast, banner) blur;
+    popovers inside the content use the opaque `--glass-strong`.
+  - The light and dark blocks must define the **same** variables (the light
+    block would otherwise beat bare `html[data-theme="dark"]` for any variable
+    only it sets).
+  - `prefers-reduced-transparency`, `prefers-contrast` and browsers without
+    `backdrop-filter` get solid chrome and a flat wallpaper. Real lens
+    refraction (SVG displacement) was deliberately skipped.
+  - Row hover must not beat selection: hover is written
+    `.task-row:hover:not(.kbd-selected):not(.bulk-selected)` (same specificity,
+    later in the file, it used to erase the selected look while the mouse was
+    still on the row).
+  **Corner radii**: toolbar controls (topbar, `.main-toolbar`, bulk bar) are
+  capsules like Mail's; everything in the content uses `--radius` (10px), task
+  rows `--glass-r-row` (8px), the quick-add bar `--glass-r-bar` (12px), board
+  columns `--radius-lg` (14px) and menus/modals `--glass-r-menu` (16px); chips and
+  badges stay pills. Change the look by editing those variables, not rules.
+  **Select arrows**: Glass replaces the browser's heavy dark dropdown arrow with a thin
+  light chevron (`appearance:none` + a data-URI background; one URI per theme because a
+  data-URI can't read CSS variables). That rule must stay *after* every Glass rule that
+  uses the `background` shorthand, which would reset the chevron (it once vanished in
+  light mode and tiled across the select in dark).
+  **Selected row/card** in Glass is a soft tinted fill (accent at ~14% over the
+  glass) with a faint rim; the crisp 2px ring appears only while `html.kbd-nav`
+  is set (arrow keys add it, any `mousedown` removes it — `markKeyboardNav` /
+  `markPointerNav`), so clicking never paints a focus ring. Other schemes keep
+  the outline because it is their only selection cue. A real pointer click
+  (`e.detail>0`) also blurs `[role="button"]` divs so a clicked badge cell
+  doesn't keep a focus ring for the next key press.
 - Each scheme may add its own one-off "signature" CSS rules (e.g. GitHub's
   primary button going solid green, a scheme-specific monospace treatment
   for numerics) — these live in their own scoped block further down in

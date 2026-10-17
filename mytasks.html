@@ -698,6 +698,7 @@
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
 
   .quickadd-project { flex-shrink: 0; margin-right: 8px; max-width: 150px; font-size: 13px; font-family: var(--font); color: var(--text-2); background: var(--bg-3); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+  html[data-scheme="glass"] .quickadd-project { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); }
   .quickadd-project:disabled { opacity: .6; cursor: default; }
   .quickadd-preview { display: none; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 22px 8px; font-size: 13px; color: var(--text-2); }
   .quickadd-preview.show { display: flex; }
@@ -748,6 +749,25 @@
   .layout:has(.drawer.open) .task-list-header > :nth-child(3) { visibility: hidden; overflow: hidden; }
   body:has(.drawer.open) .toast { right: auto; left: 24px; }
 
+  /* Selected row/card: a soft accent-tinted fill with a faint blue border. The
+     crisp ring is kept for real keyboard navigation only (html.kbd-nav, set by
+     arrow keys, cleared by any pointer press), so clicking a row never paints a
+     focus ring. Scoped to Glass: other schemes have no fill to fall back on, so
+     the outline is their only selection cue. */
+  html[data-scheme="glass"] .task-row.kbd-selected, html[data-scheme="glass"] .board-card.kbd-selected {
+    background: color-mix(in srgb, var(--blue-dot) 14%, var(--bg));
+    border-color: color-mix(in srgb, var(--blue-dot) 26%, var(--glass-edge));
+    box-shadow: none;
+  }
+  html[data-scheme="glass"].kbd-nav .task-row.kbd-selected, html[data-scheme="glass"].kbd-nav .board-card.kbd-selected {
+    border-color: color-mix(in srgb, var(--blue-dot) 70%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue-dot) 55%, transparent);
+  }
+  html[data-scheme="glass"] .task-row.bulk-selected, html[data-scheme="glass"] .task-row.kbd-selected.bulk-selected {
+    background: color-mix(in srgb, var(--purple-text) 16%, var(--bg)); border-color: color-mix(in srgb, var(--purple-text) 45%, transparent);
+    box-shadow: none;
+  }
+
   .file-chip.warn { color: var(--amber-text); border-color: var(--amber-text); }
   .file-chip.ok i { color: var(--green-text); }
   .file-chip.bad { color: var(--red-text); border-color: var(--red-text); }
@@ -773,25 +793,28 @@
   .sel-chip:hover { background: var(--purple-bg); }
   .sel-chip i { font-size: 11px; opacity: .8; }
 
-  /* ── Glass scheme (Apple "Liquid Glass"–inspired) ──────────────────────────
-     Opt-in via the Colors picker; every other scheme is untouched. The look is
-     built from: a soft color-wash wallpaper (--wall, four presets via
-     data-glass-bg), floating rounded panels that blur + saturate whatever is
-     behind them, a bright specular rim (inset highlight + diagonal sheen),
-     pill-shaped controls, and a springy press. Real lens refraction (an SVG
-     displacement filter, Chromium-only) is deliberately not used: in a layout
-     where nothing scrolls under the glass it would be invisible, and it costs
-     a lot. Two rules the CSS has to respect:
-     - backdrop-filter does not see through a parent that has its own
-       (a "backdrop root"), so popovers that live inside a panel (Appearance,
-       Filter, cell pop-over) use the near-opaque --glass-strong instead of
-       relying on blur; only body-level surfaces (row menu, modals, toast,
-       banner) blur.
+  /* ── Glass scheme (Apple "Liquid Glass" / Mail-style) ──────────────────────
+     Opt-in via the Colors picker; every other scheme is untouched. Modelled on
+     Apple Mail: the CHROME is glass and the CONTENT is flat. The topbar and the
+     sidebar are translucent and blur a soft color-wash wallpaper (--wall, four
+     presets via data-glass-bg) — the web stand-in for macOS vibrancy — and the
+     toolbar controls are capsules; the task list, board and detail panel are
+     opaque and neutral so they stay calm and readable. The window is flush, with
+     no floating cards. Real lens refraction (an SVG displacement filter,
+     Chromium-only) is deliberately not used: nothing scrolls under the glass here,
+     so it would be invisible, and it costs a lot. Rules the CSS has to respect:
+     - Content is made flat by *scoping variables*: `.main` and `.drawer` redefine
+       --bg/--bg-2/--bg-3/--glass-* to opaque neutral values, so every descendant
+       rule that reads them (rows, badges, inputs, popovers) is flat with no
+       per-element overrides. Chrome (topbar, sidebar) keeps the translucent ones.
+     - backdrop-filter does not see through a parent that has its own (a "backdrop
+       root"). Only body-level surfaces (topbar, sidebar, row menu, modals, toast)
+       blur; popovers inside the content use the opaque --glass-strong.
      - The light block and the dark block must define the same variables: the
        light block (specificity 0,1,1) would otherwise beat the bare
        html[data-theme="dark"] block for any variable only it sets.
      Accessibility: prefers-reduced-transparency / prefers-contrast (and
-     browsers without backdrop-filter) get solid surfaces and a flat wallpaper. */
+     browsers without backdrop-filter) get solid chrome and a flat wallpaper. */
   html[data-scheme="glass"] {
     --bg: rgba(255,255,255,.46); --bg-2: rgba(255,255,255,.30); --bg-3: rgba(255,255,255,.62);
     --text: #15161b; --text-2: rgba(21,22,27,.68); --text-3: rgba(21,22,27,.48);
@@ -803,7 +826,7 @@
     --green-bg: rgba(52,199,89,.18); --green-text: #1a7a36;
     --purple-bg: rgba(175,82,222,.16); --purple-text: #7a2fb0;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
-    --radius: 14px; --radius-lg: 26px;
+    --radius: 10px; --radius-lg: 14px; --glass-r-row: 8px; --glass-r-bar: 12px; --glass-r-menu: 16px;
     --glass-strong: rgba(255,255,255,.88);
     --glass-rim: rgba(255,255,255,.80); --glass-edge: rgba(255,255,255,.60);
     --glass-sheen: rgba(255,255,255,.26); --glass-sheen-2: rgba(255,255,255,.10);
@@ -823,7 +846,7 @@
     --green-bg: rgba(52,199,89,.26); --green-text: #8ee6a4;
     --purple-bg: rgba(175,82,222,.28); --purple-text: #d6a6f5;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
-    --radius: 14px; --radius-lg: 26px;
+    --radius: 10px; --radius-lg: 14px; --glass-r-row: 8px; --glass-r-bar: 12px; --glass-r-menu: 16px;
     --glass-strong: rgba(36,38,56,.90);
     --glass-rim: rgba(255,255,255,.22); --glass-edge: rgba(255,255,255,.16);
     --glass-sheen: rgba(255,255,255,.10); --glass-sheen-2: rgba(255,255,255,.04);
@@ -843,66 +866,80 @@
 
   html[data-scheme="glass"] body { background: var(--wall); background-attachment: fixed; background-size: cover; }
 
-  /* floating panels */
-  html[data-scheme="glass"] .topbar { position: relative; z-index: 60; margin: 12px 12px 0; height: 56px; padding: 0 18px; border-radius: 30px; }
-  html[data-scheme="glass"] .layout { flex: 1; min-height: 0; height: auto; padding: 12px; gap: 12px; }
-  html[data-scheme="glass"] .sidebar, html[data-scheme="glass"] .main { position: relative; border-radius: 28px; }
-  html[data-scheme="glass"] .drawer { border-radius: 28px; margin-left: -12px; transition: width .2s ease, margin .2s ease, visibility 0s linear .2s; visibility: hidden; }
-  html[data-scheme="glass"] .drawer.open { margin-left: 0; visibility: visible; transition: width .2s ease, margin .2s ease, visibility 0s; }
-  html[data-scheme="glass"] :is(.topbar, .sidebar, .main, .drawer) {
-    background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
-    border: 1px solid var(--glass-edge);
-    box-shadow: inset 0 1px 0 var(--glass-rim), inset 0 -1px 0 rgba(255,255,255,.10), var(--glass-shadow);
-  }
-  html[data-scheme="glass"] .drawer:not(.open) { border-width: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
-  html[data-scheme="glass"] :is(.topbar, .sidebar, .main, .drawer)::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(135deg, var(--glass-sheen), transparent 38%, transparent 72%, var(--glass-sheen-2)); }
-  html[data-scheme="glass"] .sidebar { border-right-width: 1px; }
+  /* flush window: glass chrome (topbar + sidebar) around flat content */
+  html[data-scheme="glass"] .layout { flex: 1; min-height: 0; height: auto; padding: 0; gap: 0; }
+  html[data-scheme="glass"] .topbar { position: relative; z-index: 60; margin: 0; height: 56px; padding: 0 18px; border-radius: 0; border-bottom: 1px solid var(--border); }
+  html[data-scheme="glass"] .sidebar { border-radius: 0; border-right: 1px solid var(--border); }
+  html[data-scheme="glass"] :is(.topbar, .sidebar) { background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
   html[data-scheme="glass"] .sidebar-section, html[data-scheme="glass"] .sidebar-footer { border-color: var(--border); }
-  html[data-scheme="glass"] .sidebar-search input { border-radius: 999px; background: var(--bg-3); border-color: var(--glass-edge); }
+  html[data-scheme="glass"] .sidebar-search input { border-radius: var(--radius); background: var(--bg-3); border-color: var(--glass-edge); }
+
+  /* content: opaque and neutral — achieved by scoping the variables (see header) */
+  html[data-scheme="glass"] :is(.main, .drawer) {
+    --bg: #ffffff; --bg-2: #f6f6f9; --bg-3: #ececf1;
+    --glass-strong: #ffffff; --glass-edge: rgba(40,44,70,.16); --glass-rim: transparent;
+    --border: rgba(40,44,70,.10); --border-2: rgba(40,44,70,.20);
+    background: var(--bg); border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  html[data-scheme="glass"][data-theme="dark"] :is(.main, .drawer) {
+    --bg: #1e1f24; --bg-2: #26272d; --bg-3: #31323a;
+    --glass-strong: #26272d; --glass-edge: rgba(255,255,255,.14); --glass-rim: transparent;
+    --border: rgba(255,255,255,.10); --border-2: rgba(255,255,255,.20);
+  }
+  html[data-scheme="glass"] .drawer { visibility: hidden; transition: width .2s ease, visibility 0s linear .2s; }
+  html[data-scheme="glass"] .drawer.open { visibility: visible; border-left: 1px solid var(--border-2); transition: width .2s ease, visibility 0s; }
   html[data-scheme="glass"] .main-toolbar { background: transparent; }
-  html[data-scheme="glass"] .quickadd { border-radius: 22px; background: var(--bg); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 4px 16px rgba(40,50,110,.08); }
-  /* Sticky column header: opaque (so rows scrolling under it can't ghost
-     through) but seamless — it paints the same wallpaper as the page, pinned to
-     the viewport (background-attachment: fixed), under the same panel tint.
-     A backdrop blur was tried first; it does not take effect on a sticky
-     element inside the scrolling list. The panels' --glass-blur deliberately has
-     no saturate(): a saturation boost would make the panel a different color from
-     the raw wallpaper this header paints, and the band would show. */
-  html[data-scheme="glass"] .task-list-header { background-image: linear-gradient(var(--bg), var(--bg)), var(--wall); background-attachment: fixed; background-size: cover; background-color: transparent; border-radius: 0; border-bottom: 1px solid var(--border); }
-  html[data-scheme="glass"] .task-row { border-radius: 18px; }
-  html[data-scheme="glass"] .task-row:hover { background: var(--bg-3); border-color: var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 4px 14px rgba(40,50,110,.10); }
-  html[data-scheme="glass"] .board-col { background: var(--bg-2); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim); }
-  html[data-scheme="glass"] .board-card { background: var(--bg-3); border-color: var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 3px 10px rgba(40,50,110,.08); }
+  html[data-scheme="glass"] .quickadd { border-radius: var(--glass-r-bar); background: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
+  html[data-scheme="glass"] .task-list-header { background: var(--bg); border-radius: 0; border-bottom: 1px solid var(--border); }
+  html[data-scheme="glass"] .task-row { border-radius: var(--glass-r-row); }
+  html[data-scheme="glass"] .task-row:hover:not(.kbd-selected):not(.bulk-selected) { background: var(--bg-2); border-color: transparent; box-shadow: none; }
+  html[data-scheme="glass"] .board-col { background: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
+  html[data-scheme="glass"] .board-card { background: var(--bg); border-color: var(--border); box-shadow: none; }
 
   /* pill controls with a springy press */
-  html[data-scheme="glass"] .btn { border-radius: 999px; background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  html[data-scheme="glass"] .btn { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
   html[data-scheme="glass"] .btn:hover { background: var(--glass-strong); box-shadow: inset 0 1px 0 var(--glass-rim), 0 4px 14px rgba(40,50,110,.14); }
   html[data-scheme="glass"] .btn:active, html[data-scheme="glass"] .view-switch-btn:active, html[data-scheme="glass"] .f-chip:active { transform: scale(.94); }
   html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: #fff; border-color: rgba(255,255,255,.45); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 4px 14px rgba(10,114,240,.35); }
   html[data-scheme="glass"] .btn-primary:hover { background: var(--glass-accent); filter: brightness(1.06); opacity: 1; }
   html[data-scheme="glass"] .btn-danger { background: linear-gradient(180deg, #ff6b5e, #e0352b); color: #fff; border-color: rgba(255,255,255,.4); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 14px rgba(224,53,43,.30); }
   html[data-scheme="glass"] .btn-danger:hover { background: linear-gradient(180deg, #ff6b5e, #e0352b); filter: brightness(1.06); }
-  html[data-scheme="glass"] .icon-btn { border-radius: 999px; }
-  html[data-scheme="glass"] .view-switch { border-radius: 999px; padding: 3px; gap: 2px; background: var(--bg-2); border: 1px solid var(--glass-edge); }
-  html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: 999px; transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease; }
+  html[data-scheme="glass"] .icon-btn { border-radius: var(--radius); }
+  /* capsules: controls that live in the toolbars, as in Mail; everything in the
+     content stays at --radius */
+  html[data-scheme="glass"] :is(.topbar, .main-toolbar, .bulk-bar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
+  html[data-scheme="glass"] .main-toolbar .view-switch-btn { border-radius: 999px; }
+  html[data-scheme="glass"] .view-switch { border-radius: var(--radius); padding: 3px; gap: 2px; background: var(--bg-2); border: 1px solid var(--glass-edge); }
+  html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: calc(var(--radius) - 3px); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease; }
   html[data-scheme="glass"] .view-switch-btn + .view-switch-btn { border-left-width: 0; }
   html[data-scheme="glass"] .view-switch-btn.active { background: var(--glass-strong); color: var(--text); box-shadow: inset 0 1px 0 var(--glass-rim), 0 2px 8px rgba(40,50,110,.15); }
   html[data-scheme="glass"] .f-chip { background: var(--bg-3); border-color: var(--glass-edge); }
-  html[data-scheme="glass"] .main-toolbar select { border-radius: 999px; background: var(--bg-3); border-color: var(--glass-edge); }
+  html[data-scheme="glass"] .main-toolbar select { border-radius: var(--radius); background: var(--bg-3); border-color: var(--glass-edge); }
   html[data-scheme="glass"] .field input[type=text], html[data-scheme="glass"] .field input[type=date], html[data-scheme="glass"] .field textarea, html[data-scheme="glass"] .field select,
-  html[data-scheme="glass"] .modal input, html[data-scheme="glass"] .modal select { background: var(--bg-2); border: 1px solid var(--glass-edge); border-radius: 14px; }
+  html[data-scheme="glass"] .modal input, html[data-scheme="glass"] .modal select { background: var(--bg-2); border: 1px solid var(--glass-edge); border-radius: var(--radius); }
   html[data-scheme="glass"] .sel-chip { background: var(--bg-3); }
 
   /* menus, modals, toast, banner */
-  html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: 20px; box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
+  html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: var(--glass-r-menu); box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
   html[data-scheme="glass"] :is(.row-menu, .modal, .toast) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
   html[data-scheme="glass"] .toast.error { background: var(--red-bg); color: var(--red-text); }
-  html[data-scheme="glass"] .row-menu-item, html[data-scheme="glass"] .row-menu-chip, html[data-scheme="glass"] .cell-pop-opt { border-radius: 12px; }
-  html[data-scheme="glass"] .sync-banner { margin: 10px 12px 0; border-radius: 22px; border: 1px solid var(--glass-edge); background: var(--amber-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: inset 0 1px 0 var(--glass-rim); }
+  html[data-scheme="glass"] .row-menu-item, html[data-scheme="glass"] .row-menu-chip, html[data-scheme="glass"] .cell-pop-opt { border-radius: 8px; }
+  html[data-scheme="glass"] .sync-banner { margin: 0; border-radius: 0; border: 0; border-bottom: 1px solid var(--border); background: var(--amber-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: none; }
   html[data-scheme="glass"] .modal-bg { background: rgba(20,24,50,.22); }
-  html[data-scheme="glass"] .drawer .btn-danger { border-radius: 999px; }
+  html[data-scheme="glass"] .drawer .btn-danger { border-radius: var(--radius); }
 
   #themeModalBg .modal { max-height: calc(100vh - 48px); overflow-y: auto; }
+
+  /* Dropdown chevron: the browser's own arrow is a heavy dark glyph that crowds the
+     pill's right edge, so Glass draws a light, thin one (appearance:none keeps the
+     native popup list). Must come after every Glass rule that sets the `background`
+     shorthand (it would reset these). Two data-URIs because a data-URI can't read CSS variables. */
+  html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .quickadd-project, html[data-scheme="glass"] .field select, html[data-scheme="glass"] .modal select, html[data-scheme="glass"] .bulk-bar select { -webkit-appearance: none; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%2315161b' stroke-opacity='.45' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 12px 8px; }
+  html[data-scheme="glass"][data-theme="dark"] .main-toolbar select, html[data-scheme="glass"][data-theme="dark"] .quickadd-project, html[data-scheme="glass"][data-theme="dark"] .field select, html[data-scheme="glass"][data-theme="dark"] .modal select, html[data-scheme="glass"][data-theme="dark"] .bulk-bar select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%23f5f6fa' stroke-opacity='.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+
+  /* toolbar capsules sit a step lighter than the content (Mail: white capsules); background-color
+     only, so the chevron image above is not reset */
+  html[data-scheme="glass"] .main-toolbar :is(.btn, select) { background-color: var(--bg-2); }
 
   /* background picker (shown in the Colors modal while Glass is selected) */
   .glass-bg-options { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
@@ -3905,7 +3942,19 @@ document.addEventListener('click', e=>{
   if(btn) btn.blur();
   const cb = e.target.closest('[role="checkbox"]');
   if(cb) cb.blur();
+  // A mouse click on a role=button div (badge cells, nav rows) must not leave it focused,
+  // or the next arrow key paints a focus ring on it. detail>0 = a real pointer click;
+  // the keyboard echo's synthetic click has detail 0, so keyboard users keep focus.
+  const rb = e.target.closest('[role="button"]');
+  if(rb && e.detail>0) rb.blur();
 });
+// Input modality for the selected-row highlight (see the Glass rules): arrow
+// keys switch <html> to .kbd-nav (crisp outline), any pointer press switches it
+// back off (soft fill only). Pure CSS reads it, so no render has to know.
+function markKeyboardNav(e){ if(e && /^Arrow(Up|Down|Left|Right)$/.test(e.key)) document.documentElement.classList?.add('kbd-nav'); }
+function markPointerNav(){ document.documentElement.classList?.remove('kbd-nav'); }
+document.addEventListener('keydown', markKeyboardNav, true);
+document.addEventListener('mousedown', markPointerNav, true);
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
     closeCellPop(); closeRowMenu(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();

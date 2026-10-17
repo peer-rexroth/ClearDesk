@@ -294,3 +294,16 @@ test('setQuickAddProject refuses the system-managed Deleted project', function (
     assertEqual(quickAddProjectId, null);
   });
 });
+
+// ── Selection highlight modality (Glass) ─────────────────────────────────────
+test('arrow keys mark keyboard navigation; a pointer press clears it', function () {
+  const cl = document.documentElement.classList;
+  markPointerNav();
+  assertFalse(cl.contains('kbd-nav'));
+  markKeyboardNav({ key: 'a' });
+  assertFalse(cl.contains('kbd-nav'), 'ordinary typing must not switch modality');
+  markKeyboardNav({ key: 'ArrowDown' });
+  assertTrue(cl.contains('kbd-nav'));
+  markPointerNav();
+  assertFalse(cl.contains('kbd-nav'));
+});
