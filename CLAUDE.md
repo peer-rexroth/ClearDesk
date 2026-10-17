@@ -330,8 +330,12 @@ parity.
   the same `.row-actions` capsule (Duplicate, Delete, ⋯; Skip for repeating tasks) at the right of the meta row
   on hover/focus/selection — absolutely positioned there so it never changes card height. A card without a due
   date shows a dashed calendar chip (`.cell-host-empty`) next to the status pill on hover/selection, which opens
-  the same Due menu. Still deliberately different: no multi-select, tags as colour strips, priority as a flag,
-  no subtask hover controls.
+  the same Due menu. Still deliberately different: tags as colour strips, priority as a flag, no subtask hover controls.
+  **Clicking is identical in both views**: a card uses `handleRowClick` on *click* (it used to select on
+  mousedown through `selectBoardCard`, which had no modifier support), so plain click selects, Cmd/Ctrl-click
+  extends and Shift-click selects a range (in on-screen card order on the board), double-click opens the panel,
+  double-click on the title renames. `.board-card.bulk-selected` shares every `kbd-selected` rule. The task
+  title no longer swallows the click (it used to, so clicking the title text did not select the row).
 - **Subtask rows follow the task row.** Subtask/step/sub-step checkboxes (`.mini-check` in the
   list and board, `.sub-check` in the panel) and the ghost add-row checkbox are *round* like
   `.task-checkbox`, just smaller; a checked one on the blue selected row is white with no green halo.
@@ -348,6 +352,9 @@ parity.
   empty via `margin-left:16px`), the grip handle is hidden (the list has none; the whole row drags in both),
   text is 14px secondary grey, and a "+" toggle shows on hover only. Ghost add rows use `padding-left:24px`
   (chevron column + gap) so their checkbox sits under the real ones.
+- **Inline rename fields are quiet too** (`.task-title-input`, `.task-subtask-text-input`, the panel's
+  `.sub-text-input`): no border, no focus halo, just a soft tint (translucent white on the selected row), the
+  caret and the selected text. The global focus ring made them a heavy white-ringed bar across a blue row.
 - **Inline add fields are a "ghost row"** (`.task-subtask-add-row`, `.add-row`):
   no box and no dashed border — a faint empty checkbox (`::before`), then the
   borderless input, with the placeholder muted and a very light tint on
