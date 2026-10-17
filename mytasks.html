@@ -697,6 +697,8 @@
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
 
+  .quickadd-project { flex-shrink: 0; margin-right: 8px; max-width: 150px; font-size: 13px; font-family: var(--font); color: var(--text-2); background: var(--bg-3); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
+  .quickadd-project:disabled { opacity: .6; cursor: default; }
   .quickadd-preview { display: none; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 22px 8px; font-size: 13px; color: var(--text-2); }
   .quickadd-preview.show { display: flex; }
   .quickadd-preview-hint { margin-left: auto; font-size: 12px; color: var(--text-3); }
@@ -770,6 +772,159 @@
   .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border: 1px solid var(--purple-text); border-radius: 14px; background: transparent; color: var(--purple-text); font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; }
   .sel-chip:hover { background: var(--purple-bg); }
   .sel-chip i { font-size: 11px; opacity: .8; }
+
+  /* ── Glass scheme (Apple "Liquid Glass"–inspired) ──────────────────────────
+     Opt-in via the Colors picker; every other scheme is untouched. The look is
+     built from: a soft color-wash wallpaper (--wall, four presets via
+     data-glass-bg), floating rounded panels that blur + saturate whatever is
+     behind them, a bright specular rim (inset highlight + diagonal sheen),
+     pill-shaped controls, and a springy press. Real lens refraction (an SVG
+     displacement filter, Chromium-only) is deliberately not used: in a layout
+     where nothing scrolls under the glass it would be invisible, and it costs
+     a lot. Two rules the CSS has to respect:
+     - backdrop-filter does not see through a parent that has its own
+       (a "backdrop root"), so popovers that live inside a panel (Appearance,
+       Filter, cell pop-over) use the near-opaque --glass-strong instead of
+       relying on blur; only body-level surfaces (row menu, modals, toast,
+       banner) blur.
+     - The light block and the dark block must define the same variables: the
+       light block (specificity 0,1,1) would otherwise beat the bare
+       html[data-theme="dark"] block for any variable only it sets.
+     Accessibility: prefers-reduced-transparency / prefers-contrast (and
+     browsers without backdrop-filter) get solid surfaces and a flat wallpaper. */
+  html[data-scheme="glass"] {
+    --bg: rgba(255,255,255,.46); --bg-2: rgba(255,255,255,.30); --bg-3: rgba(255,255,255,.62);
+    --text: #15161b; --text-2: rgba(21,22,27,.68); --text-3: rgba(21,22,27,.48);
+    --border: rgba(40,44,70,.13); --border-2: rgba(40,44,70,.24);
+    --blue-bg: rgba(10,132,255,.16); --blue-text: #0a5fd0; --blue-border: #7ab4ff;
+    --teal-bg: rgba(48,176,160,.18); --teal-text: #0b6b5f;
+    --amber-bg: rgba(255,159,10,.20); --amber-text: #8a4b00;
+    --red-bg: rgba(255,69,58,.15); --red-text: #c4281f;
+    --green-bg: rgba(52,199,89,.18); --green-text: #1a7a36;
+    --purple-bg: rgba(175,82,222,.16); --purple-text: #7a2fb0;
+    --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
+    --radius: 14px; --radius-lg: 26px;
+    --glass-strong: rgba(255,255,255,.88);
+    --glass-rim: rgba(255,255,255,.80); --glass-edge: rgba(255,255,255,.60);
+    --glass-sheen: rgba(255,255,255,.26); --glass-sheen-2: rgba(255,255,255,.10);
+    --glass-shadow: 0 10px 40px rgba(40,50,110,.16), 0 2px 8px rgba(40,50,110,.08);
+    --glass-blur: blur(26px);
+    --glass-accent: linear-gradient(180deg, #3a9bff, #0a72f0);
+    --wall: radial-gradient(55% 45% at 12% 8%, #9ccbff 0, transparent 70%), radial-gradient(50% 45% at 88% 12%, #e0b3ff 0, transparent 70%), radial-gradient(60% 55% at 78% 92%, #ffc2a8 0, transparent 70%), radial-gradient(45% 45% at 8% 88%, #a8f0d8 0, transparent 70%), linear-gradient(160deg, #eef3ff, #f7eeff);
+  }
+  html[data-scheme="glass"][data-theme="dark"] {
+    --bg: rgba(34,36,52,.50); --bg-2: rgba(22,24,36,.40); --bg-3: rgba(255,255,255,.12);
+    --text: #f5f6fa; --text-2: rgba(245,246,250,.70); --text-3: rgba(245,246,250,.46);
+    --border: rgba(255,255,255,.14); --border-2: rgba(255,255,255,.26);
+    --blue-bg: rgba(10,132,255,.26); --blue-text: #8cc2ff; --blue-border: #3a82e0;
+    --teal-bg: rgba(48,176,160,.26); --teal-text: #7fe0d0;
+    --amber-bg: rgba(255,159,10,.26); --amber-text: #ffc566;
+    --red-bg: rgba(255,69,58,.26); --red-text: #ff9a92;
+    --green-bg: rgba(52,199,89,.26); --green-text: #8ee6a4;
+    --purple-bg: rgba(175,82,222,.28); --purple-text: #d6a6f5;
+    --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
+    --radius: 14px; --radius-lg: 26px;
+    --glass-strong: rgba(36,38,56,.90);
+    --glass-rim: rgba(255,255,255,.22); --glass-edge: rgba(255,255,255,.16);
+    --glass-sheen: rgba(255,255,255,.10); --glass-sheen-2: rgba(255,255,255,.04);
+    --glass-shadow: 0 12px 44px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.30);
+    --glass-blur: blur(28px);
+    --glass-accent: linear-gradient(180deg, #4aa3ff, #1a6fe6);
+    --wall: radial-gradient(55% 45% at 12% 8%, #1f4f9e 0, transparent 70%), radial-gradient(50% 45% at 88% 12%, #6a2fa8 0, transparent 70%), radial-gradient(60% 55% at 78% 92%, #a34a3a 0, transparent 70%), radial-gradient(45% 45% at 8% 88%, #1b7a68 0, transparent 70%), linear-gradient(160deg, #10121c, #171326);
+  }
+  html[data-scheme="glass"][data-glass-bg="aurora"] { --wall: radial-gradient(55% 45% at 12% 8%, #9ccbff 0, transparent 70%), radial-gradient(50% 45% at 88% 12%, #e0b3ff 0, transparent 70%), radial-gradient(60% 55% at 78% 92%, #ffc2a8 0, transparent 70%), radial-gradient(45% 45% at 8% 88%, #a8f0d8 0, transparent 70%), linear-gradient(160deg, #eef3ff, #f7eeff); }
+  html[data-scheme="glass"][data-glass-bg="sunset"] { --wall: radial-gradient(55% 45% at 10% 10%, #ffb48a 0, transparent 70%), radial-gradient(50% 45% at 90% 15%, #ff8fb1 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #ffd98a 0, transparent 70%), radial-gradient(45% 45% at 5% 90%, #c9a0ff 0, transparent 70%), linear-gradient(160deg, #fff1e6, #ffe6f0); }
+  html[data-scheme="glass"][data-glass-bg="ocean"] { --wall: radial-gradient(55% 45% at 10% 10%, #7fd8ff 0, transparent 70%), radial-gradient(50% 45% at 90% 15%, #8fb5ff 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #8ff0d0 0, transparent 70%), radial-gradient(45% 45% at 5% 90%, #b6e6ff 0, transparent 70%), linear-gradient(160deg, #e8f8ff, #eaf3ff); }
+  html[data-scheme="glass"][data-glass-bg="graphite"] { --wall: radial-gradient(55% 45% at 12% 10%, #dfe3ea 0, transparent 70%), radial-gradient(50% 45% at 88% 15%, #f3f4f7 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #cfd5df 0, transparent 70%), linear-gradient(160deg, #eef0f4, #e3e6ec); }
+  html[data-scheme="glass"][data-glass-bg="aurora"][data-theme="dark"] { --wall: radial-gradient(55% 45% at 12% 8%, #1f4f9e 0, transparent 70%), radial-gradient(50% 45% at 88% 12%, #6a2fa8 0, transparent 70%), radial-gradient(60% 55% at 78% 92%, #a34a3a 0, transparent 70%), radial-gradient(45% 45% at 8% 88%, #1b7a68 0, transparent 70%), linear-gradient(160deg, #10121c, #171326); }
+  html[data-scheme="glass"][data-glass-bg="sunset"][data-theme="dark"] { --wall: radial-gradient(55% 45% at 10% 10%, #8a3b1f 0, transparent 70%), radial-gradient(50% 45% at 90% 15%, #8a2a55 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #7a5a14 0, transparent 70%), radial-gradient(45% 45% at 5% 90%, #4b2a8a 0, transparent 70%), linear-gradient(160deg, #1c1017, #160f1f); }
+  html[data-scheme="glass"][data-glass-bg="ocean"][data-theme="dark"] { --wall: radial-gradient(55% 45% at 10% 10%, #0f5f86 0, transparent 70%), radial-gradient(50% 45% at 90% 15%, #1d3f8f 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #0f7a64 0, transparent 70%), radial-gradient(45% 45% at 5% 90%, #0d4a6a 0, transparent 70%), linear-gradient(160deg, #0a1620, #0b1426); }
+  html[data-scheme="glass"][data-glass-bg="graphite"][data-theme="dark"] { --wall: radial-gradient(55% 45% at 12% 10%, #2a2f3a 0, transparent 70%), radial-gradient(50% 45% at 88% 15%, #1b1f29 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #343a48 0, transparent 70%), linear-gradient(160deg, #14161c, #1a1d26); }
+
+  html[data-scheme="glass"] body { background: var(--wall); background-attachment: fixed; background-size: cover; }
+
+  /* floating panels */
+  html[data-scheme="glass"] .topbar { position: relative; z-index: 60; margin: 12px 12px 0; height: 56px; padding: 0 18px; border-radius: 30px; }
+  html[data-scheme="glass"] .layout { flex: 1; min-height: 0; height: auto; padding: 12px; gap: 12px; }
+  html[data-scheme="glass"] .sidebar, html[data-scheme="glass"] .main { position: relative; border-radius: 28px; }
+  html[data-scheme="glass"] .drawer { border-radius: 28px; margin-left: -12px; transition: width .2s ease, margin .2s ease, visibility 0s linear .2s; visibility: hidden; }
+  html[data-scheme="glass"] .drawer.open { margin-left: 0; visibility: visible; transition: width .2s ease, margin .2s ease, visibility 0s; }
+  html[data-scheme="glass"] :is(.topbar, .sidebar, .main, .drawer) {
+    background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-edge);
+    box-shadow: inset 0 1px 0 var(--glass-rim), inset 0 -1px 0 rgba(255,255,255,.10), var(--glass-shadow);
+  }
+  html[data-scheme="glass"] .drawer:not(.open) { border-width: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  html[data-scheme="glass"] :is(.topbar, .sidebar, .main, .drawer)::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(135deg, var(--glass-sheen), transparent 38%, transparent 72%, var(--glass-sheen-2)); }
+  html[data-scheme="glass"] .sidebar { border-right-width: 1px; }
+  html[data-scheme="glass"] .sidebar-section, html[data-scheme="glass"] .sidebar-footer { border-color: var(--border); }
+  html[data-scheme="glass"] .sidebar-search input { border-radius: 999px; background: var(--bg-3); border-color: var(--glass-edge); }
+  html[data-scheme="glass"] .main-toolbar { background: transparent; }
+  html[data-scheme="glass"] .quickadd { border-radius: 22px; background: var(--bg); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 4px 16px rgba(40,50,110,.08); }
+  /* Sticky column header: opaque (so rows scrolling under it can't ghost
+     through) but seamless — it paints the same wallpaper as the page, pinned to
+     the viewport (background-attachment: fixed), under the same panel tint.
+     A backdrop blur was tried first; it does not take effect on a sticky
+     element inside the scrolling list. The panels' --glass-blur deliberately has
+     no saturate(): a saturation boost would make the panel a different color from
+     the raw wallpaper this header paints, and the band would show. */
+  html[data-scheme="glass"] .task-list-header { background-image: linear-gradient(var(--bg), var(--bg)), var(--wall); background-attachment: fixed; background-size: cover; background-color: transparent; border-radius: 0; border-bottom: 1px solid var(--border); }
+  html[data-scheme="glass"] .task-row { border-radius: 18px; }
+  html[data-scheme="glass"] .task-row:hover { background: var(--bg-3); border-color: var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 4px 14px rgba(40,50,110,.10); }
+  html[data-scheme="glass"] .board-col { background: var(--bg-2); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim); }
+  html[data-scheme="glass"] .board-card { background: var(--bg-3); border-color: var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 3px 10px rgba(40,50,110,.08); }
+
+  /* pill controls with a springy press */
+  html[data-scheme="glass"] .btn { border-radius: 999px; background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  html[data-scheme="glass"] .btn:hover { background: var(--glass-strong); box-shadow: inset 0 1px 0 var(--glass-rim), 0 4px 14px rgba(40,50,110,.14); }
+  html[data-scheme="glass"] .btn:active, html[data-scheme="glass"] .view-switch-btn:active, html[data-scheme="glass"] .f-chip:active { transform: scale(.94); }
+  html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: #fff; border-color: rgba(255,255,255,.45); box-shadow: inset 0 1px 0 rgba(255,255,255,.55), 0 4px 14px rgba(10,114,240,.35); }
+  html[data-scheme="glass"] .btn-primary:hover { background: var(--glass-accent); filter: brightness(1.06); opacity: 1; }
+  html[data-scheme="glass"] .btn-danger { background: linear-gradient(180deg, #ff6b5e, #e0352b); color: #fff; border-color: rgba(255,255,255,.4); box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 4px 14px rgba(224,53,43,.30); }
+  html[data-scheme="glass"] .btn-danger:hover { background: linear-gradient(180deg, #ff6b5e, #e0352b); filter: brightness(1.06); }
+  html[data-scheme="glass"] .icon-btn { border-radius: 999px; }
+  html[data-scheme="glass"] .view-switch { border-radius: 999px; padding: 3px; gap: 2px; background: var(--bg-2); border: 1px solid var(--glass-edge); }
+  html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: 999px; transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease; }
+  html[data-scheme="glass"] .view-switch-btn + .view-switch-btn { border-left-width: 0; }
+  html[data-scheme="glass"] .view-switch-btn.active { background: var(--glass-strong); color: var(--text); box-shadow: inset 0 1px 0 var(--glass-rim), 0 2px 8px rgba(40,50,110,.15); }
+  html[data-scheme="glass"] .f-chip { background: var(--bg-3); border-color: var(--glass-edge); }
+  html[data-scheme="glass"] .main-toolbar select { border-radius: 999px; background: var(--bg-3); border-color: var(--glass-edge); }
+  html[data-scheme="glass"] .field input[type=text], html[data-scheme="glass"] .field input[type=date], html[data-scheme="glass"] .field textarea, html[data-scheme="glass"] .field select,
+  html[data-scheme="glass"] .modal input, html[data-scheme="glass"] .modal select { background: var(--bg-2); border: 1px solid var(--glass-edge); border-radius: 14px; }
+  html[data-scheme="glass"] .sel-chip { background: var(--bg-3); }
+
+  /* menus, modals, toast, banner */
+  html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: 20px; box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
+  html[data-scheme="glass"] :is(.row-menu, .modal, .toast) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  html[data-scheme="glass"] .toast.error { background: var(--red-bg); color: var(--red-text); }
+  html[data-scheme="glass"] .row-menu-item, html[data-scheme="glass"] .row-menu-chip, html[data-scheme="glass"] .cell-pop-opt { border-radius: 12px; }
+  html[data-scheme="glass"] .sync-banner { margin: 10px 12px 0; border-radius: 22px; border: 1px solid var(--glass-edge); background: var(--amber-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: inset 0 1px 0 var(--glass-rim); }
+  html[data-scheme="glass"] .modal-bg { background: rgba(20,24,50,.22); }
+  html[data-scheme="glass"] .drawer .btn-danger { border-radius: 999px; }
+
+  #themeModalBg .modal { max-height: calc(100vh - 48px); overflow-y: auto; }
+
+  /* background picker (shown in the Colors modal while Glass is selected) */
+  .glass-bg-options { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px; }
+  .glass-bg-label { margin-top: 14px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); }
+  .glass-bg-opt { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius); background: transparent; color: var(--text); font-size: 13px; font-family: var(--font); cursor: pointer; }
+  .glass-bg-opt:hover { background: var(--bg-3); }
+  .glass-bg-opt.selected { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+  .glass-bg-opt-swatch { width: 54px; height: 34px; border-radius: 10px; border: 1px solid var(--border-2); }
+
+  /* solid fallback: reduced transparency / high contrast / no backdrop-filter */
+  @media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+    html[data-scheme="glass"] { --bg: #ffffff; --bg-2: #f2f3f7; --bg-3: #e8eaf0; --glass-strong: #ffffff; --glass-blur: none; --glass-rim: transparent; --glass-edge: rgba(40,44,70,.18); --glass-sheen: transparent; --glass-sheen-2: transparent; --wall: linear-gradient(160deg, #e9eefc, #f3ebfa); }
+    html[data-scheme="glass"][data-theme="dark"] { --bg: #1d1f2b; --bg-2: #171925; --bg-3: #2a2d3d; --glass-strong: #232636; --glass-blur: none; --glass-rim: transparent; --glass-edge: rgba(255,255,255,.18); --glass-sheen: transparent; --glass-sheen-2: transparent; --wall: linear-gradient(160deg, #10121c, #171326); }
+    html[data-scheme="glass"][data-glass-bg] { --wall: linear-gradient(160deg, #e9eefc, #f3ebfa); }
+    html[data-scheme="glass"][data-glass-bg][data-theme="dark"] { --wall: linear-gradient(160deg, #10121c, #171326); }
+  }
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    html[data-scheme="glass"] { --bg: #ffffff; --bg-2: #f2f3f7; --bg-3: #e8eaf0; --glass-strong: #ffffff; --glass-blur: none; --glass-rim: transparent; --glass-edge: rgba(40,44,70,.18); --glass-sheen: transparent; --glass-sheen-2: transparent; --wall: linear-gradient(160deg, #e9eefc, #f3ebfa); }
+    html[data-scheme="glass"][data-theme="dark"] { --bg: #1d1f2b; --bg-2: #171925; --bg-3: #2a2d3d; --glass-strong: #232636; --glass-blur: none; --glass-rim: transparent; --glass-edge: rgba(255,255,255,.18); --glass-sheen: transparent; --glass-sheen-2: transparent; --wall: linear-gradient(160deg, #10121c, #171326); }
+    html[data-scheme="glass"][data-glass-bg] { --wall: linear-gradient(160deg, #e9eefc, #f3ebfa); }
+    html[data-scheme="glass"][data-glass-bg][data-theme="dark"] { --wall: linear-gradient(160deg, #10121c, #171326); }
+  }
 </style>
 </head>
 <body>
@@ -891,7 +1046,8 @@
     <div class="bulk-bar" id="bulkBar"></div>
     <div class="quickadd">
       <i class="fa-solid fa-plus"></i>
-      <input spellcheck="true" type="text" id="quickAddInput" placeholder="Add a task — try: Call dentist fri !high #personal" oninput="updateQuickAddPreview()" onkeydown="quickAddTask(event)">
+      <input spellcheck="true" type="text" id="quickAddInput" placeholder="Add a task" oninput="updateQuickAddPreview()" onkeydown="quickAddTask(event)">
+      <select id="quickAddProject" class="quickadd-project" onchange="setQuickAddProject(this.value)" aria-label="Project for new tasks"></select>
     </div>
     <div class="quickadd-preview" id="quickAddPreview"></div>
     <div class="task-list" id="taskListWrap">
@@ -1045,6 +1201,7 @@
   <div class="modal" style="width:400px">
     <h3>Color scheme</h3>
     <div class="theme-options" id="themeOptions"></div>
+    <div id="glassBgOptions"></div>
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeAllModals()">Done</button></div>
   </div>
 </div>
@@ -1180,7 +1337,16 @@ const THEME_SCHEMES = [
   { id: 'modern', name: 'Modern', desc: 'Clean graphite and white, with a confident accent blue.', swatches: ['#f8f8f8', '#005fb8', '#cd3131'] },
   { id: 'dracula', name: 'Dracula', desc: 'Deep purple-gray, lit by vivid pink, cyan and green.', swatches: ['#f8f8f2', '#7c4dd9', '#cb3a2a'] },
   { id: 'github', name: 'GitHub', desc: 'Crisp neutral gray-white, with a solid green action button.', swatches: ['#f6f8fa', '#0969da', '#cf222e'] },
-  { id: 'githubdimmed', name: 'GitHub Dimmed', desc: 'The same crisp palette, dimmed to a softer graphite.', swatches: ['#f6f8fa', '#478be6', '#e5534b'] }
+  { id: 'githubdimmed', name: 'GitHub Dimmed', desc: 'The same crisp palette, dimmed to a softer graphite.', swatches: ['#f6f8fa', '#478be6', '#e5534b'] },
+  { id: 'glass', name: 'Glass', desc: 'Frosted, translucent panels floating over a soft color wash.', swatches: ['#9ccbff', '#e0b3ff', '#ffc2a8'] }
+];
+// Wallpapers for the Glass scheme (the gradients live in CSS under
+// data-glass-bg); swatches are just the picker's preview dots.
+const GLASS_BGS = [
+  { id: 'aurora',   name: 'Aurora',   swatches: ['#9ccbff', '#e0b3ff', '#ffc2a8'] },
+  { id: 'sunset',   name: 'Sunset',   swatches: ['#ffb48a', '#ff8fb1', '#ffd98a'] },
+  { id: 'ocean',    name: 'Ocean',    swatches: ['#7fd8ff', '#8fb5ff', '#8ff0d0'] },
+  { id: 'graphite', name: 'Graphite', swatches: ['#dfe3ea', '#f3f4f7', '#cfd5df'] }
 ];
 const PROJECT_ICONS = ['folder','inbox','layer-group','clipboard','briefcase','building','users','handshake','chart-line','laptop','code','calendar-days','envelope','dollar-sign','rocket','graduation-cap','house','heart','star','book','camera','plane','dumbbell','palette'];
 const CAT_COLORS = [
@@ -1272,6 +1438,11 @@ let editingProjectId = null, newProjIcon = 'folder';
   document.documentElement.setAttribute('data-theme', currentTheme);
 })();
 (function(){ const s=localStorage.getItem(SCHEME_KEY); if(s && THEME_SCHEMES.some(x=>x.id===s)){ colorScheme=s; } document.documentElement.setAttribute('data-scheme', colorScheme); })();
+// Glass wallpaper — a per-device display preference (localStorage only, like
+// the board grouping), not part of the synced data blob.
+const GLASS_BG_KEY = 'mytasks_glassbg';
+let glassBg = 'aurora';
+(function(){ try{ const g=localStorage.getItem(GLASS_BG_KEY); if(GLASS_BGS.some(x=>x.id===g)) glassBg=g; }catch(_){} document.documentElement.setAttribute('data-glass-bg', glassBg); })();
 (function(){ const c=localStorage.getItem(COMPACT_KEY); if(c!==null){compactMode = c==='1';} document.documentElement.setAttribute('data-density', compactMode?'compact':''); })();
 (function(){ const v=localStorage.getItem(VIEW_KEY); if(v==='board'||v==='list'){ viewMode=v; } })();
 (function(){ const z=localStorage.getItem(UI_SCALE_KEY); const n=parseInt(z,10); if(!isNaN(n)) uiScale=clampUiScale(n); document.documentElement.style.zoom = (uiScale/100); })();
@@ -1618,6 +1789,7 @@ function renderSidebar(){
 
   document.getElementById('mainTitle').textContent = myDayFilter ? 'My Day' : thisWeekFilter ? 'This Week' : overdueFilter ? 'Overdue' : (filterProjectId ? (projById(filterProjectId)?.name || 'All Tasks') : 'All Tasks');
   document.getElementById('sortSelect').value = sortBy;
+  renderQuickAddProject();
 }
 
 const sortComparators = {
@@ -1699,7 +1871,7 @@ function renderList(){
     if(t.repeat && t.repeat!=='none'){
       dueCell += `<i class="fa-solid fa-repeat" style="color:var(--text-3);font-size:11px;margin-left:5px" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
     }
-    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
+    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
       <div class="task-check-cell">
         ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:'<span class="subtask-toggle"></span>'}
         <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
@@ -1707,7 +1879,7 @@ function renderList(){
       <div class="task-main">
         ${renamingTaskId===t.id
           ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInput" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-          : `<span class="task-title">${highlightMatch(t.title, searchQuery)}</span>`}
+          : `<span class="task-title" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span>`}
         ${(t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('')}
       </div>
       <div class="task-cell"><span class="badge-project"${proj&&proj.name.length>20?` data-tooltip="${esc(proj.name)}"`:''}><i class="fa-solid fa-${proj?(proj.icon||'folder'):'folder'} picon"></i>${esc(proj?abbreviateName(proj.name):'')}</span></div>
@@ -1785,13 +1957,13 @@ function boardCardHtml(t){
   const priorityIcon = t.priority==='high' ? `<i class="fa-solid fa-flag board-card-priority-icon" title="High priority"></i>` : '';
   return `<div class="board-card ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''}" data-id="${t.id}" draggable="true"
       ondragstart="handleCardDragStart(event,'${t.id}')" ondragend="handleCardDragEnd(event)"
-      onmousedown="selectBoardCard('${t.id}')" onclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
+      onmousedown="selectBoardCard('${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
     ${tagStrips?`<div class="board-card-tagstrips">${tagStrips}</div>`:''}
     <div class="board-card-top">
       <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
       ${renamingTaskId===t.id
         ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInputBoard" style="flex:1" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-        : `<div class="board-card-title">${highlightMatch(t.title, searchQuery)}</div>`}
+        : `<div class="board-card-title" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</div>`}
       ${priorityIcon}
       ${dueBadge}
       ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:''}
@@ -2057,7 +2229,8 @@ function handleRowClick(e, id){
     renderList(); renderBulkBar();
   }
   lastClickedTaskId = id;
-  openTask(id);
+  kbdSelectedTaskId = id;
+  renderList();
 }
 // ── Row menu (right-click / "⋯" / Menu key) — same actions as Milestone's ─────
 // Acts on the whole selection when the clicked row is part of a multi-selection,
@@ -2448,6 +2621,32 @@ function renderDrawer(){
 // a date word (today, tomorrow, a weekday, next week, in 3 days, YYYY-MM-DD).
 // Unknown #/@ tokens stay in the title untouched. If parsing would leave an
 // empty title the whole input is kept verbatim. Shift+Enter skips parsing.
+// Default project for quick-add. null = Inbox (the original behavior). A
+// project you are *viewing* still wins — adding while inside Work puts the task
+// in Work — so the default applies from All Tasks and the smart views. An
+// explicit #project in the text beats both. A per-device preference
+// (localStorage), like the board grouping; if the saved project is gone it
+// quietly falls back to Inbox.
+const QUICKADD_PROJECT_KEY = 'mytasks_quickadd_project';
+let quickAddProjectId = null;
+try{ quickAddProjectId = localStorage.getItem(QUICKADD_PROJECT_KEY) || null; }catch(_){}
+function quickAddDefaultProjectId(){
+  return (quickAddProjectId && visibleProjects().some(p=>p.id===quickAddProjectId)) ? quickAddProjectId : 'proj-inbox';
+}
+function setQuickAddProject(id){
+  quickAddProjectId = (id && id!=='proj-inbox' && visibleProjects().some(p=>p.id===id)) ? id : null;
+  try{ if(quickAddProjectId) localStorage.setItem(QUICKADD_PROJECT_KEY, quickAddProjectId); else localStorage.removeItem(QUICKADD_PROJECT_KEY); }catch(_){}
+  renderQuickAddProject();
+  const input = document.getElementById('quickAddInput'); if(input && input.focus) input.focus();
+}
+function renderQuickAddProject(){
+  const sel = document.getElementById('quickAddProject'); if(!sel) return;
+  const viewing = filterProjectId && visibleProjects().some(p=>p.id===filterProjectId) ? filterProjectId : null;
+  sel.innerHTML = visibleProjects().map(p=>`<option value="${esc(p.id)}">${esc(abbreviateName(p.name, 18))}</option>`).join('');
+  sel.value = viewing || quickAddDefaultProjectId();
+  sel.disabled = !!viewing;
+  sel.title = viewing ? "New tasks go to the project you're viewing" : 'Project for new tasks (type #name to override)';
+}
 function parseQuickAdd(raw){
   const trimmed = String(raw).trim();
   const out = { title: trimmed, projectId: null, priority: null, dueDate: null, tags: [] };
@@ -2519,7 +2718,7 @@ function quickAddTask(event){
   const pr = event.shiftKey ? { title: typed, projectId:null, priority:null, dueDate:null, tags:[] } : parseQuickAdd(typed);
   tasks.unshift({
     id: genId(), title: pr.title, notes:'',
-    projectId: pr.projectId || filterProjectId || 'proj-inbox',
+    projectId: pr.projectId || filterProjectId || quickAddDefaultProjectId(),
     status: 'todo',
     priority: pr.priority || 'medium',
     dueDate: pr.dueDate || (myDayFilter ? todayStr() : null),
@@ -3591,10 +3790,10 @@ function shortcutsListHtml(){
     row('Range-select tasks', shift, 'Click'),
     row('Select all visible tasks', mod, 'A'),
     group('General'),
-    row('Open a task', 'Click'),
+    row('Open a task', 'Double-click'),
     row('Rename the selected task', 'F2'),
     row('Open the row menu', 'Right-click'),
-    row('Rename a subtask', 'Double-click text'),
+    row('Rename title or subtask', 'Double-click text'),
     row('Change priority, status or due date', 'Click its badge'),
     row('Show shortcuts', '?'),
     row('Close drawer/modal, clear selection', 'Esc'),
@@ -3610,7 +3809,19 @@ function openShortcutsModal(){
   document.getElementById('shortcutsModalBg').classList.add('open');
 }
 function openAboutModal(){ document.getElementById('aboutModalBg').classList.add('open'); }
+function setGlassBg(id){
+  if(!GLASS_BGS.some(x=>x.id===id)) return;
+  glassBg = id;
+  document.documentElement.setAttribute('data-glass-bg', id);
+  try{ localStorage.setItem(GLASS_BG_KEY, id); }catch(_){}
+  renderThemeModal();
+}
 function renderThemeModal(){
+  const gb = document.getElementById('glassBgOptions');
+  if(gb) gb.innerHTML = colorScheme==='glass' ? `<div class="glass-bg-label">Glass background</div><div class="glass-bg-options">${GLASS_BGS.map(b=>`
+    <button type="button" class="glass-bg-opt${b.id===glassBg?' selected':''}" onclick="setGlassBg('${b.id}')">
+      <span class="glass-bg-opt-swatch" style="background:linear-gradient(135deg,${b.swatches.join(',')})"></span>${esc(b.name)}
+    </button>`).join('')}</div>` : '';
   document.getElementById('themeOptions').innerHTML = THEME_SCHEMES.map(s=>`
     <div class="theme-option ${s.id===colorScheme?'selected':''}" onclick="setColorScheme('${s.id}')">
       <div class="theme-option-swatches">${s.swatches.map(c=>`<div class="theme-option-swatch" style="background:${c}"></div>`).join('')}</div>

@@ -189,12 +189,13 @@ parity.
 
 ### Opening, editing and capturing (UX pass)
 
-- **A single click on a list row or board card opens the drawer** (`handleRowClick`
-  ends in `openTask`; modifier clicks still multi-/range-select without
-  opening). There is no row-level double-click any more, and the title no
-  longer renames on double-click (the drawer would cover it) — **F2** renames
-  the keyboard-selected task in list and board, and the drawer's title input
-  renames too. Subtask/step double-click rename is unchanged.
+- **Double-click a list row or board card opens the drawer; a single click only
+  selects it** (the original behavior — an earlier UX pass made single click
+  open it and was reverted at the user's request). Double-click on the title
+  renames, **F2** also renames the keyboard-selected task, and right-click / ⋯
+  opens the row menu. Modifier clicks multi-/range-select as before. The
+  drawer is still the docked side panel (see below), so once it is open,
+  ↑/↓ move the selection and the panel together.
 - **Priority, Status and Due cells are inline-editable** (`openCellPop` /
   `pickCell`): the popover is appended *inside* the clicked cell and positioned
   with CSS (`position:absolute`), not from `getBoundingClientRect()`, because
@@ -209,6 +210,11 @@ parity.
   text is kept; Shift+Enter bypasses parsing. In My Day an undated task
   defaults to today. Date maths is anchored on `todayStr()` so it agrees with
   My Day/Overdue.
+  **Default project**: the picker at the right end of the quick-add bar
+  (`quickAddProjectId`, per-device `mytasks_quickadd_project`; null = Inbox).
+  Precedence: explicit `#project` > the project you are *viewing* (the picker
+  is then disabled and shows it) > the saved default > Inbox. A saved default
+  whose project was deleted falls back to Inbox.
 - **Filters live in a popover** (`#filterMenu`): the `#statusChips` /
   `#priorityChips` containers were *moved* into it, so `renderSidebar()` and
   its tests are unchanged; the Filter button shows a count and a clear (✕)
@@ -230,7 +236,7 @@ parity.
   then a collapsible Tags section (`mytasks_tags_collapsed`).
 - **The drawer is a docked side panel, not an overlay.** `#drawer` is a flex
   sibling of `.main` inside `.layout` (width 0 → 420px), with no backdrop, so
-  the list stays visible and clicking another row swaps the panel; ↑/↓ move
+  the list stays visible and double-clicking another row swaps the panel; ↑/↓ move
   the selection *and* the panel (list view). Esc / ✕ close it. Its old
   `box-shadow` only applies when open — a fixed drawer parked just off-screen
   used to bleed a grey strip down the right edge of every screen. While it is
@@ -454,6 +460,22 @@ freely — e.g. `[data-scheme="dracula"][data-theme="dark"]`.
   no teal token; Dracula/Monokai-style dark-only themes have no official
   light mode), say so in the scheme's comment rather than presenting an
   invented value as if it were verified.
+- **Glass** (Apple Liquid Glass–inspired) is the one scheme that changes
+  *layout and material*, not just colors: floating rounded panels
+  (`.topbar/.sidebar/.main/.drawer` with `backdrop-filter`), a wallpaper on
+  `body` (`--wall`; four presets chosen with `data-glass-bg`, picker shown in
+  the Colors modal only while Glass is active, stored per-device in
+  `mytasks_glassbg`), pill buttons with a springy `:active`, and a specular
+  rim (inset highlight + a diagonal `::after` sheen). Rules to keep:
+  `backdrop-filter` can't see through a parent that has its own, so popovers
+  *inside* a panel (Appearance, Filter, cell pop-over) use the near-opaque
+  `--glass-strong` and only body-level surfaces (row menu, modals, toast,
+  banner) blur; the light and dark blocks must define the **same** variables
+  (the light block would otherwise beat bare `html[data-theme="dark"]` for any
+  variable only it sets); `prefers-reduced-transparency`, `prefers-contrast`
+  and browsers without `backdrop-filter` get solid surfaces and a flat
+  wallpaper. Real lens refraction (SVG displacement) was deliberately
+  skipped — nothing scrolls under the glass here, so it would be invisible.
 - Each scheme may add its own one-off "signature" CSS rules (e.g. GitHub's
   primary button going solid green, a scheme-specific monospace treatment
   for numerics) — these live in their own scoped block further down in

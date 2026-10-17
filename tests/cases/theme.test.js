@@ -36,5 +36,24 @@ test('every THEME_SCHEMES entry actually has a matching CSS block', function () 
   // A cheap guard against typos: the scheme ids the picker offers should
   // all be spelled the same way the retheme's [data-scheme="..."] selectors expect.
   const ids = THEME_SCHEMES.map(s => s.id).sort();
-  assertDeepEqual(ids, ['dracula', 'github', 'githubdimmed', 'modern', 'standard']);
+  assertDeepEqual(ids, ['dracula', 'github', 'githubdimmed', 'glass', 'modern', 'standard']);
+});
+
+test('setGlassBg switches the wallpaper attribute, persists it, and rejects unknown ids', function () {
+  setGlassBg('sunset');
+  assertEqual(glassBg, 'sunset');
+  assertEqual(document.documentElement.getAttribute('data-glass-bg'), 'sunset');
+  assertEqual(localStorage.getItem('mytasks_glassbg'), 'sunset');
+  setGlassBg('not-a-wallpaper');
+  assertEqual(glassBg, 'sunset', 'an unknown wallpaper id is ignored');
+});
+
+test('the Colors modal offers the Glass background picker only while Glass is selected', function () {
+  setColorScheme('modern');
+  renderThemeModal();
+  assertEqual(document.getElementById('glassBgOptions').innerHTML, '');
+  setColorScheme('glass');
+  renderThemeModal();
+  const html = document.getElementById('glassBgOptions').innerHTML;
+  GLASS_BGS.forEach(b => assertIncludes(html, b.name));
 });

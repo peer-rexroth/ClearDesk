@@ -61,9 +61,12 @@ test('quickAddTask in My Day defaults the due date to today', function () {
   assertEqual(uxQuickAdd('Stretch').dueDate, todayStr());
 });
 
-test('a plain click on a list row opens the drawer', function () {
+test('a plain click on a list row only selects it; the drawer needs a double-click', function () {
   tasks = [uxTask()];
   handleRowClick({ shiftKey: false, ctrlKey: false, metaKey: false }, 'u1');
+  assertEqual(activeTaskId, null);
+  assertEqual(kbdSelectedTaskId, 'u1');
+  openTask('u1');   // what the row's ondblclick calls
   assertEqual(activeTaskId, 'u1');
 });
 
@@ -243,4 +246,51 @@ test('the side panel stays open and follows the selection with the arrow keys', 
   handleListKeyNav({ key: 'ArrowDown', preventDefault() {}, shiftKey: false });
   assertEqual(activeTaskId, kbdSelectedTaskId, 'the panel should show the newly selected task');
   assertTrue(kbdSelectedTaskId !== first);
+});
+
+// ── Default project for quick-add ────────────────────────────────────────────
+function uxWithQuickAddDefault(id, fn) {
+  const prev = quickAddProjectId;
+  try { quickAddProjectId = id; fn(); } finally { quickAddProjectId = prev; localStorage.removeItem('mytasks_quickadd_project'); }
+}
+test('quick-add uses the chosen default project from All Tasks', function () {
+  uxWithQuickAddDefault('proj-work', function () {
+    assertEqual(uxQuickAdd('Standup notes').projectId, 'proj-work');
+  });
+});
+test('quick-add defaults to Inbox when no default is set', function () {
+  uxWithQuickAddDefault(null, function () {
+    assertEqual(uxQuickAdd('Loose idea').projectId, 'proj-inbox');
+  });
+});
+test('the project you are viewing beats the default, and #project beats both', function () {
+  uxWithQuickAddDefault('proj-work', function () {
+    filterProjectId = 'proj-personal';
+    assertEqual(uxQuickAdd('Buy stamps').projectId, 'proj-personal');
+    assertEqual(uxQuickAdd('Buy milk #work').projectId, 'proj-work');
+  });
+});
+test('a default project that no longer exists falls back to Inbox', function () {
+  uxWithQuickAddDefault('proj-gone', function () {
+    assertEqual(quickAddDefaultProjectId(), 'proj-inbox');
+    assertEqual(uxQuickAdd('Orphan').projectId, 'proj-inbox');
+  });
+});
+test('setQuickAddProject persists the choice and clears it for Inbox or junk', function () {
+  uxWithQuickAddDefault(null, function () {
+    setQuickAddProject('proj-personal');
+    assertEqual(quickAddProjectId, 'proj-personal');
+    assertEqual(localStorage.getItem('mytasks_quickadd_project'), 'proj-personal');
+    setQuickAddProject('proj-inbox');
+    assertEqual(quickAddProjectId, null);
+    assertEqual(localStorage.getItem('mytasks_quickadd_project'), null);
+    setQuickAddProject('not-a-project');
+    assertEqual(quickAddProjectId, null);
+  });
+});
+test('setQuickAddProject refuses the system-managed Deleted project', function () {
+  uxWithQuickAddDefault(null, function () {
+    setQuickAddProject('proj-deleted');
+    assertEqual(quickAddProjectId, null);
+  });
 });
