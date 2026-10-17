@@ -214,6 +214,9 @@ parity.
   not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
   were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
+- **No coloured glows.** Primary and danger buttons are flat fills (`--glass-accent` / `#d92d20`, no blurred coloured
+  shadow, no gradient), and a plain `.btn` darkens on hover instead of growing a shadow. Apple's styling is flat fills with
+  crisp rings; the blue/red glows were leftovers of the earlier glassier look. Hover/focus rings are crisp (no blur).
 - **One width for the small option menus**: `--submenu-w` (164px, on `html`: the Due menu's natural width, the date field being its widest part) is the `min-width` of the cell popovers, the row
   menu's flyouts and the toolbar dropdowns, so Priority/Status/Due/Move look the same wherever they open. (They were 150, 190
   and 170 before.) The row menu itself (230px) is a different, larger menu.
