@@ -232,7 +232,7 @@
 
   .task-subtasks { grid-area: sub; display: flex; flex-direction: column; gap: 4px; }
   .task-subtask-row { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--text-2); position: relative; }
-  #taskList .task-subtask-row .subtask-toggle { position: absolute; left: -20px; top: 50%; transform: translateY(-50%); }
+  #taskList .task-subtask-row .subtask-toggle { position: absolute; left: -21px; top: 50%; transform: translateY(-50%); }
   .sub-hierarchy-btn { opacity: 0; flex-shrink: 0; font-size: 10px; padding: 2px 4px; }
   .task-subtask-row:hover .sub-hierarchy-btn { opacity: 1; }
   .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color .15s, border-color .15s; }
@@ -272,7 +272,14 @@
   .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity .1s ease; }
   /* the capsule is --bg-3, the same as .icon-btn:hover, so a hovered button used to vanish into it: give it a visible disc */
   .row-actions .icon-btn { border-radius: 999px; padding: 4px 6px; }
-  .row-actions .icon-btn:hover { background: color-mix(in srgb, var(--text) 14%, transparent); color: var(--text); }
+  .row-actions .icon-btn:hover, .subtask-toggle:hover, .sub-step-toggle:hover { background: color-mix(in srgb, var(--text) 14%, transparent); color: var(--text); }
+  /* the expand/collapse chevrons sit on a row that is itself grey on hover, so the plain --bg-3 icon-button hover vanished into it */
+  /* centre the glyph in its disc: the old box was 16px wide with 4px side padding (8px content) around a 13px icon, so the
+     chevron sat 2.5px right of centre and only looked off once the hover disc made the box visible */
+  .subtask-toggle, .sub-step-toggle { border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; }
+  /* chevrons are small (16px), so the disc is grown with a ring and made stronger than the other icon buttons' */
+  .subtask-toggle:hover, .sub-step-toggle:hover { background: color-mix(in srgb, var(--text) 20%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 20%, transparent); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(.subtask-toggle, .sub-step-toggle):hover { background: rgba(255,255,255,.5); box-shadow: 0 0 0 3px rgba(255,255,255,.3); }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
   .empty-state i { font-size: 30px; margin-bottom: 10px; display: block; opacity: .5; }
@@ -800,6 +807,12 @@
   .tool-group { display: inline-flex; align-items: center; gap: 1px; padding: 2px; border: 1px solid var(--border-2); border-radius: 999px; background: var(--bg); }
   .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 9px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: 14px; cursor: pointer; transition: background .12s ease, opacity .12s ease; }
   .tool-btn:hover:not(:disabled) { background: var(--bg-3); }
+  /* the board's fold-all button is a .btn: at rest it is --bg-3 and the Glass .btn hover turns it near-white, so hovering it
+     barely changed anything. Darken it instead, like the other toolbar controls do against their own surface. */
+  /* the list header's fold-all button wears the same capsule as the board toolbar's (#collapseAllBtnBoard, a .btn) */
+  html[data-scheme="glass"] .task-list-header > .subtask-toggle { width: 36px; height: 28px; padding: 0; margin: 0 0 0 -4px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); background: var(--bg-3); border: 1px solid var(--glass-edge); border-radius: 999px; box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); }
+  html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: color-mix(in srgb, var(--text) 13%, var(--bg-3)); box-shadow: none; }
+  html[data-scheme="glass"] #collapseAllBtnBoard:hover { background: color-mix(in srgb, var(--text) 13%, var(--bg-3)); box-shadow: none; }
   .tool-btn:disabled { opacity: .35; cursor: default; }
   .tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
   .tool-sep { width: 1px; height: 16px; margin: 0 3px; background: var(--border-2); }
@@ -882,7 +895,17 @@
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-subtask-add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
 
   .task-row:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
-  .task-row.kbd-selected .row-actions { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.3); }
+  .task-row.kbd-selected .row-actions, .board-card.kbd-selected .row-actions { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.3); }
+  /* Board cards get the same hover language as list rows: a grey fill on hover (the Glass card border rule used to cancel
+     the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
+  html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.dragging) { background: var(--bg-2); border-color: var(--border-2); }
+  .board-card-meta { position: relative; min-height: 24px; }
+  .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
+  .board-card .row-actions { right: 0; }
+  .cell-host-empty { opacity: 0; }
+  .board-card:is(:hover, :focus-within, .kbd-selected) .cell-host-empty, .cell-host-empty:focus-within { opacity: 1; }
+  .badge-due-empty { background: transparent; color: var(--text-3); border: 1px dashed var(--border-2); padding: 2px 7px; }
+  .board-card.kbd-selected .badge-due-empty { background: transparent !important; border-color: rgba(255,255,255,.55); }
 
   /* the Task cell keeps the capsule's width free so a long title wraps before it
      instead of running underneath; long unbroken words may break anywhere */
@@ -2000,6 +2023,13 @@ function boardCardHtml(t){
     </div>`:''}</div>`:''}
     <div class="board-card-meta">
       <span class="cell-host editable" role="button" tabindex="0" title="Change status" onclick="openCellPop(event,'${t.id}','status')"><span class="badge badge-status-${t.status}">${statusLabel(t.status)}</span></span>
+      ${t.dueDate ? '' : `<span class="cell-host editable cell-host-empty" role="button" tabindex="0" title="Set due date" onclick="openCellPop(event,'${t.id}','dueDate')"><span class="badge badge-due-empty"><i class="fa-regular fa-calendar"></i></span></span>`}
+      <div class="row-actions">
+        ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
+        <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+        <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+      </div>
     </div>
   </div>`;
 }

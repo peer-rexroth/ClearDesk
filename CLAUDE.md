@@ -325,6 +325,13 @@ parity.
   `:focus-visible`, so without this the ring appeared on click. The `:where()` around the
   `:not([type=…])` exclusions keeps the selector at specificity (0,1,1) so
   the per-surface overrides can out-rank it.
+- **Board cards share the list row's hover behaviour.** A card fills grey on hover (the Glass
+  `.board-card` border rule used to cancel the base border change, so cards had *no* hover feedback), and shows
+  the same `.row-actions` capsule (Duplicate, Delete, ⋯; Skip for repeating tasks) at the right of the meta row
+  on hover/focus/selection — absolutely positioned there so it never changes card height. A card without a due
+  date shows a dashed calendar chip (`.cell-host-empty`) next to the status pill on hover/selection, which opens
+  the same Due menu. Still deliberately different: no multi-select, tags as colour strips, priority as a flag,
+  no subtask hover controls.
 - **Subtask rows follow the task row.** Subtask/step/sub-step checkboxes (`.mini-check` in the
   list and board, `.sub-check` in the panel) and the ghost add-row checkbox are *round* like
   `.task-checkbox`, just smaller; a checked one on the blue selected row is white with no green halo.
