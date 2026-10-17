@@ -173,7 +173,11 @@
   .board-col.drag-over { border-color: var(--blue-border); box-shadow: inset 0 0 0 1px var(--blue-border); }
   .board-col.dimmed { opacity: 0.45; }
   .board-col-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 0.5px solid var(--border); font-size: 12px; font-weight: 600; flex-shrink: 0; }
-  .board-col-header .count { font-size: 11px; color: var(--text-3); font-weight: 500; }
+  .board-col-header .count { font-size: 11px; color: var(--text-3); font-weight: 500; flex-shrink: 0; margin-left: 8px; }
+  /* a long project name ends in "…" inside the column instead of wrapping the icon above it and pushing the count out of the tile */
+  .board-col-title { display: flex; align-items: center; gap: 6px; min-width: 0; }
+  .board-col-title .picon { flex-shrink: 0; }
+  .board-col-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .board-col-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 40px; }
   .board-empty { text-align: center; color: var(--text-3); font-size: 12px; padding: 16px 0; }
   .show-more-row { text-align: center; color: var(--text-2); font-size: 12px; font-weight: 500; padding: 8px; cursor: pointer; border-radius: var(--radius); }
@@ -2259,7 +2263,7 @@ function renderBoard(){
         ? `<div class="show-more-row" onclick="toggleShowAllCompletedProject('${col.key}')">${expanded?'Show fewer completed':`Show ${col.hiddenCount} more completed`}</div>`
         : '';
       return `<div class="board-col" data-status="${col.status.id}" ondragover="handleBoardDragOver(event,'${col.status.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDropStatus(event,'${col.status.id}')">
-        <div class="board-col-header"><span><i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i> ${esc(col.status.label)}</span><span class="count">${col.allCount}</span></div>
+        <div class="board-col-header"><span class="board-col-title"><i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
         <div class="board-col-body">
           ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
           ${showMoreRow}
@@ -2273,7 +2277,7 @@ function renderBoard(){
       ? `<div class="show-more-row" onclick="toggleShowAllCompletedProject('${p.id}')">${expanded?'Show fewer completed':`Show ${col.hiddenCount} more completed`}</div>`
       : '';
     return `<div class="board-col${dimmed?' dimmed':''}" data-project="${p.id}" ondragover="handleBoardDragOver(event,'${p.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDrop(event,'${p.id}')">
-      <div class="board-col-header"><span><i class="fa-solid fa-${p.icon||'folder'} picon"></i> ${esc(p.name)}</span><span class="count">${col.allCount}</span></div>
+      <div class="board-col-header"><span class="board-col-title" title="${esc(p.name)}"><i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
       <div class="board-col-body">
         ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
         ${showMoreRow}
