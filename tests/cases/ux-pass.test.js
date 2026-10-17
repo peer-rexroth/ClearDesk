@@ -519,3 +519,10 @@ test('a select is released after a pointer-driven change but not a keyboard-driv
   noteInputModality({ type: 'keydown' });
   assertTrue(cl.contains('kbd-input'), 'a key press sets it, which is what lets a select show its ring');
 });
+
+test('the Help dialog has a label for every topic, opens on the last topic read, and falls back to the first for an unknown one', function () {
+  HELP_TABS.forEach(function (t) { assertTrue(!!HELP_TAB_LABELS[t], 'label for ' + t); });
+  setHelpTab('views'); assertEqual(helpTab, 'views');
+  setHelpTab('no-such-topic'); assertEqual(helpTab, HELP_TABS[0]);
+  setHelpTab('data'); openHelpModal(); assertEqual(helpTab, 'data');
+});

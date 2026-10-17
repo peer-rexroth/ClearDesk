@@ -214,6 +214,16 @@ parity.
   not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
   were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
+- **Help is a tabbed dialog modelled on Milestone's** (`#helpModalBg`): a rail of topics on the left (`HELP_TABS`,
+  `HELP_TAB_LABELS`; arrow keys / Home / End move between them), a search box, and short icon rows under small section
+  titles on the right. The panes are *static HTML* so the search can read them: `helpSearch` shows every `.help-row` that
+  contains all the words, grouped by topic with the words marked, and a topic name jumps there; Esc clears the search
+  first, a second Esc closes the dialog. It reopens on the topic last read. Keyboard shortcuts are a link in its header
+  (the separate shortcuts dialog, also on **?**), not a section. **When behaviour changes, update the matching row** — the
+  old single-scroll Help had drifted (it still said single click opens the drawer).
+- **Sidebar project actions are the list's action capsule** (`.project-actions.row-actions`): Edit/Delete float just left
+  of the count on hover/focus and take no width of their own, so a project's count lines up with the nav items' counts above
+  it (a reserved 46px slot used to push every project count left). Same disc hover as the list rows.
 - **No coloured glows.** Primary and danger buttons are flat fills (`--glass-accent` / `#d92d20`, no blurred coloured
   shadow, no gradient), and a plain `.btn` darkens on hover instead of growing a shadow. Apple's styling is flat fills with
   crisp rings; the blue/red glows were leftovers of the earlier glassier look. Hover/focus rings are crisp (no blur).
