@@ -295,15 +295,138 @@ test('setQuickAddProject refuses the system-managed Deleted project', function (
   });
 });
 
-// ── Selection highlight modality (Glass) ─────────────────────────────────────
-test('arrow keys mark keyboard navigation; a pointer press clears it', function () {
-  const cl = document.documentElement.classList;
-  markPointerNav();
-  assertFalse(cl.contains('kbd-nav'));
-  markKeyboardNav({ key: 'a' });
-  assertFalse(cl.contains('kbd-nav'), 'ordinary typing must not switch modality');
-  markKeyboardNav({ key: 'ArrowDown' });
-  assertTrue(cl.contains('kbd-nav'));
-  markPointerNav();
-  assertFalse(cl.contains('kbd-nav'));
+// ── Sortable column headers ──────────────────────────────────────────────────
+function uxSortedIds() { return getFilteredSortedTasks().map(t => t.id); }
+function uxSortFixture() {
+  tasks = [
+    uxTask({ id: 'a', title: 'Bravo',   priority: 'low',    dueDate: '2031-02-01', projectId: 'proj-work',     status: 'doing' }),
+    uxTask({ id: 'b', title: 'alpha',   priority: 'high',   dueDate: null,         projectId: 'proj-inbox',    status: 'todo' }),
+    uxTask({ id: 'c', title: 'Charlie', priority: 'medium', dueDate: '2031-01-01', projectId: 'proj-personal', status: 'todo' })
+  ];
+}
+test('clicking a column header cycles ascending, descending, then back to Smart order', function () {
+  sortBy = 'smart';
+  sortByColumn('due');  assertEqual(sortBy, 'due');
+  sortByColumn('due');  assertEqual(sortBy, 'due:desc');
+  sortByColumn('due');  assertEqual(sortBy, 'smart');
+  sortByColumn('due'); sortByColumn('alpha');
+  assertEqual(sortBy, 'alpha', 'a different column starts ascending');
+});
+test('title, priority and project sort both ways', function () {
+  uxSortFixture();
+  sortBy = 'alpha';      assertDeepEqual(uxSortedIds(), ['b', 'a', 'c']);
+  sortBy = 'alpha:desc'; assertDeepEqual(uxSortedIds(), ['c', 'a', 'b']);
+  sortBy = 'priority';   assertDeepEqual(uxSortedIds(), ['b', 'c', 'a']);
+  sortBy = 'priority:desc'; assertDeepEqual(uxSortedIds(), ['a', 'c', 'b']);
+  sortBy = 'project';    assertDeepEqual(uxSortedIds(), ['b', 'c', 'a'], 'Inbox, Personal, Work');
+  sortBy = 'project:desc'; assertDeepEqual(uxSortedIds(), ['a', 'c', 'b']);
+});
+test('due sorts both ways but always keeps undated tasks last', function () {
+  uxSortFixture();
+  sortBy = 'due';      assertDeepEqual(uxSortedIds(), ['c', 'a', 'b']);
+  sortBy = 'due:desc'; assertDeepEqual(uxSortedIds(), ['a', 'c', 'b']);
+});
+test('status sorts to-do before in-progress, and completed tasks sink in both directions', function () {
+  tasks = [uxTask({ id: 'x', title: 'X', status: 'done' }), uxTask({ id: 'y', title: 'Y', status: 'doing' }), uxTask({ id: 'z', title: 'Z', status: 'todo' })];
+  sortBy = 'status';      assertDeepEqual(uxSortedIds(), ['z', 'y', 'x']);
+  sortBy = 'status:desc'; assertDeepEqual(uxSortedIds(), ['y', 'z', 'x']);
+});
+test('an unknown sortBy falls back to Smart order instead of breaking the list', function () {
+  uxSortFixture(); sortBy = 'bogus:desc';
+  assertEqual(uxSortedIds().length, 3);
+});
+test('the sort dropdown shows the base column while a descending sort is active', function () {
+  sortBy = 'due:desc'; renderSidebar();
+  assertEqual(document.getElementById('sortSelect').value, 'due');
+  sortBy = 'smart';
+});
+
+// ── Collapsible sidebar ──────────────────────────────────────────────────────
+test('toggleSidebar flips the state, the html class, and persists the choice', function () {
+  sidebarCollapsed = false; applySidebarState();
+  toggleSidebar();
+  assertTrue(sidebarCollapsed);
+  assertTrue(document.documentElement.classList.contains('sidebar-collapsed'));
+  assertEqual(localStorage.getItem('mytasks_sidebar_collapsed'), '1');
+  toggleSidebar();
+  assertFalse(sidebarCollapsed);
+  assertFalse(document.documentElement.classList.contains('sidebar-collapsed'));
+  assertEqual(localStorage.getItem('mytasks_sidebar_collapsed'), '0');
+});
+test('Cmd/Ctrl+B toggles the sidebar; other B combos and plain B do not', function () {
+  sidebarCollapsed = false;
+  let prevented = false;
+  handleSidebarShortcut({ key: 'b', ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, preventDefault() { prevented = true; } });
+  assertTrue(sidebarCollapsed); assertTrue(prevented);
+  handleSidebarShortcut({ key: 'b', ctrlKey: false, metaKey: false, shiftKey: false, altKey: false, preventDefault() {} });
+  assertTrue(sidebarCollapsed, 'plain b must not toggle');
+  handleSidebarShortcut({ key: 'b', ctrlKey: true, metaKey: false, shiftKey: true, altKey: false, preventDefault() {} });
+  assertTrue(sidebarCollapsed, 'Ctrl+Shift+B must not toggle');
+  sidebarCollapsed = false; applySidebarState();
+  localStorage.removeItem('mytasks_sidebar_collapsed');
+});
+
+// ── Selection toolbar and counts ─────────────────────────────────────────────
+test('selectionIds prefers the multi-selection, else the single selected row, else nothing', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
+  assertDeepEqual(selectionIds(), []);
+  kbdSelectedTaskId = 'b';
+  assertDeepEqual(selectionIds(), ['b']);
+  selectedTaskIds = new Set(['a', 'c']);
+  assertDeepEqual(selectionIds(), ['a', 'c']);
+  selectedTaskIds = new Set(['gone']);
+  assertDeepEqual(selectionIds(), [], 'ids of deleted tasks are ignored');
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
+});
+test('viewCounts counts open, overdue and done tasks in the current view', function () {
+  tasks = [
+    uxTask({ id: 'a' }),
+    uxTask({ id: 'b', dueDate: '2000-01-01' }),
+    uxTask({ id: 'c', status: 'done', dueDate: '2000-01-01' })
+  ];
+  const c = viewCounts();
+  assertEqual(c.open, 2); assertEqual(c.overdue, 1, 'a done task is never overdue'); assertEqual(c.done, 1);
+});
+test('the subtitle reads "N open · M overdue" and adds the selection count for several rows', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b', dueDate: '2000-01-01' }), uxTask({ id: 'c' })];
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
+  assertEqual(mainSubtitleText(), '3 open · 1 overdue');
+  kbdSelectedTaskId = 'a';
+  assertEqual(mainSubtitleText(), '3 open · 1 overdue', 'one selected row is not announced');
+  selectedTaskIds = new Set(['a', 'b']);
+  assertEqual(mainSubtitleText(), '3 open · 1 overdue · 2 selected');
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
+});
+test('the subtitle handles an empty view and an all-done view', function () {
+  tasks = [];
+  assertEqual(mainSubtitleText(), 'No tasks');
+  tasks = [uxTask({ id: 'a', status: 'done' }), uxTask({ id: 'b', status: 'done' })];
+  assertEqual(mainSubtitleText(), '0 open · 2 done');
+});
+test('toolbarAct applies to the whole selection; with no selection it does nothing', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
+  toolbarAct('priority', 'high');
+  assertTrue(tasks.every(t => t.priority === 'medium'), 'nothing selected, nothing changes');
+  selectedTaskIds = new Set(['a', 'b']);
+  toolbarAct('priority', 'high');
+  assertEqual(tasks[0].priority, 'high'); assertEqual(tasks[1].priority, 'high'); assertEqual(tasks[2].priority, 'medium');
+  selectedTaskIds = new Set(); kbdSelectedTaskId = 'c';
+  toolbarAct('toggledone');
+  assertEqual(tasks[2].status, 'done');
+  kbdSelectedTaskId = null;
+});
+test('toolMenuHtml lists priorities, due shortcuts and projects', function () {
+  PRIORITIES.forEach(p => assertIncludes(toolMenuHtml('priority'), p.label));
+  assertIncludes(toolMenuHtml('due'), 'Next week');
+  assertIncludes(toolMenuHtml('project'), 'Work');
+});
+
+test('Cmd/Ctrl+click extends the selection with the row selected by a plain click', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
+  selectedTaskIds = new Set(); kbdSelectedTaskId = 'a';
+  handleRowClick({ shiftKey: false, ctrlKey: true, metaKey: false }, 'c');
+  assertDeepEqual([...selectedTaskIds].sort(), ['a', 'c']);
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
 });

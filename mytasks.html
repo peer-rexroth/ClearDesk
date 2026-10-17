@@ -704,10 +704,15 @@
   .quickadd-preview.show { display: flex; }
   .quickadd-preview-hint { margin-left: auto; font-size: 12px; color: var(--text-3); }
 
-  .sync-banner { display: none; align-items: center; gap: 10px; padding: 8px 20px; background: var(--amber-bg); color: var(--amber-text); border-bottom: 1px solid var(--border); font-size: 14px; flex-shrink: 0; }
+  /* Quiet notice bar (after Apple Mail's): neutral surface, small amber icon, one
+     inline pill action and a dismiss — informative, not alarming. */
+  .sync-banner { display: none; align-items: center; gap: 10px; padding: 6px 20px; background: var(--bg-2); color: var(--text-2); border-bottom: 1px solid var(--border); font-size: 13px; flex-shrink: 0; }
   .sync-banner.show { display: flex; }
   .sync-banner > span { flex: 1; }
-  .sync-banner .icon-btn { color: var(--amber-text); }
+  .sync-banner > i:first-child { color: var(--amber-text); }
+  .sync-banner strong { color: var(--text); font-weight: 600; }
+  .sync-banner .btn { border-radius: 999px; }
+  .sync-banner .icon-btn { color: var(--text-3); }
 
   .filter-menu { min-width: 280px; }
   .filter-menu-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -748,25 +753,6 @@
   .layout:has(.drawer.open) .task-row > .task-cell:not(.priority):not(.status):not(.due),
   .layout:has(.drawer.open) .task-list-header > :nth-child(3) { visibility: hidden; overflow: hidden; }
   body:has(.drawer.open) .toast { right: auto; left: 24px; }
-
-  /* Selected row/card: a soft accent-tinted fill with a faint blue border. The
-     crisp ring is kept for real keyboard navigation only (html.kbd-nav, set by
-     arrow keys, cleared by any pointer press), so clicking a row never paints a
-     focus ring. Scoped to Glass: other schemes have no fill to fall back on, so
-     the outline is their only selection cue. */
-  html[data-scheme="glass"] .task-row.kbd-selected, html[data-scheme="glass"] .board-card.kbd-selected {
-    background: color-mix(in srgb, var(--blue-dot) 14%, var(--bg));
-    border-color: color-mix(in srgb, var(--blue-dot) 26%, var(--glass-edge));
-    box-shadow: none;
-  }
-  html[data-scheme="glass"].kbd-nav .task-row.kbd-selected, html[data-scheme="glass"].kbd-nav .board-card.kbd-selected {
-    border-color: color-mix(in srgb, var(--blue-dot) 70%, transparent);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--blue-dot) 55%, transparent);
-  }
-  html[data-scheme="glass"] .task-row.bulk-selected, html[data-scheme="glass"] .task-row.kbd-selected.bulk-selected {
-    background: color-mix(in srgb, var(--purple-text) 16%, var(--bg)); border-color: color-mix(in srgb, var(--purple-text) 45%, transparent);
-    box-shadow: none;
-  }
 
   .file-chip.warn { color: var(--amber-text); border-color: var(--amber-text); }
   .file-chip.ok i { color: var(--green-text); }
@@ -924,7 +910,7 @@
   html[data-scheme="glass"] :is(.row-menu, .modal, .toast) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
   html[data-scheme="glass"] .toast.error { background: var(--red-bg); color: var(--red-text); }
   html[data-scheme="glass"] .row-menu-item, html[data-scheme="glass"] .row-menu-chip, html[data-scheme="glass"] .cell-pop-opt { border-radius: 8px; }
-  html[data-scheme="glass"] .sync-banner { margin: 0; border-radius: 0; border: 0; border-bottom: 1px solid var(--border); background: var(--amber-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: none; }
+  html[data-scheme="glass"] .sync-banner { margin: 0; border-radius: 0; border: 0; border-bottom: 1px solid var(--border); background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: none; }
   html[data-scheme="glass"] .modal-bg { background: rgba(20,24,50,.22); }
   html[data-scheme="glass"] .drawer .btn-danger { border-radius: var(--radius); }
 
@@ -962,12 +948,84 @@
     html[data-scheme="glass"][data-glass-bg] { --wall: linear-gradient(160deg, #e9eefc, #f3ebfa); }
     html[data-scheme="glass"][data-glass-bg][data-theme="dark"] { --wall: linear-gradient(160deg, #10121c, #171326); }
   }
+
+  /* ── Collapsible sidebar, sortable column headers ─────────────────────────── */
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .sidebar-toggle { padding: 6px 9px; }
+  .sidebar { transition: width .2s ease, border-width .2s ease; }
+  html.sidebar-collapsed .sidebar { width: 0; border-right-width: 0; visibility: hidden; transition: width .2s ease, border-width .2s ease, visibility 0s linear .2s; }
+  @media (max-width: 800px) {
+    /* narrow: the sidebar floats over the content instead of squeezing it */
+    .sidebar { position: fixed; top: 56px; bottom: 0; left: 0; z-index: 140; width: min(300px, 86vw); box-shadow: 0 0 40px rgba(0,0,0,.25); }
+    html.sidebar-collapsed .sidebar { width: min(300px, 86vw); transform: translateX(-100%); box-shadow: none; }
+    .sidebar { transition: transform .2s ease; }
+    .topbar-brand > span { display: none; }   /* icon only, so the toggle and the right-hand buttons fit */
+  }
+  .th-sort { display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; border-radius: 6px; }
+  .th-sort:hover { color: var(--text); }
+  .th-arrow { font-size: 9px; opacity: 0; transition: opacity .12s ease; }
+  .th-sort:hover .th-arrow { opacity: .4; }
+  .th-sort.active { color: var(--text); }
+  .th-sort.active .th-arrow { opacity: 1; }
+
+  /* ── Solid accent selection (after Apple Mail) ────────────────────────────
+     A selected row/card is a solid accent fill with white text — the strongest
+     thing on screen, and the same for one task or many. --sel-bg is per scheme
+     (all ≥4.5:1 against white). Text colour is set on the row itself because
+     `color` is inherited as a computed value (re-pointing --text on the row would
+     not recolour inherited text); the --text* variables are re-pointed too so
+     descendants that read them (project, subtasks, due) follow. Badges and the
+     checkbox are recoloured explicitly (the tag badges carry inline colours,
+     hence !important). Applies to every scheme. */
+  :root, html[data-scheme="standard"] { --sel-bg: #2f6fde; }
+  html[data-theme="dark"] { --sel-bg: #2c62c9; }
+  html[data-scheme="modern"] { --sel-bg: #005fb8; }
+  html[data-scheme="modern"][data-theme="dark"] { --sel-bg: #0e639c; }
+  html[data-scheme="dracula"] { --sel-bg: #7c4dd9; }
+  html[data-scheme="dracula"][data-theme="dark"] { --sel-bg: #6b3fd0; }
+  html[data-scheme="github"] { --sel-bg: #0969da; }
+  html[data-scheme="github"][data-theme="dark"] { --sel-bg: #316dca; }
+  html[data-scheme="githubdimmed"], html[data-scheme="githubdimmed"][data-theme="dark"] { --sel-bg: #316dca; }
+  html[data-scheme="glass"] { --sel-bg: #2f6fde; }
+  html[data-scheme="glass"][data-theme="dark"] { --sel-bg: #2c62c9; }
+  .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card.kbd-selected {
+    background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: #fff;
+    --text: #fff; --text-2: rgba(255,255,255,.88); --text-3: rgba(255,255,255,.72); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
+  }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .badge { background: rgba(255,255,255,.22) !important; color: #fff !important; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox { background: transparent; border-color: rgba(255,255,255,.75); box-shadow: none; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked { background: #fff; border-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked i { color: var(--sel-bg); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover,
+  .task-row.kbd-selected .task-cell.editable:hover { background: rgba(255,255,255,.2); outline-color: transparent; color: #fff; }
+  .board-card.kbd-selected .board-card-priority-icon { color: #fff; }
+  /* Inline inputs (add subtask, rename) inside a selected row: white text on a white
+     field was invisible. Give them a translucent-white field with white text. */
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea) { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.55); caret-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, textarea)::placeholder { color: rgba(255,255,255,.72); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check { background: transparent; border-color: rgba(255,255,255,.75); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked { background: #fff; border-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
+
+  /* ── Selection toolbar (a capsule group that acts on the selection) ─────── */
+  .main-title-wrap { display: flex; flex-direction: column; min-width: 0; }
+  .main-subtitle { font-size: 12px; color: var(--text-3); line-height: 1.3; margin-top: 1px; }
+  .tool-group { display: inline-flex; align-items: center; gap: 1px; padding: 2px; border: 1px solid var(--border-2); border-radius: 999px; background: var(--bg); }
+  .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 9px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: 14px; cursor: pointer; transition: background .12s ease, opacity .12s ease; }
+  .tool-btn:hover:not(:disabled) { background: var(--bg-3); }
+  .tool-btn:disabled { opacity: .35; cursor: default; }
+  .tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
+  .tool-sep { width: 1px; height: 16px; margin: 0 3px; background: var(--border-2); }
+  .tool-menu { left: 0; right: auto; min-width: 170px; }
 </style>
 </head>
 <body>
 
 <div class="topbar">
+  <div class="topbar-left">
+    <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
   <div class="topbar-brand"><i class="fa-solid fa-list-check"></i><span><span class="brand-my">my</span><span class="brand-tasks">tasks</span></span></div>
+  </div>
   <div class="topbar-actions">
     <span id="fileSyncIndicator"></span>
     <div class="topbar-divider"></div>
@@ -1046,9 +1104,18 @@
 
   <div class="main">
     <div class="main-toolbar">
-      <div class="main-title" id="mainTitle">All Tasks</div>
+      <div class="main-title-wrap"><div class="main-title" id="mainTitle">All Tasks</div><div class="main-subtitle" id="mainSubtitle"></div></div>
       <div class="main-toolbar-right">
         <button class="btn btn-icon btn-sm" id="collapseAllBtnBoard" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks" style="display:none"><i class="fa-solid fa-angles-down" id="collapseAllIconBoard"></i></button>
+        <div class="tool-group" id="selToolbar" role="toolbar" aria-label="Actions for the selected tasks">
+          <button type="button" class="tool-btn" id="toolDone" onclick="toolbarAct('toggledone')" title="Mark complete" disabled><i class="fa-regular fa-circle-check"></i></button>
+          <div class="lib-dropdown tool-dd"><button type="button" class="tool-btn" id="toolPriority" onclick="event.stopPropagation();toggleToolMenu('priority')" title="Priority" aria-haspopup="menu" disabled><i class="fa-regular fa-flag"></i></button><div class="split-btn-menu tool-menu" id="toolMenuPriority" role="menu"></div></div>
+          <div class="lib-dropdown tool-dd"><button type="button" class="tool-btn" id="toolDue" onclick="event.stopPropagation();toggleToolMenu('due')" title="Due date" aria-haspopup="menu" disabled><i class="fa-regular fa-calendar"></i></button><div class="split-btn-menu tool-menu" id="toolMenuDue" role="menu"></div></div>
+          <div class="lib-dropdown tool-dd"><button type="button" class="tool-btn" id="toolMove" onclick="event.stopPropagation();toggleToolMenu('project')" title="Move to project" aria-haspopup="menu" disabled><i class="fa-regular fa-folder"></i></button><div class="split-btn-menu tool-menu" id="toolMenuProject" role="menu"></div></div>
+          <span class="tool-sep"></span>
+          <button type="button" class="tool-btn" id="toolDup" onclick="toolbarAct('duplicate')" title="Duplicate" disabled><i class="fa-regular fa-clone"></i></button>
+          <button type="button" class="tool-btn tool-danger" id="toolDel" onclick="toolbarAct('delete')" title="Delete" disabled><i class="fa-regular fa-trash-can"></i></button>
+        </div>
         <div class="lib-dropdown" id="filterDropdown">
           <button class="btn btn-sm" id="filterBtn" onclick="event.stopPropagation();toggleFilterMenu()" title="Filter by status and priority"><i class="fa-solid fa-filter"></i> Filter <span class="filter-count" id="filterCount"></span></button>
           <div class="split-btn-menu filter-menu" id="filterMenu" style="left:auto;right:0">
@@ -1077,6 +1144,8 @@
           <option value="priority">Priority</option>
           <option value="created">Newest first</option>
           <option value="alpha">Alphabetical</option>
+          <option value="project">Project</option>
+          <option value="status">Status</option>
         </select>
       </div>
     </div>
@@ -1088,7 +1157,7 @@
     </div>
     <div class="quickadd-preview" id="quickAddPreview"></div>
     <div class="task-list" id="taskListWrap">
-      <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span>Task</span><span>Project</span><span>Priority</span><span style="margin-left:-4px">Status</span><span style="margin-left:-8px">Due</span><span style="margin-left:-12px"></span></div>
+      <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span class="th-sort" data-col="alpha" role="button" tabindex="0" onclick="sortByColumn('alpha')" title="Sort by task name">Task<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="project" role="button" tabindex="0" onclick="sortByColumn('project')" title="Sort by project">Project<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="priority" role="button" tabindex="0" onclick="sortByColumn('priority')" title="Sort by priority">Priority<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="status" role="button" tabindex="0" style="margin-left:-4px" onclick="sortByColumn('status')" title="Sort by status">Status<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="due" role="button" tabindex="0" style="margin-left:-8px" onclick="sortByColumn('due')" title="Sort by due date">Due<i class="th-arrow fa-solid fa-chevron-up"></i></span><span style="margin-left:-12px"></span></div>
       <div id="taskList"></div>
     </div>
     <div class="board" id="board" style="display:none"></div>
@@ -1333,6 +1402,35 @@ const THEME_KEY = 'mytasks_theme';
 const SCHEME_KEY = 'mytasks_scheme';
 const COMPACT_KEY = 'mytasks_compact';
 const VIEW_KEY = 'mytasks_view';
+// Sidebar collapse — a per-device display preference (localStorage), like the
+// board grouping. With no saved choice it starts collapsed on narrow screens.
+// Picking a nav item on a narrow screen closes it again *without* saving, so a
+// wide window is never affected by what happened on a phone-sized one.
+const SIDEBAR_KEY = 'mytasks_sidebar_collapsed';
+let sidebarCollapsed = false;
+function applySidebarState(){
+  document.documentElement.classList.toggle('sidebar-collapsed', sidebarCollapsed);
+  const b = document.getElementById('sidebarToggle');
+  if(b){
+    b.setAttribute('aria-expanded', String(!sidebarCollapsed));
+    const mac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    b.title = (sidebarCollapsed ? 'Show' : 'Hide') + ' sidebar (' + (mac ? '⌘B' : 'Ctrl+B') + ')';
+  }
+}
+function toggleSidebar(){
+  sidebarCollapsed = !sidebarCollapsed;
+  try{ localStorage.setItem(SIDEBAR_KEY, sidebarCollapsed ? '1' : '0'); }catch(_){}
+  applySidebarState();
+}
+function collapseSidebarIfNarrow(){
+  if(sidebarCollapsed || !window.matchMedia) return;
+  if(window.matchMedia('(max-width: 800px)').matches){ sidebarCollapsed = true; applySidebarState(); }
+}
+(function(){
+  let v = null; try{ v = localStorage.getItem(SIDEBAR_KEY); }catch(_){}
+  sidebarCollapsed = v==='1' ? true : v==='0' ? false : (typeof window!=='undefined' && window.innerWidth <= 800);
+  applySidebarState();
+})();
 const UI_SCALE_KEY = 'mytasks_uiscale';
 // Only 4 stops — the same Small/Medium/Large/Extra Large sizes the
 // original button-based picker offered, just reachable by dragging a
@@ -1825,8 +1923,10 @@ function renderSidebar(){
   document.getElementById('sidebarFooter').textContent = `${total} task${total===1?'':'s'} · ${done} done`;
 
   document.getElementById('mainTitle').textContent = myDayFilter ? 'My Day' : thisWeekFilter ? 'This Week' : overdueFilter ? 'Overdue' : (filterProjectId ? (projById(filterProjectId)?.name || 'All Tasks') : 'All Tasks');
-  document.getElementById('sortSelect').value = sortBy;
+  document.getElementById('sortSelect').value = sortBy.replace(':desc','');
+  renderSortHeaders();
   renderQuickAddProject();
+  updateSelectionToolbar();
 }
 
 const sortComparators = {
@@ -1834,8 +1934,31 @@ const sortComparators = {
   due: (a,b)=>{ const ad=a.dueDate||'9999-99-99', bd=b.dueDate||'9999-99-99'; return ad<bd?-1:ad>bd?1:0; },
   priority: (a,b)=>{ const pr={high:0,medium:1,low:2}; return pr[a.priority]-pr[b.priority]; },
   created: (a,b)=> b.createdAt-a.createdAt,
-  alpha: (a,b)=> a.title.localeCompare(b.title)
+  alpha: (a,b)=> a.title.localeCompare(b.title),
+  project: (a,b)=> ((projById(a.projectId)||{}).name||'').localeCompare((projById(b.projectId)||{}).name||'') || a.title.localeCompare(b.title),
+  status: (a,b)=>{ const st={todo:0,doing:1,done:2}; return (st[a.status]-st[b.status]) || a.title.localeCompare(b.title); }
 };
+// Descending variants live in the same table under 'key:desc', so the direction
+// travels inside sortBy — it is saved, synced and restored with no extra field,
+// and an unknown key (e.g. from an older/newer build) still falls back to smart.
+// Due keeps undated tasks last in both directions. Done tasks sink either way
+// (doneLastComparator wraps whatever is chosen).
+['alpha','priority','project','status'].forEach(k=>{ sortComparators[k+':desc'] = (a,b)=>sortComparators[k](b,a); });
+sortComparators['due:desc'] = (a,b)=>{ const ad=a.dueDate, bd=b.dueDate; if(!ad && !bd) return 0; if(!ad) return 1; if(!bd) return -1; return ad<bd?1:ad>bd?-1:0; };
+// Column-header click: ascending → descending → back to Smart order.
+function sortByColumn(key){
+  sortBy = sortBy===key ? key+':desc' : sortBy===key+':desc' ? 'smart' : key;
+  save(); render();
+}
+function renderSortHeaders(){
+  const base = sortBy.replace(':desc',''), desc = /:desc$/.test(sortBy);
+  document.querySelectorAll('.th-sort').forEach(th=>{
+    const on = th.dataset.col===base && sortBy!=='smart';
+    th.classList.toggle('active', on);
+    const ar = th.querySelector('.th-arrow');
+    if(ar) ar.className = 'th-arrow fa-solid ' + (on && desc ? 'fa-chevron-down' : 'fa-chevron-up');
+  });
+}
 
 function taskMatchesFilters(t, opts){
   opts = opts || {};
@@ -2256,6 +2379,10 @@ function handleRowClick(e, id){
     }
   }
   if(e.ctrlKey || e.metaKey){
+    // Cmd/Ctrl+click *extends* the current selection: the row you had selected by a
+    // plain click joins the multi-selection first (as in Mail/Finder), otherwise the
+    // toolbar would act on a different set than the one that looks selected.
+    if(selectedTaskIds.size===0 && kbdSelectedTaskId && kbdSelectedTaskId!==id && tasks.some(t=>t.id===kbdSelectedTaskId)) selectedTaskIds.add(kbdSelectedTaskId);
     if(selectedTaskIds.has(id)) selectedTaskIds.delete(id); else selectedTaskIds.add(id);
     lastClickedTaskId = id;
     renderList(); renderBulkBar();
@@ -2269,6 +2396,70 @@ function handleRowClick(e, id){
   kbdSelectedTaskId = id;
   renderList();
 }
+// ── Selection toolbar + counts (Mail-style) ───────────────────────────────────
+// "The selection" is the multi-selection when there is one, else the single
+// keyboard/click-selected row. The toolbar group and the row menu share one
+// action path (rowMenuRun), so they cannot drift apart.
+function selectionIds(){
+  const exists = id=>tasks.some(t=>t.id===id);
+  if(selectedTaskIds.size>0) return [...selectedTaskIds].filter(exists);
+  return (kbdSelectedTaskId && exists(kbdSelectedTaskId)) ? [kbdSelectedTaskId] : [];
+}
+function viewCounts(){
+  const list = getFilteredSortedTasks();
+  const open = list.filter(t=>t.status!=='done');
+  return { total: list.length, open: open.length, overdue: open.filter(isOverdue).length, done: list.length - open.length };
+}
+function mainSubtitleText(){
+  const c = viewCounts(), n = selectionIds().length;
+  if(!c.total) return 'No tasks';
+  const parts = [`${c.open} open`];
+  if(c.overdue) parts.push(`${c.overdue} overdue`);
+  if(!c.open && c.done) parts.push(`${c.done} done`);
+  if(n>1) parts.push(`${n} selected`);
+  return parts.join(' · ');
+}
+function closeToolMenus(){ document.querySelectorAll('.tool-menu.open').forEach(m=>m.classList.remove('open')); }
+function toolMenuHtml(which){
+  const opt = (kind, val, inner)=>`<div class="split-btn-menu-item" role="menuitem" onclick="toolbarAct('${kind}','${val}')">${inner}</div>`;
+  if(which==='priority') return PRIORITIES.map(p=>opt('priority', p.id, `<span class="badge badge-priority-${p.id}">${esc(p.label)}</span>`)).join('');
+  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear date']].map(d=>opt('due', d[0], `<div class="split-btn-menu-label">${d[1]}</div>`)).join('');
+  return visibleProjects().map(p=>opt('project', p.id, `<i class="fa-solid fa-${p.icon||'folder'} split-btn-menu-icon"></i><div class="split-btn-menu-label">${esc(abbreviateName(p.name, 24))}</div>`)).join('');
+}
+function toggleToolMenu(which){
+  const id = 'toolMenu' + which.charAt(0).toUpperCase() + which.slice(1);
+  const m = document.getElementById(id); if(!m) return;
+  const wasOpen = m.classList.contains('open');
+  closeToolMenus(); closeFilterMenu();
+  if(wasOpen || !selectionIds().length) return;
+  m.innerHTML = toolMenuHtml(which);
+  m.classList.add('open');
+}
+function toolbarAct(kind, value){
+  const ids = selectionIds(); if(!ids.length) return;
+  closeToolMenus();
+  rowMenuIds = ids;
+  rowMenuRun(kind, value);
+}
+function updateSelectionToolbar(){
+  const sub = document.getElementById('mainSubtitle'); if(sub) sub.textContent = mainSubtitleText();
+  const ids = selectionIds(), n = ids.length;
+  const set = (id, o)=>{ const b = document.getElementById(id); if(!b) return; b.disabled = !!o.off; if(o.title) b.title = o.title; };
+  const allDone = n>0 && ids.every(id=>(tasks.find(t=>t.id===id)||{}).status==='done');
+  set('toolDone',     { off: n===0, title: allDone ? 'Mark not started' : n>1 ? `Mark ${n} complete` : 'Mark complete' });
+  set('toolPriority', { off: n===0, title: n>1 ? `Set priority for ${n} tasks` : 'Priority' });
+  set('toolDue',      { off: n===0, title: n>1 ? `Set due date for ${n} tasks` : 'Due date' });
+  set('toolMove',     { off: n===0, title: n>1 ? `Move ${n} tasks` : 'Move to project' });
+  set('toolDup',      { off: n!==1, title: 'Duplicate' });
+  set('toolDel',      { off: n===0, title: n>1 ? `Delete ${n} tasks` : 'Delete' });
+  if(n===0) closeToolMenus();
+}
+// Selection changes without a full render (a click, an arrow key), so re-sync
+// right after the event's own handlers have run.
+function syncSelectionToolbarSoon(){ if(typeof setTimeout==='function') setTimeout(updateSelectionToolbar, 0); else updateSelectionToolbar(); }
+document.addEventListener('click', syncSelectionToolbarSoon);
+document.addEventListener('keyup', syncSelectionToolbarSoon);
+
 // ── Row menu (right-click / "⋯" / Menu key) — same actions as Milestone's ─────
 // Acts on the whole selection when the clicked row is part of a multi-selection,
 // otherwise on just that row; it never changes the selection itself, so opening
@@ -3815,6 +4006,7 @@ function shortcutsListHtml(){
     group('Navigation'),
     row('Focus search', '/'),
     row('Focus quick-add', 'N'),
+    row('Show or hide the sidebar', mod, 'B'),
     row('Navigate tasks', '↑', '↓'),
     row('Open selected task', '↵'),
     group('Task actions'),
@@ -3938,6 +4130,7 @@ document.addEventListener('click', e=>{
   if(!e.target.closest('#filterDropdown')) closeFilterMenu();
   if(!e.target.closest('#cellPop')) closeCellPop();
   if(!e.target.closest('#rowMenu')) closeRowMenu();
+  if(!e.target.closest('.tool-dd')) closeToolMenus();
   const btn = e.target.closest('button');
   if(btn) btn.blur();
   const cb = e.target.closest('[role="checkbox"]');
@@ -3948,16 +4141,20 @@ document.addEventListener('click', e=>{
   const rb = e.target.closest('[role="button"]');
   if(rb && e.detail>0) rb.blur();
 });
-// Input modality for the selected-row highlight (see the Glass rules): arrow
-// keys switch <html> to .kbd-nav (crisp outline), any pointer press switches it
-// back off (soft fill only). Pure CSS reads it, so no render has to know.
-function markKeyboardNav(e){ if(e && /^Arrow(Up|Down|Left|Right)$/.test(e.key)) document.documentElement.classList?.add('kbd-nav'); }
-function markPointerNav(){ document.documentElement.classList?.remove('kbd-nav'); }
-document.addEventListener('keydown', markKeyboardNav, true);
-document.addEventListener('mousedown', markPointerNav, true);
+// Capture phase on purpose: picking a project/view re-renders the sidebar, which
+// detaches the clicked element — by the time a bubbling listener runs, closest()
+// can no longer find the .sidebar it came from.
+function closeNarrowSidebarOnNav(e){
+  if(e.target.closest && e.target.closest('.sidebar .nav-item, .sidebar .project-row') && !e.target.closest('.project-actions')) collapseSidebarIfNarrow();
+}
+document.addEventListener('click', closeNarrowSidebarOnNav, true);
+function handleSidebarShortcut(e){
+  if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && String(e.key).toLowerCase()==='b'){ e.preventDefault(); toggleSidebar(); }
+}
+document.addEventListener('keydown', handleSidebarShortcut);
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
-    closeCellPop(); closeRowMenu(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+    closeCellPop(); closeRowMenu(); closeToolMenus(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
     closeAllModals(); closeDrawer(); inlineAddSubtaskTaskId=null; inlineAddParentSubId=null; inlineAddParentStepId=null; renamingTaskId=null; renamingSubtask=null; renamingSubSubtask=null; renamingSubSubSubtask=null; selectedTaskIds.clear(); kbdSelectedTaskId=null;
     if(viewMode==='board'){ renderBoard(); } else { renderList(); }
     renderBulkBar();
@@ -4542,7 +4739,7 @@ function showSyncBanner(handle){
   const el = document.getElementById('syncBanner'); if(!el) return;
   el.innerHTML = handle
     ? `<i class="fa-solid fa-triangle-exclamation"></i><span>Sync is paused — <strong>${esc(handle.name)}</strong> needs permission again.</span><button class="btn btn-sm" onclick="openFileSyncModal(syncBannerHandle)">Reconnect</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>`
-    : `<i class="fa-solid fa-triangle-exclamation"></i><span>Your tasks are only stored in this browser. Link a file to back them up and keep them across sessions.</span><button class="btn btn-sm" onclick="openFileSyncModal()">Link a file</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss until next session"><i class="fa-solid fa-xmark"></i></button>`;
+    : `<i class="fa-solid fa-triangle-exclamation"></i><span>Your tasks are only saved in this browser. Link a file to back them up.</span><button class="btn btn-sm" onclick="openFileSyncModal()">Link a file</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss until next session"><i class="fa-solid fa-xmark"></i></button>`;
   el.classList.add('show');
 }
 function hideSyncBanner(){ const el = document.getElementById('syncBanner'); if(!el) return; el.classList.remove('show'); el.innerHTML = ''; }

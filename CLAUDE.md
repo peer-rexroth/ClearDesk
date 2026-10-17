@@ -232,6 +232,45 @@ parity.
   scheme) and Help (guide, shortcuts, about) are single dropdowns. Menus that
   re-render themselves on click must `stopPropagation()`, or the global
   outside-click handler sees a detached target and closes them.
+- **Solid accent selection** (every scheme, after Apple Mail): a selected
+  row/card is a solid `--sel-bg` fill (per scheme, light and dark, all ≥4.5:1 vs
+  white) with white text, identical for one task or many (`.kbd-selected`,
+  `.bulk-selected`). `color:#fff` is set on the row itself because `color`
+  inherits as a computed value — re-pointing `--text` alone would not recolour
+  inherited text — and the `--text*` variables are re-pointed too for
+  descendants that read them. Badges are recoloured with `!important` (tag
+  badges carry inline colours); the checkbox and icon-button hovers are
+  overridden explicitly. There is no keyboard ring any more: a solid fill is
+  already the focus indicator. When adding a scheme, add its `--sel-bg` pair.
+- **Selection toolbar + counts**: a capsule group in `.main-toolbar` (Complete,
+  Priority ▾, Due ▾, Move ▾ | Duplicate, Delete) acts on `selectionIds()` —
+  the multi-selection if any, else the single selected row — through the same
+  `rowMenuRun` path as the row menu, so the two can't drift. Buttons are
+  disabled with no selection; Duplicate needs exactly one. Because selection
+  changes without a render (clicks, arrow keys), `updateSelectionToolbar()` also
+  runs from document `click`/`keyup` listeners (deferred one tick so the row's
+  own handler has run) and at the end of `renderSidebar()`. The title has a
+  subtitle (`mainSubtitleText`): "N open · M overdue", plus "· K selected" for
+  two or more. Cmd/Ctrl+click *extends* the current selection (the row selected
+  by a plain click joins first), as in Mail/Finder.
+- **Collapsible sidebar**: the toggle (topbar, left) and **Cmd/Ctrl+B** flip
+  `sidebarCollapsed` (per-device `mytasks_sidebar_collapsed`), applied as
+  `html.sidebar-collapsed`. With no saved choice it starts collapsed at ≤800px,
+  where the sidebar floats over the content; picking a project/view there closes
+  it again *without* saving (so a phone-sized window never changes the wide-window
+  preference). That close runs in the **capture** phase — selecting re-renders the
+  sidebar, which detaches the clicked element, so a bubbling listener's
+  `closest('.sidebar …')` finds nothing. The collapse CSS sits at the very end of
+  the stylesheet so it wins ties with the Glass `.sidebar` border rule.
+- **Sortable column headers**: Task/Project/Priority/Status/Due cycle
+  ascending → descending → back to Smart order (`sortByColumn`). Direction is
+  encoded *in* `sortBy` (`'due'` / `'due:desc'`, descending variants registered in
+  `sortComparators`), so it saves, file-syncs and restores with no new field, and
+  an unknown key just falls back to smart. Undated tasks stay last in both
+  directions; completed tasks sink either way (`doneLastComparator`). The Sort
+  dropdown shows the base key and always picks ascending.
+- **Quiet notice bar**: the first-run sync notice is a neutral bar (small amber
+  icon, one pill action, ✕), not an amber block.
 - Sidebar order is Projects (with the "projects shown" control beside the +)
   then a collapsible Tags section (`mytasks_tags_collapsed`).
 - **The drawer is a docked side panel, not an overlay.** `#drawer` is a flex
@@ -496,13 +535,9 @@ freely — e.g. `[data-scheme="dracula"][data-theme="dark"]`.
   data-URI can't read CSS variables). That rule must stay *after* every Glass rule that
   uses the `background` shorthand, which would reset the chevron (it once vanished in
   light mode and tiled across the select in dark).
-  **Selected row/card** in Glass is a soft tinted fill (accent at ~14% over the
-  glass) with a faint rim; the crisp 2px ring appears only while `html.kbd-nav`
-  is set (arrow keys add it, any `mousedown` removes it — `markKeyboardNav` /
-  `markPointerNav`), so clicking never paints a focus ring. Other schemes keep
-  the outline because it is their only selection cue. A real pointer click
-  (`e.detail>0`) also blurs `[role="button"]` divs so a clicked badge cell
-  doesn't keep a focus ring for the next key press.
+  (Selection styling is no longer Glass-specific — see "Solid accent selection".
+  A real pointer click, `e.detail>0`, also blurs `[role="button"]` divs so a
+  clicked badge cell doesn't keep a focus ring for the next key press.)
 - Each scheme may add its own one-off "signature" CSS rules (e.g. GitHub's
   primary button going solid green, a scheme-specific monospace treatment
   for numerics) — these live in their own scoped block further down in
