@@ -430,3 +430,48 @@ test('Cmd/Ctrl+click extends the selection with the row selected by a plain clic
   assertDeepEqual([...selectedTaskIds].sort(), ['a', 'c']);
   selectedTaskIds = new Set(); kbdSelectedTaskId = null;
 });
+
+// ── Selection changes must not rebuild the list or the panel ─────────────────
+test('a plain click selects in place: the list markup is not rebuilt', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
+  document.getElementById('taskList').innerHTML = 'SENTINEL';
+  handleRowClick({ shiftKey: false, ctrlKey: false, metaKey: false }, 'b');
+  assertEqual(document.getElementById('taskList').innerHTML, 'SENTINEL');
+  assertEqual(kbdSelectedTaskId, 'b');
+  kbdSelectedTaskId = null;
+});
+test('modifier clicks and clearSelection also leave the list markup alone', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
+  selectedTaskIds = new Set(); kbdSelectedTaskId = null;
+  document.getElementById('taskList').innerHTML = 'SENTINEL';
+  handleRowClick({ shiftKey: false, ctrlKey: true, metaKey: false }, 'a');
+  handleRowClick({ shiftKey: false, ctrlKey: true, metaKey: false }, 'b');
+  assertDeepEqual([...selectedTaskIds].sort(), ['a', 'b']);
+  clearSelection();
+  assertEqual(selectedTaskIds.size, 0);
+  assertEqual(document.getElementById('taskList').innerHTML, 'SENTINEL');
+});
+test('openTask rebuilds the panel only for a different task, never the list', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
+  activeTaskId = null; inlineAddSubtaskTaskId = null;
+  document.getElementById('taskList').innerHTML = 'SENTINEL';
+  openTask('a');
+  assertEqual(activeTaskId, 'a');
+  const drawer = document.getElementById('drawer');
+  drawer.innerHTML = 'PANEL';
+  openTask('a');
+  assertEqual(drawer.innerHTML, 'PANEL', 'same task: the panel is left alone');
+  openTask('b');
+  assertTrue(drawer.innerHTML !== 'PANEL', 'a different task rebuilds the panel');
+  assertEqual(document.getElementById('taskList').innerHTML, 'SENTINEL', 'the list is never rebuilt');
+  activeTaskId = null; kbdSelectedTaskId = null;
+});
+test('openTask still rebuilds the list when an inline add-subtask input was open', function () {
+  tasks = [uxTask({ id: 'a' })];
+  activeTaskId = null; inlineAddSubtaskTaskId = 'a';
+  document.getElementById('taskList').innerHTML = 'SENTINEL';
+  openTask('a');
+  assertEqual(inlineAddSubtaskTaskId, null);
+  assertTrue(document.getElementById('taskList').innerHTML !== 'SENTINEL', 'the open input has to be removed from the markup');
+  activeTaskId = null; kbdSelectedTaskId = null;
+});

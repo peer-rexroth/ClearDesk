@@ -242,6 +242,19 @@ parity.
   badges carry inline colours); the checkbox and icon-button hovers are
   overridden explicitly. There is no keyboard ring any more: a solid fill is
   already the focus indicator. When adding a scheme, add its `--sel-bg` pair.
+- **Selection changes never rebuild the list.** `paintSelection()` toggles
+  `kbd-selected`/`bulk-selected` on the rows/cards that already exist (then
+  refreshes the bulk bar and toolbar); `handleRowClick`, `clearSelection` and
+  `openTask` use it. A rebuild repaints every row (a visible flash), drops the
+  hover state under the cursor for a frame, and loses scroll/focus. `openTask`
+  also skips rebuilding the panel when it already shows that task, and only
+  re-renders the list if an inline add-subtask input was open (clearing that
+  flag changes the rows' markup). Rows/cards deliberately have **no** colour transition: a 120ms fade was tried
+  and removed — it also animates the hover highlight, so moving the pointer or
+  holding an arrow key left a trail of half-faded rows (the old row still ~50%
+  highlighted while the new one fades in). Selection and hover must be instant,
+  as in Mail. Don't call `renderList()` just to move the highlight. Note the global Escape handler
+  does still rebuild the list.
 - **Selection toolbar + counts**: a capsule group in `.main-toolbar` (Complete,
   Priority ▾, Due ▾, Move ▾ | Duplicate, Delete) acts on `selectionIds()` —
   the multi-selection if any, else the single selected row — through the same

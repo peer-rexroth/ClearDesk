@@ -1017,6 +1017,9 @@
   .tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
   .tool-sep { width: 1px; height: 16px; margin: 0 3px; background: var(--border-2); }
   .tool-menu { left: 0; right: auto; min-width: 170px; }
+
+  /* a little air between the expand chevron and the checkbox circle */
+  .task-check-cell { gap: 6px; }
 </style>
 </head>
 <body>
@@ -2363,10 +2366,35 @@ function setViewMode(mode){
 }
 
 // ── Drawer ────────────────────────────────────────────────────────────────────
-function openTask(id){ activeTaskId = id; kbdSelectedTaskId = id; inlineAddSubtaskTaskId = null; inlineAddParentSubId = null; inlineAddParentStepId = null; renderDrawer(); if(viewMode==='board'){ renderBoard(); } else { renderList(); } }
+// Opening a task touches as little as possible: the list only repaints its
+// selection classes (no rebuild), and the panel is rebuilt only when it is
+// showing a different task. The list is rebuilt only if an inline "add subtask"
+// input was open, because clearing that flag changes the rows' markup.
+function openTask(id){
+  const drawerEl = document.getElementById('drawer');
+  const alreadyShown = activeTaskId===id && !!drawerEl && drawerEl.classList.contains('open');
+  const hadInlineAdd = inlineAddSubtaskTaskId!==null || inlineAddParentSubId!==null || inlineAddParentStepId!==null;
+  activeTaskId = id; kbdSelectedTaskId = id; inlineAddSubtaskTaskId = null; inlineAddParentSubId = null; inlineAddParentStepId = null;
+  if(!alreadyShown) renderDrawer();
+  if(hadInlineAdd){ if(viewMode==='board'){ renderBoard(); } else { renderList(); } }
+  else paintSelection();
+}
 function closeDrawer(){ activeTaskId = null; renderDrawer(); }
 
 // ── Bulk selection ────────────────────────────────────────────────────────────
+// Repaint the selection classes on the rows/cards that already exist. Changing
+// the selection must not rebuild the list: a rebuild repaints every row (a visible
+// flash), drops the hover state under the cursor for a frame, and loses scroll
+// and focus. Only the two rows that changed need touching.
+function paintSelection(){
+  document.querySelectorAll('.task-row, .board-card').forEach(el=>{
+    const id = el.dataset.id;
+    el.classList.toggle('kbd-selected', id===kbdSelectedTaskId);
+    if(el.classList.contains('task-row')) el.classList.toggle('bulk-selected', selectedTaskIds.has(id));
+  });
+  renderBulkBar();
+  updateSelectionToolbar();
+}
 function handleRowClick(e, id){
   if(e.shiftKey && lastClickedTaskId){
     const ids = getVisibleListTasks().tasks.map(t=>t.id);
@@ -2374,7 +2402,7 @@ function handleRowClick(e, id){
     if(a!==-1 && b!==-1){
       const [start,end] = a<b ? [a,b] : [b,a];
       for(let i=start;i<=end;i++) selectedTaskIds.add(ids[i]);
-      renderList(); renderBulkBar();
+      paintSelection();
       return;
     }
   }
@@ -2385,16 +2413,13 @@ function handleRowClick(e, id){
     if(selectedTaskIds.size===0 && kbdSelectedTaskId && kbdSelectedTaskId!==id && tasks.some(t=>t.id===kbdSelectedTaskId)) selectedTaskIds.add(kbdSelectedTaskId);
     if(selectedTaskIds.has(id)) selectedTaskIds.delete(id); else selectedTaskIds.add(id);
     lastClickedTaskId = id;
-    renderList(); renderBulkBar();
+    paintSelection();
     return;
   }
-  if(selectedTaskIds.size>0){
-    selectedTaskIds.clear();
-    renderList(); renderBulkBar();
-  }
+  selectedTaskIds.clear();
   lastClickedTaskId = id;
   kbdSelectedTaskId = id;
-  renderList();
+  paintSelection();
 }
 // ── Selection toolbar + counts (Mail-style) ───────────────────────────────────
 // "The selection" is the multi-selection when there is one, else the single
@@ -2556,7 +2581,7 @@ function rowMenuRun(kind, value){
   else if(kind==='duplicate'){ duplicateTask(ids[0]); }
   else if(kind==='delete'){ ids.length===1 ? deleteTask(ids[0]) : bulkDelete(ids); }
 }
-function clearSelection(){ selectedTaskIds.clear(); renderList(); renderBulkBar(); }
+function clearSelection(){ selectedTaskIds.clear(); paintSelection(); }
 function renderBulkBar(){
   const bar = document.getElementById('bulkBar'); if(!bar) return;
   if(selectedTaskIds.size===0){ bar.classList.remove('show'); bar.innerHTML=''; return; }
