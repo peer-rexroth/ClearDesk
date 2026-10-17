@@ -539,3 +539,13 @@ test('ArrowDown from the quick-add field selects the first task; ArrowUp from th
   leaveTasksToQuickAdd();
   assertEqual(kbdSelectedTaskId, null);
 });
+
+test('the shortcuts dialog is built from groups, each with a label, an icon and rows of [label, keys]', function () {
+  var g = shortcutGroups();
+  assertTrue(g.length >= 4, 'several groups');
+  g.forEach(function (grp) {
+    assertTrue(!!grp.id && !!grp.label && !!grp.icon, 'group has id, label, icon');
+    grp.rows.forEach(function (r) { assertTrue(typeof r[0] === 'string' && r[1].length > 0, 'row is [label, keys]'); });
+  });
+  assertTrue(scRowHtml(['Open selected task', ['↵']]).indexOf('<kbd>') !== -1, 'keys render as kbd');
+});

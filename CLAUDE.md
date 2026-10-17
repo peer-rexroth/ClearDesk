@@ -216,14 +216,14 @@ parity.
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
 - **Help is laid out like macOS System Settings**: a tinted sidebar on the left (round close button where the window controls
   sit, a capsule search field, the topics as inset rounded rows with the solid accent on the current one), and on the right a
-  large title that follows the topic ("Search results" while searching) beside a "Keyboard shortcuts" pill — no header bar and
-  no hairline between the two halves. In a narrow window the sidebar becomes a strip across the top.
+  large title that follows the topic ("Search results" while searching) beside a "Keyboard shortcuts" pill that opens the shortcuts
+  dialog — no header bar and no hairline between the two halves. In a narrow window the sidebar becomes a strip across the top.
 - **Help is a tabbed dialog content and behaviour modelled on Milestone's** (`#helpModalBg`): a rail of topics on the left (`HELP_TABS`,
   `HELP_TAB_LABELS`; arrow keys / Home / End move between them), a search box, and short icon rows under small section
   titles on the right. The panes are *static HTML* so the search can read them: `helpSearch` shows every `.help-row` that
   contains all the words, grouped by topic with the words marked, and a topic name jumps there; Esc clears the search
-  first, a second Esc closes the dialog. It reopens on the topic last read. Keyboard shortcuts are a link in its header
-  (the separate shortcuts dialog, also on **?**), not a section. **When behaviour changes, update the matching row** — the
+  first, a second Esc closes the dialog. It reopens on the topic last read. Keyboard shortcuts are not a section here
+  (the pill in its toolbar opens the separate shortcuts dialog, as do the Help menu and **?**). **When behaviour changes, update the matching row** — the
   old single-scroll Help had drifted (it still said single click opens the drawer).
 - **Sidebar project actions are the list's action capsule** (`.project-actions.row-actions`): Edit/Delete float just left
   of the count on hover/focus and take no width of their own, so a project's count lines up with the nav items' counts above
@@ -235,6 +235,13 @@ parity.
   selection and focuses the field (`selectFirstTaskFromQuickAdd` / `leaveTasksToQuickAdd`). The field's handler must
   `stopPropagation()`: it blurs first, so the document-level list handler would otherwise take the same keypress and move
   one row further.
+- **The Keyboard shortcuts dialog wears the same shell as Help** (sidebar of groups with a round close button and capsule search, a
+  title on the right, a grouped softly-tinted list of rows with the keys on the right). Content is data: `shortcutGroups()` returns
+  `{id,label,icon,rows:[[label,[keys]]]}` and `renderShortcutsDialog()` builds the tabs/panes when it opens (so ⌘ vs Ctrl is decided
+  then); the sidebar keys, search and `/` behave as in Help (`scTabKey`, `scSearch`, `helpModalKey(e, bgId, searchId)`). Add a
+  shortcut by adding a row to a group — there is no second list.
+- **Help sections are grouped cards**: each section's rows sit in one `.help-list` (rounded, softly tinted, hairlines between rows) — the same
+  look as the shortcuts dialog's `.sc-list` — and tips use the same tint; there are no divider lines between sections.
 - **Help is keyboard-driven**: it opens with focus on the topic list; ↑/↓/Home/End switch topic, → (or Tab) goes into the text,
   where the browser's arrows / Page Up/Down / Space scroll (the panes are `tabindex=0`), ← goes back; **/** jumps to the search
   field (a capsule with a magnifier), ↓ from it enters the results, ↑ goes back to the topics; Tab/Shift+Tab wrap inside the

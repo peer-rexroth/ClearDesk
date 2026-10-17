@@ -375,9 +375,9 @@
   .help-nav button.active i { color: #fff; }
   .help-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .help-toolbar { display: flex; align-items: center; gap: 12px; padding: 16px 26px 6px; flex-shrink: 0; }
-  .help-toolbar h3 { font-size: 20px; font-weight: 700; margin-right: auto; letter-spacing: -0.01em; }
   .hdr-link { display: inline-flex; align-items: center; gap: 6px; border: 0; background: color-mix(in srgb, var(--text) 7%, transparent); padding: 5px 12px; border-radius: 999px; font: inherit; font-size: 12px; color: var(--text-2); cursor: default; }
   .hdr-link:hover { background: color-mix(in srgb, var(--text) 13%, transparent); color: var(--text); }
+  .help-toolbar h3 { font-size: 20px; font-weight: 700; margin-right: auto; letter-spacing: -0.01em; }
   .help-panes { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
   .help-pane { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 26px 26px; display: flex; flex-direction: column; gap: 18px; }
   .help-pane[hidden] { display: none; }
@@ -400,8 +400,12 @@
   .help-row em { font-style: normal; }
   .help-row code, .help-row kbd { font-family: var(--mono); font-size: 12px; padding: 0 5px; border: 1px solid var(--border); border-radius: 4px; background: var(--bg-2); color: var(--text); }
   .help-row kbd { padding: 1px 6px; border-bottom-width: 2px; margin: 0 1px; }
-  .help-divider { height: 1px; background: var(--border); flex-shrink: 0; }
-  .help-tip { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
+  .help-divider { display: none; }   /* sections are separate cards now, spaced by the pane's gap */
+  /* a section's rows are one rounded, softly tinted card with hairlines between rows — the same grouped list as the shortcuts dialog */
+  .help-list { background: color-mix(in srgb, var(--text) 4%, transparent); border-radius: 12px; padding: 0 14px; }
+  .help-list .help-row { padding: 12px 0; }
+  .help-list .help-row + .help-row { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
+  .help-tip { background: color-mix(in srgb, var(--text) 4%, transparent); border: 0; border-radius: 12px; padding: 10px 14px; font-size: 12px; color: var(--text-2); line-height: 1.6; }
   .help-tip strong { color: var(--text); font-weight: 600; }
   @media (max-width: 700px) {
     .help-layout { flex-direction: column; }
@@ -413,6 +417,13 @@
     .help-toolbar { padding: 12px 16px 4px; }
     .help-pane { padding: 8px 16px 20px; }
   }
+  /* shortcut rows: a grouped, softly tinted list with hairlines between rows (like a Settings pane), label left and keys right */
+  .sc-list { background: color-mix(in srgb, var(--text) 4%, transparent); border-radius: 12px; padding: 0 14px; }
+  .sc-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; font-size: 13px; color: var(--text); }
+  .sc-row + .sc-row { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
+  .sc-keys { display: inline-flex; gap: 4px; flex-shrink: 0; }
+  .sc-row kbd { font-family: var(--mono); font-size: 12px; padding: 1px 7px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: 5px; background: var(--bg-2); color: var(--text); }
+  .sc-row mark { background: color-mix(in srgb, var(--sel-bg) 28%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
   .shortcut-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 4px 0; }
   .shortcut-row span { color: var(--text-2); }
   .shortcut-keys { display: flex; gap: 3px; }
@@ -1198,107 +1209,137 @@
       <div class="help-pane" id="helpPane-start" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-start">
         <div class="help-section">
           <div class="help-section-title">Adding and opening tasks</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>Add a task</strong>: type in <em>Add a task…</em> at the top and press <kbd>Enter</kbd>. Shorthand sets fields as you type — <code>!high</code> <code>!med</code> <code>!low</code> (<code>!!</code> for high), <code>#project</code>, <code>@tag</code> and a date word (<code>today</code>, <code>tomorrow</code>, a weekday, <code>next week</code>, <code>in 3 days</code>, <code>2026-12-24</code>). A preview under the bar shows what it understood; <kbd>Shift</kbd>+<kbd>Enter</kbd> adds the text exactly as typed.</span></div>
           <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Where it goes</strong>: a <code>#project</code> you type wins; otherwise the project you are viewing; otherwise the <strong>default project</strong> picked at the right end of the bar; otherwise Inbox. In <em>My Day</em> an undated task gets today's date.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-pointer"></i><span><strong>Click selects, double-click opens.</strong> A single click only selects a task. A <strong>double-click</strong> anywhere on it (list row or board card) opens it in the side panel; a double-click on the title text renames it instead. Cards and rows behave the same.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>Rename</strong>: double-click the title or a subtask’s text, or press <kbd>F2</kbd> on the selected task. <kbd>Enter</kbd> saves, <kbd>Esc</kbd> cancels.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">Selecting several tasks</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-object-group"></i><span><strong>Cmd/Ctrl+click</strong> adds or removes a task, <strong>Shift+click</strong> selects a range, <kbd>Cmd/Ctrl</kbd>+<kbd>A</kbd> selects every visible task. The title shows how many are selected.</span></div>
           <div class="help-row"><i class="fa-solid fa-layer-group"></i><span>The <strong>toolbar</strong> above the list — Complete, Priority, Due, Move to | Duplicate, Delete — acts on the whole selection (or on the one selected task) and is greyed out when nothing is selected. The right-click menu does the same.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">The row menu</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a task (or use its <strong>⋯</strong> button, or the <kbd>Menu</kbd> key / <kbd>Shift</kbd>+<kbd>F10</kbd>) for Open details, Mark complete, then <strong>Priority</strong>, <strong>Status</strong>, <strong>Due</strong> and <strong>Move to</strong> as submenus, then Add subtask, Duplicate and Delete. It acts on the whole selection when you right-click a selected task, and never changes the selection.</span></div>
           <div class="help-row"><i class="fa-regular fa-calendar"></i><span><strong>Due</strong> offers Today, Tomorrow, Next week, Clear — and a <strong>date field</strong> for any other date. The same menu (with the same field) opens from the toolbar’s calendar button and from the Due cell.</span></div>
           <div class="help-row"><i class="fa-solid fa-rotate-left"></i><span><strong>Undo</strong>: <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> takes back the last edit or delete, and the toast that appears offers <em>Undo</em> too.</span></div>
+          </div>
         </div>
       </div>
       <div class="help-pane" id="helpPane-edit" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-edit" hidden>
         <div class="help-section">
           <div class="help-section-title">Priority, Status and Due</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-hand-pointer"></i><span><strong>Click a pill</strong> to change it where it is: Priority, Status and Due on a list row; Status and Due on a board card. A small menu opens with a tick on the current value. On the selected (blue) row the pills show a chevron, like a pop-up button.</span></div>
           <div class="help-row"><i class="fa-regular fa-calendar-plus"></i><span>A card or row <strong>without a due date</strong> shows a dash (list) or a dashed calendar chip on hover (board) — click it to set one.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Action buttons</strong> — Duplicate, Delete and ⋯ (plus Skip for repeating tasks) — appear at the right of a task’s line when you hover it or select it, on rows and on cards.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">The side panel</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-table-columns"></i><span>Double-click a task to open it in the <strong>side panel</strong>: project, status, priority, due date, tags, repeat, notes and the full subtask tree. It stays docked next to the list, so <kbd>↑</kbd> <kbd>↓</kbd> move through tasks and the panel follows. <kbd>Esc</kbd> or ✕ closes it.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-check"></i><span>Tick subtasks, add new ones in the <em>Add subtask</em> field and drag them to reorder — the panel works like the list.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">Sorting</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span>Click a <strong>column header</strong> (Task, Project, Priority, Status, Due) to sort ascending, again for descending, a third time to go back to <em>Smart order</em> (by priority, due date and status). Undated tasks stay last, and completed tasks sink to the bottom either way. The <strong>Sort</strong> menu in the toolbar picks a column too.</span></div>
+          </div>
         </div>
       </div>
       <div class="help-pane" id="helpPane-nest" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-nest" hidden>
         <div class="help-section">
           <div class="help-section-title">Four levels of detail</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-sitemap"></i><span>A task can hold <strong>subtasks</strong>, which hold <strong>steps</strong>, which hold <strong>sub-steps</strong> — four levels in all. Every level has its own round checkbox.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>Add one</strong>: select a task and press <kbd>Tab</kbd>, or right-click → <em>Add subtask</em>, or click the <strong>+</strong> that appears beside a line with no children; in the panel use the <em>Add subtask</em> field. <kbd>Enter</kbd> adds it, <kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd> in the new field nests it one level deeper or back out.</span></div>
           <div class="help-row"><i class="fa-solid fa-chevron-down"></i><span>The <strong>chevron</strong> left of a line collapses or opens its children. The double-chevron button above the list folds every task at once; {K("Space")} folds the selected task.</span></div>
           <div class="help-row"><i class="fa-solid fa-grip-lines"></i><span><strong>Drag</strong> a line to reorder it — the whole line is the handle. Subtasks and steps can also move between parents; sub-steps only reorder within their own step. The indent / outdent buttons that appear on hover change a line’s level.</span></div>
           <div class="help-row"><i class="fa-solid fa-layer-group"></i><span>Board cards show subtasks too, but they stay lighter: you can tick, rename and add subtasks there, while steps and sub-steps are read and tick only.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">Repeating tasks</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-repeat"></i><span>Set <strong>Repeat</strong> in the side panel: daily, weekly, monthly or yearly, every N, on chosen weekdays, with an optional end date or a maximum number of times.</span></div>
           <div class="help-row"><i class="fa-solid fa-forward-step"></i><span><strong>Completing</strong> a repeating task moves it to its next date and resets its subtasks instead of finishing it; the <strong>Skip</strong> button on its line does the same without completing. Undo brings the old date back.</span></div>
+          </div>
         </div>
       </div>
       <div class="help-pane" id="helpPane-views" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-views" hidden>
         <div class="help-section">
           <div class="help-section-title">Finding your way</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-inbox"></i><span>The <strong>sidebar</strong> lists All Tasks, My Day (due today), This Week, Overdue, then your projects and a collapsible Tags list, each with a count.</span></div>
           <div class="help-row"><i class="fa-solid fa-table-list"></i><span><strong>List</strong> shows one line per task with Project, Priority, Status and Due columns. <strong>Board</strong> shows cards in columns — switch with the List / Board buttons, and choose <strong>Project | Status</strong> to decide what the columns are. Dragging a card to another column changes that field.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) matches titles, notes, subtasks and tags. <strong>Filter</strong> narrows by status, priority and tag; a count appears on the button and ✕ clears it. <strong>Sort</strong> picks the order.</span></div>
           <div class="help-row"><i class="fa-regular fa-eye"></i><span>The small slider icon beside <strong>+</strong> in the Projects heading chooses which projects appear in All Tasks and as board columns.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">Sidebar</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-window-maximize"></i><span>The sidebar button at the top left, or <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, hides and shows the sidebar. In a narrow window it starts hidden and floats over the list; choosing a project closes it again.</span></div>
+          </div>
         </div>
       </div>
       <div class="help-pane" id="helpPane-org" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-org" hidden>
         <div class="help-section">
           <div class="help-section-title">Projects</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-folder-plus"></i><span>Create projects with <strong>+</strong> in the sidebar; each gets an icon. <strong>Inbox</strong> always exists and catches tasks with no project.</span></div>
           <div class="help-row"><i class="fa-solid fa-trash-can"></i><span>Deleting a project moves its <strong>open tasks to Inbox</strong> so they can be triaged; its completed tasks are kept out of the way but still show in All Tasks, My Day, This Week, Overdue and search.</span></div>
           <div class="help-row"><i class="fa-regular fa-folder-open"></i><span>The <strong>default project</strong> for quick-add is the picker at the right end of the Add a task bar. When you are viewing a project it shows that one (greyed) instead.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">Tags</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-tag"></i><span>Tags (<em>waiting on</em>, <em>deep work</em>, <em>someday</em>) are added to a task as chips in the side panel. On a list row they show as pills next to the title, on a board card as coloured strips. Click one in the sidebar to filter by it.</span></div>
+          </div>
         </div>
       </div>
       <div class="help-pane" id="helpPane-look" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-look" hidden>
         <div class="help-section">
           <div class="help-section-title">Look and feel</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-font"></i><span>The <strong>aA</strong> button in the top bar opens <strong>Appearance</strong>: <em>Text size</em> (Medium or Large) and <em>Theme</em> — Light, Dark, or Auto, which follows your system and switches live.</span></div>
           <div class="help-row"><i class="fa-solid fa-display"></i><span>These are <strong>per-device</strong> choices — saved in this browser, not in your data file — so each machine can follow its own system. The same goes for the sidebar state, the board grouping and the default project.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span>The top bar and sidebar are frosted glass over a soft backdrop; the list, board and side panel are flat and opaque. With <em>Reduce transparency</em> or <em>Increase contrast</em> on in your system settings the glass becomes solid.</span></div>
+          </div>
         </div>
       </div>
       <div class="help-pane" id="helpPane-data" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-data" hidden>
         <div class="help-section">
           <div class="help-section-title">Where your tasks live</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-hard-drive"></i><span>Everything is stored <strong>in this browser</strong> on this device (localStorage). There is no server and no account.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Link file</strong> (Chrome or Edge) saves every change to a real <code>.json</code> file on your disk, so your tasks survive a cleared browser and can be shared through a synced folder. The top-bar chip shows <em>Link file</em> (not linked), <em>Linked</em>, or <em>Reconnect</em> when the browser needs your permission again.</span></div>
           <div class="help-row"><i class="fa-solid fa-check-double"></i><span>If two copies changed, they are <strong>merged</strong>: the newer edit of a task wins, and something you deleted stays deleted even when an older copy elsewhere still has it.</span></div>
+          </div>
         </div>
         <div class="help-divider"></div>
         <div class="help-section">
           <div class="help-section-title">Backups and moving data</div>
+          <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-download"></i><span>The <strong>Data</strong> menu (drive icon, top right) can <strong>export</strong> a backup file, <strong>import</strong> one — merging with or replacing what you have (a replace backs up first) — and open <strong>Backups</strong>.</span></div>
           <div class="help-row"><i class="fa-regular fa-clock"></i><span><strong>Daily snapshots</strong> of the last seven days are kept automatically; pick one under Data → Backups to restore it.</span></div>
+          </div>
           <div class="help-tip"><strong>Nothing leaves your machine.</strong> There is no server, no account and no admin rights are needed. Link a file to be safe against clearing browser data.</div>
         </div>
       </div>
@@ -1353,13 +1394,18 @@
 
 <!-- Shortcuts modal -->
 <div class="modal-bg" id="shortcutsModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" style="width:340px;gap:16px">
-    <div style="display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:15px;font-weight:500"><i class="fa-solid fa-keyboard" style="margin-right:8px;color:var(--text-3)"></i>Keyboard shortcuts</div>
-      <button class="btn btn-sm" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button>
+  <div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="scTitle" onkeydown="helpModalKey(event,'shortcutsModalBg','scSearch')">
+    <div class="help-layout">
+      <div class="help-side">
+        <div class="help-side-top"><button type="button" class="help-close" aria-label="Close keyboard shortcuts" title="Close (Esc)" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="help-search-bar"><div class="help-search-field"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" id="scSearch" placeholder="Search" aria-label="Search shortcuts (press / to jump here)" autocomplete="off" oninput="scSearch(this.value)" onkeydown="scSearchKey(event)"></div></div>
+        <div class="help-nav" id="scNav" role="tablist" aria-orientation="vertical" onkeydown="scTabKey(event)"></div>
+      </div>
+      <div class="help-main">
+        <div class="help-toolbar"><h3 id="scTitle">Keyboard shortcuts</h3></div>
+        <div class="help-panes" id="scPanes"></div>
+      </div>
     </div>
-    <div style="height:0.5px;background:var(--border)"></div>
-    <div id="shortcutsBody" style="display:flex;flex-direction:column;gap:2px"></div>
   </div>
 </div>
 
@@ -4075,44 +4121,81 @@ function confirmModalAction(){
 // Shared by the Shortcuts modal and the Help modal's condensed shortcuts
 // section — platform-aware modifier key labels (⌘/⇧ on Mac, Ctrl/Shift
 // elsewhere), grouped the same way both places.
-function shortcutsListHtml(){
+// ── Keyboard shortcuts dialog: the same System-Settings layout as Help — groups in the sidebar, a grouped list of rows per group ──
+function shortcutGroups(){
   const mac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const mod = mac ? '⌘' : 'Ctrl';
-  const shift = mac ? '⇧' : 'Shift';
-  const k = (...keys)=>keys.map(x=>`<kbd>${x}</kbd>`).join('');
-  const row = (label, ...keys)=>`<div class="shortcut-row"><span>${label}</span><div class="shortcut-keys">${k(...keys)}</div></div>`;
-  const group = label=>`<div class="shortcut-group-label">${label}</div>`;
+  const mod = mac ? '⌘' : 'Ctrl', shift = mac ? '⇧' : 'Shift';
   return [
-    group('Navigation'),
-    row('Focus search', '/'),
-    row('Focus quick-add', 'N'),
-    row('Show or hide the sidebar', mod, 'B'),
-    row('Navigate tasks', '↑', '↓'),
-    row('Jump from the quick-add field into the list, and back', '↓', '↑'),
-    row('Open selected task', '↵'),
-    group('Task actions'),
-    row('Collapse/expand selected task (list view)', 'Space'),
-    row('Add subtask to selected task', 'Tab'),
-    row('Delete selected task', 'Delete'),
-    row('Undo last delete or edit', mod, 'Z'),
-    group('Selection'),
-    row('Multi-select tasks', mod, 'Click'),
-    row('Range-select tasks', shift, 'Click'),
-    row('Select all visible tasks', mod, 'A'),
-    group('General'),
-    row('Open a task', 'Double-click'),
-    row('Rename the selected task', 'F2'),
-    row('Open the row menu', 'Right-click'),
-    row('Rename title or subtask', 'Double-click text'),
-    row('Change priority, status or due date', 'Click its badge'),
-    row('Show shortcuts', '?'),
-    row('Close drawer/modal, clear selection', 'Esc'),
-    group('In the Help window'),
-    row('Switch topic', '↑', '↓'),
-    row('Into the text / back to the topics', '→', '←'),
-    row('Search help', '/'),
-  ].join('');
+    { id:'nav', label:'Navigation', icon:'fa-solid fa-compass', rows:[
+      ['Focus search', ['/']], ['Focus quick-add', ['N']], ['Show or hide the sidebar', [mod,'B']], ['Navigate tasks', ['↑','↓']],
+      ['Jump from the quick-add field into the list, and back', ['↓','↑']], ['Open selected task', ['↵']] ] },
+    { id:'actions', label:'Task actions', icon:'fa-solid fa-list-check', rows:[
+      ['Collapse/expand selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Delete selected task', ['Delete']],
+      ['Undo last delete or edit', [mod,'Z']] ] },
+    { id:'select', label:'Selection', icon:'fa-solid fa-object-group', rows:[
+      ['Multi-select tasks', [mod,'Click']], ['Range-select tasks', [shift,'Click']], ['Select all visible tasks', [mod,'A']] ] },
+    { id:'general', label:'General', icon:'fa-solid fa-sliders', rows:[
+      ['Open a task', ['Double-click']], ['Rename the selected task', ['F2']], ['Open the row menu', ['Right-click']],
+      ['Rename title or subtask', ['Double-click text']], ['Change priority, status or due date', ['Click its badge']],
+      ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
+    { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
+      ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
+  ];
 }
+let scGroups = [], scTab = 'nav', scSearching = false;
+const scRowHtml = ([label, keys])=>`<div class="sc-row"><span>${esc(label)}</span><span class="sc-keys">${keys.map(x=>`<kbd>${esc(x)}</kbd>`).join('')}</span></div>`;
+function renderShortcutsDialog(){
+  scGroups = shortcutGroups();
+  document.getElementById('scNav').innerHTML = scGroups.map(g=>`<button type="button" role="tab" id="scTab-${g.id}" aria-controls="scPane-${g.id}" aria-selected="false" tabindex="-1" onclick="setScTab('${g.id}')"><i class="${g.icon}"></i><span>${esc(g.label)}</span></button>`).join('');
+  document.getElementById('scPanes').innerHTML = `<div class="help-pane" id="scPane-search" role="region" tabindex="0" onkeydown="scPaneKey(event)" aria-label="Search results" aria-live="polite" hidden></div>`
+    + scGroups.map(g=>`<div class="help-pane" id="scPane-${g.id}" role="tabpanel" tabindex="0" onkeydown="scPaneKey(event)" aria-labelledby="scTab-${g.id}" hidden><div class="sc-list">${g.rows.map(scRowHtml).join('')}</div></div>`).join('');
+}
+function setScTab(id){
+  if(scSearching) clearScSearch();
+  if(!scGroups.some(g=>g.id===id)) id = scGroups[0].id;
+  scTab = id;
+  for(const g of scGroups){
+    const on = g.id === id, b = document.getElementById('scTab-' + g.id), p = document.getElementById('scPane-' + g.id);
+    if(!b || !p) continue;
+    b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; p.hidden = !on;
+  }
+  const t = document.getElementById('scTitle'); if(t) t.textContent = scGroups.find(g=>g.id===id).label;
+  const pane = document.getElementById('scPane-' + id); if(pane) pane.scrollTop = 0;
+}
+function scSearch(q){
+  const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean), res = document.getElementById('scPane-search');
+  if(!words.length){ scSearching = false; res.hidden = true; res.innerHTML = ''; setScTab(scTab); return; }
+  scSearching = true;
+  const rx = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), re = new RegExp(`(<[^>]*>)|(${words.map(rx).join('|')})`, 'gi');
+  let html = '', n = 0;
+  for(const g of scGroups){
+    const rows = g.rows.filter(([label, keys])=>words.every(w=>(label + ' ' + keys.join(' ')).toLowerCase().includes(w)));
+    if(!rows.length) continue;
+    n += rows.length;
+    html += `<div class="help-section"><div class="help-section-title"><button type="button" class="help-jump" onclick="clearScSearch();setScTab('${g.id}')" title="Open this group">${esc(g.label)} <i class="fa-solid fa-arrow-right"></i></button></div><div class="sc-list">${rows.map(r=>scRowHtml(r).replace(re, (m, tag)=>tag ? tag : `<mark>${m}</mark>`)).join('')}</div></div>`;
+  }
+  res.innerHTML = n ? html : `<div class="help-tip">No shortcut matches “${esc(q.trim())}”. Try fewer or different words.</div>`;
+  res.hidden = false;
+  for(const g of scGroups){ document.getElementById('scPane-' + g.id).hidden = true; const b = document.getElementById('scTab-' + g.id); b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); }
+  const t = document.getElementById('scTitle'); if(t) t.textContent = 'Search results';
+  res.scrollTop = 0;
+}
+function clearScSearch(){ const i = document.getElementById('scSearch'); if(i) i.value = ''; scSearching = false; const r = document.getElementById('scPane-search'); if(r) r.hidden = true; }
+function focusScPane(){ const p = document.querySelector('#shortcutsModalBg .help-pane:not([hidden])'); if(p && p.focus) p.focus(); }
+function focusScTab(){ document.getElementById('scTab-' + scTab)?.focus(); }
+function scSearchKey(e){
+  if(e.key==='Escape' && e.target.value){ e.preventDefault(); e.stopPropagation(); clearScSearch(); setScTab(scTab); }
+  else if(e.key==='ArrowDown'){ e.preventDefault(); focusScPane(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); focusScTab(); }
+}
+function scTabKey(e){
+  const k = e.key, ids = scGroups.map(g=>g.id), i = ids.indexOf(scTab);
+  if(k==='ArrowRight'){ e.preventDefault(); focusScPane(); return; }
+  const next = k==='ArrowDown' ? (i+1) % ids.length : k==='ArrowUp' ? (i + ids.length - 1) % ids.length : k==='Home' ? 0 : k==='End' ? ids.length - 1 : -1;
+  if(next < 0) return;
+  e.preventDefault(); setScTab(ids[next]); document.getElementById('scTab-' + ids[next]).focus();
+}
+function scPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.classList.contains('help-pane')){ e.preventDefault(); focusScTab(); } }
 // ── Help dialog (tabbed, with search — modelled on Milestone's) ────────────────
 const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'look', 'data'];
 const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', look: 'Appearance', data: 'Data & sync' };
@@ -4127,10 +4210,10 @@ function setHelpTitle(t){ const h = document.getElementById('helpTitle'); if(h) 
 function focusHelpPane(){ const p = document.querySelector('#helpModalBg .help-pane:not([hidden])'); if(p && p.focus) p.focus(); }
 function focusHelpTab(){ document.getElementById('helpTab-' + helpTab)?.focus(); }
 // Tab stays inside the dialog; "/" jumps to the search box (from anywhere in the dialog except a text field).
-function helpModalKey(e){
-  if(e.key==='/' && !(e.target && e.target.id==='helpSearch')){ e.preventDefault(); document.getElementById('helpSearch')?.focus(); return; }
+function helpModalKey(e, bgId='helpModalBg', searchId='helpSearch'){
+  if(e.key==='/' && !(e.target && e.target.id===searchId)){ e.preventDefault(); document.getElementById(searchId)?.focus(); return; }
   if(e.key!=='Tab') return;
-  const f = [...document.querySelectorAll('#helpModalBg .help-modal button, #helpModalBg .help-modal input, #helpModalBg .help-modal [tabindex="0"]')].filter(el=>el.tabIndex>=0 && !el.hidden && el.offsetParent!==null);
+  const f = [...document.querySelectorAll(`#${bgId} .help-modal button, #${bgId} .help-modal input, #${bgId} .help-modal [tabindex="0"]`)].filter(el=>el.tabIndex>=0 && !el.hidden && el.offsetParent!==null);
   if(!f.length) return;
   const first = f[0], last = f[f.length-1];
   if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
@@ -4149,7 +4232,7 @@ function helpSearch(q){
     const rows = [...document.querySelectorAll(`#helpPane-${t} .help-row`)].filter(r=>words.every(w=>r.textContent.toLowerCase().includes(w)));
     if(!rows.length) continue;
     n += rows.length;
-    html += `<div class="help-section"><div class="help-section-title"><button type="button" class="help-jump" onclick="clearHelpSearch();setHelpTab('${t}')" title="Open this topic">${esc(HELP_TAB_LABELS[t])} <i class="fa-solid fa-arrow-right"></i></button></div>${rows.map(r=>`<div class="help-row">${r.innerHTML.replace(re, (m, tag)=>tag ? tag : `<mark>${m}</mark>`)}</div>`).join('')}</div>`;
+    html += `<div class="help-section"><div class="help-section-title"><button type="button" class="help-jump" onclick="clearHelpSearch();setHelpTab('${t}')" title="Open this topic">${esc(HELP_TAB_LABELS[t])} <i class="fa-solid fa-arrow-right"></i></button></div><div class="help-list">${rows.map(r=>`<div class="help-row">${r.innerHTML.replace(re, (m, tag)=>tag ? tag : `<mark>${m}</mark>`)}</div>`).join('')}</div></div>`;
   }
   res.innerHTML = n ? html : `<div class="help-tip">Nothing in Help matches “${esc(q.trim())}”. Try fewer or different words.</div>`;
   res.hidden = false; setHelpTitle('Search results');
@@ -4182,8 +4265,9 @@ function helpTabKey(e){   // arrow keys / Home / End move between the topics, li
   e.preventDefault(); setHelpTab(HELP_TABS[next]); document.getElementById('helpTab-' + HELP_TABS[next]).focus();
 }
 function openShortcutsModal(){
-  document.getElementById('shortcutsBody').innerHTML = shortcutsListHtml();
+  renderShortcutsDialog(); clearScSearch(); setScTab(scTab);
   document.getElementById('shortcutsModalBg').classList.add('open');
+  if(typeof setTimeout==='function') setTimeout(()=>{ focusScTab(); }, 30);
 }
 function openAboutModal(){ document.getElementById('aboutModalBg').classList.add('open'); }
 function openFileSyncModal(reconnectHandle){
