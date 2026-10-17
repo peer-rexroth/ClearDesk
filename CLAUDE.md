@@ -286,7 +286,10 @@ parity.
   Apple's apps a pop-up isn't left ringed after a mouse choice:
   `releaseSelectAfterPointerChange` blurs a `<select>` on `change` only when the
   last input was a pointer (`lastInputWasPointer`), so a keyboard user stepping
-  through options with the arrow keys keeps focus. The same modality toggles `html.kbd-input`, and a select shows the
+  through options with the arrow keys keeps focus. The browser's own **blue** `outline: auto` on a `<select>` is switched
+  off unconditionally (`select:focus-visible { outline: none }`): Chromium paints it after a
+  plain mouse click, and the custom neutral ring only exists under `html.kbd-input`, so
+  before this rule a clicked dropdown was left with a system-blue border. The same modality toggles `html.kbd-input`, and a select shows the
   ring only under it — Chromium treats a *mouse click* on a `<select>` as
   `:focus-visible`, so without this the ring appeared on click. The `:where()` around the
   `:not([type=…])` exclusions keeps the selector at specificity (0,1,1) so

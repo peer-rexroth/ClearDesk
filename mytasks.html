@@ -782,6 +782,11 @@
   :is([role="button"], [role="checkbox"], .btn, .icon-btn, .tool-btn, .view-switch-btn, .f-chip, .th-sort):focus-visible {
     outline: 2px solid color-mix(in srgb, var(--focus) 60%, transparent); outline-offset: 2px;
   }
+  /* The browser's own blue focus outline on a <select> must never show. Chromium treats a
+     *mouse click* on a select as :focus-visible and paints `outline: auto` in the system
+     blue; the custom neutral ring above only applies under html.kbd-input, so without this
+     the blue outline was left behind after a plain click. */
+  select:focus-visible, select:focus { outline: none; }
   /* the borderless fields that live inside another surface */
   .quickadd input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
   .quickadd:has(#quickAddInput:focus-visible) { border-color: color-mix(in srgb, var(--focus) 50%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent); }
