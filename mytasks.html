@@ -241,6 +241,14 @@
   .task-subtask-row .mini-check i { font-size: 7px; color: #fff; opacity: 0; }
   .task-subtask-row .mini-check.checked i { opacity: 1; }
   .task-subtask-row.done { text-decoration: line-through; color: var(--text-3); }
+  /* Subtask rows follow the task row: round checkboxes (same shape and green as the task checkbox, just smaller), and the
+     "+ add a step" affordance of a row without children shows on hover/focus only, so the list reads as checkbox + text. */
+  .task-subtask-row .mini-check, .drawer .subtask-row .sub-check { border-radius: 50%; width: 16px; height: 16px; background: var(--bg); }
+  .task-subtask-row .mini-check.checked, .drawer .subtask-row .sub-check.checked { box-shadow: 0 0 0 2.5px var(--green-bg); }
+  .task-subtask-row .mini-check i, .drawer .subtask-row .sub-check i { font-size: 8px; }
+  .task-subtask-add-row::before, .add-row::before { border-radius: 50% !important; }
+  #taskList .task-subtask-row .subtask-toggle:has(.fa-plus) { opacity: 0; }
+  #taskList .task-subtask-row:is(:hover, :focus-within) .subtask-toggle:has(.fa-plus) { opacity: 1; }
   .task-subtask-row span { cursor: text; }
   .board-card .task-subtask-row span { flex: 1; }
   .task-subtask-text-input { flex: 1; font-size: 13px; font-family: var(--font); border: 0.5px solid var(--border-2); border-radius: 4px; padding: 1px 5px; background: var(--bg); color: var(--text); outline: none; min-width: 60px; }
@@ -783,7 +791,7 @@
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea):not(.cell-pop *) { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.55); caret-color: #fff; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, textarea):not(.cell-pop *)::placeholder { color: rgba(255,255,255,.72); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check { background: transparent; border-color: rgba(255,255,255,.75); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked { background: #fff; border-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked { background: #fff; border-color: #fff; box-shadow: none; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
 
   /* ── Selection toolbar (a capsule group that acts on the selection) ─────── */
@@ -845,6 +853,27 @@
   .task-subtask-add-row:focus-within, .add-row:focus-within { background: var(--bg-2); }
   .task-subtask-add-row input, .add-row input { flex: 1; width: auto; min-width: 0; border: 0; border-radius: 0; background: transparent; padding: 2px 0; font-size: 14px; box-shadow: none; }
   .task-subtask-add-row input::placeholder, .add-row input::placeholder { color: var(--text-3); }
+  /* In the detail panel these inputs sit inside .field, whose boxed-input rule out-ranks the ghost style above
+     (so the step/subtask add fields rendered as bordered boxes next to a ghost row). Re-assert the ghost look
+     there, and line the ghost checkbox up with the real ones (16px, 8px gap, after the 18px handle column). */
+  html[data-scheme="glass"] .drawer :is(.task-subtask-add-row, .add-row) input[type=text] { border: 0; border-radius: 0; background: transparent; padding: 2px 0; box-shadow: none; font-size: 14px; }
+  .drawer :is(.task-subtask-add-row, .add-row) { gap: 8px; padding: 4px 6px 4px 24px; margin-top: 2px; }   /* 24 = chevron column (16) + gap (8): the ghost checkbox sits under the real ones */
+  /* Panel rows laid out like the list's: expand chevron in a 16px column LEFT of the checkbox (rows without one keep the
+     column empty so checkboxes line up), and
+     text is the list's size and secondary grey. The "+" (no children yet) shows on hover/focus only, as in the list. */
+  .drawer .subtask-row { position: relative; }
+  .drawer .subtask-row .sub-drag-handle { display: none; }   /* the list has no grip; the whole row drags in both places */
+  .drawer .subtask-row > .sub-check { margin-left: 16px; }
+  .drawer .subtask-row > .sub-step-toggle { width: 16px; padding: 2px 0; font-size: 10px; text-align: center; }
+  .drawer .subtask-row > .sub-step-toggle + .sub-check { margin-left: 0; }
+  .drawer .subtask-row .sub-step-toggle:has(.fa-plus) { opacity: 0; }
+  .drawer .subtask-row:is(:hover, :focus-within) .sub-step-toggle:has(.fa-plus) { opacity: 1; }
+  .drawer .subtask-row .sub-text { font-size: 14px; color: var(--text-2); }
+  .drawer .subtask-row.done .sub-text { color: var(--text-3); }
+  .drawer :is(.task-subtask-add-row, .add-row)::before { width: 16px; height: 16px; }
+  /* row controls (indent/outdent) appear on hover or focus only; the expand toggle and delete keep their own behaviour */
+  .drawer .subtask-row .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 0; }
+  .drawer .subtask-row:is(:hover, :focus-within) .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 1; }   /* same :not() chain as the hide rule, or that out-ranks this */
   .task-subtask-add-row input:focus-visible, .add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
   /* on the solid selection colour */
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-subtask-add-row::before { border-color: rgba(255,255,255,.7); }
@@ -2633,11 +2662,11 @@ function renderDrawer(){
             ondragstart="handleHierarchyDragStart(event,'subtask','${s.id}')" ondragend="handleHierarchyDragEnd(event)"
             ondragover="handleHierarchyDragOver(event,'subtask','${s.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','subtask','${s.id}')">
             <i class="fa-solid fa-grip-vertical sub-drag-handle"></i>
+            <button class="icon-btn sub-step-toggle" onclick="toggleDrawerStepsPanel('${s.id}');this.blur()" title="${stepsOpen?'Hide':(stepCount>0?'Show':'Add')} steps"><i class="fa-solid fa-${toggleIcon}"></i></button>
             <div class="sub-check ${s.done?'checked':''} ${s.id===justCompletedSubId?'pop':''}" role="checkbox" aria-checked="${s.done}" aria-label="Mark subtask done" tabindex="0" onclick="toggleSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-check"></i></div>
             ${renamingSubtask && renamingSubtask.taskId===t.id && renamingSubtask.subId===s.id
               ? `<input spellcheck="true" type="text" class="sub-text-input" id="renameSubtaskInputDrawer" value="${esc(s.text)}" onblur="commitRenameSubtask('${t.id}','${s.id}', this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
               : `<div class="sub-text" ondblclick="startRenameSubtask('${t.id}','${s.id}','drawer')">${esc(s.text)}</div>`}
-            <button class="icon-btn sub-step-toggle" onclick="toggleDrawerStepsPanel('${s.id}');this.blur()" title="${stepsOpen?'Hide':(stepCount>0?'Show':'Add')} steps"><i class="fa-solid fa-${toggleIcon}"></i></button>
             <button class="icon-btn" onclick="demoteSubtaskToStep('${t.id}','${s.id}')" title="Make this a step of the subtask above"><i class="fa-solid fa-indent"></i></button>
             <button class="icon-btn sub-del" onclick="deleteSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-trash"></i></button>
           </div>
@@ -2652,11 +2681,11 @@ function renderDrawer(){
                 ondragstart="handleHierarchyDragStart(event,'step','${s.id}','${ss.id}')" ondragend="handleHierarchyDragEnd(event)"
                 ondragover="handleHierarchyDragOver(event,'step','${s.id}','${ss.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','step','${s.id}','${ss.id}')">
                 <i class="fa-solid fa-grip-vertical sub-drag-handle"></i>
+                <button class="icon-btn sub-step-toggle" onclick="toggleDrawerSubStepsPanel('${ss.id}');this.blur()" title="${subStepsOpen?'Hide':(subStepCount>0?'Show':'Add')} sub-steps"><i class="fa-solid fa-${subToggleIcon}"></i></button>
                 <div class="sub-check ${ss.done?'checked':''} ${ss.id===justCompletedSubSubId?'pop':''}" role="checkbox" aria-checked="${ss.done}" aria-label="Mark subtask done" tabindex="0" onclick="toggleSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-check"></i></div>
                 ${renamingSubSubtask && renamingSubSubtask.taskId===t.id && renamingSubSubtask.subId===s.id && renamingSubSubtask.subSubId===ss.id
                   ? `<input spellcheck="true" type="text" class="sub-text-input" id="renameSubSubtaskInputDrawer" value="${esc(ss.text)}" onblur="commitRenameSubSubtask('${t.id}','${s.id}','${ss.id}', this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
                   : `<div class="sub-text" ondblclick="startRenameSubSubtask('${t.id}','${s.id}','${ss.id}','drawer')">${esc(ss.text)}</div>`}
-                <button class="icon-btn sub-step-toggle" onclick="toggleDrawerSubStepsPanel('${ss.id}');this.blur()" title="${subStepsOpen?'Hide':(subStepCount>0?'Show':'Add')} sub-steps"><i class="fa-solid fa-${subToggleIcon}"></i></button>
                 <button class="icon-btn" onclick="demoteStepToSubSubtask('${t.id}','${s.id}','${ss.id}')" title="Make this a sub-step of the step above"><i class="fa-solid fa-indent"></i></button>
                 <button class="icon-btn" onclick="promoteStepToSubtask('${t.id}','${s.id}','${ss.id}')" title="Make this its own subtask"><i class="fa-solid fa-outdent"></i></button>
                 <button class="icon-btn sub-del" onclick="deleteSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-trash"></i></button>

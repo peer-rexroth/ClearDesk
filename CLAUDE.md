@@ -325,6 +325,22 @@ parity.
   `:focus-visible`, so without this the ring appeared on click. The `:where()` around the
   `:not([type=…])` exclusions keeps the selector at specificity (0,1,1) so
   the per-surface overrides can out-rank it.
+- **Subtask rows follow the task row.** Subtask/step/sub-step checkboxes (`.mini-check` in the
+  list and board, `.sub-check` in the panel) and the ghost add-row checkbox are *round* like
+  `.task-checkbox`, just smaller; a checked one on the blue selected row is white with no green halo.
+  In the list the "+ add a step" toggle of a row without children shows on hover/focus only
+  (`.subtask-toggle:has(.fa-plus)`); chevrons for rows that have children stay visible.
+- **Detail panel add fields.** The panel's add inputs live inside `.field`, whose boxed-input
+  rule (`.field input[type=text]`, plus the Glass copy) out-ranks the ghost style, so they showed as
+  bordered boxes beside a ghost row. A `.drawer`-scoped rule at higher specificity restores the ghost
+  look and sizes the ghost checkbox like the real ones (16px, 8px gap, 18px handle column) so every
+  level lines up. Indent/outdent buttons on panel rows show on hover/focus only; the expand toggle and
+  delete keep their own behaviour. When overriding the hide rule, repeat its `:not()` chain.
+  Panel rows are laid out like the list's: the expand chevron sits in a 16px column *left* of the checkbox
+  (the toggle button is rendered before `.sub-check`; rows without one, i.e. sub-steps, keep the column
+  empty via `margin-left:16px`), the grip handle is hidden (the list has none; the whole row drags in both),
+  text is 14px secondary grey, and a "+" toggle shows on hover only. Ghost add rows use `padding-left:24px`
+  (chevron column + gap) so their checkbox sits under the real ones.
 - **Inline add fields are a "ghost row"** (`.task-subtask-add-row`, `.add-row`):
   no box and no dashed border — a faint empty checkbox (`::before`), then the
   borderless input, with the placeholder muted and a very light tint on
