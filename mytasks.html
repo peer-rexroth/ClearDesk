@@ -465,11 +465,14 @@
   .task-cell.editable:hover .badge:not(.cell-pop .badge), .cell-host.editable:hover .badge:not(.cell-pop .badge) { filter: brightness(1.14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent); }
   .task-cell.editable:hover .task-cell-empty { background: var(--bg-3); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
   .cell-host { display: inline-flex; }
-  .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 170px; display: flex; flex-direction: column; gap: 2px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
+  .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 150px; display: flex; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
   .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
-  .cell-pop-opt:hover { background: var(--bg-3); }
-  .cell-pop-opt.current { background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--border-2); }
+  .cell-pop-opt:hover { background: var(--sel-bg, var(--bg-3)); color: #fff; }
+  .cell-pop-opt .pop-check { width: 18px; font-size: 11px; visibility: hidden; flex: none; }
+  .cell-pop-opt.current .pop-check { visibility: visible; }
+  .cell-pop-opt .pop-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: none; }
+  .cell-pop-opt:hover .pop-dot { box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
 
@@ -740,7 +743,7 @@
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox { background: transparent; border-color: rgba(255,255,255,.75); box-shadow: none; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked { background: #fff; border-color: #fff; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked i { color: var(--sel-bg); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover,
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover { background: #fff; color: var(--sel-bg); }   /* solid white disc, blue glyph: translucent white on the blue fill was ~2:1 */
   /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
      the cell says "pop-up button" the way a native one does — a small chevron on the pill,
      shown on the selected row/card only so the rest of the list stays calm. (The pill grows
@@ -3717,12 +3720,16 @@ function isoAddDays(iso, n){
 }
 function isoWeekday(iso){ const [y,m,d] = iso.split('-').map(Number); return new Date(y,m-1,d).getDay(); }
 function closeCellPop(){ const el = document.getElementById('cellPop'); if(el && el.remove) el.remove(); }
+// Native-menu rows: a tick column (current value), a colour dot, plain text.
+const PRIORITY_DOT = { high:'var(--red-text)', medium:'var(--amber-text)', low:'var(--teal-text)' };
+const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var(--green-text)' };
+function popOptInner(dot, label){ return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span><span class="pop-dot" style="background:${dot}"></span>${esc(label)}`; }
 function cellPopOptionsHtml(t, field){
   if(field==='priority'){
-    return PRIORITIES.map(p=>`<button type="button" class="cell-pop-opt${t.priority===p.id?' current':''}" onclick="pickCell(event,'${t.id}','priority','${p.id}')"><span class="badge badge-priority-${p.id}">${esc(p.label)}</span></button>`).join('');
+    return PRIORITIES.map(p=>`<button type="button" class="cell-pop-opt${t.priority===p.id?' current':''}" onclick="pickCell(event,'${t.id}','priority','${p.id}')">${popOptInner(PRIORITY_DOT[p.id], p.label)}</button>`).join('');
   }
   if(field==='status'){
-    return STATUSES.map(s=>`<button type="button" class="cell-pop-opt${t.status===s.id?' current':''}" onclick="pickCell(event,'${t.id}','status','${s.id}')"><span class="badge badge-status-${s.id}">${esc(s.label)}</span></button>`).join('');
+    return STATUSES.map(s=>`<button type="button" class="cell-pop-opt${t.status===s.id?' current':''}" onclick="pickCell(event,'${t.id}','status','${s.id}')">${popOptInner(STATUS_DOT[s.id], s.label)}</button>`).join('');
   }
   const today = todayStr();
   const q = (label, iso)=>`<button type="button" class="cell-pop-opt" onclick="pickCell(event,'${t.id}','dueDate',${iso?`'${iso}'`:'null'})">${label}</button>`;

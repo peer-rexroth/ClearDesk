@@ -203,6 +203,9 @@ parity.
   goes through `updateTaskField`, so undo, `completedAt` and the recurring-task
   path behave exactly as in the drawer. Board cards expose Status and Due the
   same way (Priority there is the flag icon only).
+- **Cell popovers are native-style menus** (`popOptInner`): a tick column for the current
+  value, a colour dot (`PRIORITY_DOT`/`STATUS_DOT`) and plain text; hover fills the row with
+  `--sel-bg` and white text, as in a macOS pop-up. The coloured pills stay in the list itself.
 - **Quick-add shorthand** (`parseQuickAdd`, live preview in `#quickAddPreview`):
   `!high/!med/!low` (`!!`, `!h`…), `#project`, `@tag`, and a date word
   (today, tomorrow, weekday, next week, in N days/weeks, YYYY-MM-DD). Unknown
