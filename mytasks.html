@@ -360,10 +360,10 @@
   .task-row.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
 
   .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 14px 20px; }
-  .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 170px 100px 120px 130px 76px; min-width: max-content; }
+  .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 170px 100px 120px 130px; min-width: 880px; }   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
-  .task-row { display: grid; grid-template-areas: "check title project priority status due del" ". sub sub sub sub sub ."; column-gap: 10px; row-gap: 6px; align-items: center; padding: 10px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
+  .task-row { display: grid; grid-template-areas: "check title project priority status due" ". sub sub sub sub sub"; column-gap: 10px; row-gap: 6px; align-items: center; padding: 10px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
   html[data-density="compact"] .task-row { padding: 3px 10px; row-gap: 2px; }
   .task-row:hover { background: var(--bg); border-color: var(--border); }
   .task-row:hover .row-actions { opacity: 1; }
@@ -420,7 +420,12 @@
   .badge-due.today { background: var(--amber-bg); color: var(--amber-text); }
   .badge-project { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-2); white-space: nowrap; }
   .badge-project .picon { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
-  .row-actions { grid-area: del; display: flex; justify-content: flex-end; gap: 2px; opacity: 0; margin-top: 1px; margin-left: -12px; }
+  /* Row actions are an overlay inside the Task cell, not a grid column (after
+     Milestone): a small capsule at the cell's right end, shown on the row you last
+     clicked, on hover and when focus is inside the row. Invisible rows take no
+     clicks (pointer-events), so the capsule never swallows a click on the title. */
+  .task-main { position: relative; }
+  .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity .1s ease; }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
   .empty-state i { font-size: 30px; margin-bottom: 10px; display: block; opacity: .5; }
@@ -749,7 +754,7 @@
   /* With the panel open the list loses ~420px: drop the Project column (it is
      in the panel) and tighten the rest so Priority/Status/Due stay visible. */
   .layout:has(.drawer.open) .task-list-header,
-  .layout:has(.drawer.open) .task-row { grid-template-columns: 44px minmax(150px,1fr) 0 96px 110px 90px 64px; column-gap: 8px; }
+  .layout:has(.drawer.open) .task-row { grid-template-columns: 44px minmax(150px,1fr) 0 96px 110px 90px; column-gap: 8px; min-width: 560px; }
   .layout:has(.drawer.open) .task-row > .task-cell:not(.priority):not(.status):not(.due),
   .layout:has(.drawer.open) .task-list-header > :nth-child(3) { visibility: hidden; overflow: hidden; }
   body:has(.drawer.open) .toast { right: auto; left: 24px; }
@@ -773,7 +778,6 @@
   .row-menu-chip:hover { background: var(--bg-3); }
   .row-menu-chip.current { border-color: var(--border-2); background: var(--bg-2); }
   .row-menu-chip i { color: var(--text-3); font-size: 12px; }
-  @media (hover: none) { .row-actions { opacity: 1; } }
 
   .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border: 1px solid var(--purple-text); border-radius: 14px; background: transparent; color: var(--purple-text); font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; }
   .sel-chip:hover { background: var(--purple-bg); }
@@ -1020,6 +1024,59 @@
 
   /* a little air between the expand chevron and the checkbox circle */
   .task-check-cell { gap: 6px; }
+
+  /* ── One focus style (replaces the browser's default ring) ────────────────────
+     Neutral, like the Graphite accent on macOS: text inputs, selects and
+     textareas get a border and a soft 3px halo in the text colour (50% / 16%),
+     which keeps ≥3:1 against the surface in light and dark without a saturated
+     blue. !important because many component rules set border-color/outline per
+     element (and `.field input:focus` out-ranks any selector short of that); the
+     focus indicator must always win, and it is never removed, only restyled.
+     Clickable non-<input> things (badge cells, header sorts, buttons, chips) get a
+     2px outline for keyboard focus only (:focus-visible), as Apple does. --focus is
+     --text, so it follows every scheme and theme. */
+  :root { --focus: var(--text); }
+  :is(input:where(:not([type=checkbox]):not([type=radio]):not([type=file])), textarea):focus-visible,
+  html.kbd-input select:focus-visible {   /* :where() keeps the exclusions at zero specificity, so the per-surface overrides below can out-rank this; selects only ring after a key press (Chromium counts a mouse click on a <select> as :focus-visible) */
+    outline: none !important;
+    border-color: color-mix(in srgb, var(--focus) 50%, transparent) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent) !important;
+  }
+  :is([role="button"], [role="checkbox"], .btn, .icon-btn, .tool-btn, .view-switch-btn, .f-chip, .th-sort):focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--focus) 60%, transparent); outline-offset: 2px;
+  }
+  /* the borderless fields that live inside another surface */
+  .quickadd input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+  .quickadd:has(#quickAddInput:focus-visible) { border-color: color-mix(in srgb, var(--focus) 50%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent); }
+  .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 color-mix(in srgb, var(--focus) 55%, transparent) !important; border-color: transparent !important; border-radius: 0; }
+  /* inside a selected (blue) row the neutral ring would vanish: use white */
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea):focus-visible { border-color: #fff !important; box-shadow: 0 0 0 3px rgba(255,255,255,.4) !important; }
+
+  /* ── Ghost row: inline "add subtask / step / sub-step" fields ──────────────────
+     No box, no dashed border: the field looks like one more line in the list — a
+     faint empty checkbox, then the text you type, with the placeholder muted. Focus
+     is the caret plus a very light tint on the line (after Apple Reminders'
+     new-item row). Applies in the list, on board cards and in the side panel. */
+  .task-subtask-add-row, .add-row { display: flex; align-items: center; gap: 7px; margin-top: 2px; padding: 2px 6px 2px 2px; border-radius: 8px; }
+  .task-subtask-add-row::before, .add-row::before { content: ""; flex-shrink: 0; width: 14px; height: 14px; border: 1.5px solid var(--border-2); border-radius: 4px; opacity: .6; }
+  .add-row { padding-left: 18px; }   /* the panel's subtask rows start with a drag handle; line the ghost checkbox up with theirs */
+  .task-subtask-add-row:focus-within, .add-row:focus-within { background: var(--bg-2); }
+  .task-subtask-add-row input, .add-row input { flex: 1; width: auto; min-width: 0; border: 0; border-radius: 0; background: transparent; padding: 2px 0; font-size: 14px; box-shadow: none; }
+  .task-subtask-add-row input::placeholder, .add-row input::placeholder { color: var(--text-3); }
+  .task-subtask-add-row input:focus-visible, .add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+  /* on the solid selection colour */
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-subtask-add-row::before { border-color: rgba(255,255,255,.7); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-subtask-add-row:focus-within { background: rgba(255,255,255,.16); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-subtask-add-row input { background: transparent; border-color: transparent; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-subtask-add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+
+  .task-row:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
+  .task-row.kbd-selected .row-actions { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.3); }
+
+  /* the Task cell keeps the capsule's width free so a long title wraps before it
+     instead of running underneath; long unbroken words may break anywhere */
+  .task-main { padding-right: 96px; }
+  .task-title { overflow-wrap: anywhere; min-width: 0; }
 </style>
 </head>
 <body>
@@ -1160,7 +1217,7 @@
     </div>
     <div class="quickadd-preview" id="quickAddPreview"></div>
     <div class="task-list" id="taskListWrap">
-      <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span class="th-sort" data-col="alpha" role="button" tabindex="0" onclick="sortByColumn('alpha')" title="Sort by task name">Task<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="project" role="button" tabindex="0" onclick="sortByColumn('project')" title="Sort by project">Project<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="priority" role="button" tabindex="0" onclick="sortByColumn('priority')" title="Sort by priority">Priority<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="status" role="button" tabindex="0" style="margin-left:-4px" onclick="sortByColumn('status')" title="Sort by status">Status<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="due" role="button" tabindex="0" style="margin-left:-8px" onclick="sortByColumn('due')" title="Sort by due date">Due<i class="th-arrow fa-solid fa-chevron-up"></i></span><span style="margin-left:-12px"></span></div>
+      <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span class="th-sort" data-col="alpha" role="button" tabindex="0" onclick="sortByColumn('alpha')" title="Sort by task name">Task<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="project" role="button" tabindex="0" onclick="sortByColumn('project')" title="Sort by project">Project<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="priority" role="button" tabindex="0" onclick="sortByColumn('priority')" title="Sort by priority">Priority<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="status" role="button" tabindex="0" style="margin-left:-4px" onclick="sortByColumn('status')" title="Sort by status">Status<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="due" role="button" tabindex="0" style="margin-left:-8px" onclick="sortByColumn('due')" title="Sort by due date">Due<i class="th-arrow fa-solid fa-chevron-up"></i></span></div>
       <div id="taskList"></div>
     </div>
     <div class="board" id="board" style="display:none"></div>
@@ -2044,6 +2101,12 @@ function renderList(){
           ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInput" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
           : `<span class="task-title" onclick="event.stopPropagation()" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span>`}
         ${(t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('')}
+        <div class="row-actions">
+          ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
+          <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
+          <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+          <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+        </div>
       </div>
       <div class="task-cell"><span class="badge-project"${proj&&proj.name.length>20?` data-tooltip="${esc(proj.name)}"`:''}><i class="fa-solid fa-${proj?(proj.icon||'folder'):'folder'} picon"></i>${esc(proj?abbreviateName(proj.name):'')}</span></div>
       <div class="task-cell priority editable" role="button" tabindex="0" title="Change priority" onclick="openCellPop(event,'${t.id}','priority')"><span class="badge badge-priority-${t.priority}">${priorityLabel(t.priority)}</span></div>
@@ -2094,12 +2157,6 @@ function renderList(){
       `).join('')}${inlineAddSubtaskTaskId===t.id && !inlineAddParentSubId?`<div class="task-subtask-add-row" onclick="event.stopPropagation()">
         <input spellcheck="true" type="text" id="inlineSubtaskInput" placeholder="Add a subtask and press Enter…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubtask('${t.id}')} else if(event.key==='Tab'){event.preventDefault(); if(!event.shiftKey){indentInlineSubtaskInput('${t.id}');}}">
       </div>`:''}</div>`:''}
-      <div class="row-actions">
-        ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
-        <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
-        <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-        <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
-      </div>
     </div>`;
   }).join('') + (doneTotal>MAX_COMPLETED_SHOWN
     ? `<div class="show-more-row" onclick="toggleShowAllCompletedList()">${showAllCompletedList?'Show fewer completed':`Show ${hiddenCount} more completed`}</div>`
@@ -4173,6 +4230,20 @@ function closeNarrowSidebarOnNav(e){
   if(e.target.closest && e.target.closest('.sidebar .nav-item, .sidebar .project-row') && !e.target.closest('.project-actions')) collapseSidebarIfNarrow();
 }
 document.addEventListener('click', closeNarrowSidebarOnNav, true);
+// A pop-up menu must not stay ringed after a mouse choice (Apple's never do), but a
+// keyboard user stepping through a closed select with the arrow keys must keep
+// focus — so only release it when the last input was a pointer.
+let lastInputWasPointer = false;
+function noteInputModality(e){
+  lastInputWasPointer = e.type==='pointerdown' || e.type==='mousedown';
+  document.documentElement.classList?.toggle('kbd-input', !lastInputWasPointer);
+}
+function releaseSelectAfterPointerChange(e){
+  if(lastInputWasPointer && e.target && e.target.tagName==='SELECT' && e.target.blur) e.target.blur();
+}
+document.addEventListener('pointerdown', noteInputModality, true);
+document.addEventListener('keydown', noteInputModality, true);
+document.addEventListener('change', releaseSelectAfterPointerChange);
 function handleSidebarShortcut(e){
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && String(e.key).toLowerCase()==='b'){ e.preventDefault(); toggleSidebar(); }
 }

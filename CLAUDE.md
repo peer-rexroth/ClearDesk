@@ -266,6 +266,46 @@ parity.
   subtitle (`mainSubtitleText`): "N open · M overdue", plus "· K selected" for
   two or more. Cmd/Ctrl+click *extends* the current selection (the row selected
   by a plain click joins first), as in Mail/Finder.
+- **One focus style (neutral, after Apple).** The browser's default blue ring is
+  replaced everywhere. Inputs/selects/textareas get a border plus a soft 3px halo
+  in the *text colour* (50% / 16% — like macOS with the Graphite accent; ≥3:1 in
+  light and dark), via `:focus-visible` with `!important` (per-component rules set
+  `border-color`/`outline`, and `.field input:focus` out-ranks any normal
+  selector — the indicator is restyled, never removed). Clickable non-input
+  things (`[role=button]`, buttons, chips, `.th-sort`) get a 2px outline for
+  keyboard focus only. `--focus` is `--text`, so it follows every scheme/theme.
+  The quick-add bar rings as a whole (`:has(#quickAddInput:focus-visible)`), the
+  drawer title gets an underline, inputs inside a selected row use white. As in
+  Apple's apps a pop-up isn't left ringed after a mouse choice:
+  `releaseSelectAfterPointerChange` blurs a `<select>` on `change` only when the
+  last input was a pointer (`lastInputWasPointer`), so a keyboard user stepping
+  through options with the arrow keys keeps focus. The same modality toggles `html.kbd-input`, and a select shows the
+  ring only under it — Chromium treats a *mouse click* on a `<select>` as
+  `:focus-visible`, so without this the ring appeared on click. The `:where()` around the
+  `:not([type=…])` exclusions keeps the selector at specificity (0,1,1) so
+  the per-surface overrides can out-rank it.
+- **Inline add fields are a "ghost row"** (`.task-subtask-add-row`, `.add-row`):
+  no box and no dashed border — a faint empty checkbox (`::before`), then the
+  borderless input, with the placeholder muted and a very light tint on
+  `:focus-within` (after Apple Reminders' new-item row). It is the same in the list,
+  on board cards, in the panel and on the solid selection colour (white there).
+  The field is focused the moment it appears, so the global focus halo is switched
+  off for it — the caret and the tint are the focus indicator.
+- **Row actions are an overlay in the Task cell, not a grid column** (after
+  Milestone). `.row-actions` (Skip occurrence on repeating tasks, Duplicate,
+  Delete, ⋯) lives inside `.task-main` as a small capsule at the cell's right end,
+  visible on hover, on `:focus-within` and on the row last clicked
+  (`.kbd-selected`) — and *only* there, so a multi-selection doesn't sprout a
+  capsule on every row (the selection toolbar covers those). It has
+  `pointer-events:none` while invisible so it never swallows a click on the title.
+  The 7th grid column is gone from both the header and the rows (and from the
+  drawer-open override), and `.task-main` keeps 96px of right padding so a long
+  title wraps before the capsule instead of running under it.
+- **Row width is a fixed floor, not `max-content`.** The list rows/header used
+  `min-width: max-content`, which made any long title stretch *its own row* wider
+  than the header (every row is a separate grid), pushing that row's columns out
+  of line. They now use `min-width: 880px` (`560px` with the side panel open) and
+  titles wrap (`overflow-wrap:anywhere`).
 - **Collapsible sidebar**: the toggle (topbar, left) and **Cmd/Ctrl+B** flip
   `sidebarCollapsed` (per-device `mytasks_sidebar_collapsed`), applied as
   `html.sidebar-collapsed`. With no saved choice it starts collapsed at ≤800px,

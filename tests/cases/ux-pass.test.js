@@ -475,3 +475,24 @@ test('openTask still rebuilds the list when an inline add-subtask input was open
   assertTrue(document.getElementById('taskList').innerHTML !== 'SENTINEL', 'the open input has to be removed from the markup');
   activeTaskId = null; kbdSelectedTaskId = null;
 });
+
+// ── Focus: release a select after a mouse choice, never after the keyboard ──
+test('a select is released after a pointer-driven change but not a keyboard-driven one', function () {
+  let blurred = 0;
+  const sel = { tagName: 'SELECT', blur() { blurred++; } };
+  noteInputModality({ type: 'pointerdown' });
+  releaseSelectAfterPointerChange({ target: sel });
+  assertEqual(blurred, 1, 'mouse choice releases focus');
+  noteInputModality({ type: 'keydown' });
+  releaseSelectAfterPointerChange({ target: sel });
+  assertEqual(blurred, 1, 'stepping through options with the arrow keys keeps focus');
+  noteInputModality({ type: 'pointerdown' });
+  releaseSelectAfterPointerChange({ target: { tagName: 'INPUT', blur() { blurred++; } } });
+  assertEqual(blurred, 1, 'only selects are affected');
+  noteInputModality({ type: 'keydown' });
+  const cl = document.documentElement.classList;
+  noteInputModality({ type: 'pointerdown' });
+  assertFalse(cl.contains('kbd-input'), 'a pointer press clears the keyboard-input flag');
+  noteInputModality({ type: 'keydown' });
+  assertTrue(cl.contains('kbd-input'), 'a key press sets it, which is what lets a select show its ring');
+});
