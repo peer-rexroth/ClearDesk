@@ -455,7 +455,11 @@
   /* ── UX pass: inline cell editing, quick-add preview, sync banner,
      filter popover, appearance menu, collapsible tags ─────────────────── */
   .task-cell.editable, .cell-host.editable { position: relative; cursor: pointer; border-radius: var(--radius); }
-  .task-cell.editable:hover, .cell-host.editable:hover { background: var(--bg-3); outline: 4px solid var(--bg-3); }
+  /* Hovering an editable cell reacts on its pill only, never on the whole cell box:
+     the pill brightens and gets a soft pill-shaped halo (brightness works on every
+     badge colour, light and dark). An empty cell (just the dash) gets a small pill. */
+  .task-cell.editable:hover .badge, .cell-host.editable:hover .badge { filter: brightness(1.14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent); }
+  .task-cell.editable:hover .task-cell-empty { background: var(--bg-3); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
   .cell-host { display: inline-flex; }
   .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 170px; display: flex; flex-direction: column; gap: 2px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
@@ -731,8 +735,7 @@
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked i { color: var(--sel-bg); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover,
   /* hovering an editable cell in a selected row brightens just its pill, not the whole cell box */
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover { background: transparent; outline-color: transparent; }
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge { background: rgba(255,255,255,.38) !important; }
+  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge { background: rgba(255,255,255,.38) !important; filter: none; box-shadow: 0 0 0 3px rgba(255,255,255,.18); }
   .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: #fff; background: rgba(255,255,255,.24); border-radius: 999px; box-shadow: 0 0 0 4px rgba(255,255,255,.24); }
   .board-card.kbd-selected .board-card-priority-icon { color: #fff; }
   /* the Glass card style (html[data-scheme] .board-card) out-ranks .board-card.kbd-selected, so restate the fill at higher specificity */

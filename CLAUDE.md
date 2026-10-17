@@ -244,9 +244,11 @@ parity.
   descendants that read them. Badges are recoloured with `!important` (tag
   badges carry inline colours); the checkbox and icon-button hovers are
   overridden explicitly. There is no keyboard ring any more: a solid fill is
-  already the focus indicator. Hovering an editable cell in a selected row
-  brightens only its pill, not the whole cell box (unselected rows still show the
-  whole-cell halo).
+  already the focus indicator. Hovering an editable cell (Priority/Status/Due on
+  a row, Status/Due on a card) reacts on its **pill only**, in every row, never on
+  the whole cell box: the pill brightens (`filter: brightness`, which works on every
+  badge colour in both themes) and gets a soft pill-shaped halo; an empty cell shows
+  a small pill behind the dash. On a selected row the pill goes translucent white.
 - **Selection changes never rebuild the list.** `paintSelection()` toggles
   `kbd-selected`/`bulk-selected` on the rows/cards that already exist (then
   refreshes the bulk bar and toolbar); `handleRowClick`, `clearSelection` and
