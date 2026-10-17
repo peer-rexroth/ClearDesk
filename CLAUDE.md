@@ -516,8 +516,16 @@ still has one is simply ignored by `load()`).
 
 - **`data-theme`** (`light`/`dark`) is the only axis. It is set from the saved
   choice or the OS preference, and changed from the **Appearance** menu's
-  *Theme* control — plain **Light | Dark** text, no sun/moon icons (they were
-  removed at the user's request; don't reintroduce them).
+  *Theme* control: **Light | Dark** with thin outlined sun / crescent-moon icons
+  drawn in the SF Symbols idiom (`ICON_SUN`/`ICON_MOON`, inline SVG, `currentColor`).
+  The user disliked the heavy solid Font Awesome sun/moon, so don't swap those back.
+- **One density, one of two text sizes.** The density option is gone: compact is
+  the only layout (`.task-row` is `padding: 3px 10px; row-gap: 2px` in the base
+  rules — it used to be switched by `html[data-density="compact"]`, which is also
+  gone, along with `compactMode`/`mytasks_compact` and their save/load/sync
+  entries). Text size offers only **M (100%) and L (115%)** (`UI_SCALE_STEPS`);
+  Small and Extra Large were removed, and `clampUiScale` snaps a saved 90 to M
+  and a saved 130 to L so nobody is stranded on a size the control no longer has.
 - **`<html data-scheme="glass">`** is set in the markup and is now only a
   styling hook: every Glass selector is written `html[data-scheme="glass"] …`,
   and it is not toggled by script. Rewriting those to bare `html …` would lower
@@ -545,7 +553,8 @@ still has one is simply ignored by `load()`).
     a Glass rule, reach for those variables rather than hard-coding colors.
   - `backdrop-filter` can't see through a parent that has its own, so only
     body-level surfaces (topbar, sidebar, row menu, modals, toast, banner) blur;
-    popovers inside the content use the opaque `--glass-strong`.
+    popovers inside the content use the near-opaque `--glass-strong` (97%; at 88%
+    the content underneath ghosted through the Appearance menu).
   - The light and dark blocks must define the **same** variables (the light
     block would otherwise beat bare `html[data-theme="dark"]` for any variable
     only it sets).

@@ -37,10 +37,12 @@ test('setThemeMode switches light and dark, persists it, and does nothing if alr
   assertEqual(localStorage.getItem('mytasks_theme'), 'light');
 });
 
-test('the Appearance menu offers Light and Dark as plain text, with no sun/moon icons', function () {
+test('the Appearance menu offers Light and Dark with thin SF-style SVG icons, not Font Awesome ones', function () {
   renderUiScaleMenu();
   const html = document.getElementById('uiScaleMenu').innerHTML;
   assertIncludes(html, 'Light'); assertIncludes(html, 'Dark');
-  assertFalse(html.includes('fa-sun') || html.includes('fa-moon'));
+  assertEqual((html.match(/class="theme-ico"/g) || []).length, 2, 'one inline SVG icon per option');
+  assertFalse(html.includes('fa-sun') || html.includes('fa-moon'), 'the heavy solid glyphs stay out');
   assertFalse(html.includes('Color scheme'), 'the scheme button is gone');
+  assertFalse(html.includes('Density'), 'the density control is gone');
 });

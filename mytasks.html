@@ -43,7 +43,7 @@
      not great across platforms. Set directly as an inline style
      (document.documentElement.style.zoom), since there's no small, fixed
      set of named steps a CSS attribute selector could map cleanly (see
-     data-theme/data-scheme/data-density for that pattern elsewhere). zoom
+     data-theme/data-scheme for that pattern elsewhere). zoom
      is a Chromium/Safari-only CSS property (not Firefox) — the same
      "Chrome/Edge is the primary target" stance the file-sync feature
      already takes elsewhere in this app; on an unsupported browser this
@@ -196,8 +196,7 @@
   .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 170px 100px 120px 130px; min-width: 880px; }   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
-  .task-row { display: grid; grid-template-areas: "check title project priority status due" ". sub sub sub sub sub"; column-gap: 10px; row-gap: 6px; align-items: center; padding: 10px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
-  html[data-density="compact"] .task-row { padding: 3px 10px; row-gap: 2px; }
+  .task-row { display: grid; grid-template-areas: "check title project priority status due" ". sub sub sub sub sub"; column-gap: 10px; row-gap: 2px; align-items: center; padding: 3px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
   .task-row:hover { background: var(--bg); border-color: var(--border); }
   .task-row:hover .row-actions { opacity: 1; }
   .task-row.kbd-selected { background: var(--bg); border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
@@ -421,7 +420,7 @@
   .quickadd { border-width: 1px; box-shadow: var(--shadow); }
   .quickadd input { font-size: 15px; padding: 11px 10px; }
   .task-list-header { border-bottom-width: 1px; padding-bottom: 10px; }
-  .task-row { padding: 11px 10px; border-width: 1px; }
+  .task-row { padding: 3px 10px; border-width: 1px; }
   .task-row:hover { box-shadow: var(--shadow); }
   .task-title { font-size: 15px; }
   .task-title-input { font-size: 15px; border-width: 1px; }
@@ -489,6 +488,7 @@
   #filterBtn.has-filters { border-color: var(--text); }
 
   .ap-gap { margin-top: 12px; }
+  .theme-ico { vertical-align: -3px; margin-right: 6px; }
   .ui-scale-panel .view-switch-btn { white-space: nowrap; }
 
   .sidebar-section-actions { display: inline-flex; gap: 2px; }
@@ -578,7 +578,7 @@
     --purple-bg: rgba(175,82,222,.16); --purple-text: #7a2fb0;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
     --radius: 10px; --radius-lg: 14px; --glass-r-row: 8px; --glass-r-bar: 12px; --glass-r-menu: 16px;
-    --glass-strong: rgba(255,255,255,.88);
+    --glass-strong: rgba(255,255,255,.97);
     --glass-rim: rgba(255,255,255,.80); --glass-edge: rgba(255,255,255,.60);
     --glass-sheen: rgba(255,255,255,.26); --glass-sheen-2: rgba(255,255,255,.10);
     --glass-shadow: 0 10px 40px rgba(40,50,110,.16), 0 2px 8px rgba(40,50,110,.08);
@@ -598,7 +598,7 @@
     --purple-bg: rgba(175,82,222,.28); --purple-text: #d6a6f5;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
     --radius: 10px; --radius-lg: 14px; --glass-r-row: 8px; --glass-r-bar: 12px; --glass-r-menu: 16px;
-    --glass-strong: rgba(36,38,56,.90);
+    --glass-strong: rgba(36,38,56,.97);
     --glass-rim: rgba(255,255,255,.22); --glass-edge: rgba(255,255,255,.16);
     --glass-sheen: rgba(255,255,255,.10); --glass-sheen-2: rgba(255,255,255,.04);
     --glass-shadow: 0 12px 44px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.30);
@@ -841,7 +841,7 @@
       </div>
     </div>
     <div class="lib-dropdown" id="uiScaleDropdown">
-      <button class="btn btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size, theme, density and color scheme"><i class="fa-solid fa-palette"></i> Appearance <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>
+      <button class="btn btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size and theme"><i class="fa-solid fa-palette"></i> Appearance <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>
       <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:210px"></div>
     </div>
     <div class="lib-dropdown" id="helpDropdown">
@@ -1183,7 +1183,6 @@
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'mytasks_data_v1';
 const THEME_KEY = 'mytasks_theme';
-const COMPACT_KEY = 'mytasks_compact';
 const VIEW_KEY = 'mytasks_view';
 // Sidebar collapse — a per-device display preference (localStorage), like the
 // board grouping. With no saved choice it starts collapsed on narrow screens.
@@ -1215,22 +1214,19 @@ function collapseSidebarIfNarrow(){
   applySidebarState();
 })();
 const UI_SCALE_KEY = 'mytasks_uiscale';
-// Only 4 stops — the same Small/Medium/Large/Extra Large sizes the
-// original button-based picker offered, just reachable by dragging a
-// slider between them instead of clicking one of 4 separate buttons.
-// short is what's actually shown on each segment button (S/M/L/XL, so all
-// 4 fit comfortably in a compact topbar popover); label is the full name,
-// used as that segment's title tooltip.
+// Two stops: Medium (the default) and Large. Small and Extra Large were removed at
+// the user's request; a saved 90 (Small) snaps to Medium and a saved 130 (Extra
+// Large) snaps to Large, so nobody is left on a size the control no longer offers.
+// short is what's shown on each segment (M/L); label is the full name, used as
+// that segment's title tooltip.
 const UI_SCALE_STEPS = [
-  { pct: 90,  label: 'Small',       short: 'S' },
-  { pct: 100, label: 'Medium',      short: 'M' },
-  { pct: 115, label: 'Large',       short: 'L' },
-  { pct: 130, label: 'Extra Large', short: 'XL' }
+  { pct: 100, label: 'Medium', short: 'M' },
+  { pct: 115, label: 'Large',  short: 'L' }
 ];
 const UI_SCALE_DEFAULT = 100;
 // Index into UI_SCALE_STEPS of whichever stop is closest to pct — this is
 // what the slider's own position (0..UI_SCALE_STEPS.length-1) is derived
-// from, so a stored value that isn't exactly one of the 4 stops (e.g. a
+// from, so a stored value that isn't exactly one of the stops (e.g. a
 // leftover from an earlier, continuous version of this slider) still
 // lands on a sensible position rather than breaking the control.
 function uiScaleStepIndex(pct){
@@ -1244,7 +1240,7 @@ function uiScaleStepIndex(pct){
 }
 // Snaps any value — from localStorage, an incoming synced file, a
 // hand-edited import, not just the slider itself — to the nearest of the
-// 4 real stops, so uiScale is always exactly one of UI_SCALE_STEPS' own
+// real stops, so uiScale is always exactly one of UI_SCALE_STEPS' own
 // pct values, never something in between.
 function clampUiScale(v){
   if(!isFinite(Number(v))) return UI_SCALE_DEFAULT;
@@ -1325,7 +1321,6 @@ let myDayFilter = false, thisWeekFilter = false, overdueFilter = false;
 let allTasksHiddenProjectIds = [];
 let searchQuery = '', sortBy = 'smart';
 let currentTheme = 'light';
-let compactMode = true;
 let viewMode = 'list';
 let uiScale = UI_SCALE_DEFAULT; // percent, e.g. 100 = 100%
 let draggingTaskId = null;
@@ -1338,7 +1333,6 @@ let editingProjectId = null, newProjIcon = 'folder';
   else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ currentTheme='dark'; }
   document.documentElement.setAttribute('data-theme', currentTheme);
 })();
-(function(){ const c=localStorage.getItem(COMPACT_KEY); if(c!==null){compactMode = c==='1';} document.documentElement.setAttribute('data-density', compactMode?'compact':''); })();
 (function(){ const v=localStorage.getItem(VIEW_KEY); if(v==='board'||v==='list'){ viewMode=v; } })();
 (function(){ const z=localStorage.getItem(UI_SCALE_KEY); const n=parseInt(z,10); if(!isNaN(n)) uiScale=clampUiScale(n); document.documentElement.style.zoom = (uiScale/100); })();
 
@@ -1418,7 +1412,6 @@ function load(){
       allTasksHiddenProjectIds = d.allTasksHiddenProjectIds || [];
       sortBy = d.sortBy || 'smart';
       if(d.theme){ currentTheme=d.theme; document.documentElement.setAttribute('data-theme',d.theme); localStorage.setItem(THEME_KEY,d.theme); }
-      if(d.compactMode!==undefined){ compactMode=d.compactMode; document.documentElement.setAttribute('data-density', compactMode?'compact':''); localStorage.setItem(COMPACT_KEY, compactMode?'1':'0'); }
       if(d.viewMode==='board'||d.viewMode==='list'){ viewMode=d.viewMode; localStorage.setItem(VIEW_KEY, viewMode); }
       if(d.uiScale!==undefined && !isNaN(parseInt(d.uiScale,10))){ uiScale=clampUiScale(d.uiScale); document.documentElement.style.zoom=(uiScale/100); localStorage.setItem(UI_SCALE_KEY,String(uiScale)); }
     } else {
@@ -1432,7 +1425,7 @@ function load(){
   }
 }
 function save(){
-  const data = { projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme: currentTheme, compactMode, viewMode, uiScale };
+  const data = { projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme: currentTheme, viewMode, uiScale };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
   maybeSnapshotBackup();
@@ -3836,6 +3829,11 @@ function openFileSyncModal(reconnectHandle){
 function closeFileSyncModal(){ document.getElementById('fileSyncModalBg')?.classList.remove('open'); }
 function toggleLibMenu(){ document.getElementById('libMenu')?.classList.toggle('open'); }
 function closeLibMenu(){ document.getElementById('libMenu')?.classList.remove('open'); }
+// Light/Dark icons: thin outlined sun and crescent moon, drawn in the SF Symbols
+// idiom (round caps, ~1px stroke, currentColor) rather than the heavy solid Font
+// Awesome glyphs, which the user disliked.
+const ICON_SUN = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M2.6 12h2.1M19.3 12h2.1M5.35 5.35l1.5 1.5M17.15 17.15l1.5 1.5M5.35 18.65l1.5-1.5M17.15 6.85l1.5-1.5"/></svg>';
+const ICON_MOON = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 14.4A8.4 8.4 0 0 1 9.6 3.8a8.4 8.4 0 1 0 10.6 10.6z"/></svg>';
 function renderUiScaleMenu(){
   const el = document.getElementById('uiScaleMenu');
   if(!el) return;
@@ -3847,13 +3845,8 @@ function renderUiScaleMenu(){
       `).join('')}</div>
       <div class="ui-scale-panel-header ap-gap">Theme</div>
       <div class="view-switch">
-        <button type="button" class="view-switch-btn${currentTheme!=='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('light')">Light</button>
-        <button type="button" class="view-switch-btn${currentTheme==='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('dark')">Dark</button>
-      </div>
-      <div class="ui-scale-panel-header ap-gap">Density</div>
-      <div class="view-switch">
-        <button type="button" class="view-switch-btn${!compactMode?' active':''}" onclick="event.stopPropagation();setDensityMode(false)">Comfortable</button>
-        <button type="button" class="view-switch-btn${compactMode?' active':''}" onclick="event.stopPropagation();setDensityMode(true)">Compact</button>
+        <button type="button" class="view-switch-btn${currentTheme!=='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('light')">${ICON_SUN}Light</button>
+        <button type="button" class="view-switch-btn${currentTheme==='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('dark')">${ICON_MOON}Dark</button>
       </div>
     </div>
   `;
@@ -4166,18 +4159,6 @@ function toggleTheme(){
   save();
 }
 function setThemeMode(mode){ if((mode==='dark') !== (currentTheme==='dark')) toggleTheme(); renderUiScaleMenu(); }
-function setDensityMode(compact){ if(!!compact !== !!compactMode) toggleCompactMode(); renderUiScaleMenu(); }
-function toggleCompactMode(){
-  compactMode = !compactMode;
-  document.documentElement.setAttribute('data-density', compactMode ? 'compact' : '');
-  localStorage.setItem(COMPACT_KEY, compactMode ? '1' : '0');
-  updateCompactIcon();
-  save();
-}
-function updateCompactIcon(){
-  const icon = document.getElementById('compactIcon');
-  if(icon) icon.className = compactMode ? 'fa-solid fa-expand' : 'fa-solid fa-compress';
-}
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 let toastUndoAction = null, toastHideTimer = null;
@@ -4409,7 +4390,7 @@ async function createNewLinkedFile(){
     });
     fileHandle = handle;
     try{ await _fsPut(handle); }catch(_){}
-    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme:currentTheme, compactMode, viewMode, uiScale});
+    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme:currentTheme, viewMode, uiScale});
     updateFileSyncUI();
     showToast(`Linked — auto-saving to ${handle.name}`);
   }catch(e){ if(e.name!=='AbortError') showToast('Could not create file', true); }
@@ -4441,7 +4422,7 @@ async function linkFile(){
       }
       return;
     }
-    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme:currentTheme, compactMode, viewMode, uiScale});
+    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme:currentTheme, viewMode, uiScale});
     updateFileSyncUI();
     showToast(`Linked — auto-saving to ${handle.name}`);
   }catch(e){ if(e.name!=='AbortError') showToast('Could not link file', true); }
@@ -4573,7 +4554,6 @@ async function initFileSync(){
 // ── Init ──────────────────────────────────────────────────────────────────────
 load();
 purgeOldCompletedTasks();
-updateCompactIcon();
 render();
 initFileSync();
 

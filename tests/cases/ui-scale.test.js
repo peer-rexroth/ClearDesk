@@ -1,25 +1,28 @@
-// Text size segmented control (topbar text-height popover) — a 4-stop CSS
-// zoom on <html> (S/M/L/XL, full names Small/Medium/Large/Extra Large in
-// each segment's own tooltip), picked from a .view-switch pill (the same
-// segmented control the List/Board toggle already uses), persisted/synced
-// the same way theme/compactMode/colorScheme already are.
+// Text size segmented control (Appearance menu) — a 2-stop CSS zoom on <html>
+// (M/L, full names Medium/Large in each segment's own tooltip), picked from a
+// .view-switch pill (the same segmented control the List/Board toggle uses),
+// persisted/synced the same way the theme is. Small and Extra Large were removed.
 
-test('UI_SCALE_STEPS has exactly the 4 original named sizes and their short forms, in order', function () {
-  assertDeepEqual(UI_SCALE_STEPS.map(s => s.label), ['Small', 'Medium', 'Large', 'Extra Large']);
-  assertDeepEqual(UI_SCALE_STEPS.map(s => s.short), ['S', 'M', 'L', 'XL']);
-  assertDeepEqual(UI_SCALE_STEPS.map(s => s.pct), [90, 100, 115, 130]);
+test('UI_SCALE_STEPS offers exactly Medium and Large, in order', function () {
+  assertDeepEqual(UI_SCALE_STEPS.map(s => s.label), ['Medium', 'Large']);
+  assertDeepEqual(UI_SCALE_STEPS.map(s => s.short), ['M', 'L']);
+  assertDeepEqual(UI_SCALE_STEPS.map(s => s.pct), [100, 115]);
 });
 
 test('uiScaleStepIndex finds the exact stop, and snaps an in-between value to the nearest one', function () {
-  assertEqual(uiScaleStepIndex(100), 1);
-  assertEqual(uiScaleStepIndex(130), 3);
-  assertEqual(uiScaleStepIndex(103), 1, 'closer to Medium (100) than Large (115)');
-  assertEqual(uiScaleStepIndex(999), 3, 'clamps to the last stop for anything past it');
+  assertEqual(uiScaleStepIndex(100), 0);
+  assertEqual(uiScaleStepIndex(115), 1);
+  assertEqual(uiScaleStepIndex(103), 0, 'closer to Medium (100) than Large (115)');
+  assertEqual(uiScaleStepIndex(90), 0, 'a saved Small snaps to Medium');
+  assertEqual(uiScaleStepIndex(130), 1, 'a saved Extra Large snaps to Large');
+  assertEqual(uiScaleStepIndex(999), 1, 'clamps to the last stop for anything past it');
 });
 
-test('clampUiScale snaps any value to one of the 4 real stops', function () {
+test('clampUiScale snaps any value to one of the 2 real stops', function () {
   assertEqual(clampUiScale(103), 100);
-  assertEqual(clampUiScale(999), 130);
+  assertEqual(clampUiScale(90), 100);
+  assertEqual(clampUiScale(130), 115);
+  assertEqual(clampUiScale(999), 115);
   assertEqual(clampUiScale('not-a-number'), UI_SCALE_DEFAULT, 'falls back to the default on garbage input');
 });
 
@@ -37,24 +40,33 @@ test('setUiScale updates state, applies the zoom style, and localStorage', funct
 
 test('setUiScale snaps an off-stop value to the nearest real one before storing it', function () {
   setUiScale(999);
-  assertEqual(uiScale, 130);
+  assertEqual(uiScale, 115);
   setUiScale(103);
   assertEqual(uiScale, 100);
 });
 
 test('setUiScale closes the popover after picking a segment', function () {
   document.getElementById('uiScaleMenu').classList.add('open');
-  setUiScale(90);
+  setUiScale(115);
   assertFalse(document.getElementById('uiScaleMenu').classList.contains('open'));
 });
 
-test('load() picks up a uiScale saved in the data blob, same as colorScheme', function () {
+test('load() picks up a uiScale saved in the data blob, same as the theme', function () {
   localStorage.setItem('mytasks_data_v1', JSON.stringify({
-    projects: defaultProjects(), tasks: defaultTasks(), uiScale: 130
+    projects: defaultProjects(), tasks: defaultTasks(), uiScale: 115
   }));
   load();
-  assertEqual(uiScale, 130);
-  assertEqual(document.documentElement.style.zoom, 1.3);
+  assertEqual(uiScale, 115);
+  assertEqual(document.documentElement.style.zoom, 1.15);
+});
+
+test('load() moves a removed size (Small / Extra Large) onto the nearest offered one', function () {
+  localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 90 }));
+  load();
+  assertEqual(uiScale, 100, 'Small -> Medium');
+  localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 130 }));
+  load();
+  assertEqual(uiScale, 115, 'Extra Large -> Large');
 });
 
 test('load() ignores a non-numeric uiScale rather than crashing', function () {
@@ -67,9 +79,9 @@ test('load() ignores a non-numeric uiScale rather than crashing', function () {
 });
 
 test('save() round-trips uiScale into the stored data blob', function () {
-  setUiScale(90);
+  setUiScale(115);
   const saved = JSON.parse(localStorage.getItem('mytasks_data_v1'));
-  assertEqual(saved.uiScale, 90);
+  assertEqual(saved.uiScale, 115);
 });
 
 // Pulls {short, title, active} out of each rendered segment button, in
@@ -84,21 +96,21 @@ function renderedUiScaleSegments(){
   return out;
 }
 
-test('renderUiScaleMenu builds a 4-segment view-switch pill (S/M/L/XL) with the current stop marked active', function () {
+test('renderUiScaleMenu builds a 2-segment view-switch pill (M/L) with the current stop marked active', function () {
   setUiScale(115);
   renderUiScaleMenu();
   const segments = renderedUiScaleSegments();
-  assertDeepEqual(segments.map(s => s.short), ['S', 'M', 'L', 'XL']);
-  assertDeepEqual(segments.map(s => s.title), ['Small', 'Medium', 'Large', 'Extra Large'], 'the full name is each segment\'s own tooltip');
+  assertDeepEqual(segments.map(s => s.short), ['M', 'L']);
+  assertDeepEqual(segments.map(s => s.title), ['Medium', 'Large'], 'the full name is each segment\'s own tooltip');
   assertEqual(segments.filter(s => s.active).length, 1, 'exactly one segment is marked active');
   assertEqual(segments.find(s => s.active).short, 'L', 'Large (115%) is the active segment');
 });
 
 test('renderUiScaleMenu moves the active segment when the scale changes', function () {
-  setUiScale(90);
+  setUiScale(100);
   renderUiScaleMenu();
-  assertEqual(renderedUiScaleSegments().find(s => s.active).short, 'S');
-  setUiScale(130);
+  assertEqual(renderedUiScaleSegments().find(s => s.active).short, 'M');
+  setUiScale(115);
   renderUiScaleMenu();
-  assertEqual(renderedUiScaleSegments().find(s => s.active).short, 'XL');
+  assertEqual(renderedUiScaleSegments().find(s => s.active).short, 'L');
 });
