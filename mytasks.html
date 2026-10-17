@@ -868,7 +868,7 @@
   .drawer .subtask-row > .sub-step-toggle + .sub-check { margin-left: 0; }
   .drawer .subtask-row .sub-step-toggle:has(.fa-plus) { opacity: 0; }
   .drawer .subtask-row:is(:hover, :focus-within) .sub-step-toggle:has(.fa-plus) { opacity: 1; }
-  .drawer .subtask-row .sub-text { font-size: 14px; color: var(--text-2); }
+  .drawer .subtask-row .sub-text { font-size: 14px; color: var(--text-2); flex: 0 1 auto; }   /* controls follow the text, as in the list, instead of hugging the far edge */
   .drawer .subtask-row.done .sub-text { color: var(--text-3); }
   .drawer :is(.task-subtask-add-row, .add-row)::before { width: 16px; height: 16px; }
   /* row controls (indent/outdent) appear on hover or focus only; the expand toggle and delete keep their own behaviour */
