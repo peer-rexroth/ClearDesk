@@ -214,7 +214,11 @@ parity.
   not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
   were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
-- **Help is a tabbed dialog modelled on Milestone's** (`#helpModalBg`): a rail of topics on the left (`HELP_TABS`,
+- **Help is laid out like macOS System Settings**: a tinted sidebar on the left (round close button where the window controls
+  sit, a capsule search field, the topics as inset rounded rows with the solid accent on the current one), and on the right a
+  large title that follows the topic ("Search results" while searching) beside a "Keyboard shortcuts" pill — no header bar and
+  no hairline between the two halves. In a narrow window the sidebar becomes a strip across the top.
+- **Help is a tabbed dialog content and behaviour modelled on Milestone's** (`#helpModalBg`): a rail of topics on the left (`HELP_TABS`,
   `HELP_TAB_LABELS`; arrow keys / Home / End move between them), a search box, and short icon rows under small section
   titles on the right. The panes are *static HTML* so the search can read them: `helpSearch` shows every `.help-row` that
   contains all the words, grouped by topic with the words marked, and a topic name jumps there; Esc clears the search
@@ -231,6 +235,10 @@ parity.
   selection and focuses the field (`selectFirstTaskFromQuickAdd` / `leaveTasksToQuickAdd`). The field's handler must
   `stopPropagation()`: it blurs first, so the document-level list handler would otherwise take the same keypress and move
   one row further.
+- **Help is keyboard-driven**: it opens with focus on the topic list; ↑/↓/Home/End switch topic, → (or Tab) goes into the text,
+  where the browser's arrows / Page Up/Down / Space scroll (the panes are `tabindex=0`), ← goes back; **/** jumps to the search
+  field (a capsule with a magnifier), ↓ from it enters the results, ↑ goes back to the topics; Tab/Shift+Tab wrap inside the
+  dialog (`helpModalKey`). The shortcuts dialog lists these under "In the Help window".
 - **No coloured glows.** Primary and danger buttons are flat fills (`--glass-accent` / `#d92d20`, no blurred coloured
   shadow, no gradient), and a plain `.btn` darkens on hover instead of growing a shadow. Apple's styling is flat fills with
   crisp rings; the blue/red glows were leftovers of the earlier glassier look. Hover/focus rings are crisp (no blur).

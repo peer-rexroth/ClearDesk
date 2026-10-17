@@ -359,24 +359,35 @@
   .import-option:hover { background: var(--bg-2); }
   .import-option-text strong { display: block; font-size: 13px; font-weight: 500; }
   .import-option-text span { font-size: 12px; color: var(--text-2); }
-  /* Help: a tabbed dialog (as in Milestone) — a rail of topics on the left, a search box and short icon rows under small section titles on the right */
-  .help-modal { width: 840px; max-width: 94vw; height: min(690px, 88vh); max-height: none; gap: 0; padding: 0; overflow: hidden; }   /* a fixed height, so switching topics never resizes the dialog */
-  .help-modal-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-  .help-modal-header h3 { font-size: 16px; margin-right: auto; }
-  .hdr-link { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 4px 8px; border-radius: 6px; font: inherit; font-size: 13px; color: var(--text-2); cursor: pointer; }
-  .hdr-link:hover { background: var(--bg-3); color: var(--text); }
+  /* Help: a tabbed dialog — laid out like macOS System Settings: a tinted sidebar (round close button where the window controls sit, a capsule
+     search field, the topics as inset rounded rows) beside a detail pane with its own large title and no hairlines between them. */
+  .help-modal { width: 860px; max-width: 94vw; height: min(700px, 88vh); max-height: none; gap: 0; padding: 0; overflow: hidden; }   /* a fixed height, so switching topics never resizes the dialog */
   .help-layout { display: flex; flex: 1; min-height: 0; }
-  .help-nav { width: 214px; flex-shrink: 0; display: flex; flex-direction: column; gap: 2px; padding: 12px 10px; border-right: 1px solid var(--border); background: var(--bg-2); overflow-y: auto; }
+  .help-side { width: 236px; flex-shrink: 0; display: flex; flex-direction: column; background: color-mix(in srgb, var(--text) 4%, transparent); }
+  .help-side-top { padding: 14px 14px 6px; flex-shrink: 0; }
+  .help-close { width: 28px; height: 28px; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text-2); font-size: 12px; cursor: default; }
+  .help-close:hover { background: color-mix(in srgb, var(--text) 16%, transparent); color: var(--text); }
+  .help-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px 12px; overflow-y: auto; }
   .help-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: default; }
   .help-nav button i { width: 16px; text-align: center; font-size: 14px; color: var(--text-3); flex-shrink: 0; }
-  .help-nav button:hover { background: var(--bg-3); }
+  .help-nav button:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
   .help-nav button.active { background: var(--sel-bg); color: #fff; }   /* the same solid accent as a selected row */
   .help-nav button.active i { color: #fff; }
+  .help-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+  .help-toolbar { display: flex; align-items: center; gap: 12px; padding: 16px 26px 6px; flex-shrink: 0; }
+  .help-toolbar h3 { font-size: 20px; font-weight: 700; margin-right: auto; letter-spacing: -0.01em; }
+  .hdr-link { display: inline-flex; align-items: center; gap: 6px; border: 0; background: color-mix(in srgb, var(--text) 7%, transparent); padding: 5px 12px; border-radius: 999px; font: inherit; font-size: 12px; color: var(--text-2); cursor: default; }
+  .hdr-link:hover { background: color-mix(in srgb, var(--text) 13%, transparent); color: var(--text); }
   .help-panes { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
-  .help-pane { flex: 1; min-height: 0; overflow-y: auto; padding: 20px 26px 24px; display: flex; flex-direction: column; gap: 18px; }
+  .help-pane { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 26px 26px; display: flex; flex-direction: column; gap: 18px; }
   .help-pane[hidden] { display: none; }
-  .help-search-bar { flex: none; padding: 12px 26px 0; }
-  .help-search-bar input { width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-2); color: var(--text); font: inherit; font-size: 13px; }
+  .help-search-bar { flex: none; padding: 4px 12px 8px; }
+  /* a capsule field with a magnifier and a soft tint, like Mail's search field (the shape every toolbar control uses) */
+  .help-search-field { position: relative; }
+  .help-search-field i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-3); pointer-events: none; }
+  .help-search-bar input { width: 100%; padding: 7px 14px 7px 34px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--text); font: inherit; font-size: 13px; }
+  .help-search-bar input::placeholder { color: var(--text-3); }
+  .help-pane:focus-visible { outline: none; }   /* focusable only so the arrow keys and Page Up/Down scroll it */
   .help-row mark { background: color-mix(in srgb, var(--sel-bg) 28%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
   .help-jump { border: 0; background: none; padding: 0; font: inherit; text-transform: inherit; letter-spacing: inherit; color: var(--sel-bg); cursor: pointer; }
   .help-jump i { font-size: 9px; margin-left: 3px; }
@@ -394,9 +405,13 @@
   .help-tip strong { color: var(--text); font-weight: 600; }
   @media (max-width: 700px) {
     .help-layout { flex-direction: column; }
-    .help-nav { width: auto; flex-direction: row; border-right: 0; border-bottom: 1px solid var(--border); padding: 8px; overflow-x: auto; overflow-y: hidden; }
+    .help-side { width: auto; flex-direction: row; flex-wrap: wrap; align-items: center; }
+    .help-side-top { padding: 12px 0 0 12px; }
+    .help-search-bar { flex: 1; padding: 12px 12px 0 8px; min-width: 150px; }
+    .help-nav { flex: 0 0 100%; flex-direction: row; padding: 8px; overflow-x: auto; overflow-y: hidden; }
     .help-nav button { width: auto; white-space: nowrap; }
-    .help-pane { padding: 16px 16px 20px; }
+    .help-toolbar { padding: 12px 16px 4px; }
+    .help-pane { padding: 8px 16px 20px; }
   }
   .shortcut-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; padding: 4px 0; }
   .shortcut-row span { color: var(--text-2); }
@@ -498,7 +513,6 @@
   .modal input, .modal select { font-size: 15px; border-width: 1px; }
   .import-option-text strong { font-size: 14px; }
   .import-option-text span { font-size: 13px; }
-  .help-modal-header h3 { font-size: 18px; }
   .help-section-title { font-size: 12px; }
   .help-row { font-size: 14px; }
   .drawer-header input.title-input { font-size: 18px; }
@@ -1159,13 +1173,11 @@
 
 <!-- Help modal -->
 <div class="modal-bg" id="helpModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal help-modal" role="dialog" aria-labelledby="helpTitle">
-    <div class="help-modal-header">
-      <h3 id="helpTitle">Help</h3>
-      <button type="button" class="btn-link hdr-link" onclick="closeAllModals();openShortcutsModal()" title="Press ? anywhere"><i class="fa-regular fa-keyboard"></i> Keyboard shortcuts</button>
-      <button class="btn btn-sm" onclick="closeAllModals()" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
-    </div>
+  <div class="modal help-modal" role="dialog" aria-modal="true" aria-labelledby="helpTitle" onkeydown="helpModalKey(event)">
     <div class="help-layout">
+      <div class="help-side">
+        <div class="help-side-top"><button type="button" class="help-close" aria-label="Close help" title="Close (Esc)" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button></div>
+        <div class="help-search-bar"><div class="help-search-field"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" id="helpSearch" placeholder="Search" aria-label="Search help (press / to jump here)" autocomplete="off" oninput="helpSearch(this.value)" onkeydown="helpSearchKey(event)"></div></div>
       <div class="help-nav" role="tablist" aria-orientation="vertical" onkeydown="helpTabKey(event)">
         <button type="button" role="tab" id="helpTab-start" class="active" aria-selected="true" tabindex="0" aria-controls="helpPane-start" onclick="setHelpTab('start')"><i class="fa-solid fa-compass"></i><span>Getting started</span></button>
         <button type="button" role="tab" id="helpTab-edit" aria-selected="false" tabindex="-1" aria-controls="helpPane-edit" onclick="setHelpTab('edit')"><i class="fa-solid fa-pen-to-square"></i><span>Editing in place</span></button>
@@ -1175,10 +1187,15 @@
         <button type="button" role="tab" id="helpTab-look" aria-selected="false" tabindex="-1" aria-controls="helpPane-look" onclick="setHelpTab('look')"><i class="fa-solid fa-circle-half-stroke"></i><span>Appearance</span></button>
         <button type="button" role="tab" id="helpTab-data" aria-selected="false" tabindex="-1" aria-controls="helpPane-data" onclick="setHelpTab('data')"><i class="fa-solid fa-hard-drive"></i><span>Data &amp; sync</span></button>
       </div>
+      </div>
+      <div class="help-main">
+        <div class="help-toolbar">
+          <h3 id="helpTitle">Getting started</h3>
+          <button type="button" class="hdr-link" onclick="closeAllModals();openShortcutsModal()" title="Press ? anywhere"><i class="fa-regular fa-keyboard"></i> Keyboard shortcuts</button>
+        </div>
       <div class="help-panes">
-        <div class="help-search-bar"><input type="search" id="helpSearch" placeholder="Search help…" aria-label="Search help" autocomplete="off" oninput="helpSearch(this.value)" onkeydown="helpSearchKey(event)"></div>
-        <div class="help-pane" id="helpPane-search" role="region" aria-label="Search results" aria-live="polite" hidden></div>
-      <div class="help-pane" id="helpPane-start" role="tabpanel" aria-labelledby="helpTab-start">
+        <div class="help-pane" id="helpPane-search" role="region" tabindex="0" onkeydown="helpPaneKey(event)" aria-label="Search results" aria-live="polite" hidden></div>
+      <div class="help-pane" id="helpPane-start" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-start">
         <div class="help-section">
           <div class="help-section-title">Adding and opening tasks</div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>Add a task</strong>: type in <em>Add a task…</em> at the top and press <kbd>Enter</kbd>. Shorthand sets fields as you type — <code>!high</code> <code>!med</code> <code>!low</code> (<code>!!</code> for high), <code>#project</code>, <code>@tag</code> and a date word (<code>today</code>, <code>tomorrow</code>, a weekday, <code>next week</code>, <code>in 3 days</code>, <code>2026-12-24</code>). A preview under the bar shows what it understood; <kbd>Shift</kbd>+<kbd>Enter</kbd> adds the text exactly as typed.</span></div>
@@ -1200,7 +1217,7 @@
           <div class="help-row"><i class="fa-solid fa-rotate-left"></i><span><strong>Undo</strong>: <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> takes back the last edit or delete, and the toast that appears offers <em>Undo</em> too.</span></div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-edit" role="tabpanel" aria-labelledby="helpTab-edit" hidden>
+      <div class="help-pane" id="helpPane-edit" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-edit" hidden>
         <div class="help-section">
           <div class="help-section-title">Priority, Status and Due</div>
           <div class="help-row"><i class="fa-solid fa-hand-pointer"></i><span><strong>Click a pill</strong> to change it where it is: Priority, Status and Due on a list row; Status and Due on a board card. A small menu opens with a tick on the current value. On the selected (blue) row the pills show a chevron, like a pop-up button.</span></div>
@@ -1219,7 +1236,7 @@
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span>Click a <strong>column header</strong> (Task, Project, Priority, Status, Due) to sort ascending, again for descending, a third time to go back to <em>Smart order</em> (by priority, due date and status). Undated tasks stay last, and completed tasks sink to the bottom either way. The <strong>Sort</strong> menu in the toolbar picks a column too.</span></div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-nest" role="tabpanel" aria-labelledby="helpTab-nest" hidden>
+      <div class="help-pane" id="helpPane-nest" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-nest" hidden>
         <div class="help-section">
           <div class="help-section-title">Four levels of detail</div>
           <div class="help-row"><i class="fa-solid fa-sitemap"></i><span>A task can hold <strong>subtasks</strong>, which hold <strong>steps</strong>, which hold <strong>sub-steps</strong> — four levels in all. Every level has its own round checkbox.</span></div>
@@ -1235,7 +1252,7 @@
           <div class="help-row"><i class="fa-solid fa-forward-step"></i><span><strong>Completing</strong> a repeating task moves it to its next date and resets its subtasks instead of finishing it; the <strong>Skip</strong> button on its line does the same without completing. Undo brings the old date back.</span></div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-views" role="tabpanel" aria-labelledby="helpTab-views" hidden>
+      <div class="help-pane" id="helpPane-views" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-views" hidden>
         <div class="help-section">
           <div class="help-section-title">Finding your way</div>
           <div class="help-row"><i class="fa-solid fa-inbox"></i><span>The <strong>sidebar</strong> lists All Tasks, My Day (due today), This Week, Overdue, then your projects and a collapsible Tags list, each with a count.</span></div>
@@ -1249,7 +1266,7 @@
           <div class="help-row"><i class="fa-regular fa-window-maximize"></i><span>The sidebar button at the top left, or <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, hides and shows the sidebar. In a narrow window it starts hidden and floats over the list; choosing a project closes it again.</span></div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-org" role="tabpanel" aria-labelledby="helpTab-org" hidden>
+      <div class="help-pane" id="helpPane-org" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-org" hidden>
         <div class="help-section">
           <div class="help-section-title">Projects</div>
           <div class="help-row"><i class="fa-solid fa-folder-plus"></i><span>Create projects with <strong>+</strong> in the sidebar; each gets an icon. <strong>Inbox</strong> always exists and catches tasks with no project.</span></div>
@@ -1262,7 +1279,7 @@
           <div class="help-row"><i class="fa-solid fa-tag"></i><span>Tags (<em>waiting on</em>, <em>deep work</em>, <em>someday</em>) are added to a task as chips in the side panel. On a list row they show as pills next to the title, on a board card as coloured strips. Click one in the sidebar to filter by it.</span></div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-look" role="tabpanel" aria-labelledby="helpTab-look" hidden>
+      <div class="help-pane" id="helpPane-look" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-look" hidden>
         <div class="help-section">
           <div class="help-section-title">Look and feel</div>
           <div class="help-row"><i class="fa-solid fa-font"></i><span>The <strong>aA</strong> button in the top bar opens <strong>Appearance</strong>: <em>Text size</em> (Medium or Large) and <em>Theme</em> — Light, Dark, or Auto, which follows your system and switches live.</span></div>
@@ -1270,7 +1287,7 @@
           <div class="help-row"><i class="fa-regular fa-clone"></i><span>The top bar and sidebar are frosted glass over a soft backdrop; the list, board and side panel are flat and opaque. With <em>Reduce transparency</em> or <em>Increase contrast</em> on in your system settings the glass becomes solid.</span></div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-data" role="tabpanel" aria-labelledby="helpTab-data" hidden>
+      <div class="help-pane" id="helpPane-data" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-data" hidden>
         <div class="help-section">
           <div class="help-section-title">Where your tasks live</div>
           <div class="help-row"><i class="fa-solid fa-hard-drive"></i><span>Everything is stored <strong>in this browser</strong> on this device (localStorage). There is no server and no account.</span></div>
@@ -1284,6 +1301,7 @@
           <div class="help-row"><i class="fa-regular fa-clock"></i><span><strong>Daily snapshots</strong> of the last seven days are kept automatically; pick one under Data → Backups to restore it.</span></div>
           <div class="help-tip"><strong>Nothing leaves your machine.</strong> There is no server, no account and no admin rights are needed. Link a file to be safe against clearing browser data.</div>
         </div>
+      </div>
       </div>
       </div>
     </div>
@@ -4089,6 +4107,10 @@ function shortcutsListHtml(){
     row('Change priority, status or due date', 'Click its badge'),
     row('Show shortcuts', '?'),
     row('Close drawer/modal, clear selection', 'Esc'),
+    group('In the Help window'),
+    row('Switch topic', '↑', '↓'),
+    row('Into the text / back to the topics', '→', '←'),
+    row('Search help', '/'),
   ].join('');
 }
 // ── Help dialog (tabbed, with search — modelled on Milestone's) ────────────────
@@ -4096,7 +4118,26 @@ const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'look', 'data'];
 const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', look: 'Appearance', data: 'Data & sync' };
 let helpTab = 'start';   // the topic last read (this session): the dialog reopens where you left it
 let helpSearching = false;
-function openHelpModal(tab){ clearHelpSearch(); setHelpTab(tab || helpTab); document.getElementById('helpModalBg').classList.add('open'); }
+function openHelpModal(tab){
+  clearHelpSearch(); setHelpTab(tab || helpTab); document.getElementById('helpModalBg').classList.add('open');
+  // keyboard users land on the topic list (the dialog fades in, so wait a tick: a hidden element can't take focus)
+  if(typeof setTimeout==='function') setTimeout(()=>{ document.getElementById('helpTab-' + helpTab)?.focus(); }, 30);
+}
+function setHelpTitle(t){ const h = document.getElementById('helpTitle'); if(h) h.textContent = t; }
+function focusHelpPane(){ const p = document.querySelector('#helpModalBg .help-pane:not([hidden])'); if(p && p.focus) p.focus(); }
+function focusHelpTab(){ document.getElementById('helpTab-' + helpTab)?.focus(); }
+// Tab stays inside the dialog; "/" jumps to the search box (from anywhere in the dialog except a text field).
+function helpModalKey(e){
+  if(e.key==='/' && !(e.target && e.target.id==='helpSearch')){ e.preventDefault(); document.getElementById('helpSearch')?.focus(); return; }
+  if(e.key!=='Tab') return;
+  const f = [...document.querySelectorAll('#helpModalBg .help-modal button, #helpModalBg .help-modal input, #helpModalBg .help-modal [tabindex="0"]')].filter(el=>el.tabIndex>=0 && !el.hidden && el.offsetParent!==null);
+  if(!f.length) return;
+  const first = f[0], last = f[f.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+// In the content: Left goes back to the topic list; the browser's own arrows / Page Up / Page Down / Space scroll it.
+function helpPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.classList.contains('help-pane')){ e.preventDefault(); focusHelpTab(); } }
 // Search: every row that contains all the words, grouped by topic, with the words marked; a topic name jumps to that topic.
 function helpSearch(q){
   const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean), res = document.getElementById('helpPane-search');
@@ -4111,12 +4152,16 @@ function helpSearch(q){
     html += `<div class="help-section"><div class="help-section-title"><button type="button" class="help-jump" onclick="clearHelpSearch();setHelpTab('${t}')" title="Open this topic">${esc(HELP_TAB_LABELS[t])} <i class="fa-solid fa-arrow-right"></i></button></div>${rows.map(r=>`<div class="help-row">${r.innerHTML.replace(re, (m, tag)=>tag ? tag : `<mark>${m}</mark>`)}</div>`).join('')}</div>`;
   }
   res.innerHTML = n ? html : `<div class="help-tip">Nothing in Help matches “${esc(q.trim())}”. Try fewer or different words.</div>`;
-  res.hidden = false;
+  res.hidden = false; setHelpTitle('Search results');
   for(const t of HELP_TABS){ document.getElementById('helpPane-' + t).hidden = true; const b = document.getElementById('helpTab-' + t); b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); }
   res.scrollTop = 0;
 }
 function clearHelpSearch(){ const i = document.getElementById('helpSearch'); if(i) i.value = ''; helpSearching = false; const r = document.getElementById('helpPane-search'); if(r) r.hidden = true; }
-function helpSearchKey(e){ if(e.key==='Escape' && e.target.value){ e.preventDefault(); e.stopPropagation(); clearHelpSearch(); setHelpTab(helpTab); } }   // Escape clears the search first; a second one closes the dialog
+function helpSearchKey(e){
+  if(e.key==='Escape' && e.target.value){ e.preventDefault(); e.stopPropagation(); clearHelpSearch(); setHelpTab(helpTab); }
+  else if(e.key==='ArrowDown'){ e.preventDefault(); focusHelpPane(); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); focusHelpTab(); }
+}   // Escape clears the search first; a second one closes the dialog
 function setHelpTab(id){
   if(helpSearching) clearHelpSearch();
   if(!HELP_TABS.includes(id)) id = HELP_TABS[0];
@@ -4126,11 +4171,13 @@ function setHelpTab(id){
     if(!b || !p) continue;
     b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); b.tabIndex = on ? 0 : -1; p.hidden = !on;
   }
+  setHelpTitle(HELP_TAB_LABELS[id]);
   const pane = document.getElementById('helpPane-' + id); if(pane) pane.scrollTop = 0;
 }
 function helpTabKey(e){   // arrow keys / Home / End move between the topics, like any tab list
   const k = e.key, i = HELP_TABS.indexOf(helpTab);
-  const next = k==='ArrowDown' || k==='ArrowRight' ? (i+1) % HELP_TABS.length : k==='ArrowUp' || k==='ArrowLeft' ? (i + HELP_TABS.length - 1) % HELP_TABS.length : k==='Home' ? 0 : k==='End' ? HELP_TABS.length - 1 : -1;
+  if(k==='ArrowRight'){ e.preventDefault(); focusHelpPane(); return; }
+  const next = k==='ArrowDown' ? (i+1) % HELP_TABS.length : k==='ArrowUp' ? (i + HELP_TABS.length - 1) % HELP_TABS.length : k==='Home' ? 0 : k==='End' ? HELP_TABS.length - 1 : -1;
   if(next < 0) return;
   e.preventDefault(); setHelpTab(HELP_TABS[next]); document.getElementById('helpTab-' + HELP_TABS[next]).focus();
 }
