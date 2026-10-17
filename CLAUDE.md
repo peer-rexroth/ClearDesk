@@ -228,12 +228,12 @@ parity.
   `expandedCompletedProjects` Set.
 - **First-run file-sync prompt is a banner, not a modal** (`#syncBanner`,
   `showSyncBanner`): dismissed per session; the modal still opens from the
-  banner/topbar button. Topbar: Appearance (text size, theme, density, color
-  scheme) and Help (guide, shortcuts, about) are single dropdowns. Menus that
+  banner/topbar button. Topbar: Appearance (text size, theme, density)
+  and Help (guide, shortcuts, about) are single dropdowns. Menus that
   re-render themselves on click must `stopPropagation()`, or the global
   outside-click handler sees a detached target and closes them.
-- **Solid accent selection** (every scheme, after Apple Mail): a selected
-  row/card is a solid `--sel-bg` fill (per scheme, light and dark, all ≥4.5:1 vs
+- **Solid accent selection** (after Apple Mail): a selected
+  row/card is a solid `--sel-bg` fill (light and dark, both ≥4.5:1 vs
   white) with white text, identical for one task or many (`.kbd-selected`,
   `.bulk-selected`). `color:#fff` is set on the row itself because `color`
   inherits as a computed value — re-pointing `--text` alone would not recolour
@@ -241,7 +241,9 @@ parity.
   descendants that read them. Badges are recoloured with `!important` (tag
   badges carry inline colours); the checkbox and icon-button hovers are
   overridden explicitly. There is no keyboard ring any more: a solid fill is
-  already the focus indicator. When adding a scheme, add its `--sel-bg` pair.
+  already the focus indicator. Hovering an editable cell in a selected row
+  brightens only its pill, not the whole cell box (unselected rows still show the
+  whole-cell halo).
 - **Selection changes never rebuild the list.** `paintSelection()` toggles
   `kbd-selected`/`bulk-selected` on the rows/cards that already exist (then
   refreshes the bulk bar and toolbar); `handleRowClick`, `clearSelection` and
@@ -273,7 +275,7 @@ parity.
   `border-color`/`outline`, and `.field input:focus` out-ranks any normal
   selector — the indicator is restyled, never removed). Clickable non-input
   things (`[role=button]`, buttons, chips, `.th-sort`) get a 2px outline for
-  keyboard focus only. `--focus` is `--text`, so it follows every scheme/theme.
+  keyboard focus only. `--focus` is `--text`, so it follows the theme.
   The quick-add bar rings as a whole (`:has(#quickAddInput:focus-visible)`), the
   drawer title gets an underline, inputs inside a selected row use white. As in
   Apple's apps a pop-up isn't left ringed after a mouse choice:
@@ -505,59 +507,35 @@ Tombstones travel through the linked-file sync payload but **not** through
 the plain export/import `.json` format or the local daily-backup snapshots —
 same reasoning as the equivalent note in PromptLab's CLAUDE.md.
 
-## Color scheme system
+## Look: one scheme (Glass), light and dark
 
-Two independent axes control appearance: `data-theme` (`light`/`dark`,
-toggled by the sun/moon button, unchanged since before schemes existed) and
-`data-scheme` (picked from the palette-icon button's modal). Each scheme
-defines its own light *and* dark CSS variable pair, so the two axes combine
-freely — e.g. `[data-scheme="dracula"][data-theme="dark"]`.
+The app has **one look** — Glass — in light and dark. There is no scheme picker,
+no wallpaper picker, and no `colorScheme`/`glassBg` state: they were removed at
+the user's request, and `save()` no longer writes `colorScheme` (an old file that
+still has one is simply ignored by `load()`).
 
-- **`THEME_SCHEMES`** (near the top of the `<script>` block) is the single
-  source of truth for which schemes exist — each entry has `id`, `name`,
-  `desc`, and `swatches` (three hex values shown as dots in the picker).
-  `id` must exactly match a `[data-scheme="..."]` selector; nothing
-  enforces this automatically except `tests/cases/theme.test.js`'s "every
-  THEME_SCHEMES entry actually has a matching CSS block" test, which will
-  fail loudly on a typo but won't catch a selector that exists with no
-  matching `THEME_SCHEMES` entry (a harmless orphan, not a crash).
-- **`:root, html[data-scheme="standard"]`** and the bare
-  `html[data-theme="dark"]` block are the original, untouched palette —
-  this is what renders when `data-scheme` is absent entirely, so it must
-  stay exactly as-is. Every other scheme is defined as
-  `html[data-scheme="x"] { ... }` (light) and
-  `html[data-scheme="x"][data-theme="dark"] { ... }` (dark) — the dark
-  block's extra attribute selector always wins on specificity over the
-  bare `html[data-theme="dark"]`, so block order in the file doesn't
-  matter for correctness.
-- A handful of type/checkbox touches (bolder wordmark and task titles,
-  wider-tracked section labels, a colored ring on checked checkboxes) are
-  global defaults that every scheme except Standard inherits; Standard
-  explicitly reverts them back to the original values in a
-  `html[data-scheme="standard"] .foo { ... }` block so it stays the true
-  original look rather than original colors wearing new type.
-- Persistence mirrors how `theme`/`compactMode`/`viewMode` already work:
-  `colorScheme` (state) + `SCHEME_KEY`/`localStorage` (fast path on load)
-  + folded into the `save()`/`load()`/`fileSyncWrite()` payloads (so it
-  travels through the linked-file cross-device sync too).
-- **Accuracy convention**: when a scheme claims to replicate a real
-  product's theme (VS Code, GitHub, Dracula, etc.), verify the actual
-  values — via `WebFetch`/`WebSearch` against the real source (a theme's
-  official spec page, or its GitHub repo/compiled CSS/design-token
-  files) — rather than reconstructing from memory. This project has
-  gotten real values wrong from memory more than once (Dracula's light
-  mode, GitHub Dark Dimmed's background, VS Code Light Modern's accent
-  color all needed correcting after a fetch). Where no real equivalent
-  exists for something our UI needs (e.g. GitHub's semantic palette has
-  no teal token; Dracula/Monokai-style dark-only themes have no official
-  light mode), say so in the scheme's comment rather than presenting an
-  invented value as if it were verified.
-- **Glass** (Apple Liquid Glass / Mail-style) is the one scheme that changes
-  *layout and material*, not just colors. It copies Apple Mail's rule: **the
-  chrome is glass, the content is flat.** The topbar and sidebar are translucent
-  and blur a soft wallpaper on `body` (`--wall`; four presets chosen with
-  `data-glass-bg`, picker shown in the Colors modal only while Glass is active,
-  stored per-device in `mytasks_glassbg`) — the web stand-in for macOS vibrancy;
+- **`data-theme`** (`light`/`dark`) is the only axis. It is set from the saved
+  choice or the OS preference, and changed from the **Appearance** menu's
+  *Theme* control — plain **Light | Dark** text, no sun/moon icons (they were
+  removed at the user's request; don't reintroduce them).
+- **`<html data-scheme="glass">`** is set in the markup and is now only a
+  styling hook: every Glass selector is written `html[data-scheme="glass"] …`,
+  and it is not toggled by script. Rewriting those to bare `html …` would lower
+  their specificity and change which rules win over the base ones, so leave it.
+- **`:root`** carries only `--font` and `--mono` — the two variables Glass does
+  not define. Glass defines every colour variable in both themes.
+- Removed with the schemes: the Standard/Modern/Dracula/GitHub/GitHub Dimmed
+  variable blocks and their "signature" rules, the Standard type reverts, the
+  theme-picker modal and its CSS, `THEME_SCHEMES`/`GLASS_BGS`, and the four
+  wallpaper presets (Graphite, the only one kept, is the base `--wall`).
+  If you ever bring a second look back, reintroduce it as a deliberate feature,
+  not by resurrecting these from git history piecemeal.
+
+- **The look** (Apple Liquid Glass / Mail-style) changes *layout and material*,
+  not just colours. It copies Apple Mail's rule: **the chrome is glass, the
+  content is flat.** The topbar and sidebar are translucent and blur a soft
+  graphite wallpaper on `body` (`--wall`, light and dark) — the web stand-in for
+  macOS vibrancy;
   the toolbar controls are capsules; the list, board and detail panel are opaque
   and neutral; the window is flush (no floating cards). Rules to keep:
   - Content is flattened by **scoping variables**, not per-element overrides:
@@ -588,21 +566,8 @@ freely — e.g. `[data-scheme="dracula"][data-theme="dark"]`.
   data-URI can't read CSS variables). That rule must stay *after* every Glass rule that
   uses the `background` shorthand, which would reset the chevron (it once vanished in
   light mode and tiled across the select in dark).
-  (Selection styling is no longer Glass-specific — see "Solid accent selection".
-  A real pointer click, `e.detail>0`, also blurs `[role="button"]` divs so a
-  clicked badge cell doesn't keep a focus ring for the next key press.)
-- Each scheme may add its own one-off "signature" CSS rules (e.g. GitHub's
-  primary button going solid green, a scheme-specific monospace treatment
-  for numerics) — these live in their own scoped block further down in
-  the stylesheet, separate from the variable definitions, and are called
-  out by name in a comment above the scheme's variable block.
-
-To add a scheme: add its light+dark CSS variable blocks, add any signature
-rules, add a `THEME_SCHEMES` entry, and add its `id` to the sorted list in
-`tests/cases/theme.test.js`'s last test. To remove one: reverse all of the
-above and grep the whole repo for its id/name to catch stray comments —
-past removals have left references behind that grep caught but a partial
-manual removal wouldn't have.
+  A real pointer click (`e.detail>0`) also blurs `[role="button"]` divs so a
+  clicked badge cell doesn't keep a focus ring for the next key press.
 
 ## Conventions from this project's history
 
