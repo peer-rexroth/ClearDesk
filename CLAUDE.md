@@ -249,6 +249,22 @@ parity.
   the whole cell box: the pill brightens (`filter: brightness`, which works on every
   badge colour in both themes) and gets a soft pill-shaped halo; an empty cell shows
   a small pill behind the dash. On a selected row the pill goes translucent white.
+  Editable cells follow macOS conventions otherwise: the pointer stays an **arrow**
+  (`cursor: default` — Apple reserves the hand for links), and the pills on the
+  *selected* row/card get a small chevron (`::after`, a data-URI SVG) so they read as
+  pop-up buttons, as a native one does; unselected rows stay calm. The pill grows by
+  the chevron's width (~14px) on selection; the columns are wide enough that no
+  neighbour moves.
+  **Popovers opened inside a selected row.** `.cell-pop` is appended *inside* the clicked
+  cell, so it sits inside the blue `.kbd-selected` row and would inherit its white
+  text, translucent-white pills, white input styling and chevron — white on the
+  popover's own white surface, i.e. a blank box (this shipped once). Two guards: the
+  selected-row rules for `.badge`, `.badge::after`, the pill hover and `input/select/
+  textarea` all carry `:not(.cell-pop .badge)` / `:not(.cell-pop *)`, and `.cell-pop`
+  re-points `--text*`/`--border*` to `--ink*`/`--ink-border*`, captured where no
+  selected row has changed them (`html { --ink: var(--text) }`, and in the content
+  scope for borders). Anything else that is opened inside a row must opt out the
+  same way.
 - **Selection changes never rebuild the list.** `paintSelection()` toggles
   `kbd-selected`/`bulk-selected` on the rows/cards that already exist (then
   refreshes the bulk bar and toolbar); `handleRowClick`, `clearSelection` and
@@ -273,14 +289,18 @@ parity.
   subtitle (`mainSubtitleText`): "N open · M overdue", plus "· K selected" for
   two or more. Cmd/Ctrl+click *extends* the current selection (the row selected
   by a plain click joins first), as in Mail/Finder.
-- **One focus style (neutral, after Apple).** The browser's default blue ring is
-  replaced everywhere. Inputs/selects/textareas get a border plus a soft 3px halo
-  in the *text colour* (50% / 16% — like macOS with the Graphite accent; ≥3:1 in
-  light and dark), via `:focus-visible` with `!important` (per-component rules set
-  `border-color`/`outline`, and `.field input:focus` out-ranks any normal
-  selector — the indicator is restyled, never removed). Clickable non-input
-  things (`[role=button]`, buttons, chips, `.th-sort`) get a 2px outline for
-  keyboard focus only. `--focus` is `--text`, so it follows the theme.
+- **One focus style (Apple Mail's colours).** The browser's default blue ring is
+  replaced everywhere by the ring sampled from Mail's search field: a solid ~3pt
+  band (`--focus-ring`: `#9bbcf6` periwinkle in light, `#417391` steel teal-blue in
+  dark) with the control's own border taking a slightly darker edge
+  (`--focus-edge`: `#89aae6` / `#3c6f8c`). Inputs/selects/textareas get it via
+  `:focus-visible` with `!important` (per-component rules set `border-color` /
+  `outline`, and `.field input:focus` out-ranks any normal selector — the indicator
+  is restyled, never removed). Clickable non-input things (`[role=button]`, buttons,
+  chips, `.th-sort`) get the same colour as a 3px outline for keyboard focus only.
+  It was neutral grey for a while and was changed to these colours at the user's
+  request, so the earlier "no blue" instruction applies to the *browser's* default
+  blue outline, not to this ring.
   The quick-add bar rings as a whole (`:has(#quickAddInput:focus-visible)`), the
   drawer title gets an underline, inputs inside a selected row use white. As in
   Apple's apps a pop-up isn't left ringed after a mouse choice:

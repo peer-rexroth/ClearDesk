@@ -21,6 +21,10 @@
      and dark (data-theme). <html data-scheme="glass"> is set in the markup and is
      only a styling hook now — there is no scheme picker. Glass defines every
      colour variable in both themes, so :root carries just the two it does not. */
+  /* --ink*: the real text/border colours, captured on <html> where no selected row has
+     re-pointed --text/--border. A popover opened inside a selected (blue) row resets to
+     these, otherwise it would inherit the row's white text on its own white surface. */
+  html { --ink: var(--text); --ink-2: var(--text-2); --ink-3: var(--text-3); }
   :root {
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -458,11 +462,12 @@
   /* Hovering an editable cell reacts on its pill only, never on the whole cell box:
      the pill brightens and gets a soft pill-shaped halo (brightness works on every
      badge colour, light and dark). An empty cell (just the dash) gets a small pill. */
-  .task-cell.editable:hover .badge, .cell-host.editable:hover .badge { filter: brightness(1.14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent); }
+  .task-cell.editable:hover .badge:not(.cell-pop .badge), .cell-host.editable:hover .badge:not(.cell-pop .badge) { filter: brightness(1.14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent); }
   .task-cell.editable:hover .task-cell-empty { background: var(--bg-3); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
   .cell-host { display: inline-flex; }
   .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 170px; display: flex; flex-direction: column; gap: 2px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
+  .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
   .cell-pop-opt:hover { background: var(--bg-3); }
   .cell-pop-opt.current { background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--border-2); }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
@@ -625,12 +630,14 @@
     --bg: #ffffff; --bg-2: #f6f6f9; --bg-3: #ececf1;
     --glass-strong: #ffffff; --glass-edge: rgba(40,44,70,.16); --glass-rim: transparent;
     --border: rgba(40,44,70,.10); --border-2: rgba(40,44,70,.20);
+    --ink-border: var(--border); --ink-border-2: var(--border-2);
     background: var(--bg); border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
   }
   html[data-scheme="glass"][data-theme="dark"] :is(.main, .drawer) {
     --bg: #1e1f24; --bg-2: #26272d; --bg-3: #31323a;
     --glass-strong: #26272d; --glass-edge: rgba(255,255,255,.14); --glass-rim: transparent;
     --border: rgba(255,255,255,.10); --border-2: rgba(255,255,255,.20);
+    --ink-border: var(--border); --ink-border-2: var(--border-2);
   }
   html[data-scheme="glass"] .drawer { visibility: hidden; transition: width .2s ease, visibility 0s linear .2s; }
   html[data-scheme="glass"] .drawer.open { visibility: visible; border-left: 1px solid var(--border-2); transition: width .2s ease, visibility 0s; }
@@ -729,21 +736,31 @@
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: #fff;
     --text: #fff; --text-2: rgba(255,255,255,.88); --text-3: rgba(255,255,255,.72); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
   }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .badge { background: rgba(255,255,255,.22) !important; color: #fff !important; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.22) !important; color: #fff !important; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox { background: transparent; border-color: rgba(255,255,255,.75); box-shadow: none; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked { background: #fff; border-color: #fff; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .task-checkbox.checked i { color: var(--sel-bg); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .icon-btn:hover,
+  /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
+     the cell says "pop-up button" the way a native one does — a small chevron on the pill,
+     shown on the selected row/card only so the rest of the list stays calm. (The pill grows
+     by the chevron's width when its row is selected; the columns are wide enough that
+     nothing else moves.) */
+  .task-cell.editable, .cell-host.editable { cursor: default; }
+  :is(.task-row.kbd-selected .task-cell.editable, .board-card.kbd-selected .cell-host.editable) .badge:not(.cell-pop .badge)::after {
+    content: ""; flex-shrink: 0; width: 8px; height: 8px; margin-left: 2px; opacity: .9;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1.4 2.7L4 5.3l2.6-2.6' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 8px 8px no-repeat;
+  }
   /* hovering an editable cell in a selected row brightens just its pill, not the whole cell box */
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge { background: rgba(255,255,255,.38) !important; filter: none; box-shadow: 0 0 0 3px rgba(255,255,255,.18); }
+  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.38) !important; filter: none; box-shadow: 0 0 0 3px rgba(255,255,255,.18); }
   .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: #fff; background: rgba(255,255,255,.24); border-radius: 999px; box-shadow: 0 0 0 4px rgba(255,255,255,.24); }
   .board-card.kbd-selected .board-card-priority-icon { color: #fff; }
   /* the Glass card style (html[data-scheme] .board-card) out-ranks .board-card.kbd-selected, so restate the fill at higher specificity */
   html[data-scheme="glass"] .board-card.kbd-selected { background: var(--sel-bg); border-color: var(--sel-bg); }
   /* Inline inputs (add subtask, rename) inside a selected row: white text on a white
      field was invisible. Give them a translucent-white field with white text. */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea) { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.55); caret-color: #fff; }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, textarea)::placeholder { color: rgba(255,255,255,.72); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea):not(.cell-pop *) { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.55); caret-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, textarea):not(.cell-pop *)::placeholder { color: rgba(255,255,255,.72); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check { background: transparent; border-color: rgba(255,255,255,.75); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked { background: #fff; border-color: #fff; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
@@ -763,25 +780,27 @@
   .task-check-cell { gap: 6px; }
 
   /* ── One focus style (replaces the browser's default ring) ────────────────────
-     Neutral, like the Graphite accent on macOS: text inputs, selects and
-     textareas get a border and a soft 3px halo in the text colour (50% / 16%),
-     which keeps ≥3:1 against the surface in light and dark without a saturated
-     blue. !important because many component rules set border-color/outline per
-     element (and `.field input:focus` out-ranks any selector short of that); the
-     focus indicator must always win, and it is never removed, only restyled.
-     Clickable non-<input> things (badge cells, header sorts, buttons, chips) get a
-     2px outline for keyboard focus only (:focus-visible), as Apple does. --focus is
-     --text, so it follows every scheme and theme. */
-  :root { --focus: var(--text); }
+     Apple Mail's, sampled from its search field: a solid ~3pt band — periwinkle
+     #9bbcf6 in light, steel teal-blue #417391 in dark — around the control, with a
+     slightly darker inner edge (#89aae6 / #3c6f8c) as the control's own border.
+     Text inputs, selects and textareas get it on :focus-visible; !important because
+     many component rules set border-color/outline per element (and `.field
+     input:focus` out-ranks any selector short of that) — the focus indicator must
+     always win, and it is never removed, only restyled. Clickable non-<input> things
+     (badge cells, header sorts, buttons, chips) get the same colour as a 3px outline
+     for keyboard focus only. */
+  :root { --focus-ring: #9bbcf6; --focus-edge: #89aae6; }
+  html[data-theme="dark"] { --focus-ring: #417391; --focus-edge: #3c6f8c; }
   :is(input:where(:not([type=checkbox]):not([type=radio]):not([type=file])), textarea):focus-visible,
   html.kbd-input select:focus-visible {   /* :where() keeps the exclusions at zero specificity, so the per-surface overrides below can out-rank this; selects only ring after a key press (Chromium counts a mouse click on a <select> as :focus-visible) */
     outline: none !important;
-    border-color: color-mix(in srgb, var(--focus) 50%, transparent) !important;
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent) !important;
+    border-color: var(--focus-edge) !important;
+    box-shadow: 0 0 0 3px var(--focus-ring) !important;
   }
   :is([role="button"], [role="checkbox"], .btn, .icon-btn, .tool-btn, .view-switch-btn, .f-chip, .th-sort):focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--focus) 60%, transparent); outline-offset: 2px;
+    outline: 3px solid var(--focus-ring); outline-offset: 0;   /* hugs the control like Mail's ring: a gap showed as a white halo */
   }
+  .f-chip:focus-visible { outline-width: 2px; }   /* small pills: a 3px band swallowed the label */
   /* The browser's own blue focus outline on a <select> must never show. Chromium treats a
      *mouse click* on a select as :focus-visible and paints `outline: auto` in the system
      blue; the custom neutral ring above only applies under html.kbd-input, so without this
@@ -789,10 +808,10 @@
   select:focus-visible, select:focus { outline: none; }
   /* the borderless fields that live inside another surface */
   .quickadd input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
-  .quickadd:has(#quickAddInput:focus-visible) { border-color: color-mix(in srgb, var(--focus) 50%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 16%, transparent); }
-  .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 color-mix(in srgb, var(--focus) 55%, transparent) !important; border-color: transparent !important; border-radius: 0; }
+  .quickadd:has(#quickAddInput:focus-visible) { border-color: var(--focus-edge); box-shadow: 0 0 0 3px var(--focus-ring); }
+  .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 var(--focus-ring) !important; border-color: transparent !important; border-radius: 0; }
   /* inside a selected (blue) row the neutral ring would vanish: use white */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea):focus-visible { border-color: #fff !important; box-shadow: 0 0 0 3px rgba(255,255,255,.4) !important; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected) :is(input, select, textarea):not(.cell-pop *):focus-visible { border-color: #fff !important; box-shadow: 0 0 0 3px rgba(255,255,255,.4) !important; }
 
   /* ── Ghost row: inline "add subtask / step / sub-step" fields ──────────────────
      No box, no dashed border: the field looks like one more line in the list — a
