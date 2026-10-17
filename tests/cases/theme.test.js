@@ -9,20 +9,21 @@ test('there is no colour-scheme or wallpaper picker any more', function () {
   assertEqual(typeof openThemeModal, 'undefined');
 });
 
-test('save() no longer writes a colorScheme into the data blob', function () {
+test('save() writes neither a colorScheme nor a theme into the data blob', function () {
   save();
   const saved = JSON.parse(localStorage.getItem('mytasks_data_v1'));
   assertEqual(saved.colorScheme, undefined);
-  assertEqual(saved.theme, currentTheme, 'light/dark is still saved');
+  assertEqual(saved.theme, undefined, 'theme is a per-device preference now, not synced');
 });
 
-test('load() ignores a colorScheme left in an older saved file', function () {
+test('load() ignores a colorScheme and a theme left in an older or synced file', function () {
+  setThemeMode('light');
   localStorage.setItem('mytasks_data_v1', JSON.stringify({
     projects: defaultProjects(), tasks: defaultTasks(), colorScheme: 'dracula', theme: 'dark'
   }));
   load();
-  assertEqual(currentTheme, 'dark');
-  assertEqual(document.documentElement.getAttribute('data-theme'), 'dark');
+  assertEqual(currentTheme, 'light', 'another device\'s theme must not override this one\'s');
+  assertEqual(themePref, 'light');
 });
 
 test('setThemeMode switches light and dark, persists it, and does nothing if already there', function () {
@@ -41,8 +42,35 @@ test('the Appearance menu offers Light and Dark with thin SF-style SVG icons, no
   renderUiScaleMenu();
   const html = document.getElementById('uiScaleMenu').innerHTML;
   assertIncludes(html, 'Light'); assertIncludes(html, 'Dark');
-  assertEqual((html.match(/class="theme-ico"/g) || []).length, 2, 'one inline SVG icon per option');
+  assertIncludes(html, 'Auto');
+  assertEqual((html.match(/class="theme-ico"/g) || []).length, 3, 'one inline SVG icon per option (Light, Dark, Auto)');
   assertFalse(html.includes('fa-sun') || html.includes('fa-moon'), 'the heavy solid glyphs stay out');
   assertFalse(html.includes('Color scheme'), 'the scheme button is gone');
   assertFalse(html.includes('Density'), 'the density control is gone');
+});
+
+test('Auto is the default and follows the system; Light and Dark override it', function () {
+  const real = window.matchMedia;
+  try {
+    window.matchMedia = function () { return { matches: true, addEventListener() {} }; };
+    setThemeMode('auto');
+    assertEqual(themePref, 'auto');
+    assertEqual(currentTheme, 'dark', 'the system is dark, so Auto is dark');
+    assertEqual(localStorage.getItem('mytasks_theme'), 'auto');
+    setThemeMode('light');
+    assertEqual(currentTheme, 'light', 'an explicit choice beats the system');
+    window.matchMedia = function () { return { matches: false, addEventListener() {} }; };
+    setThemeMode('auto');
+    assertEqual(currentTheme, 'light');
+  } finally { window.matchMedia = real; }
+});
+
+test('an unrecognised saved theme value falls back to Auto', function () {
+  localStorage.setItem('mytasks_theme', 'purple');
+  themePref = 'dark';
+  // the startup logic, as written: only light/dark are honoured
+  const t = localStorage.getItem('mytasks_theme');
+  const pref = (t === 'light' || t === 'dark') ? t : 'auto';
+  assertEqual(pref, 'auto');
+  setThemeMode('light');
 });

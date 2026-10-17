@@ -811,6 +811,14 @@
      instead of running underneath; long unbroken words may break anywhere */
   .task-main { padding-right: 96px; }
   .task-title { overflow-wrap: anywhere; min-width: 0; }
+
+  /* the Appearance button: a small A beside a large A (Safari's "aA"), not a palette —
+     there are no colour choices left to suggest */
+  .aa-ico { display: inline-flex; align-items: baseline; gap: 1px; font-weight: 600; line-height: 1; letter-spacing: -0.02em; }
+  .aa-s { font-size: 11px; }
+  .aa-l { font-size: 17px; }
+  .topbar-tools .tool-btn { min-width: 34px; height: 30px; }
+  .ui-scale-panel .view-switch-btn { font-weight: 600; line-height: 1.2; }
 </style>
 </head>
 <body>
@@ -823,8 +831,9 @@
   <div class="topbar-actions">
     <span id="fileSyncIndicator"></span>
     <div class="topbar-divider"></div>
+    <div class="tool-group topbar-tools">
     <div class="lib-dropdown" id="libDropdown">
-      <button class="btn btn-sm" onclick="event.stopPropagation();toggleLibMenu()"><i class="fa-solid fa-database"></i> Data <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>
+      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleLibMenu()" title="Data — export, import, backups" aria-haspopup="menu"><i class="fa-regular fa-hard-drive"></i></button>
       <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
         <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
           <i class="fa-solid fa-download split-btn-menu-icon"></i>
@@ -841,16 +850,17 @@
       </div>
     </div>
     <div class="lib-dropdown" id="uiScaleDropdown">
-      <button class="btn btn-sm" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Text size and theme"><i class="fa-solid fa-palette"></i> Appearance <i class="fa-solid fa-chevron-down" style="font-size:9px"></i></button>
+      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Appearance — text size and theme" aria-haspopup="menu"><span class="aa-ico" aria-hidden="true"><span class="aa-s">A</span><span class="aa-l">A</span></span></button>
       <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:210px"></div>
     </div>
     <div class="lib-dropdown" id="helpDropdown">
-      <button class="btn btn-icon btn-sm" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about"><i class="fa-regular fa-circle-question"></i></button>
+      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about" aria-haspopup="menu"><i class="fa-regular fa-circle-question"></i></button>
       <div class="split-btn-menu" id="helpMenu" style="left:auto;right:0">
         <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Help guide</div></div></div>
         <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard shortcuts</div></div></div>
         <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About</div></div></div>
       </div>
+    </div>
     </div>
   </div>
 </div>
@@ -1217,11 +1227,11 @@ const UI_SCALE_KEY = 'mytasks_uiscale';
 // Two stops: Medium (the default) and Large. Small and Extra Large were removed at
 // the user's request; a saved 90 (Small) snaps to Medium and a saved 130 (Extra
 // Large) snaps to Large, so nobody is left on a size the control no longer offers.
-// short is what's shown on each segment (M/L); label is the full name, used as
-// that segment's title tooltip.
+// Each segment shows the letter A at its own size (glyph, in px) — a small A and a
+// large A, as in Safari's "aA" menu — and label is its tooltip.
 const UI_SCALE_STEPS = [
-  { pct: 100, label: 'Medium', short: 'M' },
-  { pct: 115, label: 'Large',  short: 'L' }
+  { pct: 100, label: 'Medium', glyph: 14 },
+  { pct: 115, label: 'Large',  glyph: 19 }
 ];
 const UI_SCALE_DEFAULT = 100;
 // Index into UI_SCALE_STEPS of whichever stop is closest to pct — this is
@@ -1320,7 +1330,8 @@ let myDayFilter = false, thisWeekFilter = false, overdueFilter = false;
 // visible instead of silently missing until someone remembers to opt it in.
 let allTasksHiddenProjectIds = [];
 let searchQuery = '', sortBy = 'smart';
-let currentTheme = 'light';
+let currentTheme = 'light';   // the RESOLVED theme ('light' | 'dark') that data-theme shows
+let themePref = 'auto';       // what the user chose: 'light' | 'dark' | 'auto' (follow the system)
 let viewMode = 'list';
 let uiScale = UI_SCALE_DEFAULT; // percent, e.g. 100 = 100%
 let draggingTaskId = null;
@@ -1328,10 +1339,15 @@ let modalTarget = null, pendingImportData = null;
 let editingProjectId = null, newProjIcon = 'folder';
 
 (function(){
-  const t=localStorage.getItem(THEME_KEY);
-  if(t){ currentTheme=t; }
-  else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){ currentTheme='dark'; }
-  document.documentElement.setAttribute('data-theme', currentTheme);
+  let t = null; try{ t = localStorage.getItem(THEME_KEY); }catch(_){}
+  themePref = (t==='light' || t==='dark') ? t : 'auto';
+  applyTheme();
+  // Auto means *following* the system, live — not just reading it once at load.
+  if(window.matchMedia){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = ()=>{ if(themePref==='auto'){ applyTheme(); renderUiScaleMenu(); } };
+    if(mq && mq.addEventListener) mq.addEventListener('change', onChange);
+  }
 })();
 (function(){ const v=localStorage.getItem(VIEW_KEY); if(v==='board'||v==='list'){ viewMode=v; } })();
 (function(){ const z=localStorage.getItem(UI_SCALE_KEY); const n=parseInt(z,10); if(!isNaN(n)) uiScale=clampUiScale(n); document.documentElement.style.zoom = (uiScale/100); })();
@@ -1411,7 +1427,6 @@ function load(){
       deletedProjectIds = d.deletedProjectIds || [];
       allTasksHiddenProjectIds = d.allTasksHiddenProjectIds || [];
       sortBy = d.sortBy || 'smart';
-      if(d.theme){ currentTheme=d.theme; document.documentElement.setAttribute('data-theme',d.theme); localStorage.setItem(THEME_KEY,d.theme); }
       if(d.viewMode==='board'||d.viewMode==='list'){ viewMode=d.viewMode; localStorage.setItem(VIEW_KEY, viewMode); }
       if(d.uiScale!==undefined && !isNaN(parseInt(d.uiScale,10))){ uiScale=clampUiScale(d.uiScale); document.documentElement.style.zoom=(uiScale/100); localStorage.setItem(UI_SCALE_KEY,String(uiScale)); }
     } else {
@@ -1425,7 +1440,7 @@ function load(){
   }
 }
 function save(){
-  const data = { projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme: currentTheme, viewMode, uiScale };
+  const data = { projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
   maybeSnapshotBackup();
@@ -3833,6 +3848,7 @@ function closeLibMenu(){ document.getElementById('libMenu')?.classList.remove('o
 // idiom (round caps, ~1px stroke, currentColor) rather than the heavy solid Font
 // Awesome glyphs, which the user disliked.
 const ICON_SUN = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M2.6 12h2.1M19.3 12h2.1M5.35 5.35l1.5 1.5M17.15 17.15l1.5 1.5M5.35 18.65l1.5-1.5M17.15 6.85l1.5-1.5"/></svg>';
+const ICON_AUTO = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 3.8a8.2 8.2 0 0 0 0 16.4z" fill="currentColor"/></svg>';
 const ICON_MOON = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 14.4A8.4 8.4 0 0 1 9.6 3.8a8.4 8.4 0 1 0 10.6 10.6z"/></svg>';
 function renderUiScaleMenu(){
   const el = document.getElementById('uiScaleMenu');
@@ -3841,12 +3857,13 @@ function renderUiScaleMenu(){
     <div class="ui-scale-panel">
       <div class="ui-scale-panel-header">Text Size</div>
       <div class="view-switch">${UI_SCALE_STEPS.map(s=>`
-        <button type="button" class="view-switch-btn${s.pct===uiScale?' active':''}" title="${esc(s.label)}" onclick="setUiScale(${s.pct})">${esc(s.short)}</button>
+        <button type="button" class="view-switch-btn${s.pct===uiScale?' active':''}" title="${esc(s.label)}" style="font-size:${s.glyph}px" onclick="setUiScale(${s.pct})">A</button>
       `).join('')}</div>
       <div class="ui-scale-panel-header ap-gap">Theme</div>
       <div class="view-switch">
-        <button type="button" class="view-switch-btn${currentTheme!=='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('light')">${ICON_SUN}Light</button>
-        <button type="button" class="view-switch-btn${currentTheme==='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('dark')">${ICON_MOON}Dark</button>
+        <button type="button" class="view-switch-btn${themePref==='light'?' active':''}" onclick="event.stopPropagation();setThemeMode('light')">${ICON_SUN}Light</button>
+        <button type="button" class="view-switch-btn${themePref==='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('dark')">${ICON_MOON}Dark</button>
+        <button type="button" class="view-switch-btn${themePref==='auto'?' active':''}" onclick="event.stopPropagation();setThemeMode('auto')" title="Follow the system's light/dark setting">${ICON_AUTO}Auto</button>
       </div>
     </div>
   `;
@@ -4152,13 +4169,20 @@ function handleListKeyNav(e){
 }
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
-function toggleTheme(){
-  currentTheme = currentTheme==='dark' ? 'light' : 'dark';
+// Theme is a per-device preference (localStorage only, never synced): each device
+// should follow its own system's light/dark setting, so Auto is the default and a
+// synced file must not push one device's choice onto another.
+function osPrefersDark(){ return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+function applyTheme(){
+  currentTheme = themePref==='auto' ? (osPrefersDark() ? 'dark' : 'light') : themePref;
   document.documentElement.setAttribute('data-theme', currentTheme);
-  localStorage.setItem(THEME_KEY, currentTheme);
-  save();
 }
-function setThemeMode(mode){ if((mode==='dark') !== (currentTheme==='dark')) toggleTheme(); renderUiScaleMenu(); }
+function setThemeMode(mode){
+  themePref = (mode==='light' || mode==='dark') ? mode : 'auto';
+  try{ localStorage.setItem(THEME_KEY, themePref); }catch(_){}
+  applyTheme();
+  renderUiScaleMenu();
+}
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 let toastUndoAction = null, toastHideTimer = null;
@@ -4390,7 +4414,7 @@ async function createNewLinkedFile(){
     });
     fileHandle = handle;
     try{ await _fsPut(handle); }catch(_){}
-    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme:currentTheme, viewMode, uiScale});
+    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale});
     updateFileSyncUI();
     showToast(`Linked — auto-saving to ${handle.name}`);
   }catch(e){ if(e.name!=='AbortError') showToast('Could not create file', true); }
@@ -4422,7 +4446,7 @@ async function linkFile(){
       }
       return;
     }
-    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, theme:currentTheme, viewMode, uiScale});
+    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale});
     updateFileSyncUI();
     showToast(`Linked — auto-saving to ${handle.name}`);
   }catch(e){ if(e.name!=='AbortError') showToast('Could not link file', true); }

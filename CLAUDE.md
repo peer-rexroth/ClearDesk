@@ -228,8 +228,11 @@ parity.
   `expandedCompletedProjects` Set.
 - **First-run file-sync prompt is a banner, not a modal** (`#syncBanner`,
   `showSyncBanner`): dismissed per session; the modal still opens from the
-  banner/topbar button. Topbar: Appearance (text size, theme, density)
-  and Help (guide, shortcuts, about) are single dropdowns. Menus that
+  banner/topbar button. Topbar: after the Link-file status chip, one icon-only
+  capsule group (`.tool-group.topbar-tools`) of Data (export/import/backups),
+  Appearance (an "aA" glyph — a palette would suggest colour choices that no longer
+  exist) and Help (guide, shortcuts, about), each opening its own dropdown with a
+  tooltip. Menus that
   re-render themselves on click must `stopPropagation()`, or the global
   outside-click handler sees a detached target and closes them.
 - **Solid accent selection** (after Apple Mail): a selected
@@ -514,16 +517,23 @@ no wallpaper picker, and no `colorScheme`/`glassBg` state: they were removed at
 the user's request, and `save()` no longer writes `colorScheme` (an old file that
 still has one is simply ignored by `load()`).
 
-- **`data-theme`** (`light`/`dark`) is the only axis. It is set from the saved
-  choice or the OS preference, and changed from the **Appearance** menu's
-  *Theme* control: **Light | Dark** with thin outlined sun / crescent-moon icons
-  drawn in the SF Symbols idiom (`ICON_SUN`/`ICON_MOON`, inline SVG, `currentColor`).
-  The user disliked the heavy solid Font Awesome sun/moon, so don't swap those back.
+- **Theme** is `themePref` (`'light' | 'dark' | 'auto'`, default **auto**) →
+  `currentTheme` (the resolved `light`/`dark` that `data-theme` shows), via
+  `applyTheme()`. Auto *follows the system live* (a `prefers-color-scheme`
+  change listener), not just at load. It is a **per-device preference
+  (`mytasks_theme` in localStorage) and is deliberately not in the synced data
+  blob**: each device should follow its own system, and a synced file must not
+  push one device's choice onto another (`load()` ignores a `theme` in a file).
+  It is changed from the **Appearance** popover's *Theme* control: **Light | Dark
+  | Auto** with thin outlined sun / crescent-moon / half-filled-circle icons drawn
+  in the SF Symbols idiom (`ICON_SUN`/`ICON_MOON`/`ICON_AUTO`, inline SVG,
+  `currentColor`). The user disliked the heavy solid Font Awesome sun/moon, so
+  don't swap those back.
 - **One density, one of two text sizes.** The density option is gone: compact is
   the only layout (`.task-row` is `padding: 3px 10px; row-gap: 2px` in the base
   rules — it used to be switched by `html[data-density="compact"]`, which is also
   gone, along with `compactMode`/`mytasks_compact` and their save/load/sync
-  entries). Text size offers only **M (100%) and L (115%)** (`UI_SCALE_STEPS`);
+  entries). Text size offers only **Medium (100%) and Large (115%)** (`UI_SCALE_STEPS`), shown as a small "A" and a large "A" (each segment's `glyph` is its font size, like Safari's "aA" menu; the full name is the tooltip);
   Small and Extra Large were removed, and `clampUiScale` snaps a saved 90 to M
   and a saved 130 to L so nobody is stranded on a size the control no longer has.
 - **`<html data-scheme="glass">`** is set in the markup and is now only a

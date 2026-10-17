@@ -3,10 +3,10 @@
 // .view-switch pill (the same segmented control the List/Board toggle uses),
 // persisted/synced the same way the theme is. Small and Extra Large were removed.
 
-test('UI_SCALE_STEPS offers exactly Medium and Large, in order', function () {
+test('UI_SCALE_STEPS offers exactly Medium and Large, in order, as a small and a large A', function () {
   assertDeepEqual(UI_SCALE_STEPS.map(s => s.label), ['Medium', 'Large']);
-  assertDeepEqual(UI_SCALE_STEPS.map(s => s.short), ['M', 'L']);
   assertDeepEqual(UI_SCALE_STEPS.map(s => s.pct), [100, 115]);
+  assertTrue(UI_SCALE_STEPS[0].glyph < UI_SCALE_STEPS[1].glyph, 'the Large letter is drawn bigger than the Medium one');
 });
 
 test('uiScaleStepIndex finds the exact stop, and snaps an in-between value to the nearest one', function () {
@@ -96,21 +96,21 @@ function renderedUiScaleSegments(){
   return out;
 }
 
-test('renderUiScaleMenu builds a 2-segment view-switch pill (M/L) with the current stop marked active', function () {
+test('renderUiScaleMenu builds a 2-segment pill of a small and a large A, with the current stop marked active', function () {
   setUiScale(115);
   renderUiScaleMenu();
   const segments = renderedUiScaleSegments();
-  assertDeepEqual(segments.map(s => s.short), ['M', 'L']);
+  assertDeepEqual(segments.map(s => s.short), ['A', 'A'], 'both segments show the letter A, at different sizes');
   assertDeepEqual(segments.map(s => s.title), ['Medium', 'Large'], 'the full name is each segment\'s own tooltip');
   assertEqual(segments.filter(s => s.active).length, 1, 'exactly one segment is marked active');
-  assertEqual(segments.find(s => s.active).short, 'L', 'Large (115%) is the active segment');
+  assertEqual(segments.find(s => s.active).title, 'Large', 'Large (115%) is the active segment');
 });
 
 test('renderUiScaleMenu moves the active segment when the scale changes', function () {
   setUiScale(100);
   renderUiScaleMenu();
-  assertEqual(renderedUiScaleSegments().find(s => s.active).short, 'M');
+  assertEqual(renderedUiScaleSegments().find(s => s.active).title, 'Medium');
   setUiScale(115);
   renderUiScaleMenu();
-  assertEqual(renderedUiScaleSegments().find(s => s.active).short, 'L');
+  assertEqual(renderedUiScaleSegments().find(s => s.active).title, 'Large');
 });
