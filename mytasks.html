@@ -144,7 +144,9 @@
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
   .project-row.settle { animation: rowSettle .22s ease-out; }
   .project-row .picon { width: 14px; text-align: center; font-size: 12px; color: var(--text-3); flex-shrink: 0; }
-  .project-row .pname { flex: 1; min-width: 0; white-space: nowrap; }
+  .project-row .pname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* while the action capsule is showing, the name gives up the room it needs, so a long name ends in "…" before the capsule instead of running under it */
+  .project-row:is(:hover, :focus-within) .pname { margin-right: 76px; }
   .project-row .count { font-size: 11px; color: var(--text-3); }
   /* Edit/Delete are the list's action capsule (.row-actions), floated just left of the count, so they take no width of their own and
      the counts line up with the nav items' above (the old 46px reserved slot pushed every project count to the left) */
@@ -1721,6 +1723,11 @@ function highlightMatch(text, query){
   if(idx===-1) return esc(text);
   return `${esc(text.slice(0,idx))}<mark class="search-highlight">${esc(text.slice(idx,idx+query.length))}</mark>${esc(text.slice(idx+query.length))}`;
 }
+// A project name that is cut short (by the 20-character limit or by the hover room the action capsule takes) gets its full name as a tooltip.
+function tipIfTruncated(row){
+  const n = row.querySelector('.pname'); if(!n || n.dataset.tooltip) return;
+  if(n.scrollWidth > n.clientWidth + 1) n.dataset.tooltip = n.dataset.full || n.textContent;
+}
 function abbreviateName(name, maxLen=20){ return name.length > maxLen ? name.slice(0, maxLen) + '…' : name; }
 function projById(id){ return projects.find(p=>p.id===id); }
 function colorOf(name){ return CAT_COLORS.find(c=>c.name===name) || CAT_COLORS[0]; }
@@ -1880,10 +1887,10 @@ function renderSidebar(){
   }).join('');
 
   document.getElementById('projectList').innerHTML = visibleProjects().map(p=>{
-    return `<div class="project-row ${filterProjectId===p.id?'active':''}" data-id="${p.id}" role="button" tabindex="0" aria-pressed="${filterProjectId===p.id}" onclick="setProjectFilter('${p.id}')"
+    return `<div class="project-row ${filterProjectId===p.id?'active':''}" data-id="${p.id}" role="button" tabindex="0" aria-pressed="${filterProjectId===p.id}" onclick="setProjectFilter('${p.id}')" onmouseenter="tipIfTruncated(this)"
       ${p.locked ? '' : `draggable="true" ondragstart="handleProjectDragStart(event,'${p.id}')" ondragend="handleProjectDragEnd(event)" ondragover="handleProjectDragOver(event,'${p.id}')" ondragleave="handleProjectDragLeave(event)" ondrop="handleProjectDrop(event,'${p.id}')"`}>
       <i class="fa-solid fa-${p.icon||'folder'} picon"></i>
-      <span class="pname"${p.name.length>20?` data-tooltip="${esc(p.name)}"`:''}>${esc(abbreviateName(p.name))}</span>
+      <span class="pname" data-full="${esc(p.name)}"${p.name.length>20?` data-tooltip="${esc(p.name)}"`:''}>${esc(abbreviateName(p.name))}</span>
       <span class="count">${taskCountsForProject(p.id)}</span>
       <span class="project-actions row-actions">
         <button class="icon-btn" onclick="event.stopPropagation();openProjectModal('${p.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
@@ -2303,6 +2310,7 @@ function handleBoardKeyNav(e){
   inlineAddSubtaskTaskId = null;
   inlineAddParentSubId = null;
   inlineAddParentStepId = null;
+  if(e.key==='ArrowUp' && colIdx!==-1 && rowIdx===0){ if(hadInlineAdd) renderBoard(); leaveTasksToQuickAdd(); return; }   // up from a column's first card goes back into the quick-add field
   if(colIdx===-1){
     colIdx = columns.findIndex(c=>c.tasks.length>0);
     if(colIdx===-1) return;
@@ -2957,7 +2965,22 @@ function updateQuickAddPreview(){
   el.innerHTML = `<span class="quickadd-preview-label">Will add “${esc(pr.title)}” with</span>` + chips.join('') + `<span class="quickadd-preview-hint">Shift+Enter adds it as typed</span>`;
   el.classList.add('show');
 }
+// ArrowDown out of the quick-add field selects the first task; ArrowUp from the first task goes back in (like Mail's search field).
+function selectFirstTaskFromQuickAdd(){
+  const first = viewMode==='board' ? (getBoardColumns().find(c=>c.tasks.length)||{tasks:[]}).tasks[0] : getVisibleListTasks().tasks[0];
+  const input = document.getElementById('quickAddInput'); if(input && input.blur) input.blur();
+  if(!first) return;
+  selectedTaskIds.clear(); kbdSelectedTaskId = first.id; lastClickedTaskId = first.id;
+  paintSelection();
+  const el = document.querySelector(`.task-row[data-id="${first.id}"], .board-card[data-id="${first.id}"]`);
+  if(el && el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+}
+function leaveTasksToQuickAdd(){
+  kbdSelectedTaskId = null; selectedTaskIds.clear(); paintSelection();
+  const input = document.getElementById('quickAddInput'); if(input && input.focus) input.focus();
+}
 function quickAddTask(event){
+  if(event.key==='ArrowDown' && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey){ event.preventDefault(); event.stopPropagation(); selectFirstTaskFromQuickAdd(); return; }   // stopPropagation: the field is blurred by now, so the list's own arrow handler would otherwise take this same keypress and move one row further
   // Tab is a no-op here: this is a single-purpose field with no adjacent
   // field to tab into, so pressing Tab (unlike Enter) shouldn't hand focus
   // off to whatever happens to be next in DOM order (the collapse-all
@@ -4047,6 +4070,7 @@ function shortcutsListHtml(){
     row('Focus quick-add', 'N'),
     row('Show or hide the sidebar', mod, 'B'),
     row('Navigate tasks', '↑', '↓'),
+    row('Jump from the quick-add field into the list, and back', '↓', '↑'),
     row('Open selected task', '↵'),
     group('Task actions'),
     row('Collapse/expand selected task (list view)', 'Space'),
@@ -4440,6 +4464,7 @@ function handleListKeyNav(e){
   inlineAddParentSubId = null;
   inlineAddParentStepId = null;
   const idx = list.findIndex(t=>t.id===kbdSelectedTaskId);
+  if(e.key==='ArrowUp' && idx===0){ if(hadInlineAdd) renderList(); leaveTasksToQuickAdd(); return; }   // up from the first task goes back into the quick-add field
   let next;
   if(idx===-1) next = 0;
   else if(e.key==='ArrowDown') next = Math.min(idx+1, list.length-1);

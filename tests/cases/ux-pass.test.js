@@ -526,3 +526,16 @@ test('the Help dialog has a label for every topic, opens on the last topic read,
   setHelpTab('no-such-topic'); assertEqual(helpTab, HELP_TABS[0]);
   setHelpTab('data'); openHelpModal(); assertEqual(helpTab, 'data');
 });
+
+test('ArrowDown from the quick-add field selects the first task; ArrowUp from the first task clears the selection (focus returns to the field)', function () {
+  tasks = [uxTask({ id: 'a', title: 'A' }), uxTask({ id: 'b', title: 'B' })];
+  viewMode = 'list'; kbdSelectedTaskId = null; selectedTaskIds = new Set();
+  var first = getVisibleListTasks().tasks[0].id;
+  selectFirstTaskFromQuickAdd();
+  assertEqual(kbdSelectedTaskId, first);
+  var stopped = false, prevented = false;
+  quickAddTask({ key: 'ArrowDown', preventDefault: function () { prevented = true; }, stopPropagation: function () { stopped = true; }, target: { value: '' } });
+  assertTrue(prevented && stopped, 'the keypress is consumed so the list handler does not also move a row');
+  leaveTasksToQuickAdd();
+  assertEqual(kbdSelectedTaskId, null);
+});

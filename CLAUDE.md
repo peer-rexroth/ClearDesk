@@ -224,6 +224,13 @@ parity.
 - **Sidebar project actions are the list's action capsule** (`.project-actions.row-actions`): Edit/Delete float just left
   of the count on hover/focus and take no width of their own, so a project's count lines up with the nav items' counts above
   it (a reserved 46px slot used to push every project count left). Same disc hover as the list rows.
+  While the capsule shows, the name gives up 76px (`margin-right` on `.pname`, which has `text-overflow: ellipsis`), so a long
+  name ends in "…" before the capsule instead of running under it; `tipIfTruncated` then adds the full name as a tooltip.
+- **Arrow keys cross the quick-add field**: ArrowDown in it selects the first task (list: first row; board: first card of
+  the first non-empty column), keeping whatever you typed; ArrowUp from the first task (or a column's first card) clears the
+  selection and focuses the field (`selectFirstTaskFromQuickAdd` / `leaveTasksToQuickAdd`). The field's handler must
+  `stopPropagation()`: it blurs first, so the document-level list handler would otherwise take the same keypress and move
+  one row further.
 - **No coloured glows.** Primary and danger buttons are flat fills (`--glass-accent` / `#d92d20`, no blurred coloured
   shadow, no gradient), and a plain `.btn` darkens on hover instead of growing a shadow. Apple's styling is flat fills with
   crisp rings; the blue/red glows were leftovers of the earlier glassier look. Hover/focus rings are crisp (no blur).
