@@ -214,6 +214,11 @@ parity.
   not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
   were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
+- **Every Due menu has the date field** (`dueDateFieldHtml`, shared): the cell popover, the right-click Due submenu and the
+  toolbar Due menu. Picking a date goes through `rowMenuRun('due', 'YYYY-MM-DD')` (an empty value clears), so it applies to the
+  whole selection with one undo. A Due flyout stays open while the field has focus (`:focus-within`), because the browser's
+  date popup is outside it and the pointer leaving would otherwise close the flyout mid-pick. Due rows have no tick column
+  (`.no-tick`), so their text and the field line up; the toolbar menus are inset (`.tool-menu{padding:5px}`) like the others.
 - **The Due popover opens leftwards** (`.task-cell.due .cell-pop`, and a card's due pill): the Due cell is the last
   column and the popover (170px+) is wider than it, so anchoring it at the cell's left edge ran it under the scroll
   container's edge and clipped it. Priority/Status popovers still anchor left.

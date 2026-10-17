@@ -184,6 +184,29 @@ test('rowMenuRun due shortcuts set today / tomorrow / next week / clear', functi
   assertEqual(tasks[0].dueDate, null);
 });
 
+test('the menus\' date field sets any date on one or several tasks, and an empty value clears it', function () {
+  tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b', dueDate: '2030-01-01' })];
+  rowMenuIds = ['a']; rowMenuRun('due', '2031-03-03');
+  assertEqual(tasks[0].dueDate, '2031-03-03');
+  rowMenuIds = ['a', 'b']; rowMenuRun('due', '2032-04-04');
+  assertEqual(tasks[0].dueDate, '2032-04-04');
+  assertEqual(tasks[1].dueDate, '2032-04-04');
+  rowMenuIds = ['a', 'b']; rowMenuRun('due', 'clear');
+  assertEqual(tasks[0].dueDate, null);
+  assertEqual(tasks[1].dueDate, null);
+});
+
+test('the right-click Due submenu and the toolbar Due menu both offer the date field, prefilled when the selection shares a date', function () {
+  tasks = [uxTask({ id: 'a', dueDate: '2031-03-03' }), uxTask({ id: 'b', dueDate: '2031-03-03' })];
+  kbdSelectedTaskId = 'a'; selectedTaskIds = new Set(['a', 'b']);
+  var tool = toolMenuHtml('due');
+  assertTrue(tool.indexOf('type="date"') !== -1 && tool.indexOf('value="2031-03-03"') !== -1, 'toolbar Due menu has a prefilled date field');
+  var menu = rowMenuHtml(['a', 'b']);
+  assertTrue(menu.indexOf('type="date"') !== -1 && menu.indexOf('value="2031-03-03"') !== -1, 'row menu Due submenu has a prefilled date field');
+  tasks[1].dueDate = '2031-05-05';
+  assertTrue(toolMenuHtml('due').indexOf('value="2031-03-03"') === -1, 'no prefill when the selection disagrees');
+});
+
 test('rowMenuRun on several rows applies to all of them', function () {
   tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' }), uxTask({ id: 'c' })];
   rowMenuIds = ['a', 'b'];

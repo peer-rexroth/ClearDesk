@@ -508,6 +508,14 @@
   .row-menu-sub:hover > .sub-parent, .row-menu-sub.open > .sub-parent { background: var(--sel-bg, var(--bg-3)); color: #fff; }
   .row-menu-sub:hover > .sub-parent i, .row-menu-sub.open > .sub-parent i, .row-menu-sub:hover > .sub-parent .row-menu-hint { color: #fff; }
   .sub-parent .row-menu-hint i { font-size: 10px; width: auto; }
+  /* Due rows never show a tick, so they drop the tick column and the text starts at the row's own padding; the date field spans the
+     same inner width as a row (a field is just a wide row), with the toolbar menu inset like the other menus */
+  .no-tick .pop-check { display: none; }
+  .menu-date { box-sizing: border-box; width: 100%; margin: 3px 0 0; font-size: 13px; padding: 4px 8px; }
+  .tool-menu { padding: 5px; }
+  .tool-menu .row-menu-sep, .row-menu-flyout .row-menu-sep, .cell-pop .row-menu-sep { margin: 5px 3px; }
+  /* keep a Due flyout open while its date field has focus: the browser's date popup is outside the flyout, so the pointer leaves it */
+  .row-menu-sub:focus-within > .row-menu-flyout { display: flex; }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
   /* the Due cell is the last column (and a card's due pill sits at the card's right edge): a menu wider than the cell must grow
@@ -2333,7 +2341,7 @@ function toolMenuHtml(which){
   const same = k=>ts.length && ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
   const opt = (kind, val, lead, label, cur)=>menuOpt(`toolbarAct('${kind}','${val}')`, lead, label, cur);
   if(which==='priority') return PRIORITIES.map(p=>opt('priority', p.id, PRIORITY_DOT[p.id], p.label, same('priority')===p.id)).join('');
-  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear date']].map(d=>opt('due', d[0], null, d[1])).join('');
+  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear date']].map(d=>opt('due', d[0], null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `toolbarAct('due',this.value||'clear')`);
   return visibleProjects().map(p=>opt('project', p.id, {icon:p.icon}, abbreviateName(p.name, 24), same('projectId')===p.id)).join('');
 }
 function toggleToolMenu(which){
@@ -2412,7 +2420,7 @@ function rowMenuHtml(ids){
   parts.push(sep);
   parts.push(sub('fa-regular fa-flag', 'Priority', opts('priority', PRIORITIES, same('priority'), x=>PRIORITY_DOT[x.id])));
   parts.push(sub('fa-regular fa-circle-dot', 'Status', opts('status', STATUSES, same('status'), x=>STATUS_DOT[x.id])));
-  parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('')));
+  parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `rowMenuRun('due',this.value||'clear')`)));
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
   if(n===1) parts.push(item('fa-solid fa-plus','Add subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-clone','Duplicate','rowMenuRun(\'duplicate\')'));
@@ -2472,7 +2480,7 @@ function rowMenuRun(kind, value){
   else if(kind==='status'){ ids.length===1 ? updateTaskField(ids[0],'status',value) : bulkSetStatus(value, ids); }
   else if(kind==='project'){ ids.length===1 ? updateTaskField(ids[0],'projectId',value) : bulkMoveProject(value, ids); }
   else if(kind==='due'){
-    const v = value==='today' ? today : value==='tomorrow' ? isoAddDays(today,1) : value==='week' ? isoAddDays(today,7) : null;
+    const v = value==='today' ? today : value==='tomorrow' ? isoAddDays(today,1) : value==='week' ? isoAddDays(today,7) : /^\d{4}-\d{2}-\d{2}$/.test(value||'') ? value : null;   // an ISO date comes from the menus' date field; anything else clears
     ids.length===1 ? updateTaskField(ids[0],'dueDate',v) : bulkSetDueDate(v, ids);
   }
   else if(kind==='subtask'){
@@ -3840,7 +3848,12 @@ function popOptInner(lead, label){
   const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
-function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
+function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
+// The "pick any date" field shared by the cell popover, the row menu's Due submenu and the toolbar's Due menu. `handler` is the
+// JS run on change, with `this` the input (an empty value means "clear").
+function dueDateFieldHtml(current, handler){
+  return `<input type="date" class="cell-pop-date menu-date" aria-label="Pick a date" value="${esc(current||'')}" onclick="event.stopPropagation()" onchange="${handler}">`;
+}
 function cellPopOptionsHtml(t, field){
   if(field==='priority'){
     return PRIORITIES.map(p=>`<button type="button" class="cell-pop-opt${t.priority===p.id?' current':''}" onclick="pickCell(event,'${t.id}','priority','${p.id}')">${popOptInner(PRIORITY_DOT[p.id], p.label)}</button>`).join('');
@@ -3849,10 +3862,10 @@ function cellPopOptionsHtml(t, field){
     return STATUSES.map(s=>`<button type="button" class="cell-pop-opt${t.status===s.id?' current':''}" onclick="pickCell(event,'${t.id}','status','${s.id}')">${popOptInner(STATUS_DOT[s.id], s.label)}</button>`).join('');
   }
   const today = todayStr();
-  const q = (label, iso)=>`<button type="button" class="cell-pop-opt" onclick="pickCell(event,'${t.id}','dueDate',${iso?`'${iso}'`:'null'})">${popOptInner(null, label)}</button>`;
+  const q = (label, iso)=>`<button type="button" class="cell-pop-opt no-tick" onclick="pickCell(event,'${t.id}','dueDate',${iso?`'${iso}'`:'null'})">${popOptInner(null, label)}</button>`;
   return q('Today', today) + q('Tomorrow', isoAddDays(today,1)) + q('Next week', isoAddDays(today,7))
     + (t.dueDate ? q('Clear date', null) : '')
-    + `<input type="date" class="cell-pop-date" value="${esc(t.dueDate||'')}" onclick="event.stopPropagation()" onchange="pickCell(event,'${t.id}','dueDate',this.value||null)">`;
+    + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(t.dueDate, `pickCell(event,'${t.id}','dueDate',this.value||null)`);
 }
 function openCellPop(e, id, field){
   if(e && e.stopPropagation) e.stopPropagation();
