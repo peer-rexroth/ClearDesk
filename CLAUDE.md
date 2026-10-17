@@ -214,6 +214,9 @@ parity.
   not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
   were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
+- **One width for the small option menus**: `--submenu-w` (164px, on `html`: the Due menu's natural width, the date field being its widest part) is the `min-width` of the cell popovers, the row
+  menu's flyouts and the toolbar dropdowns, so Priority/Status/Due/Move look the same wherever they open. (They were 150, 190
+  and 170 before.) The row menu itself (230px) is a different, larger menu.
 - **Every Due menu has the date field** (`dueDateFieldHtml`, shared): the cell popover, the right-click Due submenu and the
   toolbar Due menu. Picking a date goes through `rowMenuRun('due', 'YYYY-MM-DD')` (an empty value clears), so it applies to the
   whole selection with one undo. A Due flyout stays open while the field has focus (`:focus-within`), because the browser's

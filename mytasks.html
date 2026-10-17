@@ -24,7 +24,8 @@
   /* --ink*: the real text/border colours, captured on <html> where no selected row has
      re-pointed --text/--border. A popover opened inside a selected (blue) row resets to
      these, otherwise it would inherit the row's white text on its own white surface. */
-  html { --ink: var(--text); --ink-2: var(--text-2); --ink-3: var(--text-3); }
+  html { --submenu-w: 164px;   /* one width for every small option menu: cell popovers, the row menu's flyouts and the toolbar dropdowns */
+    --ink: var(--text); --ink-2: var(--text-2); --ink-3: var(--text-3); }
   :root {
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
@@ -486,7 +487,7 @@
   .task-cell.editable:hover .badge:not(.cell-pop .badge), .cell-host.editable:hover .badge:not(.cell-pop .badge) { filter: brightness(1.14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent); }
   .task-cell.editable:hover .task-cell-empty { background: var(--bg-3); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
   .cell-host { display: inline-flex; }
-  .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: 150px; display: flex; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
+  .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: var(--submenu-w); display: flex; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
   .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
   /* shared menu-row anatomy: tick column, dot or icon, text (cell popovers, row menu, toolbar menus) */
@@ -502,7 +503,7 @@
   .row-menu-item.menu-opt { gap: 0; padding: 5px 8px; }
   /* submenus: hover (or click) a parent row to open its flyout beside the menu */
   .row-menu-sub { position: relative; }
-  .row-menu-flyout { display: none; position: absolute; left: calc(100% - 4px); top: -6px; min-width: 190px; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 1; }
+  .row-menu-flyout { display: none; position: absolute; left: calc(100% - 4px); top: -6px; min-width: var(--submenu-w); flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 1; }
   .row-menu-flyout.flip { left: auto; right: calc(100% - 4px); }
   .row-menu-sub:hover > .row-menu-flyout, .row-menu-sub.open > .row-menu-flyout { display: flex; }
   .row-menu-sub:hover > .sub-parent, .row-menu-sub.open > .sub-parent { background: var(--sel-bg, var(--bg-3)); color: #fff; }
@@ -830,7 +831,7 @@
   .tool-btn:disabled { opacity: .35; cursor: default; }
   .tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
   .tool-sep { width: 1px; height: 16px; margin: 0 3px; background: var(--border-2); }
-  .tool-menu { left: 0; right: auto; min-width: 170px; }
+  .tool-menu { left: 0; right: auto; min-width: var(--submenu-w); }
 
   /* a little air between the expand chevron and the checkbox circle */
   .task-check-cell { gap: 6px; }
