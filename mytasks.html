@@ -131,7 +131,7 @@
   .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; }
   .f-chip { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; cursor: pointer; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: all 0.1s; user-select: none; }
   .f-chip:hover { border-color: var(--border-2); color: var(--text); }
-  .f-chip.active { font-weight: 600; border-color: var(--border-2); background: var(--bg-3); color: var(--text); }
+  .f-chip.active { background: var(--bg-3); color: var(--text); }   /* same weight as the pills; the fill alone says "on" (a bold label and an outline said it twice) */
 
   .project-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius); cursor: pointer; font-size: 13px; }
   .project-row:hover { background: var(--bg-2); }
@@ -197,7 +197,7 @@
   .task-row.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
 
   .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 14px 20px; }
-  .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 170px 100px 120px 130px; min-width: 880px; }   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
+  .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 152px 88px 108px 112px; min-width: 816px; }   /* Due = widest date seen across 22 locales (pt-BR "28 de mar." 108px, with chevron) + a little */   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
   .task-row { display: grid; grid-template-areas: "check title project priority status due" ". sub sub sub sub sub"; column-gap: 10px; row-gap: 2px; align-items: center; padding: 3px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
@@ -510,6 +510,9 @@
   .sub-parent .row-menu-hint i { font-size: 10px; width: auto; }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
+  /* the Due cell is the last column (and a card's due pill sits at the card's right edge): a menu wider than the cell must grow
+     leftwards, or it runs under the scroll container's edge and is clipped */
+  .task-cell.due .cell-pop, .board-card-top .cell-host .cell-pop { left: auto; right: 0; }
 
   .quickadd-project { flex-shrink: 0; margin-right: 8px; max-width: 150px; font-size: 13px; font-family: var(--font); color: var(--text-2); background: var(--bg-3); border: 1px solid var(--border); border-radius: 999px; padding: 5px 10px; cursor: pointer; }
   html[data-scheme="glass"] .quickadd-project { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); }
@@ -1779,7 +1782,7 @@ function renderSidebar(){
   document.getElementById('tagChips').innerHTML = TAGS.map(tg=>{
     const active = filterTags.includes(tg.id);
     const tc = colorOf(tg.color);
-    return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:${tc.text}`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="setTagFilter('${tg.id}')">${esc(tg.label)}</div>`;
+    return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:transparent`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="setTagFilter('${tg.id}')">${esc(tg.label)}</div>`;
   }).join('');
 
   document.getElementById('projectList').innerHTML = visibleProjects().map(p=>{
@@ -2647,7 +2650,7 @@ function renderDrawer(){
       <div class="field">
         <label>Tags</label>
         <div class="filter-chips">
-          ${TAGS.map(tg=>{ const active=(t.tags||[]).includes(tg.id); const tc=colorOf(tg.color); return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:${tc.text}`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="toggleTaskTag('${t.id}','${tg.id}')">${esc(tg.label)}</div>`; }).join('')}
+          ${TAGS.map(tg=>{ const active=(t.tags||[]).includes(tg.id); const tc=colorOf(tg.color); return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:transparent`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="toggleTaskTag('${t.id}','${tg.id}')">${esc(tg.label)}</div>`; }).join('')}
         </div>
       </div>
       <div class="field-row">

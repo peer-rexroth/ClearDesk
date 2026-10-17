@@ -214,6 +214,9 @@ parity.
   not clip overflow (`overflow` removed) or the flyouts would be cut off. The old flat sections
   were tried first and judged too tall. Also every `.row-menu-item` now hovers accent-blue (a destructive item
   turns white on it). Add a new menu by composing `menuOpt`, not by writing a new row style.
+- **The Due popover opens leftwards** (`.task-cell.due .cell-pop`, and a card's due pill): the Due cell is the last
+  column and the popover (170px+) is wider than it, so anchoring it at the cell's left edge ran it under the scroll
+  container's edge and clipped it. Priority/Status popovers still anchor left.
 - **Quick-add shorthand** (`parseQuickAdd`, live preview in `#quickAddPreview`):
   `!high/!med/!low` (`!!`, `!h`…), `#project`, `@tag`, and a date word
   (today, tomorrow, weekday, next week, in N days/weeks, YYYY-MM-DD). Unknown
@@ -344,6 +347,10 @@ parity.
   `.task-checkbox`, just smaller; a checked one on the blue selected row is white with no green halo.
   In the list the "+ add a step" toggle of a row without children shows on hover/focus only
   (`.subtask-toggle:has(.fa-plus)`); chevrons for rows that have children stay visible.
+- **Filter/tag chips (`.f-chip`) match the pills.** An active tag chip is the tag's tinted fill and text colour at
+  the pills' weight (500) with no outline — it used to add a 1px border in the text colour and bold the label, so the
+  same tag looked different in the sidebar than on a task row. Inactive chips stay neutral, so the fill alone says
+  "on". Same in the sidebar, the filter popover and the detail panel.
 - **Detail panel add fields.** The panel's add inputs live inside `.field`, whose boxed-input
   rule (`.field input[type=text]`, plus the Glass copy) out-ranks the ghost style, so they showed as
   bordered boxes beside a ghost row. A `.drawer`-scoped rule at higher specificity restores the ghost
@@ -378,8 +385,13 @@ parity.
 - **Row width is a fixed floor, not `max-content`.** The list rows/header used
   `min-width: max-content`, which made any long title stretch *its own row* wider
   than the header (every row is a separate grid), pushing that row's columns out
-  of line. They now use `min-width: 880px` (`560px` with the side panel open) and
+  of line. They now use `min-width: 816px` (`560px` with the side panel open) and
   titles wrap (`overflow-wrap:anywhere`).
+- **Column widths are sized to content, not guessed.** Project 152 / Priority 88 / Status 108 / Due 112px, the rest
+  goes to Task. They were measured with the selected-row chevron included: Priority 78, Status 99, Project 143
+  (20 characters). Due is set by the *widest locale date* (22 locales tried via `fmtDate`'s `toLocaleDateString`):
+  pt-BR "28 de mar." needs 108, hu-HU 104, English only 89 — so it carries a few px of buffer. Re-measure before
+  narrowing any of them. The panel-open layout (`.layout:has(.drawer.open)`) has its own, tighter widths.
 - **Collapsible sidebar**: the toggle (topbar, left) and **Cmd/Ctrl+B** flip
   `sidebarCollapsed` (per-device `mytasks_sidebar_collapsed`), applied as
   `html.sidebar-collapsed`. With no saved choice it starts collapsed at ≤800px,
