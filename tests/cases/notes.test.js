@@ -744,3 +744,13 @@ test('no conflict copy when we had not edited since the last sync, or the text i
   mergeNotesData({ notes: [ntNote({ id: 'c4', body: '<p>same</p>', updatedAt: 300 })] }, true);
   assertEqual(notes.length, 1);
 });
+
+test('file backup naming and due-check', function () {
+  assertTrue(FILE_BACKUP_RE.test(fileBackupName('2026-10-18')));
+  assertFalse(FILE_BACKUP_RE.test('notes.json'));
+  localStorage.removeItem(FILE_BACKUP_LAST);
+  assertTrue(fileBackupDue());
+  localStorage.setItem(FILE_BACKUP_LAST, todayStr());
+  assertFalse(fileBackupDue());
+  localStorage.removeItem(FILE_BACKUP_LAST);
+});

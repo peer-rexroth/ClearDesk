@@ -1363,6 +1363,14 @@
           <i class="fa-solid fa-clock-rotate-left split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Backups</div><div class="split-btn-menu-desc">Restore an automatic daily snapshot</div></div>
         </div>
+        <div class="split-btn-menu-item" id="fileBackupItem" onclick="fileBackupMenuAction();closeLibMenu()">
+          <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label" id="fileBackupLabel">Daily file backup</div><div class="split-btn-menu-desc" id="fileBackupDesc">Save a daily copy to a Backup folder</div></div>
+        </div>
+        <div class="split-btn-menu-item" id="fileBackupOffItem" style="display:none" onclick="stopFileBackup();closeLibMenu()">
+          <i class="fa-solid fa-ban split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Turn off file backup</div></div>
+        </div>
       </div>
     </div>
     <div class="lib-dropdown" id="uiScaleDropdown">
@@ -2196,6 +2204,7 @@ function dataPayload(){
   return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
 let storageFullWarned = false;
+let backupDirHandle = null, backupRunning = false;     // the daily file-backup folder (see "Daily file backup")
 function save(){
   const data = dataPayload();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); storageFullWarned = false; }
@@ -2203,6 +2212,7 @@ function save(){
     if(!storageFullWarned){ storageFullWarned = true; showToast('Storage is full, so changes are not saved in this browser. Link a data file or export a backup.', true); }
   }
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
+  if(backupDirHandle && fileBackupDue()) fileBackupIfDue(false);
   maybeSnapshotBackup();
 }
 function getBackups(){
@@ -6752,6 +6762,82 @@ function updateFileSyncUI(){
     else fadeSwapHTML(el, fileSyncChipHtml('lapsed', fileHandle.name));
   }).catch(()=>{ if(el) fadeSwapHTML(el, fileSyncChipHtml('unlinked')); });
 }
+// ── Daily file backup ─────────────────────────────────────────────────────────
+// A linked file's handle cannot reveal its own folder, so the user picks the folder once (the one holding the data file works well).
+// Once per day the app writes mydesk-data-YYYY-MM-DD.json into a "Backup" subfolder of it and keeps the newest FILE_BACKUPS_KEEP.
+const FILE_BACKUP_KEY = 'backup-dir', FILE_BACKUP_LAST = 'mydesk_filebackup_last', FILE_BACKUP_SUB = 'Backup', FILE_BACKUPS_KEEP = 30;
+const FILE_BACKUP_RE = /^mydesk-data-\d{4}-\d{2}-\d{2}\.json$/;
+const _fsGetK = k => _fsIdb('readonly',  (s,r,j)=>{ const q=s.get(k);   q.onsuccess=()=>r(q.result); q.onerror=()=>j(q.error); });
+const _fsPutK = (k,h) => _fsIdb('readwrite', (s,r,j)=>{ const q=s.put(h,k); q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
+const _fsDelK = k => _fsIdb('readwrite', (s,r,j)=>{ const q=s.delete(k);   q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
+function fileBackupName(day){ return `mydesk-data-${day}.json`; }
+function fileBackupDue(){ try{ return localStorage.getItem(FILE_BACKUP_LAST)!==todayStr(); }catch(_){ return true; } }
+// Writes today's copy if one is due. Never prompts (it runs from save()), so a lapsed permission just waits for the user to reconnect.
+async function fileBackupIfDue(force){
+  if(!backupDirHandle || backupRunning || (!force && !fileBackupDue())) return false;
+  backupRunning = true;
+  try{
+    if(await backupDirHandle.queryPermission({mode:'readwrite'})!=='granted'){ updateFileBackupUI(); return false; }
+    const sub = await backupDirHandle.getDirectoryHandle(FILE_BACKUP_SUB, {create:true});
+    const w = await (await sub.getFileHandle(fileBackupName(todayStr()), {create:true})).createWritable();
+    await w.write(JSON.stringify(dataPayload())); await w.close();
+    try{ localStorage.setItem(FILE_BACKUP_LAST, todayStr()); }catch(_){}
+    const names = []; for await (const [n] of sub.entries()) if(FILE_BACKUP_RE.test(n)) names.push(n);
+    names.sort().slice(0, Math.max(0, names.length - FILE_BACKUPS_KEEP)).forEach(n=>sub.removeEntry(n).catch(()=>{}));
+    updateFileBackupUI();
+    return true;
+  }catch(e){ return false; }
+  finally{ backupRunning = false; }
+}
+async function chooseBackupFolder(){
+  if(!window.showDirectoryPicker){ showToast('Folder backups need Chrome or Edge', true); return; }
+  try{
+    const dir = await window.showDirectoryPicker({id:'mydesk-backup', mode:'readwrite'});
+    backupDirHandle = dir;
+    try{ await _fsPutK(FILE_BACKUP_KEY, dir); }catch(_){}
+    const ok = await fileBackupIfDue(true);
+    showToast(ok ? `Backed up to ${dir.name}/${FILE_BACKUP_SUB} — then once a day` : 'Could not write the backup', !ok);
+  }catch(e){ if(e.name!=='AbortError') showToast('Could not set the backup folder', true); }
+}
+async function reconnectBackupFolder(){
+  if(!backupDirHandle) return;
+  try{
+    if(await backupDirHandle.requestPermission({mode:'readwrite'})!=='granted'){ showToast('Permission denied', true); return; }
+    const ok = await fileBackupIfDue(false) || !fileBackupDue();
+    showToast(ok ? 'Daily file backup resumed' : 'Could not write the backup', !ok);
+  }catch(e){ showToast('Could not reconnect the backup folder', true); }
+}
+async function stopFileBackup(){
+  backupDirHandle = null;
+  try{ await _fsDelK(FILE_BACKUP_KEY); }catch(_){}
+  updateFileBackupUI();
+  showToast('Daily file backup turned off');
+}
+async function fileBackupMenuAction(){
+  if(!backupDirHandle) return chooseBackupFolder();
+  let perm = 'prompt'; try{ perm = await backupDirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
+  if(perm!=='granted') return reconnectBackupFolder();
+  openConfirmModal({
+    title: 'Daily file backup', confirmLabel: 'Choose another folder', danger: false,
+    body: `A copy is saved once a day to ${backupDirHandle.name}/${FILE_BACKUP_SUB} (the newest ${FILE_BACKUPS_KEEP} are kept).`,
+    action: ()=>chooseBackupFolder()
+  });
+}
+async function updateFileBackupUI(){
+  const l = document.getElementById('fileBackupLabel'), d = document.getElementById('fileBackupDesc'), off = document.getElementById('fileBackupOffItem');
+  if(!l || !d) return;
+  if(!backupDirHandle){ l.textContent = 'Daily file backup'; d.textContent = 'Save a daily copy to a Backup folder'; if(off) off.style.display = 'none'; return; }
+  let perm = 'prompt'; try{ perm = await backupDirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
+  l.textContent = perm==='granted' ? 'Daily file backup' : 'Resume file backup';
+  d.textContent = perm==='granted' ? `On — ${backupDirHandle.name}/${FILE_BACKUP_SUB}` : `Permission needed for ${backupDirHandle.name}`;
+  if(off) off.style.display = '';
+}
+async function initFileBackup(){
+  try{ backupDirHandle = (await _fsGetK(FILE_BACKUP_KEY)) || null; }catch(_){ backupDirHandle = null; }
+  await updateFileBackupUI();
+  fileBackupIfDue(false);
+}
+
 async function initFileSync(){
   if(!window.showOpenFilePicker) return;
   updateFileSyncUI();
@@ -6791,6 +6877,7 @@ purgeOldCompletedTasks();
 applyAppMode();
 render();
 initFileSync();
+initFileBackup();
 
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('mydesk: service worker registration failed — offline support unavailable', e)); });
