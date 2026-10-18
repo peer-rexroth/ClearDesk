@@ -240,6 +240,7 @@ parity.
   `{id,label,icon,rows:[[label,[keys]]]}` and `renderShortcutsDialog()` builds the tabs/panes when it opens (so ⌘ vs Ctrl is decided
   then); the sidebar keys, search and `/` behave as in Help (`scTabKey`, `scSearch`, `helpModalKey(e, bgId, searchId)`). Add a
   shortcut by adding a row to a group — there is no second list.
+- **The Link/Create-file dialog is PromptLab's** (`.sync-modal`): a header (round blue link icon, title, one-line subtitle), a grouped tinted list of choices (Resume / Link existing / Create new, each with a round icon, a title, a description and a chevron — the Help dialog's list idiom) and a quiet amber notice. Keep it identical in both apps; the old per-colour icon tiles and amber box are gone. Unlinking still uses the generic confirm modal.
 - **About is a button-less, centred panel** like macOS's About window: the real app icon (`icons/icon-192.png`, 22% corner radius), the name, a tagline, a credit line, the feedback address and a privacy line, with the same round close control as Help at the top left. No version line (the app has no version constant — don't invent one).
 - **Help sections are grouped cards**: each section's rows sit in one `.help-list` (rounded, softly tinted, hairlines between rows) — the same
   look as the shortcuts dialog's `.sc-list` — and tips use the same tint; there are no divider lines between sections.

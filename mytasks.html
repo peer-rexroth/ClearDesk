@@ -371,6 +371,25 @@
   .help-side-top { padding: 14px 14px 6px; flex-shrink: 0; }
   .help-close { width: 28px; height: 28px; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text-2); font-size: 12px; cursor: default; }
   /* About: a centred, button-less panel like macOS's "About" window — the app icon, its name, a line of credit, and the same round close control as Help */
+  /* Link/Create dialog — shared with PromptLab: a grouped list of choices (the Help dialog's idiom), then a quiet notice */
+  .sync-modal { width: 420px; gap: 16px; }
+  .sync-head { display: flex; align-items: center; gap: 14px; }
+  .sync-head-icon { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue-bg); color: var(--blue-text); font-size: 16px; }
+  .sync-head h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
+  .sync-head p { margin-top: 1px; font-size: 13px; color: var(--text-3); line-height: 1.4; }
+  .sync-list { background: color-mix(in srgb, var(--text) 4%, transparent); border-radius: 12px; padding: 0 6px; display: flex; flex-direction: column; }
+  .sync-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 8px; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: default; border-radius: 8px; }
+  .sync-row:not(:last-child) { border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent); border-radius: 0; }
+  .sync-row:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+  .sync-row:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -1px; }
+  .sync-ico { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text-2); font-size: 14px; }
+  .sync-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .sync-text strong { font-size: 14px; font-weight: 600; }
+  .sync-text span { font-size: 13px; color: var(--text-2); }
+  .sync-chev { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+  .sync-note { align-items: flex-start; gap: 10px; padding: 0 4px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
+  .sync-note i { margin-top: 3px; font-size: 13px; color: var(--amber-text); flex-shrink: 0; }
+  .sync-note strong { color: var(--text); font-weight: 600; }
   .about-modal { width: 320px; padding: 40px 28px 26px; gap: 0; align-items: center; text-align: center; position: relative; }
   .about-close { position: absolute; top: 14px; left: 14px; }
   .about-icon { width: 88px; height: 88px; border-radius: 22%; box-shadow: 0 6px 18px rgba(0,0,0,.18), 0 0 0 0.5px rgba(0,0,0,.12); }
@@ -1414,52 +1433,39 @@
   </div>
 </div>
 
-<!-- File sync onboarding modal -->
+<!-- File sync onboarding modal: one grouped list of choices, then a quiet notice (the Help dialog's list idiom; same dialog as PromptLab's) -->
 <div class="modal-bg" id="fileSyncModalBg" onclick="if(event.target===this) closeFileSyncModal()">
-  <div class="modal" style="width:380px;gap:18px">
-    <div style="display:flex;align-items:center;gap:12px">
-      <i class="fa-solid fa-link" style="font-size:18px;color:var(--blue-text)"></i>
+  <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
+    <div class="sync-head">
+      <span class="sync-head-icon"><i class="fa-solid fa-link"></i></span>
       <div>
-        <div style="font-size:15px;font-weight:500">Sync to a file</div>
-        <div style="font-size:12px;color:var(--text-3);margin-top:2px">Back up and share your tasks across sessions</div>
+        <h3 id="syncTitle">Sync to a file</h3>
+        <p>Back up and share your tasks across sessions</p>
       </div>
     </div>
-    <div style="height:0.5px;background:var(--border)"></div>
-    <div class="import-options">
-      <div id="fileSyncReconnectOption" class="import-option" style="display:none" onclick="closeFileSyncModal();reconnectFile()">
-        <div style="width:34px;height:34px;border-radius:8px;background:var(--teal-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="fa-solid fa-rotate-right" style="color:var(--teal-text);font-size:15px"></i>
-        </div>
-        <div class="import-option-text">
-          <strong id="fileSyncReconnectLabel">Resume sync</strong>
-          <span>Reconnect to restore auto-saving</span>
-        </div>
-      </div>
-      <div class="import-option" onclick="closeFileSyncModal();linkFile()">
-        <div style="width:34px;height:34px;border-radius:8px;background:var(--blue-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="fa-solid fa-folder-open" style="color:var(--blue-text);font-size:15px"></i>
-        </div>
-        <div class="import-option-text">
-          <strong>Link existing file</strong>
-          <span>Open a .json data file and sync to it</span>
-        </div>
-      </div>
-      <div class="import-option" onclick="closeFileSyncModal();createNewLinkedFile()">
-        <div style="width:34px;height:34px;border-radius:8px;background:var(--green-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0">
-          <i class="fa-solid fa-file-circle-plus" style="color:var(--green-text);font-size:15px"></i>
-        </div>
-        <div class="import-option-text">
-          <strong>Create new file</strong>
-          <span>Save your tasks to a new .json file</span>
-        </div>
-      </div>
+    <div class="sync-list" role="group" aria-label="Choose how to sync">
+      <button type="button" id="fileSyncReconnectOption" class="sync-row" style="display:none" onclick="closeFileSyncModal();reconnectFile()">
+        <span class="sync-ico"><i class="fa-solid fa-rotate-right"></i></span>
+        <span class="sync-text"><strong id="fileSyncReconnectLabel">Resume sync</strong><span>Reconnect to restore auto-saving</span></span>
+        <i class="fa-solid fa-chevron-right sync-chev"></i>
+      </button>
+      <button type="button" class="sync-row" onclick="closeFileSyncModal();linkFile()">
+        <span class="sync-ico"><i class="fa-solid fa-folder-open"></i></span>
+        <span class="sync-text"><strong>Link existing file</strong><span>Open a .json data file and sync to it</span></span>
+        <i class="fa-solid fa-chevron-right sync-chev"></i>
+      </button>
+      <button type="button" class="sync-row" onclick="closeFileSyncModal();createNewLinkedFile()">
+        <span class="sync-ico"><i class="fa-solid fa-file-circle-plus"></i></span>
+        <span class="sync-text"><strong>Create new file</strong><span>Save your tasks to a new .json file</span></span>
+        <i class="fa-solid fa-chevron-right sync-chev"></i>
+      </button>
     </div>
-    <div id="fileSyncWarning" style="display:flex;align-items:flex-start;gap:8px;background:var(--amber-bg);border-radius:var(--radius);padding:10px 12px">
-      <i class="fa-solid fa-triangle-exclamation" style="color:var(--amber-text);font-size:13px;margin-top:2px;flex-shrink:0"></i>
-      <span style="font-size:12px;color:var(--amber-text);line-height:1.55">Without a linked file, your tasks are stored in browser storage and <strong>will be lost if you clear browsing data</strong>.</span>
+    <div id="fileSyncWarning" class="sync-note" style="display:flex">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <span>Without a linked file, your tasks are stored in browser storage and <strong>will be lost if you clear browsing data</strong>.</span>
     </div>
     <div class="modal-actions">
-      <button class="btn" onclick="closeFileSyncModal()">Not now</button>
+      <button type="button" class="btn" onclick="closeFileSyncModal()">Not now</button>
     </div>
   </div>
 </div>
