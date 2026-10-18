@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="mytasks">
+<meta name="apple-mobile-web-app-title" content="MyDesk">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1e1e1c" media="(prefers-color-scheme: dark)">
-<title>mytasks</title>
+<title>MyDesk</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%85%3C/text%3E%3C/svg%3E">
@@ -1105,7 +1105,7 @@
 <div class="topbar">
   <div class="topbar-left">
     <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
-  <div class="topbar-brand"><i class="fa-solid fa-list-check"></i><span><span class="brand-my">my</span><span class="brand-tasks">tasks</span></span></div>
+  <div class="topbar-brand"><i class="fa-solid fa-list-check"></i><span><span class="brand-my">My</span><span class="brand-tasks">Desk</span></span></div>
     <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks or Notes">
       <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')">Tasks</button>
       <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')">Notes</button>
@@ -1562,7 +1562,7 @@
   <div class="modal about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <button type="button" class="help-close about-close" aria-label="Close" title="Close (Esc)" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button>
     <img class="about-icon" src="icons/icon-192.png" alt="" width="88" height="88">
-    <h3 class="about-name" id="aboutTitle">mytasks</h3>
+    <h3 class="about-name" id="aboutTitle">MyDesk</h3>
     <div class="about-tag">A local-first task manager</div>
     <div class="about-credits">Created by <strong>Peer Rexroth</strong></div>
     <div class="about-feedback">Feedback &amp; suggestions welcome<br><a href="mailto:peer.rexroth@db.com">peer.rexroth@db.com</a></div>
@@ -5321,7 +5321,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `mytasks-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
+  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 function handleFileImport(event){
@@ -5333,7 +5333,7 @@ function handleFileImport(event){
       if(!data.tasks || !data.projects) throw new Error('bad');
       pendingImportData = data;
       document.getElementById('importModalBg').classList.add('open');
-    }catch(err){ showToast('Invalid mytasks file', true); }
+    }catch(err){ showToast('Invalid MyDesk file', true); }
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -5387,7 +5387,7 @@ function mergeData(data, opts){
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `mytasks-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
+    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
     // an older export has no notes: leave yours alone rather than wiping them
@@ -5450,7 +5450,7 @@ function restoreBackup(date){
     title: 'Restore this backup?',
     body: `This replaces your current data with the snapshot from ${fmtDate(date)}. Your current data will be backed up to a file first.`,
     action: ()=>{
-      downloadBackup(projects, tasks, `mytasks-backup-before-restore-${todayStr()}.json`, {notes, noteFolders});
+      downloadBackup(projects, tasks, `mydesk-backup-before-restore-${todayStr()}.json`, {notes, noteFolders});
       projects = b.projects || defaultProjects();
       tasks = b.tasks || [];
       if(Array.isArray(b.notes)){ notes = b.notes; noteFolders = b.noteFolders || []; }
@@ -5521,7 +5521,7 @@ async function createNewLinkedFile(){
   if(!window.showSaveFilePicker){ showToast('File linking requires Chrome or Edge', true); return; }
   try{
     const handle = await window.showSaveFilePicker({
-      suggestedName: 'mytasks-data.json',
+      suggestedName: 'mydesk-data.json',
       types: [{description:'JSON', accept:{'application/json':['.json']}}]
     });
     fileHandle = handle;
@@ -5554,7 +5554,7 @@ async function linkFile(){
         showToast(`Merged from ${handle.name} — ${parts.length?parts.join(', '):'nothing new'} — auto-saving enabled`);
       } else {
         fileHandle = null;
-        showToast(`${handle.name} is not a mytasks data file — unlinked`, true);
+        showToast(`${handle.name} is not a MyDesk data file — unlinked`, true);
       }
       return;
     }
@@ -5696,7 +5696,7 @@ render();
 initFileSync();
 
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
-  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('mytasks: service worker registration failed — offline support unavailable', e)); });
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('mydesk: service worker registration failed — offline support unavailable', e)); });
 }
 </script>
 </body>

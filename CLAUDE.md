@@ -1,14 +1,17 @@
-# mytasks
+# MyDesk (formerly mytasks)
+
+
+**Rename note:** the app was renamed from mytasks to MyDesk. Internal storage keys (`mytasks_*` in localStorage) and the IndexedDB name `mytasks-fs` were deliberately NOT renamed, so existing users keep their data and linked file. Don't "fix" them without a migration.
 
 A single-file task manager PWA. Everything — HTML, CSS, and JS — lives in
-`mytasks.html` (~3,200 lines). There is no build step, no bundler, no
+`mydesk.html` (~3,200 lines). There is no build step, no bundler, no
 dependencies beyond a CDN Font Awesome link. Edit the file directly.
 
 ## Running it
 
-`./start-mytasks.command` serves the directory on `http://127.0.0.1:8934` and
+`./start-mydesk.command` serves the directory on `http://127.0.0.1:8934` and
 opens it in Chrome/Edge (Safari can't install this kind of PWA on macOS).
-`./stop-mytasks.command` kills the server. A plain `file://` open also works
+`./stop-mydesk.command` kills the server. A plain `file://` open also works
 for quick checks, but PWA install/offline support requires the http server.
 
 Data persists to `localStorage` by default; there's also an optional

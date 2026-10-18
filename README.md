@@ -1,6 +1,6 @@
-# mytasks
+# MyDesk
 
-A local-first task manager — projects, priorities, due dates, subtasks and
+A local-first task and notes manager — projects, priorities, due dates, subtasks and
 recurring tasks — that runs entirely in your browser and stores everything
 on your own device. No account, no server, no tracking.
 
@@ -19,23 +19,23 @@ on your own device. No account, no server, no tracking.
 Clone the repo, then from inside it:
 
 ```
-./start-mytasks.command
+./start-mydesk.command
 ```
 
 This serves the folder on `http://127.0.0.1:8934` and opens it in Chrome or
-Edge (Safari can't install this kind of PWA on macOS). `./stop-mytasks.command`
+Edge (Safari can't install this kind of PWA on macOS). `./stop-mydesk.command`
 stops the server again.
 
-You can also just open `mytasks.html` directly in a browser (`file://`) for a
+You can also just open `mydesk.html` directly in a browser (`file://`) for a
 quick look, but installing the PWA and offline support both require the app
 to be served over `http://` rather than opened as a bare file.
 
 Once it's open, click the install icon in the browser's address bar (or
-Chrome/Edge's menu → "Install mytasks…") to install it as a standalone app.
+Chrome/Edge's menu → "Install mydesk…") to install it as a standalone app.
 
 ## No build step
 
-Everything — HTML, CSS, and JS — lives in the single `mytasks.html` file.
+Everything — HTML, CSS, and JS — lives in the single `mydesk.html` file.
 There's no bundler, no package manager, and no dependencies beyond a CDN
 Font Awesome stylesheet. Open the file in an editor and change it directly.
 

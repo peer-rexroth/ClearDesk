@@ -2,7 +2,7 @@
 // rest of this project). Run via ./tests/run.sh from anywhere, or directly:
 //   osascript -l JavaScript tests/harness.js [nameFilter]
 //
-// How it works: extracts the inline <script> block from mytasks.html,
+// How it works: extracts the inline <script> block from mydesk.html,
 // appends a resetState() glue function plus every tests/cases/*.test.js
 // file, and evaluates all of it in ONE eval() call so test files can read
 // and reassign the app's real top-level state (tasks, projects, filters,
@@ -24,7 +24,7 @@ async function run(argv) {
 
   const nameFilter = argv[0] || '';
   const cwd = $.NSFileManager.defaultManager.currentDirectoryPath.js;
-  const appPath = cwd + '/mytasks.html';
+  const appPath = cwd + '/mydesk.html';
   const casesDir = cwd + '/tests/cases';
 
   function readFile(path) {
@@ -40,13 +40,13 @@ async function run(argv) {
     return out.sort();
   }
 
-  // ---- extract the inline <script> block from mytasks.html ----
+  // ---- extract the inline <script> block from mydesk.html ----
   const html = readFile(appPath);
   const openTag = '<script>';
   const openIdx = html.indexOf(openTag);
   const closeIdx = openIdx === -1 ? -1 : html.indexOf('</script>', openIdx);
   if (openIdx === -1 || closeIdx === -1) {
-    throw new Error('Could not find an inline <script>...</script> block in mytasks.html — did the markup change?');
+    throw new Error('Could not find an inline <script>...</script> block in mydesk.html — did the markup change?');
   }
   const appCode = html.slice(openIdx + openTag.length, closeIdx);
 

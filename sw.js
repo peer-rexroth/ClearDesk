@@ -1,6 +1,6 @@
-const CACHE_NAME = 'mytasks-cache-v2';
+const CACHE_NAME = 'mydesk-cache-v3';
 const APP_SHELL = [
-  'mytasks.html',
+  'mydesk.html',
   'manifest.json',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -22,7 +22,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => Promise.all(APP_SHELL.map((url) =>
-        cache.add(url).catch((err) => console.warn('mytasks sw: failed to precache', url, err))
+        cache.add(url).catch((err) => console.warn('mydesk sw: failed to precache', url, err))
       )))
       .then(() => self.skipWaiting())
   );
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(req, res.clone()));
           return res;
         })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('mytasks.html')))
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('mydesk.html')))
     );
     return;
   }

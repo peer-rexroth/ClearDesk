@@ -1,8 +1,8 @@
 {
-  "name": "mytasks",
-  "short_name": "mytasks",
-  "description": "A local-first task manager — projects, priorities, due dates, subtasks and recurring tasks, stored entirely on your device.",
-  "start_url": "./mytasks.html",
+  "name": "MyDesk",
+  "short_name": "MyDesk",
+  "description": "A local-first task and notes manager — projects, priorities, due dates, subtasks and recurring tasks, stored entirely on your device.",
+  "start_url": "./mydesk.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
