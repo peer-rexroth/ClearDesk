@@ -368,6 +368,11 @@
   /* About: a centred, button-less panel like macOS's "About" window — the app icon, its name, a line of credit, and the same round close control as Help */
   /* Link/Create dialog — shared with PromptLab: a grouped list of choices (the Help dialog's idiom), then a quiet notice */
   .sync-modal { width: 420px; gap: 16px; }
+  .newfile-field { position: relative; margin: 0; }
+  .newfile-field input { width: 100%; padding-right: 58px; }
+  .newfile-ext { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-3, var(--text-2)); font-size: 15px; pointer-events: none; }
+  .newfile-error { color: var(--red-text, #d92d20); font-size: 13px; line-height: 1.4; margin-top: -6px; }
+  .newfile-error:empty { display: none; }
   .sync-head { display: flex; align-items: center; gap: 14px; }
   .sync-head-icon { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue-bg); color: var(--blue-text); font-size: 16px; }
   .sync-head h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
@@ -1842,9 +1847,8 @@
       <span class="sync-head-icon"><i class="fa-solid fa-file-circle-plus"></i></span>
       <div><h3 id="newFileTitle">Name the new file</h3><p id="newFileFolder"></p></div>
     </div>
-    <div class="field"><input type="text" id="newFileName" maxlength="80" autocomplete="off" spellcheck="false" aria-label="File name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitNewFile()}else if(event.key==='Escape'){event.stopPropagation();closeNewFileModal()}" oninput="document.getElementById('newFileError').textContent=''"></div>
-    <div class="sync-note" id="newFileHint" style="display:flex"><i class="fa-solid fa-circle-info"></i><span>Saved as a .json file in this folder. Daily backups go in its Backup subfolder.</span></div>
-    <div id="newFileError" class="sync-note" style="color:var(--danger,#d92d20);padding:0 2px;min-height:0"></div>
+    <div class="field newfile-field"><input type="text" id="newFileName" maxlength="80" autocomplete="off" spellcheck="false" aria-label="File name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitNewFile()}else if(event.key==='Escape'){event.stopPropagation();closeNewFileModal()}" oninput="document.getElementById('newFileError').textContent=''"><span class="newfile-ext" aria-hidden="true">.json</span></div>
+    <div id="newFileError" class="newfile-error" role="alert"></div>
     <div class="modal-actions"><button type="button" class="btn" onclick="closeNewFileModal()">Cancel</button><button type="button" class="btn btn-primary" onclick="submitNewFile()">Create</button></div>
   </div>
 </div>
@@ -6597,7 +6601,7 @@ let pendingNewFileDir = null;
 async function createNewLinkedFile(){
   const dir = await pickDataFolder(); if(!dir) return;
   pendingNewFileDir = dir;
-  document.getElementById('newFileFolder').textContent = `In the folder ${dir.name}`;
+  document.getElementById('newFileFolder').textContent = `In ${dir.name}. Daily backups go in its Backup subfolder.`;
   const inp = document.getElementById('newFileName'); inp.value = 'mydesk-data';
   document.getElementById('newFileError').textContent = '';
   document.getElementById('newFileModalBg').classList.add('open');
