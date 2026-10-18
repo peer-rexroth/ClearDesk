@@ -342,7 +342,222 @@ test('the note right-click menu offers lock, clone, move and delete (and disable
 
 test('the folder right-click menu: the default folder only offers a new note', function () {
   noteFolders.push({ id: 'f-work', name: 'Work' });
-  assertNotIncludes(folderMenuHtml(NOTES_DEFAULT_FOLDER), 'Rename');
-  assertIncludes(folderMenuHtml('f-work'), 'Rename');
+  assertNotIncludes(folderMenuHtml(NOTES_DEFAULT_FOLDER), 'Edit');
+  assertIncludes(folderMenuHtml('f-work'), 'Edit');
   assertIncludes(folderMenuHtml('f-work'), 'Delete');
+});
+
+// ---- subfolders (one level) ----
+function ntTree() {
+  noteFolders.push({ id: 'f-work', name: 'Work', order: 2000 }, { id: 'f-q1', name: 'Q1', parentId: 'f-work', order: 1000 }, { id: 'f-q2', name: 'Q2', parentId: 'f-work', order: 2000 }, { id: 'f-home', name: 'Home', order: 3000 });
+}
+
+test('normalizeNotes keeps one level of nesting and flattens anything else', function () {
+  noteFolders.push(
+    { id: 'p', name: 'P' },
+    { id: 'c', name: 'C', parentId: 'p' },
+    { id: 'gc', name: 'GC', parentId: 'c' },          // a subfolder of a subfolder
+    { id: 'self', name: 'Self', parentId: 'self' },   // inside itself
+    { id: 'orph', name: 'Orphan', parentId: 'missing' },
+    { id: 'bad', name: 'Bad', parentId: '<script>' }
+  );
+  normalizeNotes();
+  const f = id => noteFolders.find(x => x.id === id);
+  assertEqual(f('c').parentId, 'p');
+  assertEqual(f('gc').parentId, undefined, 'grandchildren are flattened to top level');
+  assertEqual(f('self').parentId, undefined);
+  assertEqual(f('orph').parentId, undefined);
+  assertEqual(f('bad').parentId, undefined);
+  noteFolders.find(x => x.id === NOTES_DEFAULT_FOLDER).parentId = 'p';
+  normalizeNotes();
+  assertEqual(f(NOTES_DEFAULT_FOLDER).parentId, undefined, 'the default folder always stays top level');
+});
+
+test('a folder shows its own notes and its subfolders notes; a subfolder only its own', function () {
+  ntTree();
+  notes = [ntNote({ id: 'a', folderId: 'f-work' }), ntNote({ id: 'b', folderId: 'f-q1' }), ntNote({ id: 'c', folderId: 'f-home' })];
+  noteFolderFilter = 'f-work';
+  assertDeepEqual(visibleNotes().map(n => n.id).sort(), ['a', 'b']);
+  noteFolderFilter = 'f-q1';
+  assertDeepEqual(visibleNotes().map(n => n.id), ['b']);
+  noteFolderFilter = 'all';
+  assertEqual(visibleNotes().length, 3);
+});
+
+test('orderedFolders lists each folder followed by its subfolders, and folderPath names the parent', function () {
+  ntTree();
+  assertDeepEqual(orderedFolders().map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-work', 'f-q1', 'f-q2', 'f-home']);
+  assertEqual(folderPath(noteFolders.find(f => f.id === 'f-q1')), 'Work / Q1');
+  assertEqual(folderPath(noteFolders.find(f => f.id === 'f-work')), 'Work');
+});
+
+test('saveFolderModal creates a subfolder under a top-level folder', function () {
+  ntTree();
+  editingFolderId = null;
+  document.getElementById('folderNameInput').value = 'Kitchen';
+  document.getElementById('folderParentSelect').value = 'f-home';
+  saveFolderModal();
+  const k = noteFolders.find(f => f.name === 'Kitchen');
+  assertEqual(k.parentId, 'f-home');
+});
+
+test('a subfolder cannot be created inside another subfolder', function () {
+  ntTree();
+  editingFolderId = null;
+  document.getElementById('folderNameInput').value = 'Deep';
+  document.getElementById('folderParentSelect').value = 'f-q1';
+  saveFolderModal();
+  assertEqual(noteFolders.find(f => f.name === 'Deep').parentId, undefined, 'it lands at top level instead');
+});
+
+test('a folder that has subfolders cannot be moved inside another folder', function () {
+  ntTree();
+  editingFolderId = 'f-work';
+  document.getElementById('folderNameInput').value = 'Work';
+  document.getElementById('folderParentSelect').value = 'f-home';
+  saveFolderModal();
+  assertEqual(noteFolders.find(f => f.id === 'f-work').parentId, undefined);
+});
+
+test('editing a folder can move it into another folder, and Undo puts it back', function () {
+  ntTree();
+  editingFolderId = 'f-home';
+  document.getElementById('folderNameInput').value = 'Home';
+  document.getElementById('folderParentSelect').value = 'f-work';
+  saveFolderModal();
+  assertEqual(noteFolders.find(f => f.id === 'f-home').parentId, 'f-work');
+  triggerToastUndo();
+  assertEqual(noteFolders.find(f => f.id === 'f-home').parentId, undefined);
+});
+
+test('deleting a folder deletes its subfolders, moves all their notes to Notes, and Undo restores everything', function () {
+  ntTree();
+  notes = [ntNote({ id: 'a', folderId: 'f-work' }), ntNote({ id: 'b', folderId: 'f-q1' }), ntNote({ id: 'c', folderId: 'f-home' })];
+  deleteNoteFolder('f-work');
+  confirmModalAction();                               // accept the confirm dialog
+  assertDeepEqual(noteFolders.map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-home']);
+  assertEqual(notes.find(n => n.id === 'a').folderId, NOTES_DEFAULT_FOLDER);
+  assertEqual(notes.find(n => n.id === 'b').folderId, NOTES_DEFAULT_FOLDER);
+  assertEqual(notes.find(n => n.id === 'c').folderId, 'f-home');
+  assertTrue(['f-work', 'f-q1', 'f-q2'].every(id => deletedNoteFolderIds.some(d => d.id === id)), 'every removed folder is tombstoned');
+  triggerToastUndo();
+  assertDeepEqual(noteFolders.map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-work', 'f-q1', 'f-q2', 'f-home']);
+  assertEqual(notes.find(n => n.id === 'b').folderId, 'f-q1');
+  assertEqual(deletedNoteFolderIds.length, 0);
+});
+
+test('the right-click menus: top-level folders offer a subfolder, subfolders do not; Move to lists every folder', function () {
+  ntTree();
+  assertIncludes(folderMenuHtml('f-work'), 'New subfolder');
+  assertNotIncludes(folderMenuHtml('f-q1'), 'New subfolder');
+  notes = [ntNote({ id: 'x' })];
+  const h = noteMenuHtml('x');
+  assertIncludes(h, 'Q1'); assertIncludes(h, 'Q2'); assertIncludes(h, 'Home');
+});
+
+test('merging folders from another device flattens a bad parent link', function () {
+  ntTree();
+  mergeNotesData({ noteFolders: [{ id: 'f-new', name: 'New', parentId: 'f-q1' }], notes: [] }, true);
+  assertEqual(noteFolders.find(f => f.id === 'f-new').parentId, undefined);
+  mergeNotesData({ noteFolders: [{ id: 'f-ok', name: 'OK', parentId: 'f-home' }], notes: [] }, true);
+  assertEqual(noteFolders.find(f => f.id === 'f-ok').parentId, 'f-home');
+});
+
+// ---- folder timestamps, reorder and order sync ----
+test('normalizeNotes gives legacy folders an order (stored sequence) and an updatedAt of 0', function () {
+  noteFolders = [{ id: 'a1', name: 'A' }, { id: 'b1', name: 'B' }];
+  normalizeNotes();
+  const a = noteFolders.find(f => f.id === 'a1'), b = noteFolders.find(f => f.id === 'b1');
+  assertTrue(Number.isFinite(a.order) && Number.isFinite(b.order) && a.order < b.order, 'order follows the stored sequence');
+  assertEqual(a.updatedAt, 0);
+});
+
+test('new folders get an order at the end of their level and a timestamp', function () {
+  ntTree();
+  editingFolderId = null;
+  document.getElementById('folderNameInput').value = 'Last';
+  document.getElementById('folderParentSelect').value = '';
+  saveFolderModal();
+  const f = noteFolders.find(x => x.name === 'Last');
+  assertTrue(f.order > 3000, 'after the last top-level folder');
+  assertTrue(f.updatedAt > 0);
+  assertEqual(topFolders().pop().id, f.id);
+});
+
+test('reorderFolder moves a folder within its level and writes only that folder', function () {
+  ntTree();
+  const before = noteFolders.map(f => [f.id, f.order, f.updatedAt]);
+  assertTrue(reorderFolder('f-home', 'f-work', true));
+  assertDeepEqual(topFolders().map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-home', 'f-work']);
+  const changed = noteFolders.filter(f => { const b = before.find(x => x[0] === f.id); return b[1] !== f.order || b[2] !== f.updatedAt; });
+  assertDeepEqual(changed.map(f => f.id), ['f-home'], 'one small edit, so it merges cleanly');
+});
+
+test('reorderFolder places a folder after a target, and refuses to cross levels', function () {
+  ntTree();
+  assertTrue(reorderFolder('f-q1', 'f-q2', false));
+  assertDeepEqual(folderChildren('f-work').map(f => f.id), ['f-q2', 'f-q1']);
+  assertFalse(reorderFolder('f-q1', 'f-home', true), 'a subfolder cannot be dropped next to a top-level folder');
+  assertFalse(reorderFolder('f-home', 'f-home', true));
+});
+
+test('moveFolderBy steps a folder up or down and stops at the ends', function () {
+  ntTree();
+  moveFolderBy('f-home', -1);
+  assertDeepEqual(topFolders().map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-home', 'f-work']);
+  moveFolderBy('f-home', -1); moveFolderBy('f-home', -1);
+  assertEqual(topFolders()[0].id, 'f-home');
+  moveFolderBy('f-home', -1);
+  assertEqual(topFolders()[0].id, 'f-home', 'already first');
+});
+
+test('repeated reorders that run out of room renumber the level', function () {
+  noteFolders.push({ id: 'x1', name: 'X1', order: 5000 }, { id: 'x2', name: 'X2', order: 5000.0000001 }, { id: 'x3', name: 'X3', order: 6000 });
+  reorderFolder('x3', 'x2', true);
+  const ids = topFolders().map(f => f.id).filter(i => i.startsWith('x'));
+  assertDeepEqual(ids, ['x1', 'x3', 'x2']);
+  assertTrue(new Set(noteFolders.map(f => f.order)).size === noteFolders.length, 'orders are distinct again');
+});
+
+test('merging: a newer rename, move or reorder of an existing folder wins; an older one does not', function () {
+  noteFolders.push({ id: 'f-a', name: 'Old', order: 2000, updatedAt: 1000 }, { id: 'f-b', name: 'B', order: 3000, updatedAt: 1000 });
+  mergeNotesData({ noteFolders: [{ id: 'f-a', name: 'New', order: 9000, updatedAt: 2000, parentId: 'f-b' }], notes: [] }, true);
+  const a = noteFolders.find(f => f.id === 'f-a');
+  assertEqual(a.name, 'New'); assertEqual(a.order, 9000); assertEqual(a.parentId, 'f-b');
+  mergeNotesData({ noteFolders: [{ id: 'f-a', name: 'Stale', order: 1, updatedAt: 1500 }], notes: [] }, true);
+  assertEqual(a.name, 'New', 'an older copy is ignored');
+  mergeNotesData({ noteFolders: [{ id: 'f-a', name: 'Top again', order: 100, updatedAt: 3000 }], notes: [] }, true);
+  assertEqual(a.parentId, undefined, 'moving back to top level also propagates');
+});
+
+test('merging: a folder deleted here stays deleted unless the other copy was edited after the delete', function () {
+  deletedNoteFolderIds.push({ id: 'f-gone', deletedAt: 5000 });
+  mergeNotesData({ noteFolders: [{ id: 'f-gone', name: 'Gone', order: 1, updatedAt: 4000 }], notes: [] }, true);
+  assertFalse(noteFolders.some(f => f.id === 'f-gone'), 'stale copy stays deleted');
+  mergeNotesData({ noteFolders: [{ id: 'f-gone', name: 'Gone', order: 1, updatedAt: 6000 }], notes: [] }, true);
+  assertTrue(noteFolders.some(f => f.id === 'f-gone'), 'a newer edit brings it back');
+  assertFalse(deletedNoteFolderIds.some(d => d.id === 'f-gone'));
+});
+
+test('the folder context menu offers Move up / Move down only when there are siblings, and disables the ends', function () {
+  ntTree();
+  assertIncludes(folderMenuHtml('f-work'), 'Move up');
+  assertIncludes(folderMenuHtml('f-q1'), 'Move down');
+  noteFolders = noteFolders.filter(f => f.id !== 'f-q2');
+  assertNotIncludes(folderMenuHtml('f-q1'), 'Move up', 'a lone subfolder has nothing to move past');
+});
+
+test('renaming or moving a folder stamps updatedAt; Undo restores the order too', function () {
+  ntTree();
+  const f = noteFolders.find(x => x.id === 'f-home');
+  f.updatedAt = 1000;
+  editingFolderId = 'f-home';
+  document.getElementById('folderNameInput').value = 'Home 2';
+  document.getElementById('folderParentSelect').value = 'f-work';
+  saveFolderModal();
+  assertTrue(f.updatedAt > 1000);
+  assertEqual(f.parentId, 'f-work');
+  assertTrue(f.order > 2000, 'joins the end of the new level');
+  triggerToastUndo();
+  assertEqual(f.parentId, undefined); assertEqual(f.name, 'Home'); assertEqual(f.order, 3000);
 });

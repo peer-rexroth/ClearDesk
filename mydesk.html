@@ -1070,6 +1070,10 @@
   .tool-btn.on:hover:not(:disabled) { background: var(--amber-bg); opacity: .85; }
   .note-editor.locked .note-fmt { opacity: .4; pointer-events: none; }
   .note-editor.locked .note-body { cursor: default; }
+  .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--text-3); cursor: pointer; font-size: 9px; }
+  .project-row .folder-twisty:hover { background: var(--bg-3); color: var(--text); }
+  .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
+  .project-row.sub-folder { padding-left: 28px; }
   .note-row-lock { font-size: 10px; color: var(--text-3); margin-left: 4px; }
   .note-row.selected .note-row-lock { color: inherit; opacity: .8; }
   .note-linkbar { display: flex; align-items: center; gap: 8px; margin: 0 24px 6px; padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--text) 5%, transparent); }
@@ -1361,6 +1365,7 @@
   <div class="modal">
     <h3 id="folderModalTitle">New Folder</h3>
     <input spellcheck="true" type="text" id="folderNameInput" placeholder="Folder name" maxlength="40" onkeydown="if(event.key==='Enter') saveFolderModal()">
+    <div class="field" id="folderParentField" style="margin-top:12px"><label for="folderParentSelect">Location</label><select id="folderParentSelect" aria-label="Location"></select></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeAllModals()">Cancel</button>
       <button class="btn btn-primary" onclick="saveFolderModal()">Save</button>
@@ -1544,7 +1549,9 @@
         <div class="help-section">
           <div class="help-section-title">Folders &amp; finding notes</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Folders</strong>: <strong>+</strong> beside <em>Folders</em> adds one; hover a folder to rename or delete it. Deleting a folder moves its notes to <em>Notes</em>. Move a note with the folder menu in its toolbar. Deleting, moving or renaming shows an <strong>Undo</strong> toast, and <kbd>⌘Z</kbd> does the same while you are not typing; inside a note, <kbd>⌘Z</kbd> undoes your typing.</span></div>
+          <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Folders</strong>: <strong>+</strong> beside <em>Folders</em> adds one; hover a folder to edit or delete it. Deleting a folder moves its notes to <em>Notes</em>. Move a note with the folder menu in its toolbar. Deleting, moving or renaming shows an <strong>Undo</strong> toast, and <kbd>⌘Z</kbd> does the same while you are not typing; inside a note, <kbd>⌘Z</kbd> undoes your typing.</span></div>
+          <div class="help-row"><i class="fa-regular fa-folder-open"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows its own notes plus those of its subfolders, and its count includes them. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrows-up-down"></i><span><strong>Reordering folders</strong>: drag a folder up or down within its level, or right-click it and choose <em>Move up</em> / <em>Move down</em>. The order, renames and moves sync between devices like note edits.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of the notes in the current folder.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Delete</kbd> while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
           <div class="help-row"><i class="fa-solid fa-hard-drive"></i><span>Notes are part of your data: they are saved in this browser, included in <strong>Export</strong>, <strong>Import</strong> and <strong>Backups</strong>, and kept in the linked file. When two copies of a note differ, the newer edit wins.</span></div>
@@ -4245,7 +4252,7 @@ const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var
 // One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
 // tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
 function popOptInner(lead, label){
-  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"></i>`;
+  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
 function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
@@ -4435,12 +4442,14 @@ function scPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.
 // ({id,title,body,folderId,createdAt,updatedAt}); `body` is sanitized HTML written in a
 // contenteditable editor. Notes ride along in the same data blob as tasks, so they save,
 // back up, export/import and sync (newer edit of a note wins; deletions are tombstoned).
-const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder';
+const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder', NOTES_COLLAPSED_KEY = 'mytasks_notes_collapsed';
 const NOTES_DEFAULT_FOLDER = 'nf-notes';
+const noteFoldersCollapsed = new Set();   // top-level folders folded shut in the sidebar (per device)
 let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '';
 try{
   if(localStorage.getItem(MODE_KEY)==='notes') appMode = 'notes';
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
+  const savedCollapsed = JSON.parse(localStorage.getItem(NOTES_COLLAPSED_KEY) || '[]'); if(Array.isArray(savedCollapsed)) savedCollapsed.forEach(x=>{ if(typeof x==='string') noteFoldersCollapsed.add(x); });
 }catch(_){}
 let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRange = null, noteDragFromEditor = false, editingFolderId = null;
 
@@ -4507,6 +4516,11 @@ function normalizeNotes(){
   noteFolders.forEach(f=>{ if(!isSafeId(f.id)) f.id = genId(); f.name = String(f.name || 'Folder').slice(0,40); });
   if(!noteFolders.some(f=>f.id===NOTES_DEFAULT_FOLDER)) noteFolders.unshift({id:NOTES_DEFAULT_FOLDER, name:'Notes', locked:true});
   noteFolders.forEach(f=>{ if(f.id===NOTES_DEFAULT_FOLDER) f.locked = true; });
+  noteFolders.forEach((f, i)=>{
+    if(!Number.isFinite(f.order)) f.order = (i + 1) * 1000;       // legacy folders: keep the order they were stored in
+    if(!Number.isFinite(f.updatedAt)) f.updatedAt = 0;            // legacy folders count as the oldest version, so any real edit wins a merge
+  });
+  fixFolderParents();
   notes = notes.filter(n=>n && typeof n==='object');
   notes.forEach(n=>{
     if(!isSafeId(n.id)) n.id = genId();
@@ -4522,6 +4536,88 @@ function normalizeNotes(){
   deletedNoteIds = deletedNoteIds.filter(x=>x && x.id);
   deletedNoteFolderIds = deletedNoteFolderIds.filter(x=>x && x.id);
 }
+// Folders nest one level only (a folder, and subfolders inside it). Anything else — a missing or unsafe parent, a folder inside itself,
+// a subfolder of a subfolder, a parent on the default folder — is flattened to top level, so a bad import or sync cannot build a tangle.
+function fixFolderParents(){
+  const byId = new Map(noteFolders.map(f=>[f.id, f]));
+  const hadParent = new Set(noteFolders.filter(f=>f.parentId).map(f=>f.id));
+  noteFolders.forEach(f=>{
+    const pid = f.parentId;
+    const ok = typeof pid==='string' && isSafeId(pid) && pid!==f.id && f.id!==NOTES_DEFAULT_FOLDER && byId.has(pid) && !hadParent.has(pid);
+    if(!ok) delete f.parentId;
+  });
+}
+// Folders carry `order` (a number; the sidebar sorts by it) and `updatedAt`, so a rename, a move and a reorder all merge across devices like a note edit.
+const folderOrd = f=>Number.isFinite(f.order) ? f.order : 0;
+function sortFolders(list){ return list.slice().sort((a, b)=>folderOrd(a) - folderOrd(b)); }   // stable: equal orders keep the stored order
+function folderChildren(id){ return sortFolders(noteFolders.filter(f=>f.parentId===id)); }
+function topFolders(){ return sortFolders(noteFolders.filter(f=>!f.parentId)); }
+function folderEndOrder(parentId, exceptId){
+  const sibs = noteFolders.filter(f=>(f.parentId || '')===(parentId || '') && f.id!==exceptId);
+  return sibs.length ? Math.max(...sibs.map(folderOrd)) + 1000 : 1000;
+}
+// Put `id` just before or after a sibling (same level only). Only the moved folder is rewritten, so the reorder is one small, mergeable edit.
+function reorderFolder(id, targetId, before){
+  const f = folderById(id), t = folderById(targetId);
+  if(!f || !t || f.id===t.id || (f.parentId || '')!==(t.parentId || '')) return false;
+  const sibs = sortFolders(noteFolders.filter(x=>(x.parentId || '')===(f.parentId || '') && x.id!==f.id));
+  let at = sibs.findIndex(x=>x.id===t.id); if(at===-1) return false;
+  if(!before) at++;
+  const prev = sibs[at - 1], next = sibs[at], now = Date.now();
+  if(prev && next && Math.abs(folderOrd(next) - folderOrd(prev)) < 1e-6){          // no room left between neighbours: renumber the level
+    sibs.splice(at, 0, f); sibs.forEach((x, i)=>{ x.order = (i + 1) * 1000; x.updatedAt = now; });
+  } else {
+    f.order = prev && next ? (folderOrd(prev) + folderOrd(next)) / 2 : next ? folderOrd(next) - 1000 : prev ? folderOrd(prev) + 1000 : 1000;
+    f.updatedAt = now;
+  }
+  save(); render();
+  return true;
+}
+function moveFolderBy(id, delta){
+  const f = folderById(id); if(!f) return;
+  const sibs = f.parentId ? folderChildren(f.parentId) : topFolders();
+  const i = sibs.findIndex(x=>x.id===id), j = i + delta;
+  if(i===-1 || j<0 || j>=sibs.length) return;
+  reorderFolder(id, sibs[j].id, delta<0);
+}
+let draggedFolderId = null;
+function handleFolderDragStart(e, id){ draggedFolderId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', id); e.currentTarget.classList.add('dragging'); }
+function handleFolderDragEnd(){
+  draggedFolderId = null;
+  document.querySelectorAll('#noteFolderList .dragging, #noteFolderList .drag-over-top, #noteFolderList .drag-over-bottom').forEach(el=>el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom'));
+}
+function folderDropOk(targetId){
+  const d = folderById(draggedFolderId), t = folderById(targetId);
+  return !!(d && t && d.id!==t.id && (d.parentId || '')===(t.parentId || ''));     // reordering stays inside one level
+}
+function handleFolderDragOver(e, targetId){
+  if(!draggedFolderId || !folderDropOk(targetId)) return;
+  e.preventDefault(); e.stopPropagation();
+  const row = e.currentTarget, rect = row.getBoundingClientRect();
+  row.classList.remove('drag-over-top', 'drag-over-bottom');
+  row.classList.add((e.clientY - rect.top) / rect.height < 0.5 ? 'drag-over-top' : 'drag-over-bottom');
+}
+function handleFolderDragLeave(e){ e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom'); }
+function handleFolderDrop(e, targetId){
+  if(!draggedFolderId || !folderDropOk(targetId)) return;
+  e.preventDefault(); e.stopPropagation();
+  const row = e.currentTarget, rect = row.getBoundingClientRect();
+  const before = (e.clientY - rect.top) / rect.height < 0.5, id = draggedFolderId;
+  handleFolderDragEnd();
+  if(reorderFolder(id, targetId, before)) document.querySelector(`#noteFolderList .project-row[data-id="${id}"]`)?.classList.add('settle');
+}
+function orderedFolders(){ const out = []; topFolders().forEach(f=>{ out.push(f); folderChildren(f.id).forEach(c=>out.push(c)); }); return out; }
+function folderPath(f){ const p = f && f.parentId ? folderById(f.parentId) : null; return f ? (p ? `${p.name} / ${f.name}` : f.name) : ''; }
+// Choosing a folder shows its own notes and those of its subfolders.
+function noteInFilter(n){
+  if(noteFolderFilter==='all') return true;
+  return n.folderId===noteFolderFilter || (folderById(n.folderId) || {}).parentId===noteFolderFilter;
+}
+function toggleFolderCollapsed(id){
+  if(noteFoldersCollapsed.has(id)) noteFoldersCollapsed.delete(id); else noteFoldersCollapsed.add(id);
+  try{ localStorage.setItem(NOTES_COLLAPSED_KEY, JSON.stringify([...noteFoldersCollapsed])); }catch(_){}
+  renderNotesSidebar();
+}
 // Same rules as tasks: the newer edit of a note wins, a tombstone keeps a deleted note deleted unless the incoming copy is newer.
 function mergeNotesData(data, respectTombstones){
   let added = 0, updated = 0;
@@ -4534,11 +4630,18 @@ function mergeNotesData(data, respectTombstones){
   mergeTombs(deletedNoteFolderIds, data.deletedNoteFolderIds);
   mergeTombs(deletedNoteIds, data.deletedNoteIds);
   (data.noteFolders||[]).forEach(f=>{
-    if(!f || !f.id || noteFolders.some(x=>x.id===f.id)) return;
-    if(f.id!==NOTES_DEFAULT_FOLDER && respectTombstones && deletedNoteFolderIds.some(x=>x.id===f.id)) return;
-    if(!respectTombstones) untombstone(deletedNoteFolderIds, f.id);
+    if(!f || !f.id) return;
+    const ex = noteFolders.find(x=>x.id===f.id);
+    if(ex){                                                          // a rename, move or reorder: the newer edit wins
+      if((f.updatedAt||0) > (ex.updatedAt||0)){ const locked = ex.locked; Object.assign(ex, f); if(!f.parentId) delete ex.parentId; if(locked) ex.locked = true; }
+      return;
+    }
+    const tomb = deletedNoteFolderIds.find(x=>x.id===f.id);
+    if(f.id!==NOTES_DEFAULT_FOLDER && respectTombstones && tomb && tomb.deletedAt >= (f.updatedAt||0)) return;   // stays deleted
+    if(tomb) untombstone(deletedNoteFolderIds, f.id);                // edited after we deleted it (or tombstones are being ignored)
     noteFolders.push(f);
   });
+  fixFolderParents();
   (data.notes||[]).forEach(it=>{
     if(!it || !it.id) return;
     const existing = notes.find(n=>n.id===it.id);
@@ -4590,7 +4693,7 @@ function cloneNote(id){
   const now = Date.now();
   const clone = { id: genId(), title: uniqueNoteTitle(src.title || 'New note'), body: src.body, folderId: src.folderId, createdAt: now, updatedAt: now, locked: !!src.locked };
   notes.push(clone);
-  if(noteFolderFilter!=='all' && noteFolderFilter!==clone.folderId) noteFolderFilter = 'all';
+  if(!noteInFilter(clone)) noteFolderFilter = 'all';
   selectedNoteId = clone.id; noteEditorId = null;
   save(); render();
   showToast('Note cloned', false, ()=>{
@@ -4606,7 +4709,7 @@ let noteMenuId = null, folderMenuId = null;
 function noteMenuHtml(id){
   const n = notes.find(x=>x.id===id); if(!n) return '';
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
-  const moveOpts = noteFolders.map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {icon:'folder'}, f.name, f.id===n.folderId)).join('');
+  const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {icon:'folder', indent:!!f.parentId}, f.name, f.id===n.folderId)).join('');
   return [
     item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`),
     item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
@@ -4637,7 +4740,10 @@ function folderMenuHtml(id){
   const f = folderById(id); if(!f) return '';
   const item = rowMenuItem;
   const parts = [item('fa-solid fa-plus', 'New note here', `folderMenuRun('new')`)];
-  if(!f.locked) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Rename', `folderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true}));
+  if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New subfolder', `folderMenuRun('newsub')`));
+  const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
+  if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
+  if(!f.locked) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `folderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true}));
   return parts.join('');
 }
 function openFolderMenu(e, id){
@@ -4653,6 +4759,9 @@ function folderMenuRun(kind){
   const id = folderMenuId; closeRowMenu();
   if(!id) return;
   if(kind==='new'){ setNoteFolder(id); createNote(); }
+  else if(kind==='newsub') openFolderModal(null, id);
+  else if(kind==='up') moveFolderBy(id, -1);
+  else if(kind==='down') moveFolderBy(id, 1);
   else if(kind==='rename') openFolderModal(id);
   else if(kind==='delete') deleteNoteFolder(id);
 }
@@ -4661,7 +4770,7 @@ function folderMenuRun(kind){
 function visibleNotes(){
   const words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
   return notes
-    .filter(n=>(noteFolderFilter==='all' || n.folderId===noteFolderFilter) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
+    .filter(n=>noteInFilter(n) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
     .sort((a,b)=>b.updatedAt - a.updatedAt);
 }
 function folderById(id){ return noteFolders.find(f=>f.id===id); }
@@ -4675,20 +4784,29 @@ function fmtNoteDate(ts){
   return d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
 }
 function renderNotesSidebar(){
-  const counts = {}; notes.forEach(n=>{ counts[n.folderId] = (counts[n.folderId]||0) + 1; });
+  const own = {}; notes.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
+  const total = f=>(own[f.id]||0) + folderChildren(f.id).reduce((a,c)=>a + (own[c.id]||0), 0);   // a folder's count includes its subfolders
   const all = document.getElementById('allNotesNav'), cnt = document.getElementById('allNotesCount');
   if(cnt) cnt.textContent = notes.length;
   if(all){ all.classList.toggle('active', noteFolderFilter==='all'); all.setAttribute('aria-pressed', noteFolderFilter==='all' ? 'true' : 'false'); }
   const list = document.getElementById('noteFolderList');
-  if(list) list.innerHTML = noteFolders.map(f=>`<div class="project-row ${noteFolderFilter===f.id?'active':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')">
-      <i class="fa-regular fa-folder picon"></i>
+  const activeF = folderById(noteFolderFilter);
+  const row = (f, sub, kids)=>{
+    const shut = kids.length && noteFoldersCollapsed.has(f.id) && !(activeF && activeF.parentId===f.id);
+    const twisty = sub ? '' : kids.length
+      ? `<button type="button" class="folder-twisty" aria-label="${shut?'Expand':'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();toggleFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut?'right':'down'}"></i></button>`
+      : '<span class="folder-twisty-gap"></span>';
+    return `<div class="project-row ${noteFolderFilter===f.id?'active':''}${sub?' sub-folder':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')" draggable="true" ondragstart="handleFolderDragStart(event,'${f.id}')" ondragend="handleFolderDragEnd()" ondragover="handleFolderDragOver(event,'${f.id}')" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event,'${f.id}')">
+      ${twisty}<i class="fa-regular fa-folder picon"></i>
       <span class="pname">${esc(f.name)}</span>
-      <span class="count">${counts[f.id]||0}</span>
+      <span class="count">${total(f)}</span>
       ${f.locked ? '' : `<span class="project-actions row-actions">
-        <button class="icon-btn" onclick="event.stopPropagation();openFolderModal('${f.id}')" title="Rename"><i class="fa-solid fa-pen"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();openFolderModal('${f.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
         <button class="icon-btn" onclick="event.stopPropagation();deleteNoteFolder('${f.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
       </span>`}
-    </div>`).join('');
+    </div>` + (shut ? '' : kids.map(c=>row(c, true, [])).join(''));
+  };
+  if(list) list.innerHTML = topFolders().map(f=>row(f, false, folderChildren(f.id))).join('');
 }
 function renderNotesList(vis){
   vis = vis || visibleNotes();
@@ -4706,14 +4824,14 @@ function renderNotesList(vis){
     return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')">
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
-      ${noteFolderFilter==='all' && fol ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(fol.name)}</div>` : ''}
+      ${fol && (noteFolderFilter==='all' || folderChildren(noteFolderFilter).length) ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(folderPath(fol))}</div>` : ''}
     </div>`;
   }).join('');
 }
 function updateNoteMeta(n){
   const el = document.getElementById('noteMeta'); if(!el || !n) return;
   const fol = folderById(n.folderId);
-  el.textContent = `Edited ${new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})}${fol ? ' · ' + fol.name : ''}${n.locked ? ' · Locked' : ''}`;
+  el.textContent = `Edited ${new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})}${fol ? ' · ' + folderPath(fol) : ''}${n.locked ? ' · Locked' : ''}`;
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
@@ -4727,7 +4845,7 @@ function renderNoteEditor(){
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
   const sel = document.getElementById('noteFolderSelect');
-  if(sel){ sel.innerHTML = noteFolders.map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${esc(f.name)}</option>`).join(''); sel.disabled = !!n.locked; }
+  if(sel){ sel.innerHTML = orderedFolders().map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${f.parentId ? '\u00a0\u00a0\u00a0' : ''}${esc(f.name)}</option>`).join(''); sel.disabled = !!n.locked; }
   const locked = !!n.locked;
   ed?.classList.toggle('locked', locked);
   body.contentEditable = locked ? 'false' : 'true'; title.readOnly = locked;
@@ -4804,7 +4922,7 @@ function moveNote(id, folderId){
   flushNoteEdit();
   const prev = n.folderId, dest = folderById(folderId);
   n.folderId = folderId; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
-  if(noteFolderFilter!=='all' && noteFolderFilter!==folderId) selectedNoteId = null;
+  if(!noteInFilter(n)) selectedNoteId = null;
   save(); render();
   showToast(`Moved to ${dest.name}`, false, ()=>{
     const m = notes.find(x=>x.id===id); if(!m) return;
@@ -4818,49 +4936,85 @@ function setNoteFolder(id){
   const leaving = selectedNoteId;
   noteFolderFilter = (id==='all' || folderById(id)) ? id : 'all';
   try{ localStorage.setItem(NOTES_FOLDER_KEY, noteFolderFilter); }catch(_){}
+  const picked = folderById(noteFolderFilter);
+  if(picked && picked.parentId && noteFoldersCollapsed.has(picked.parentId)){ noteFoldersCollapsed.delete(picked.parentId); try{ localStorage.setItem(NOTES_COLLAPSED_KEY, JSON.stringify([...noteFoldersCollapsed])); }catch(_){} }
   selectedNoteId = null; removeIfEmptyNote(leaving);
   render();
 }
-function openFolderModal(id){
+function openFolderModal(id, parentId){
   editingFolderId = id || null;
   const f = id ? folderById(id) : null;
-  document.getElementById('folderModalTitle').textContent = f ? 'Rename Folder' : 'New Folder';
+  document.getElementById('folderModalTitle').textContent = f ? 'Edit Folder' : (parentId ? 'New Subfolder' : 'New Folder');
   const input = document.getElementById('folderNameInput'); input.value = f ? f.name : '';
+  // Location: top level, or inside one top-level folder. A folder that already has subfolders cannot move inside another (one level only).
+  const field = document.getElementById('folderParentField'), sel = document.getElementById('folderParentSelect');
+  const canNest = !f || (!f.locked && !folderChildren(f.id).length);
+  if(field) field.style.display = canNest ? '' : 'none';
+  if(sel){
+    const cur = f ? (f.parentId || '') : (parentId || '');
+    sel.innerHTML = `<option value="">Top level</option>` + topFolders().filter(x=>!f || x.id!==f.id).map(x=>`<option value="${x.id}"${x.id===cur?' selected':''}>${esc(x.name)}</option>`).join('');
+    sel.value = cur;
+  }
   document.getElementById('folderModalBg').classList.add('open');
   if(typeof setTimeout==='function') setTimeout(()=>{ input.focus(); input.select(); }, 50);   // the dialog fades in; a hidden field cannot take focus
 }
 function saveFolderModal(){
   const name = (document.getElementById('folderNameInput').value || '').trim().slice(0,40);
   if(!name) return;
-  let renamed = null;
-  if(editingFolderId){ const f = folderById(editingFolderId); if(f && !f.locked && f.name!==name){ renamed = {id: f.id, from: f.name}; f.name = name; } }
-  else { const f = {id: genId(), name}; noteFolders.push(f); noteFolderFilter = f.id; try{ localStorage.setItem(NOTES_FOLDER_KEY, f.id); }catch(_){} selectedNoteId = null; }
+  const picked = (document.getElementById('folderParentSelect') || {}).value || '';
+  const parent = picked && folderById(picked) && !folderById(picked).parentId ? picked : '';
+  let changed = null;
+  if(editingFolderId){
+    const f = folderById(editingFolderId);
+    if(f && !f.locked){
+      const canNest = !folderChildren(f.id).length && parent!==f.id;
+      const newParent = canNest ? parent : (f.parentId || '');
+      if(f.name!==name || (f.parentId || '')!==newParent){
+        changed = { id: f.id, name: f.name, parentId: f.parentId || '', order: f.order };
+        const moved = (f.parentId || '')!==newParent;
+        f.name = name; if(newParent) f.parentId = newParent; else delete f.parentId;
+        if(moved) f.order = folderEndOrder(newParent, f.id);          // joins the end of its new level
+        f.updatedAt = Date.now();
+      }
+    }
+  } else {
+    const f = {id: genId(), name, order: folderEndOrder(parent), updatedAt: Date.now()}; if(parent) f.parentId = parent;
+    noteFolders.push(f); noteFolderFilter = f.id; try{ localStorage.setItem(NOTES_FOLDER_KEY, f.id); }catch(_){} selectedNoteId = null;
+    if(parent && noteFoldersCollapsed.has(parent)){ noteFoldersCollapsed.delete(parent); try{ localStorage.setItem(NOTES_COLLAPSED_KEY, JSON.stringify([...noteFoldersCollapsed])); }catch(_){} }
+  }
   closeAllModals(); save(); render();
-  if(renamed) showToast('Folder renamed', false, ()=>{
-    const f = folderById(renamed.id); if(!f) return;
-    f.name = renamed.from; save(); render(); showToast('Rename undone');
+  if(changed) showToast('Folder updated', false, ()=>{
+    const f = folderById(changed.id); if(!f) return;
+    f.name = changed.name; if(changed.parentId && folderById(changed.parentId)) f.parentId = changed.parentId; else delete f.parentId;
+    f.order = changed.order; f.updatedAt = Date.now();
+    save(); render(); showToast('Change undone');
   });
 }
 function deleteNoteFolder(id){
   const f = folderById(id); if(!f || f.locked) return;
-  const count = notes.filter(n=>n.folderId===id).length;
+  const kids = folderChildren(id), gone = new Set([id, ...kids.map(k=>k.id)]);
+  const count = notes.filter(n=>gone.has(n.folderId)).length;
+  const bits = [];
+  if(kids.length) bits.push(`Its ${kids.length} subfolder${kids.length===1?'':'s'} will be deleted too. `);
+  if(count) bits.push(`${count} note${count===1?'':'s'} will move to Notes. `);
   openConfirmModal({
     title: `Delete "${f.name}"?`,
-    body: (count ? `${count} note${count===1?'':'s'} will move to Notes. ` : '') + 'You can undo this from the toast right after deleting.',
+    body: bits.join('') + 'You can undo this from the toast right after deleting.',
     action: ()=>{
-      const idx = noteFolders.findIndex(x=>x.id===id); if(idx===-1) return;
+      if(!folderById(id)) return;
       flushNoteEdit();
-      const [removed] = noteFolders.splice(idx, 1);
-      tombstone(deletedNoteFolderIds, id);
+      const removed = [];
+      noteFolders.forEach((x, i)=>{ if(gone.has(x.id)) removed.push({f:x, i}); });
+      noteFolders = noteFolders.filter(x=>!gone.has(x.id));
+      gone.forEach(g=>tombstone(deletedNoteFolderIds, g));
       const moved = [];
-      notes.forEach(n=>{ if(n.folderId===id){ moved.push(n.id); n.folderId = NOTES_DEFAULT_FOLDER; n.updatedAt = Date.now(); } });
-      if(noteFolderFilter===id) noteFolderFilter = 'all';
+      notes.forEach(n=>{ if(gone.has(n.folderId)){ moved.push([n.id, n.folderId]); n.folderId = NOTES_DEFAULT_FOLDER; n.updatedAt = Date.now(); } });
+      if(gone.has(noteFolderFilter)) noteFolderFilter = 'all';
       noteEditorId = null;
       save(); render();
       showToast('Folder deleted', false, ()=>{
-        untombstone(deletedNoteFolderIds, id);
-        noteFolders.splice(idx, 0, removed);
-        moved.forEach(nid=>{ const n = notes.find(x=>x.id===nid); if(n){ n.folderId = id; n.updatedAt = Date.now(); } });
+        removed.forEach(r=>{ untombstone(deletedNoteFolderIds, r.f.id); noteFolders.splice(Math.min(r.i, noteFolders.length), 0, r.f); });
+        moved.forEach(([nid, fid])=>{ const n = notes.find(x=>x.id===nid); if(n){ n.folderId = fid; n.updatedAt = Date.now(); } });
         noteEditorId = null; save(); render(); showToast('Folder restored');
       });
     }
