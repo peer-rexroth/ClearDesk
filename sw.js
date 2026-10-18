@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mydesk-cache-v3';
+const CACHE_NAME = 'mydesk-cache-v4';
 const APP_SHELL = [
   'mydesk.html',
   'manifest.json',
