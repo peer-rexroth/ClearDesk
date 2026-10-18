@@ -590,8 +590,30 @@ test('noteTableHtml builds a header row, body rows, and a paragraph after it to 
   assertEqual(sanitizeNoteHtml(h), h, 'what we insert survives the sanitiser unchanged');
 });
 
-test('the table menu offers table sizes when the cursor is outside a table', function () {
+test('outside a table the menu is the size picker', function () {
   const h = noteTableMenuHtml();
-  assertIncludes(h, '2 × 2 table'); assertIncludes(h, '5 × 5 table');
+  assertIncludes(h, 'tbl-picker'); assertIncludes(h, 'Insert table');
+  assertEqual((h.match(/tbl-cell/g) || []).length, 64, 'an 8 x 8 grid to start with');
   assertNotIncludes(h, 'Delete');
+});
+
+test('the picker lights up from the corner and reports rows x columns', function () {
+  const st = tablePickerAt({ r: 0, c: 0, rows: 8, cols: 8 }, 3, 4);
+  assertEqual(tablePickerLabel(st), '3 rows × 4 columns');
+  assertEqual(tablePickerLabel({ r: 1, c: 1 }), '1 row × 1 column');
+  assertEqual(tablePickerLabel({ r: 0, c: 0 }), 'Insert table');
+  const h = noteTablePickerHtml(st);
+  assertEqual((h.match(/tbl-cell on/g) || []).length, 12);
+});
+
+test('the picker grows by one row or column at its edge, up to 10 x 10', function () {
+  let st = { r: 0, c: 0, rows: 8, cols: 8 };
+  st = tablePickerAt(st, 8, 3);
+  assertEqual(st.rows, 9); assertEqual(st.cols, 8);
+  st = tablePickerAt(st, 9, 8);
+  assertEqual(st.rows, 10); assertEqual(st.cols, 9);
+  st = tablePickerAt(st, 50, 50);
+  assertEqual(st.r, 10); assertEqual(st.c, 10); assertEqual(st.rows, 10); assertEqual(st.cols, 10);
+  st = tablePickerAt(st, 2, 2);
+  assertEqual(st.rows, 10, 'it does not shrink while the picker is open');
 });

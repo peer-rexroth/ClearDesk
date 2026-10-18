@@ -1114,6 +1114,12 @@
   .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: .4em 0 .8em; }
   .note-body th, .note-body td { border: 1px solid var(--border-2); padding: 6px 10px; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
   .note-body th { background: var(--bg-2); font-weight: 600; }
+  .note-table-menu:has(.tbl-picker) { min-width: 0; }
+  .tbl-picker { padding: 7px 8px 5px; user-select: none; }
+  .tbl-picker-grid { display: grid; gap: 3px; }
+  .tbl-cell { width: 16px; height: 16px; box-sizing: border-box; border: 1px solid var(--border-2); border-radius: 3px; background: var(--bg); cursor: pointer; }
+  .tbl-cell.on { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); }
+  .tbl-picker-label { margin-top: 7px; text-align: center; font-size: 12px; color: var(--text-2); white-space: nowrap; }
   .note-body td:empty::after, .note-body th:empty::after { content: "\200b"; }
   .note-body ul.cl { list-style: none; padding-left: 2px; }
   .note-body ul.cl > li { position: relative; padding-left: 28px; }
@@ -1548,7 +1554,7 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button inserts a 2×2 to 5×5 table with a header row. Inside a table the same button adds or deletes rows and columns, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. Inside a table the same button adds or deletes rows and columns, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock in a note's toolbar makes it read-only. You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -2733,7 +2739,8 @@ function mainSubtitleText(){
   if(n>1) parts.push(`${n} selected`);
   return parts.join(' · ');
 }
-function closeToolMenus(){ document.querySelectorAll('.tool-menu.open').forEach(m=>m.classList.remove('open')); }
+// Only the task toolbar's menus (inside .tool-dd): the Notes toolbar reuses .tool-menu for its look and must not be closed by this.
+function closeToolMenus(){ document.querySelectorAll('.tool-dd .tool-menu.open').forEach(m=>m.classList.remove('open')); }
 function toolMenuHtml(which){
   const ts = selectionIds().map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
   const same = k=>ts.length && ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
@@ -5086,6 +5093,41 @@ function noteListStyle(kind){
   onNoteInput(); updateNoteToolbarState();
 }
 // ---- tables ----
+// The size picker: a grid that lights up from the top-left corner to the cell under the pointer (or the arrow keys), with a live
+// "3 rows × 4 columns" label. It starts at 8×8 and grows by one row or column whenever you reach its edge, up to 10×10.
+const NOTE_TABLE_MAX = 10;
+let noteTablePicker = { r: 0, c: 0, rows: 8, cols: 8 };
+function tablePickerAt(st, r, c){
+  r = Math.max(0, Math.min(NOTE_TABLE_MAX, r)); c = Math.max(0, Math.min(NOTE_TABLE_MAX, c));
+  return { r, c, rows: Math.min(NOTE_TABLE_MAX, Math.max(st.rows, r + 1)), cols: Math.min(NOTE_TABLE_MAX, Math.max(st.cols, c + 1)) };
+}
+function tablePickerLabel(st){ return st.r && st.c ? `${st.r} row${st.r===1?'':'s'} × ${st.c} column${st.c===1?'':'s'}` : 'Insert table'; }
+function noteTablePickerHtml(st){
+  let cells = '';
+  for(let r=1; r<=st.rows; r++) for(let c=1; c<=st.cols; c++) cells += `<span class="tbl-cell${r<=st.r && c<=st.c ? ' on' : ''}" role="gridcell" data-r="${r}" data-c="${c}" onmouseenter="noteTablePickerSet(${r},${c})" onclick="noteTableInsert(${r},${c})"></span>`;
+  return `<div class="tbl-picker" role="grid" aria-label="Table size"><div class="tbl-picker-grid" id="tblPickerGrid" style="grid-template-columns:repeat(${st.cols},16px)" onmouseleave="noteTablePickerSet(0,0)">${cells}</div><div class="tbl-picker-label" id="tblPickerLabel" aria-live="polite">${tablePickerLabel(st)}</div></div>`;
+}
+function noteTablePickerSet(r, c){
+  const grid = document.getElementById('tblPickerGrid'); if(!grid) return;
+  const was = noteTablePicker;
+  noteTablePicker = r===0 && c===0 ? { ...was, r: 0, c: 0 } : tablePickerAt(was, r, c);
+  if(noteTablePicker.rows!==was.rows || noteTablePicker.cols!==was.cols){                       // reached the edge: grow
+    const m = document.getElementById('noteTableMenu'); if(m) m.innerHTML = noteTablePickerHtml(noteTablePicker);
+  } else grid.querySelectorAll('.tbl-cell').forEach(el=>el.classList.toggle('on', +el.dataset.r<=noteTablePicker.r && +el.dataset.c<=noteTablePicker.c));
+  const label = document.getElementById('tblPickerLabel'); if(label) label.textContent = tablePickerLabel(noteTablePicker);
+}
+// While the picker is open the caret stays in the note, so the note's keydown hands the arrow keys to the picker.
+function noteTablePickerKey(e){
+  if(!document.getElementById('tblPickerGrid') || !document.getElementById('noteTableMenu')?.classList.contains('open')) return false;
+  const st = noteTablePicker;
+  if(e.key==='Escape'){ e.preventDefault(); closeNoteTableMenu(); return true; }
+  if(e.key==='Enter'){ e.preventDefault(); if(st.r && st.c) noteTableInsert(st.r, st.c); return true; }
+  const d = { ArrowRight:[0,1], ArrowLeft:[0,-1], ArrowDown:[1,0], ArrowUp:[-1,0] }[e.key];
+  if(!d) return false;
+  e.preventDefault();
+  noteTablePickerSet(Math.max(1, st.r + d[0]), Math.max(1, st.c + d[1]));
+  return true;
+}
 // A table is plain <table><tbody><tr><th|td>. Inserting and every row/column edit go through execCommand('insertHTML') (the edit is
 // applied to a clone of the table, which then replaces the original), so the browser's own undo — the toolbar's Undo and Cmd+Z — covers them.
 function noteSelectedCell(){
@@ -5151,6 +5193,7 @@ function noteTableEdit(op){
   onNoteInput(); updateNoteToolbarState();
 }
 function noteTableInsert(rows, cols){
+  rows = Math.max(1, Math.min(NOTE_TABLE_MAX, rows|0)); cols = Math.max(1, Math.min(NOTE_TABLE_MAX, cols|0));
   closeNoteTableMenu();
   noteFocusBody();
   if(noteSelectedCell()) return;
@@ -5162,7 +5205,7 @@ function noteTableInsert(rows, cols){
 }
 function noteTableMenuHtml(){
   const cell = noteSelectedCell();
-  if(!cell) return [[2,2],[3,3],[4,4],[5,5]].map(([r,c])=>menuOpt(`noteTableInsert(${r},${c})`, {icon:'table'}, `${r} × ${c} table`)).join('');
+  if(!cell) return noteTablePickerHtml(noteTablePicker);
   const { table } = noteCellPos(cell), hasHead = [...table.rows[0].cells].every(x=>x.tagName==='TH');
   const o = (op, icon, label, cur)=>menuOpt(`noteTableEdit('${op}')`, {icon}, label, cur);
   const danger = h=>h.replace('row-menu-item menu-opt', 'row-menu-item menu-opt danger');
@@ -5178,6 +5221,7 @@ function toggleNoteTableMenu(){
   const wasOpen = m.classList.contains('open');
   closeNoteTableMenu(); closeNoteListMenu();
   if(wasOpen) return;
+  noteTablePicker = { r: 0, c: 0, rows: 8, cols: 8 };
   m.innerHTML = noteTableMenuHtml();
   m.classList.add('open');
 }
@@ -5220,6 +5264,8 @@ function onNoteInput(e){
   scheduleNoteSave();
 }
 function onNoteKeydown(e){
+  if(noteTablePickerKey(e)) return;
+  if(e.key==='Escape' && document.querySelector('#noteTableMenu.open, #noteListMenu.open')){ e.preventDefault(); closeNoteTableMenu(); closeNoteListMenu(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase()==='k'){ e.preventDefault(); openNoteLinkBar(); return; }
   if(e.key==='Tab'){
     const sel = window.getSelection();
