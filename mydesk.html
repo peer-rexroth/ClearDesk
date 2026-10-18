@@ -1239,6 +1239,9 @@
   html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text); box-shadow: none; }
   /* the column-header row: its 28px controls sit in the middle of the band (they used to hug the hairline above, 10px of air below) */
   html[data-scheme="glass"] .task-list-header { padding-top: 6px; padding-bottom: 6px; align-items: center; }
+  /* Projects and Tags flow one after the other in one scrolling area (Tags used to be pinned to the bottom with a gap above it) */
+  .sidebar-scroll { flex: 1; min-height: 0; overflow-y: auto; }
+  .sidebar-scroll > .sidebar-section.tags-section { border-top: 0; }
 </style>
 </head>
 <body>
@@ -1297,7 +1300,8 @@
         <span class="count" id="overdueCount"></span>
       </div>
     </div>
-    <div class="sidebar-section grow">
+    <div class="sidebar-scroll">
+    <div class="sidebar-section">
       <div class="sidebar-section-label">Projects <span class="sidebar-section-actions">
         <button class="icon-btn" onclick="openAllTasksProjectsModal()" title="Choose which projects appear in All Tasks and on the board"><i class="fa-solid fa-sliders"></i></button>
         <button class="icon-btn" onclick="openProjectModal()" title="New project"><i class="fa-solid fa-plus"></i></button>
@@ -1307,6 +1311,7 @@
     <div class="sidebar-section tags-section" id="tagsSection">
       <div class="sidebar-section-label" role="button" tabindex="0" onclick="toggleTagsSection()" title="Show or hide tags">Tags <i class="fa-solid fa-chevron-down tags-chevron"></i></div>
       <div class="filter-chips" id="tagChips"></div>
+    </div>
     </div>
     <div class="sb-tools" id="sbTools">
     <span id="fileSyncIndicator"></span>

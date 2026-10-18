@@ -461,7 +461,7 @@ parity.
 - **Quiet notice bar**: the first-run sync notice is a neutral bar (small amber
   icon, one pill action, ✕), not an amber block.
 - Sidebar order is Projects (with the "projects shown" control beside the +)
-  then a collapsible Tags section (`mytasks_tags_collapsed`).
+  then a collapsible Tags section (`mytasks_tags_collapsed`). Both sit in one scrolling `.sidebar-scroll` area, so Tags follows the last project directly (it used to be pinned to the bottom with a gap above it) and a long project list scrolls them together while the tools bar stays put.
 - **The drawer is a docked side panel, not an overlay.** `#drawer` is a flex
   sibling of `.main` inside `.layout` (width 0 → 420px), with no backdrop, so
   the list stays visible and double-clicking another row swaps the panel; ↑/↓ move
