@@ -617,3 +617,12 @@ test('the picker grows by one row or column at its edge, up to 10 x 10', functio
   st = tablePickerAt(st, 2, 2);
   assertEqual(st.rows, 10, 'it does not shrink while the picker is open');
 });
+
+test('the grip menus: columns offer insert left/right and delete; the first row also offers the header toggle', function () {
+  const col = tblGripMenuHtml('col', 1);
+  assertIncludes(col, 'Insert left'); assertIncludes(col, 'Insert right'); assertIncludes(col, 'Delete column');
+  assertNotIncludes(col, 'Header row');
+  const row0 = tblGripMenuHtml('row', 0), row2 = tblGripMenuHtml('row', 2);
+  assertIncludes(row0, 'Insert above'); assertIncludes(row0, 'Insert below'); assertIncludes(row0, 'Header row'); assertIncludes(row0, 'Delete row');
+  assertNotIncludes(row2, 'Header row', 'only the first row can be the header');
+});

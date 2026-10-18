@@ -1081,7 +1081,18 @@
   .note-linkbar i { color: var(--text-3); font-size: 12px; }
   .note-linkbar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; outline: none; box-shadow: none !important; }
   .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 24px 56px; }
-  .note-doc { width: 100%; }
+  .note-doc { width: 100%; position: relative; }
+  .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
+  .tbl-handles > * { pointer-events: auto; }
+  .note-editor.locked .tbl-handles { display: none; }
+  .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border-2); color: var(--text-3); font-size: 9px; cursor: pointer; }
+  .tbl-grip.col { height: 14px; }
+  .tbl-grip.row { width: 14px; }
+  .tbl-grip.row i { transform: rotate(90deg); }
+  .tbl-grip:hover { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
+  .tbl-plus { position: absolute; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sel-bg, var(--blue-text)); color: #fff; font-size: 8px; cursor: pointer; opacity: 0; transition: opacity .12s ease, transform .12s ease; }
+  .tbl-plus.end { opacity: .5; }
+  .tbl-plus:hover { opacity: 1; transform: scale(1.18); }
   .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
   .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
   .note-title::placeholder { color: var(--text-3); }
@@ -1349,11 +1360,12 @@
           <button type="button" class="btn btn-sm" onclick="closeNoteLinkBar()">Cancel</button>
         </div>
         <div class="note-scroll">
-          <div class="note-doc">
+          <div class="note-doc" onmousemove="tblHandlesMove(event)" onmouseleave="tblHandlesLeave()">
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing…"
                  oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
+            <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
           </div>
         </div>
       </div>
@@ -1554,7 +1566,7 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. Inside a table the same button adds or deletes rows and columns, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. Point at a table to see grips above each column and beside each row (click or right-click one for Insert and Delete), and <strong>+</strong> buttons on the boundaries to add a column or row right there. Inside a table the toolbar button also adds or deletes rows and columns, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock in a note's toolbar makes it read-only. You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -4857,7 +4869,7 @@ function renderNoteEditor(){
   const title = document.getElementById('noteTitle'), body = document.getElementById('noteBody');
   if(noteEditorId!==n.id || noteEditorStamp!==n.updatedAt){
     // (re)load: a different note, or one changed from outside (a sync) that is not being edited right now
-    title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt;
+    title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; tblHandlesHide();
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
   const sel = document.getElementById('noteFolderSelect');
@@ -5149,11 +5161,12 @@ function noteCaretIn(cell){
   sel.removeAllRanges(); sel.addRange(r);
 }
 function noteCellPos(cell){ const tr = cell.parentNode, table = tr.closest('table'); return { table, r: [...table.rows].indexOf(tr), c: cell.cellIndex }; }
-function noteTableEdit(op){
+function noteTableEdit(op, ref){
   closeNoteTableMenu();
   noteFocusBody();
-  const cell = noteSelectedCell(); if(!cell) return;
-  const { table, r, c } = noteCellPos(cell);
+  const cell = ref ? null : noteSelectedCell(); if(!ref && !cell) return;
+  const { table, r, c } = ref || noteCellPos(cell);          // `ref` ({table, r, c}) comes from the hover handles; otherwise the cell the caret is in
+  tblHandlesHide();
   const body = document.getElementById('noteBody'), idx = [...body.querySelectorAll('table')].indexOf(table);
   const clone = table.cloneNode(true), rowsN = clone.rows.length, colsN = Math.max(...[...clone.rows].map(x=>x.cells.length));
   const sel = window.getSelection(), range = document.createRange();
@@ -5226,6 +5239,69 @@ function toggleNoteTableMenu(){
   m.classList.add('open');
 }
 function closeNoteTableMenu(){ document.getElementById('noteTableMenu')?.classList.remove('open'); }
+// ---- hover handles ----
+// Pointing at a table shows grips above each column and left of each row (click or right-click for that column's / row's menu) and
+// "+" buttons on the column and row boundaries. They live in an overlay next to the note, never inside it, so they are not saved.
+let tblHandlesTable = null, tblHandlesTimer = null, tblMenuRef = null;
+function tblHandlesHide(){ tblHandlesTable = null; const h = document.getElementById('tblHandles'); if(h) h.innerHTML = ''; }
+function tblHandlesLeave(){ if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
+function tblHandlesMove(e){
+  if(noteIsLocked(noteEditorId)){ if(tblHandlesTable) tblHandlesHide(); return; }
+  const t = e.target;
+  if(t && t.closest && t.closest('#tblHandles')){ clearTimeout(tblHandlesTimer); return; }
+  const table = t && t.closest ? t.closest('#noteBody table') : null;
+  if(!table){ if(tblHandlesTable) tblHandlesLeave(); return; }
+  clearTimeout(tblHandlesTimer);
+  if(table!==tblHandlesTable) tblHandlesShow(table);
+}
+function tblHandlesRefresh(){ if(!tblHandlesTable) return; if(tblHandlesTable.isConnected) tblHandlesShow(tblHandlesTable); else tblHandlesHide(); }
+function tblHandlesShow(table){
+  const layer = document.getElementById('tblHandles'), doc = layer && layer.parentNode; if(!layer || !table) return;
+  tblHandlesTable = table;
+  const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1;   // the UI-size zoom makes viewport px differ from CSS px
+  const tr = table.getBoundingClientRect(), left = (tr.left - dr.left) / k, top = (tr.top - dr.top) / k;
+  const rows = [...table.rows], cols = rows[0] ? [...rows[0].cells] : [], p = n=>Math.round(n * 10) / 10;
+  let h = '';
+  cols.forEach((cell, i)=>{
+    const cr = cell.getBoundingClientRect(), cx = (cr.left - dr.left) / k, cw = cr.width / k, gw = Math.max(14, Math.min(32, cw - 28));
+    h += `<div class="tbl-grip col" style="left:${p(cx + cw / 2 - gw / 2)}px;top:${p(top - 20)}px;width:${p(gw)}px" role="button" aria-label="Column ${i + 1} actions" title="Column actions" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'col',${i})" oncontextmenu="tblGripOpen(event,'col',${i})"><i class="fa-solid fa-ellipsis"></i></div>`;
+    h += `<div class="tbl-plus${i===cols.length - 1 ? ' end' : ''}" style="left:${p(cx + cw - 8)}px;top:${p(top - 22)}px" role="button" aria-label="Insert a column after column ${i + 1}" title="Insert column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${i})"><i class="fa-solid fa-plus"></i></div>`;
+  });
+  rows.forEach((row, i)=>{
+    const rr = row.getBoundingClientRect(), ry = (rr.top - dr.top) / k, rh = rr.height / k, gh = Math.max(14, Math.min(32, rh - 20));
+    h += `<div class="tbl-grip row" style="left:${p(left - 20)}px;top:${p(ry + rh / 2 - gh / 2)}px;height:${p(gh)}px" role="button" aria-label="Row ${i + 1} actions" title="Row actions" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'row',${i})" oncontextmenu="tblGripOpen(event,'row',${i})"><i class="fa-solid fa-ellipsis"></i></div>`;
+    h += `<div class="tbl-plus${i===rows.length - 1 ? ' end' : ''}" style="left:${p(left - 26)}px;top:${p(ry + rh - 8)}px" role="button" aria-label="Insert a row after row ${i + 1}" title="Insert row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${i},0)"><i class="fa-solid fa-plus"></i></div>`;
+  });
+  layer.innerHTML = h;
+}
+function tblPlus(e, op, r, c){ e.stopPropagation(); if(tblHandlesTable) noteTableEdit(op, { table: tblHandlesTable, r, c }); }
+function tblGripMenuHtml(kind, i){
+  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+  if(kind==='col') return [
+    item('fa-solid fa-arrow-left', 'Insert left', `tblGripRun('colBefore')`), item('fa-solid fa-arrow-right', 'Insert right', `tblGripRun('colAfter')`), sep,
+    item('fa-solid fa-trash', 'Delete column', `tblGripRun('delCol')`, {danger:true})
+  ].join('');
+  return [
+    item('fa-solid fa-arrow-up', 'Insert above', `tblGripRun('rowBefore')`), item('fa-solid fa-arrow-down', 'Insert below', `tblGripRun('rowAfter')`), sep,
+    ...(i===0 ? [item('fa-solid fa-heading', 'Header row', `tblGripRun('header')`), sep] : []),
+    item('fa-solid fa-trash', 'Delete row', `tblGripRun('delRow')`, {danger:true})
+  ].join('');
+}
+function tblGripOpen(e, kind, i){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu || !tblHandlesTable) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu();
+  tblMenuRef = { table: tblHandlesTable, r: kind==='row' ? i : 0, c: kind==='col' ? i : 0 };
+  noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = tblGripMenuHtml(kind, i);
+  const rect = e.currentTarget.getBoundingClientRect();
+  placeRowMenu(menu, e.type==='click' ? rect.left : e.clientX, e.type==='click' ? rect.bottom + 4 : e.clientY, e.currentTarget);
+}
+function tblGripRun(op){
+  const ref = tblMenuRef; closeRowMenu();
+  if(ref && ref.table && ref.table.isConnected) noteTableEdit(op, ref);
+}
+window.addEventListener('resize', tblHandlesRefresh);
 function noteChecklist(){
   noteFocusBody();
   const sel = window.getSelection();
@@ -5261,6 +5337,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
+  tblHandlesRefresh();
   scheduleNoteSave();
 }
 function onNoteKeydown(e){
