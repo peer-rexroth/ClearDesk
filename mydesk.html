@@ -1245,6 +1245,12 @@
   /* while the sidebar is hidden the floating toggle + sync chip sit over the first column's bar: keep its title clear of them.
      Written last and with the Glass prefix so no earlier padding rule can win (the Tasks title rule did, once). */
   html[data-scheme="glass"].sidebar-collapsed .main-toolbar, html[data-scheme="glass"].sidebar-collapsed .notes-list-head { padding-left: 112px !important; }
+  /* the floating toggle and the collapsed file-status chip are round 36px buttons like the compose button, icons dead centre */
+  html[data-scheme="glass"] #fileSyncMini .file-chip { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; gap: 0; border: 0; border-radius: 50%; background: var(--cap-fill); }
+  #fileSyncMini .file-chip i { margin: 0; width: auto; line-height: 1; }
+  html[data-scheme="glass"] #sbFloat { top: 8px; }
+  html[data-scheme="glass"] #sbFloat .btn-icon { width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: var(--cap-fill); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; }
+  html[data-scheme="glass"] #sbFloat .btn-icon:hover, html[data-scheme="glass"] #fileSyncMini .file-chip:hover { background: var(--cap-hover); }
 </style>
 </head>
 <body>
