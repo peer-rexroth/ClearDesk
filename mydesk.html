@@ -1242,6 +1242,9 @@
   /* Projects and Tags flow one after the other in one scrolling area (Tags used to be pinned to the bottom with a gap above it) */
   .sidebar-scroll { flex: 1; min-height: 0; overflow-y: auto; }
   .sidebar-scroll > .sidebar-section.tags-section { border-top: 0; }
+  /* while the sidebar is hidden the floating toggle + sync chip sit over the first column's bar: keep its title clear of them.
+     Written last and with the Glass prefix so no earlier padding rule can win (the Tasks title rule did, once). */
+  html[data-scheme="glass"].sidebar-collapsed .main-toolbar, html[data-scheme="glass"].sidebar-collapsed .notes-list-head { padding-left: 112px !important; }
 </style>
 </head>
 <body>
