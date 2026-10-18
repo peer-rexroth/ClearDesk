@@ -1065,6 +1065,13 @@
   .note-toolbar-grow { flex: 1; }
   .note-toolbar .tool-btn.active { background: var(--bg-3); color: var(--text); }
   .note-select { font-size: 12px; border: 1px solid var(--border-2); border-radius: 999px; padding: 4px 26px 4px 12px; background-color: var(--bg-2); color: var(--text); font-family: var(--font); max-width: 170px; }
+  .tool-btn .tb-ico { width: 16px; height: 16px; display: block; }
+  .tool-btn.on { background: var(--amber-bg); color: var(--amber-text); }   /* the lock, while the note is read-only */
+  .tool-btn.on:hover:not(:disabled) { background: var(--amber-bg); opacity: .85; }
+  .note-editor.locked .note-fmt { opacity: .4; pointer-events: none; }
+  .note-editor.locked .note-body { cursor: default; }
+  .note-row-lock { font-size: 10px; color: var(--text-3); margin-left: 4px; }
+  .note-row.selected .note-row-lock { color: inherit; opacity: .8; }
   .note-linkbar { display: flex; align-items: center; gap: 8px; margin: 0 24px 6px; padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--text) 5%, transparent); }
   .note-linkbar[hidden] { display: none; }
   .note-linkbar i { color: var(--text-3); font-size: 12px; }
@@ -1286,32 +1293,35 @@
       <div class="notes-empty" id="notesEmpty"><i class="fa-regular fa-note-sticky"></i><div>No note selected</div><button type="button" class="btn btn-sm" onclick="createNote()"><i class="fa-solid fa-plus"></i> New note</button></div>
       <div class="note-editor" id="noteEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
-          <select id="noteStyleSelect" class="note-select" aria-label="Text style" onchange="noteBlock(this.value)">
+          <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option>
           </select>
-          <div class="tool-group">
+          <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><i class="fa-solid fa-rotate-left"></i></button>
             <button type="button" class="tool-btn" id="noteRedoBtn" onclick="noteCmd('redo')" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><i class="fa-solid fa-rotate-right"></i></button>
           </div>
-          <div class="tool-group">
+          <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" data-cmd="bold" onclick="noteCmd('bold')" title="Bold (⌘B)" aria-label="Bold"><i class="fa-solid fa-bold"></i></button>
             <button type="button" class="tool-btn" data-cmd="italic" onclick="noteCmd('italic')" title="Italic (⌘I)" aria-label="Italic"><i class="fa-solid fa-italic"></i></button>
             <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><i class="fa-solid fa-underline"></i></button>
             <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
           </div>
-          <div class="tool-group">
+          <div class="tool-group note-fmt">
             <div class="lib-dropdown" id="noteListDropdown">
               <button type="button" class="tool-btn" data-cmd="list" onclick="event.stopPropagation();toggleNoteListMenu()" title="Lists" aria-label="Lists" aria-haspopup="menu"><i class="fa-solid fa-list-ul"></i></button>
               <div class="split-btn-menu tool-menu note-list-menu" id="noteListMenu" role="menu"></div>
             </div>
             <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><i class="fa-regular fa-square-check"></i></button>
           </div>
-          <div class="tool-group">
+          <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><i class="fa-solid fa-link"></i></button>
             <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><i class="fa-solid fa-eraser"></i></button>
           </div>
           <span class="note-toolbar-grow"></span>
           <select id="noteFolderSelect" class="note-select" aria-label="Folder" title="Move to folder" onchange="moveNote(noteEditorId, this.value)"></select>
+          <button type="button" class="tool-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock to prevent editing" aria-label="Lock note" aria-pressed="false"></button>
+          <button type="button" class="tool-btn" onclick="cloneNote(noteEditorId)" title="Clone note" aria-label="Clone note"><i class="fa-regular fa-clone"></i></button>
+          <span class="tool-sep"></span>
           <button type="button" class="tool-btn tool-danger note-del" onclick="deleteNote(noteEditorId)" title="Delete note" aria-label="Delete note"><i class="fa-regular fa-trash-can"></i></button>
         </div>
         <div class="note-linkbar" id="noteLinkBar" hidden>
@@ -1525,6 +1535,9 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
+          <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock in a note's toolbar makes it read-only. You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
+          <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
           <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
           </div>
         </div>
@@ -2771,17 +2784,20 @@ function toggleRowSub(e, btn){
   if(!was){ placeRowSub(sub); sub.classList.add('open'); }
 }
 function closeRowMenu(){ document.getElementById('rowMenu')?.classList.remove('open'); }
+// The two building blocks of the right-click menus (tasks and notes): a plain row, and a row that opens a flyout of options.
+const rowMenuItem = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}"><i class="${icon}"></i><span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+const rowMenuSub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)"><i class="${icon}"></i><span>${text}</span><span class="row-menu-hint"><i class="fa-solid fa-chevron-right"></i></span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
 function rowMenuHtml(ids){
   const n = ids.length;
   const ts = ids.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
   if(!ts.length) return '';
-  const item = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}"><i class="${icon}"></i><span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+  const item = rowMenuItem;
   const opts = (field, list, cur, lead)=>list.map(x=>menuOpt(`rowMenuRun('${field}','${x.id}')`, lead(x), x.label, cur===x.id)).join('');
   const same = k=>ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
   const allDone = ts.every(t=>t.status==='done');
   const sep = '<div class="row-menu-sep"></div>';
   // A submenu: a parent row that opens a flyout of menuOpt rows on hover (or on click, for touch/keyboard).
-  const sub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)"><i class="${icon}"></i><span>${text}</span><span class="row-menu-hint"><i class="fa-solid fa-chevron-right"></i></span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
+  const sub = rowMenuSub;
   const dueQ = [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear']];
   const parts = [];
   if(n===1) parts.push(item('fa-solid fa-pen-to-square','Open details','rowMenuRun(\'open\')'));
@@ -4499,6 +4515,7 @@ function normalizeNotes(){
     if(!noteFolders.some(f=>f.id===n.folderId)) n.folderId = NOTES_DEFAULT_FOLDER;
     if(!n.createdAt) n.createdAt = Date.now();
     if(!n.updatedAt) n.updatedAt = n.createdAt;
+    n.locked = n.locked===true;
   });
   if(!Array.isArray(deletedNoteIds)) deletedNoteIds = [];
   if(!Array.isArray(deletedNoteFolderIds)) deletedNoteFolderIds = [];
@@ -4550,6 +4567,96 @@ function setAppMode(mode){
   applyAppMode(); render();
 }
 
+// ---- lock & clone ----
+const NOTE_ICON_LOCK   = '<svg class="tb-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.8" y="9.8" width="16.4" height="11.8" rx="3"/><path d="M7.4 9.8V7.6a4.6 4.6 0 0 1 9.2 0v2.2"/></svg>';
+const NOTE_ICON_UNLOCK = '<svg class="tb-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.8" y="9.8" width="16.4" height="11.8" rx="3"/><path d="M7.4 9.8V7.6a4.6 4.6 0 0 1 8.8-1.9"/></svg>';
+// A locked note is read-only: no typing, formatting, moving or deleting until it is unlocked (cloning and copying still work).
+function noteIsLocked(id){ const n = notes.find(x=>x.id===id); return !!(n && n.locked); }
+function toggleNoteLock(id){
+  const n = notes.find(x=>x.id===id); if(!n) return;
+  if(id===noteEditorId) flushNoteEdit();
+  n.locked = !n.locked; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
+  save(); render();
+}
+function uniqueNoteTitle(base){
+  const taken = new Set(notes.map(n=>n.title));
+  let t = `${base} (copy)`, i = 2;
+  while(taken.has(t)) t = `${base} (copy ${i++})`;
+  return t.slice(0,200);
+}
+function cloneNote(id){
+  const src = notes.find(n=>n.id===id); if(!src) return;
+  flushNoteEdit();
+  const now = Date.now();
+  const clone = { id: genId(), title: uniqueNoteTitle(src.title || 'New note'), body: src.body, folderId: src.folderId, createdAt: now, updatedAt: now, locked: !!src.locked };
+  notes.push(clone);
+  if(noteFolderFilter!=='all' && noteFolderFilter!==clone.folderId) noteFolderFilter = 'all';
+  selectedNoteId = clone.id; noteEditorId = null;
+  save(); render();
+  showToast('Note cloned', false, ()=>{
+    const i = notes.findIndex(n=>n.id===clone.id); if(i===-1) return;
+    notes.splice(i, 1); tombstone(deletedNoteIds, clone.id);
+    if(selectedNoteId===clone.id) selectedNoteId = src.id;
+    noteEditorId = null; save(); render(); showToast('Clone removed');
+  });
+}
+
+// ---- right-click menus ----
+let noteMenuId = null, folderMenuId = null;
+function noteMenuHtml(id){
+  const n = notes.find(x=>x.id===id); if(!n) return '';
+  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+  const moveOpts = noteFolders.map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {icon:'folder'}, f.name, f.id===n.folderId)).join('');
+  return [
+    item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`),
+    item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
+    sep,
+    rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', `class="row-menu-item sub-parent"${n.locked ? ' disabled' : ''}`),
+    sep,
+    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint:'Del', off:!!n.locked})
+  ].join('');
+}
+function openNoteMenu(e, id){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  noteMenuId = id; folderMenuId = null;
+  menu.innerHTML = noteMenuHtml(id);
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function noteMenuRun(kind, value){
+  const id = noteMenuId; closeRowMenu();
+  if(!id) return;
+  if(kind==='lock') toggleNoteLock(id);
+  else if(kind==='clone') cloneNote(id);
+  else if(kind==='move') moveNote(id, value);
+  else if(kind==='delete') deleteNote(id);
+}
+function folderMenuHtml(id){
+  const f = folderById(id); if(!f) return '';
+  const item = rowMenuItem;
+  const parts = [item('fa-solid fa-plus', 'New note here', `folderMenuRun('new')`)];
+  if(!f.locked) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Rename', `folderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true}));
+  return parts.join('');
+}
+function openFolderMenu(e, id){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  folderMenuId = id; noteMenuId = null;
+  menu.innerHTML = folderMenuHtml(id);
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function folderMenuRun(kind){
+  const id = folderMenuId; closeRowMenu();
+  if(!id) return;
+  if(kind==='new'){ setNoteFolder(id); createNote(); }
+  else if(kind==='rename') openFolderModal(id);
+  else if(kind==='delete') deleteNoteFolder(id);
+}
+
 // ---- lists ----
 function visibleNotes(){
   const words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
@@ -4573,7 +4680,7 @@ function renderNotesSidebar(){
   if(cnt) cnt.textContent = notes.length;
   if(all){ all.classList.toggle('active', noteFolderFilter==='all'); all.setAttribute('aria-pressed', noteFolderFilter==='all' ? 'true' : 'false'); }
   const list = document.getElementById('noteFolderList');
-  if(list) list.innerHTML = noteFolders.map(f=>`<div class="project-row ${noteFolderFilter===f.id?'active':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')">
+  if(list) list.innerHTML = noteFolders.map(f=>`<div class="project-row ${noteFolderFilter===f.id?'active':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')">
       <i class="fa-regular fa-folder picon"></i>
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${counts[f.id]||0}</span>
@@ -4596,8 +4703,8 @@ function renderNotesList(vis){
   }
   list.innerHTML = vis.map(n=>{
     const sel = n.id===selectedNoteId, fol = folderById(n.folderId);
-    return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')">
-      <div class="note-row-title">${esc(n.title || 'New note')}</div>
+    return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')">
+      <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
       ${noteFolderFilter==='all' && fol ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(fol.name)}</div>` : ''}
     </div>`;
@@ -4606,7 +4713,7 @@ function renderNotesList(vis){
 function updateNoteMeta(n){
   const el = document.getElementById('noteMeta'); if(!el || !n) return;
   const fol = folderById(n.folderId);
-  el.textContent = `Edited ${new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})}${fol ? ' · ' + fol.name : ''}`;
+  el.textContent = `Edited ${new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})}${fol ? ' · ' + fol.name : ''}${n.locked ? ' · Locked' : ''}`;
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
@@ -4620,7 +4727,13 @@ function renderNoteEditor(){
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
   const sel = document.getElementById('noteFolderSelect');
-  if(sel) sel.innerHTML = noteFolders.map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${esc(f.name)}</option>`).join('');
+  if(sel){ sel.innerHTML = noteFolders.map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${esc(f.name)}</option>`).join(''); sel.disabled = !!n.locked; }
+  const locked = !!n.locked;
+  ed?.classList.toggle('locked', locked);
+  body.contentEditable = locked ? 'false' : 'true'; title.readOnly = locked;
+  const lockBtn = document.getElementById('noteLockBtn');
+  if(lockBtn){ lockBtn.classList.toggle('on', locked); lockBtn.innerHTML = locked ? NOTE_ICON_LOCK : NOTE_ICON_UNLOCK; lockBtn.title = locked ? 'Unlock to enable editing' : 'Lock to prevent editing'; lockBtn.setAttribute('aria-pressed', locked ? 'true' : 'false'); }
+  const delBtn = document.querySelector('.note-del'); if(delBtn){ delBtn.disabled = locked; delBtn.title = locked ? 'Unlock to delete' : 'Delete note'; }
   updateNoteMeta(n);
 }
 function renderNotes(){
@@ -4636,7 +4749,7 @@ function scheduleNoteSave(){ if(typeof clearTimeout==='function') clearTimeout(n
 function flushNoteEdit(){ if(noteSaveTimer){ if(typeof clearTimeout==='function') clearTimeout(noteSaveTimer); noteSaveTimer = null; commitNoteEdit(); } }
 function commitNoteEdit(){
   noteSaveTimer = null;
-  const n = notes.find(x=>x.id===noteEditorId); if(!n) return;
+  const n = notes.find(x=>x.id===noteEditorId); if(!n || n.locked) return;
   const title = (document.getElementById('noteTitle').value || '').slice(0,200);
   const body = sanitizeNoteHtml(document.getElementById('noteBody').innerHTML);
   if(title===n.title && body===n.body) return;
@@ -4645,7 +4758,7 @@ function commitNoteEdit(){
 }
 function removeIfEmptyNote(id){
   const n = notes.find(x=>x.id===id);
-  if(!n || !noteIsEmpty(n)) return;
+  if(!n || n.locked || !noteIsEmpty(n)) return;
   notes.splice(notes.indexOf(n), 1); tombstone(deletedNoteIds, id); save();
 }
 function syncSearchBox(){ const si = document.getElementById('searchInput'); if(si && appMode==='notes') si.value = noteSearchQuery; }
@@ -4671,6 +4784,7 @@ function createNote(){
 }
 function deleteNote(id){
   const idx = notes.findIndex(n=>n.id===id); if(idx===-1) return;
+  if(notes[idx].locked){ showToast('Unlock the note to delete it', true); return; }
   flushNoteEdit();
   const vis = visibleNotes(), vi = vis.findIndex(n=>n.id===id);
   const [removed] = notes.splice(idx, 1);
@@ -4686,7 +4800,7 @@ function deleteNote(id){
   });
 }
 function moveNote(id, folderId){
-  const n = notes.find(x=>x.id===id); if(!n || !folderById(folderId) || n.folderId===folderId) return;
+  const n = notes.find(x=>x.id===id); if(!n || n.locked || !folderById(folderId) || n.folderId===folderId) return;
   flushNoteEdit();
   const prev = n.folderId, dest = folderById(folderId);
   n.folderId = folderId; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
@@ -4855,6 +4969,7 @@ function onNoteKeydown(e){
 function onNoteTitleKey(e){ if(e.key==='Enter'){ e.preventDefault(); const b = document.getElementById('noteBody'); if(b) b.focus(); } }
 function onNoteBodyClick(e){
   const t = e.target;
+  if(noteIsLocked(noteEditorId)) return;                                           // read-only: checklists cannot be ticked either
   if(t && t.tagName==='LI' && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('cl') && e.offsetX < 28){
     if(t.getAttribute('data-done')==='1') t.removeAttribute('data-done'); else t.setAttribute('data-done', '1');
     onNoteInput(); return;

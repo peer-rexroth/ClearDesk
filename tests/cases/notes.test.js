@@ -266,3 +266,83 @@ test('sanitizeNoteHtml keeps known list styles and drops unknown ones', function
   assertEqual(sanitizeNoteHtml('<ol data-ls="dash"><li>a</li></ol>'), '<ol><li>a</li></ol>', 'a bullet style does not apply to a numbered list');
   assertEqual(sanitizeNoteHtml('<ul class="cl" data-ls="dash"><li>a</li></ul>'), '<ul class="cl"><li>a</li></ul>');
 });
+
+test('a locked note cannot be deleted, moved or auto-removed', function () {
+  noteFolders.push({ id: 'f-work', name: 'Work' });
+  const n = ntNote({ id: 'nl1', title: '', body: '', locked: true });
+  notes = [n];
+  deleteNote('nl1');
+  assertEqual(notes.length, 1, 'delete is refused');
+  moveNote('nl1', 'f-work');
+  assertEqual(n.folderId, NOTES_DEFAULT_FOLDER, 'move is refused');
+  removeIfEmptyNote('nl1');
+  assertEqual(notes.length, 1, 'an empty locked note is not auto-removed');
+});
+
+test('toggleNoteLock flips the lock and stamps the note so a sync prefers it', function () {
+  const n = ntNote({ id: 'nl2', updatedAt: 1000 });
+  notes = [n];
+  toggleNoteLock('nl2');
+  assertTrue(n.locked === true);
+  assertTrue(n.updatedAt > 1000, 'updatedAt moves so the lock change wins a merge');
+  toggleNoteLock('nl2');
+  assertTrue(n.locked === false);
+  deleteNote('nl2');
+  assertEqual(notes.length, 0, 'unlocked again, so it can be deleted');
+});
+
+test('normalizeNotes only accepts a real boolean lock', function () {
+  notes = [ntNote({ id: 'a1', locked: true }), ntNote({ id: 'a2', locked: 'yes' }), ntNote({ id: 'a3' })];
+  normalizeNotes();
+  assertEqual(notes[0].locked, true);
+  assertEqual(notes[1].locked, false);
+  assertEqual(notes[2].locked, false);
+});
+
+test('a lock set on another device wins when it is the newer edit', function () {
+  notes = [ntNote({ id: 'm1', updatedAt: 1000 })];
+  mergeNotesData({ notes: [ntNote({ id: 'm1', updatedAt: 2000, locked: true })] }, true);
+  assertEqual(notes[0].locked, true);
+});
+
+test('cloneNote copies the body, folder and lock under a unique "(copy)" title', function () {
+  const src = ntNote({ id: 'c1', title: 'Plan', body: '<p>hi</p>', locked: true });
+  notes = [src];
+  cloneNote('c1');
+  assertEqual(notes.length, 2);
+  const c = notes.find(n => n.id !== 'c1');
+  assertEqual(c.title, 'Plan (copy)');
+  assertEqual(c.body, '<p>hi</p>');
+  assertEqual(c.locked, true, 'the lock state is copied, like PromptLab');
+  assertEqual(selectedNoteId, c.id, 'the clone is opened');
+  cloneNote('c1');
+  assertTrue(notes.some(n => n.title === 'Plan (copy 2)'), 'a second clone gets a number');
+});
+
+test('cloning offers Undo that removes the clone and tombstones it', function () {
+  notes = [ntNote({ id: 'c2', title: 'A' })];
+  cloneNote('c2');
+  const cloneId = notes.find(n => n.id !== 'c2').id;
+  triggerToastUndo();
+  assertEqual(notes.length, 1);
+  assertTrue(deletedNoteIds.some(d => d.id === cloneId));
+});
+
+test('the note right-click menu offers lock, clone, move and delete (and disables the last two when locked)', function () {
+  noteFolders.push({ id: 'f-work', name: 'Work' });
+  notes = [ntNote({ id: 'rm1', title: 'X' })];
+  let h = noteMenuHtml('rm1');
+  assertIncludes(h, 'Lock'); assertIncludes(h, 'Clone'); assertIncludes(h, 'Move to'); assertIncludes(h, 'Work'); assertIncludes(h, 'Delete');
+  assertNotIncludes(h, 'disabled');
+  notes[0].locked = true;
+  h = noteMenuHtml('rm1');
+  assertIncludes(h, 'Unlock');
+  assertIncludes(h, 'disabled');
+});
+
+test('the folder right-click menu: the default folder only offers a new note', function () {
+  noteFolders.push({ id: 'f-work', name: 'Work' });
+  assertNotIncludes(folderMenuHtml(NOTES_DEFAULT_FOLDER), 'Rename');
+  assertIncludes(folderMenuHtml('f-work'), 'Rename');
+  assertIncludes(folderMenuHtml('f-work'), 'Delete');
+});
