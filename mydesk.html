@@ -1199,7 +1199,6 @@
   /* the new-note button is Apple Notes' round compose button: icon only, same filled capsule as the other bar controls */
   html[data-scheme="glass"] .note-toolbar .note-new-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
   /* Apple Notes sets the compose button off from the formatting controls with a thin divider */
-  .note-toolbar .note-new-sep { width: 1px; height: 26px; background: var(--border-2); margin: 0 2px 0 0; flex: none; }
   /* the notes list column is one continuous surface from the very top: no tinted band or hairline over its header */
   html[data-scheme="glass"] .notes-list-head { background: transparent; border-bottom: 0; }
   html[data-scheme="glass"] .notes-list-head .note-sort-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
@@ -1263,7 +1262,7 @@
   /* keep the editor bar on ONE row in a narrower pane: the folder dropdown (also in the ⋯ menu's "Move to") steps aside, then the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
   @container notepane (max-width: 880px) { .note-toolbar #noteFolderSelect { display: none; } }
-  @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .note-new-sep { display: none; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
+  @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
@@ -1466,7 +1465,6 @@
       <div class="note-editor" id="noteEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
           <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><i class="fa-regular fa-pen-to-square"></i></button>
-          <span class="note-new-sep" aria-hidden="true"></span>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option>
           </select>
