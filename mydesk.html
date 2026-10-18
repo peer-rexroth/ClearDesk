@@ -1280,6 +1280,10 @@
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option>
           </select>
           <div class="tool-group">
+            <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><i class="fa-solid fa-rotate-left"></i></button>
+            <button type="button" class="tool-btn" id="noteRedoBtn" onclick="noteCmd('redo')" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><i class="fa-solid fa-rotate-right"></i></button>
+          </div>
+          <div class="tool-group">
             <button type="button" class="tool-btn" data-cmd="bold" onclick="noteCmd('bold')" title="Bold (⌘B)" aria-label="Bold"><i class="fa-solid fa-bold"></i></button>
             <button type="button" class="tool-btn" data-cmd="italic" onclick="noteCmd('italic')" title="Italic (⌘I)" aria-label="Italic"><i class="fa-solid fa-italic"></i></button>
             <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><i class="fa-solid fa-underline"></i></button>
@@ -4762,6 +4766,11 @@ function noteChecklist(){
 function noteClearFormat(){ noteFocusBody(); document.execCommand('removeFormat', false); document.execCommand('formatBlock', false, '<p>'); onNoteInput(); updateNoteToolbarState(); }
 function updateNoteToolbarState(){
   const body = document.getElementById('noteBody'), sel = window.getSelection ? window.getSelection() : null;
+  try{
+    const u = document.getElementById('noteUndoBtn'), r = document.getElementById('noteRedoBtn');
+    if(u) u.disabled = !document.queryCommandEnabled('undo');
+    if(r) r.disabled = !document.queryCommandEnabled('redo');
+  }catch(_){}
   if(!body || !sel || !sel.rangeCount || !body.contains(sel.anchorNode)) return;
   const set = (cmd, on)=>{ const b = document.querySelector(`.note-toolbar [data-cmd="${cmd}"]`); if(b) b.classList.toggle('active', !!on); };
   ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, document.queryCommandState(c)));
