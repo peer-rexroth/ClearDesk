@@ -1150,6 +1150,7 @@
   .sb-tools { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-top: 0.5px solid var(--border); flex: none; }
   .sb-tools .topbar-divider { display: none; }
   .sb-tools .split-btn-menu { top: auto !important; bottom: calc(100% + 8px); left: 0 !important; right: auto !important; }
+  html:has(.sb-tools .split-btn-menu.open) .sidebar-resizer { visibility: hidden; }   /* its accent line and tooltip must not cut through an open sidebar menu */
   .layout { position: relative; }
   .sb-float { display: none; position: absolute; top: 9px; left: 12px; z-index: 70; align-items: center; gap: 8px; }
   html.sidebar-collapsed .sb-float { display: flex; }
@@ -1365,11 +1366,7 @@
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label" id="fileBackupLabel">Daily file backup</div><div class="split-btn-menu-desc" id="fileBackupDesc">Save a daily copy to a Backup folder</div></div>
-        </div>
-        <div class="split-btn-menu-item" id="fileBackupOffItem" style="display:none" onclick="stopFileBackup();closeLibMenu()">
-          <i class="fa-solid fa-ban split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Turn off file backup</div></div>
+          <div><div class="split-btn-menu-label" id="fileBackupLabel">Daily file backup</div><div class="split-btn-menu-desc" id="fileBackupDesc">Link a data file to enable</div></div>
         </div>
       </div>
     </div>
@@ -1838,12 +1835,12 @@
       </button>
       <button type="button" class="sync-row" onclick="closeFileSyncModal();linkFile()">
         <span class="sync-ico"><i class="fa-solid fa-folder-open"></i></span>
-        <span class="sync-text"><strong>Link existing file</strong><span>Open a .json data file and sync to it</span></span>
+        <span class="sync-text"><strong>Link existing file</strong><span>Choose the folder that holds your .json data file</span></span>
         <i class="fa-solid fa-chevron-right sync-chev"></i>
       </button>
       <button type="button" class="sync-row" onclick="closeFileSyncModal();createNewLinkedFile()">
         <span class="sync-ico"><i class="fa-solid fa-file-circle-plus"></i></span>
-        <span class="sync-text"><strong>Create new file</strong><span>Save your tasks to a new .json file</span></span>
+        <span class="sync-text"><strong>Create new file</strong><span>Choose a folder; daily backups go in its Backup subfolder</span></span>
         <i class="fa-solid fa-chevron-right sync-chev"></i>
       </button>
     </div>
@@ -1854,6 +1851,32 @@
     <div class="modal-actions">
       <button type="button" class="btn" onclick="closeFileSyncModal()">Not now</button>
     </div>
+  </div>
+</div>
+
+<!-- Name for a new data file (after its folder is picked) -->
+<div class="modal-bg" id="newFileModalBg" onclick="if(event.target===this) closeNewFileModal()">
+  <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="newFileTitle">
+    <div class="sync-head">
+      <span class="sync-head-icon"><i class="fa-solid fa-file-circle-plus"></i></span>
+      <div><h3 id="newFileTitle">Name the new file</h3><p id="newFileFolder"></p></div>
+    </div>
+    <div class="field"><input type="text" id="newFileName" maxlength="80" autocomplete="off" spellcheck="false" aria-label="File name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitNewFile()}else if(event.key==='Escape'){event.stopPropagation();closeNewFileModal()}" oninput="document.getElementById('newFileError').textContent=''"></div>
+    <div class="sync-note" id="newFileHint" style="display:flex"><i class="fa-solid fa-circle-info"></i><span>Saved as a .json file in this folder. Daily backups go in its Backup subfolder.</span></div>
+    <div id="newFileError" class="sync-note" style="color:var(--danger,#d92d20);padding:0 2px;min-height:0"></div>
+    <div class="modal-actions"><button type="button" class="btn" onclick="closeNewFileModal()">Cancel</button><button type="button" class="btn btn-primary" onclick="submitNewFile()">Create</button></div>
+  </div>
+</div>
+
+<!-- Which data file in the linked folder (shown when linking finds several) -->
+<div class="modal-bg" id="dataFilesModalBg" onclick="if(event.target===this) closeDataFilesModal()">
+  <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="dataFilesTitle">
+    <div class="sync-head">
+      <span class="sync-head-icon"><i class="fa-solid fa-folder-open"></i></span>
+      <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one MyDesk file</p></div>
+    </div>
+    <div class="sync-list" id="dataFilesList" role="group" aria-label="Data files"></div>
+    <div class="modal-actions"><button type="button" class="btn" onclick="closeDataFilesModal()">Cancel</button></div>
   </div>
 </div>
 
@@ -2204,7 +2227,7 @@ function dataPayload(){
   return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
 let storageFullWarned = false;
-let backupDirHandle = null, backupRunning = false;     // the daily file-backup folder (see "Daily file backup")
+let dirHandle = null, backupRunning = false;     // the linked data file's folder (daily file backup), see "Daily file backup"
 function save(){
   const data = dataPayload();
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); storageFullWarned = false; }
@@ -2212,7 +2235,7 @@ function save(){
     if(!storageFullWarned){ storageFullWarned = true; showToast('Storage is full, so changes are not saved in this browser. Link a data file or export a backup.', true); }
   }
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
-  if(backupDirHandle && fileBackupDue()) fileBackupIfDue(false);
+  if(fileBackupDue()) fileBackupIfDue();
   maybeSnapshotBackup();
 }
 function getBackups(){
@@ -6568,7 +6591,7 @@ function restoreBackup(date){
 
 // ── File System Access API ────────────────────────────────────────────────────
 let fileHandle = null;
-const _FS = { db: 'mytasks-fs', store: 'handles', key: 'linked-file' };
+const _FS = { db: 'mytasks-fs', store: 'handles', key: 'linked-file', dirKey: 'linked-dir' };
 function _fsIdb(mode, fn){
   return new Promise((res, rej)=>{
     const req = indexedDB.open(_FS.db, 1);
@@ -6619,56 +6642,105 @@ async function fileSyncWrite(data){
   }catch(e){ /* localStorage remains the authoritative fallback */ }
 }
 async function _clearFileLink(){
-  fileHandle = null;
+  fileHandle = null; dirHandle = null;
   lastSyncedSnapshot = null;
   await _fsDel().catch(()=>{});
-  updateFileSyncUI();
+  await _fsDelK(_FS.dirKey).catch(()=>{});
+  updateFileSyncUI(); updateFileBackupUI();
 }
+// Linking asks for the data file's FOLDER (one permission, like Milestone): the file lives inside it, and the same grant lets the
+// daily backup write a dated copy into its "Backup" subfolder. The old file-picker flow is gone; files linked that way keep working
+// and gain backups once their folder is linked (Data menu -> Daily file backup).
+async function pickDataFolder(){
+  if(!window.showDirectoryPicker){ showToast('File linking requires Chrome or Edge', true); return null; }
+  try{ return await window.showDirectoryPicker({id:'mydesk-folder', mode:'readwrite'}); }
+  catch(e){
+    if(e.name!=='AbortError') showToast('That folder cannot be used. Pick a folder inside Documents (not Documents itself).', true);
+    return null;
+  }
+}
+// The folder's .json files that hold MyDesk data (a tasks and a projects array), newest first.
+async function listDataFiles(dir){
+  const out = [];
+  for await (const [name, h] of dir.entries()){
+    if(h.kind!=='file' || !/\.json$/i.test(name) || out.length>=100) continue;
+    try{
+      const f = await h.getFile(); if(f.size > 50e6) continue;
+      const d = JSON.parse(await f.text());
+      if(d && Array.isArray(d.tasks) && Array.isArray(d.projects)) out.push({ name, handle:h, tasks:d.tasks.length, notes:(d.notes||[]).length, modified:f.lastModified });
+    }catch(_){}
+  }
+  return out.sort((x,y)=>y.modified - x.modified);
+}
+let pendingNewFileDir = null;
 async function createNewLinkedFile(){
-  if(!window.showSaveFilePicker){ showToast('File linking requires Chrome or Edge', true); return; }
-  try{
-    const handle = await window.showSaveFilePicker({
-      suggestedName: 'mydesk-data.json',
-      types: [{description:'JSON', accept:{'application/json':['.json']}}]
-    });
-    fileHandle = handle;
-    try{ await _fsPut(handle); }catch(_){}
-    await fileSyncWrite(dataPayload());
-    updateFileSyncUI();
-    showToast(`Linked — auto-saving to ${handle.name}`);
-  }catch(e){ if(e.name!=='AbortError') showToast('Could not create file', true); }
+  const dir = await pickDataFolder(); if(!dir) return;
+  pendingNewFileDir = dir;
+  document.getElementById('newFileFolder').textContent = `In the folder ${dir.name}`;
+  const inp = document.getElementById('newFileName'); inp.value = 'mydesk-data';
+  document.getElementById('newFileError').textContent = '';
+  document.getElementById('newFileModalBg').classList.add('open');
+  setTimeout(()=>{ inp.focus(); inp.select(); }, 30);
 }
-async function linkFile(){
-  if(!window.showOpenFilePicker){ showToast('File linking requires Chrome or Edge', true); return; }
+function closeNewFileModal(){ document.getElementById('newFileModalBg')?.classList.remove('open'); pendingNewFileDir = null; }
+// A plain file name: no path characters, ".json" added when missing.
+function cleanDataFileName(raw){
+  let n = String(raw||'').trim().replace(/\.json$/i, '').trim();
+  if(!n || /[\\/:*?"<>|\u0000-\u001f]/.test(n) || n==='.' || n==='..' || n.startsWith('.')) return '';
+  return n.slice(0, 80) + '.json';
+}
+async function submitNewFile(){
+  const dir = pendingNewFileDir, err = document.getElementById('newFileError'); if(!dir) return;
+  const name = cleanDataFileName(document.getElementById('newFileName').value);
+  if(!name){ err.textContent = 'Enter a file name without slashes or special characters.'; return; }
   try{
-    const [handle] = await window.showOpenFilePicker({
-      types: [{description:'JSON', accept:{'application/json':['.json']}}],
-      multiple: false
-    });
-    const perm = await handle.requestPermission({mode:'readwrite'});
-    if(perm!=='granted'){ showToast('Write permission denied', true); return; }
-    fileHandle = handle;
-    try{ await _fsPut(handle); }catch(_){}
-    let existingText = '';
-    try{ existingText = await (await handle.getFile()).text(); }catch(_){}
-    if(existingText.trim()){
-      let data; try{ data = JSON.parse(existingText); }catch(_){}
-      if(data && data.tasks && data.projects){
-        const {added, updated} = mergeData(data);
-        normalizeData();
-        save(); render(); updateFileSyncUI();
-        const parts=[]; if(added) parts.push(`${added} added`); if(updated) parts.push(`${updated} updated`);
-        showToast(`Merged from ${handle.name} — ${parts.length?parts.join(', '):'nothing new'} — auto-saving enabled`);
-      } else {
-        fileHandle = null;
-        showToast(`${handle.name} is not a MyDesk data file — unlinked`, true);
-      }
-      return;
-    }
+    let exists = true; try{ await dir.getFileHandle(name); }catch(_){ exists = false; }
+    if(exists){ err.textContent = `${name} already exists in this folder. Choose another name, or use "Link existing file".`; return; }
+    const handle = await dir.getFileHandle(name, {create:true});
+    closeNewFileModal();
+    fileHandle = handle; dirHandle = dir;
+    try{ await _fsPut(handle); await _fsPutK(_FS.dirKey, dir); }catch(_){}
     await fileSyncWrite(dataPayload());
-    updateFileSyncUI();
-    showToast(`Linked — auto-saving to ${handle.name}`);
-  }catch(e){ if(e.name!=='AbortError') showToast('Could not link file', true); }
+    updateFileSyncUI(); updateFileBackupUI(); fileBackupIfDue();
+    showToast(`Linked: auto-saving to ${dir.name}/${handle.name}`);
+  }catch(e){ err.textContent = 'Could not create the file.'; }
+}
+let pendingDataFiles = null;
+async function linkFile(){
+  const dir = await pickDataFolder(); if(!dir) return;
+  try{
+    const files = await listDataFiles(dir);
+    if(!files.length){ showToast('No MyDesk data file in that folder. Use "Create new file" instead.', true); return; }
+    if(files.length===1){ await finishLink(dir, files[0].handle); return; }
+    pendingDataFiles = { dir, files };
+    document.getElementById('dataFilesFolder').textContent = `${dir.name}: ${files.length} data files`;
+    document.getElementById('dataFilesList').innerHTML = files.map((f,i)=>`
+      <button type="button" class="sync-row" onclick="chooseDataFile(${i})">
+        <span class="sync-ico"><i class="fa-solid fa-file-lines"></i></span>
+        <span class="sync-text"><strong>${esc(f.name)}</strong><span>${f.tasks} task${f.tasks===1?'':'s'}${f.notes?` · ${f.notes} note${f.notes===1?'':'s'}`:''} · ${esc(new Date(f.modified).toLocaleDateString())}</span></span>
+        <i class="fa-solid fa-chevron-right sync-chev"></i>
+      </button>`).join('');
+    document.getElementById('dataFilesModalBg').classList.add('open');
+  }catch(e){ showToast('Could not read that folder', true); }
+}
+function closeDataFilesModal(){ document.getElementById('dataFilesModalBg')?.classList.remove('open'); pendingDataFiles = null; }
+function chooseDataFile(i){
+  const p = pendingDataFiles; closeDataFilesModal();
+  if(p && p.files[i]) finishLink(p.dir, p.files[i].handle);
+}
+async function finishLink(dir, handle){
+  try{
+    if(await dir.requestPermission({mode:'readwrite'})!=='granted'){ showToast('Write permission denied', true); return; }
+    fileHandle = handle; dirHandle = dir;
+    try{ await _fsPut(handle); await _fsPutK(_FS.dirKey, dir); }catch(_){}
+    const text = await (await handle.getFile()).text();
+    const data = JSON.parse(text);
+    const {added, updated} = mergeData(data);
+    normalizeData();
+    save(); render(); updateFileSyncUI(); updateFileBackupUI(); fileBackupIfDue();
+    const parts=[]; if(added) parts.push(`${added} added`); if(updated) parts.push(`${updated} updated`);
+    showToast(`Merged from ${handle.name} — ${parts.length?parts.join(', '):'nothing new'} — auto-saving enabled`);
+  }catch(e){ showToast('Could not link file', true); }
 }
 async function unlinkFile(){
   await _clearFileLink();
@@ -6677,6 +6749,7 @@ async function unlinkFile(){
 async function reconnectFile(){
   if(!fileHandle) return;
   try{
+    if(dirHandle) await dirHandle.requestPermission({mode:'readwrite'});       // the folder's grant covers the file and the Backup subfolder
     const perm = await fileHandle.requestPermission({mode:'readwrite'});
     if(perm!=='granted'){ showToast('Permission denied', true); return; }
     const text = await (await fileHandle.getFile()).text();
@@ -6763,81 +6836,67 @@ function updateFileSyncUI(){
   }).catch(()=>{ if(el) fadeSwapHTML(el, fileSyncChipHtml('unlinked')); });
 }
 // ── Daily file backup ─────────────────────────────────────────────────────────
-// A linked file's handle cannot reveal its own folder, so the user picks the folder once (the one holding the data file works well).
-// Once per day the app writes mydesk-data-YYYY-MM-DD.json into a "Backup" subfolder of it and keeps the newest FILE_BACKUPS_KEEP.
-const FILE_BACKUP_KEY = 'backup-dir', FILE_BACKUP_LAST = 'mydesk_filebackup_last', FILE_BACKUP_SUB = 'Backup', FILE_BACKUPS_KEEP = 30;
-const FILE_BACKUP_RE = /^mydesk-data-\d{4}-\d{2}-\d{2}\.json$/;
+// Modelled on Milestone / Pulse: a dated copy of the data goes into a "Backup" subfolder of the LINKED folder, once a day, kept forever.
+// Best-effort and silent (the save that triggered it already succeeded); never prompts. If today's file is already on disk (another
+// tab or device wrote it) it is left alone: the first writer each day wins.
+const FILE_BACKUP_SUB = 'Backup', FILE_BACKUP_RE = /^.+-\d{4}-\d{2}-\d{2}\.json$/;
+let lastFileBackupDay = null;
 const _fsGetK = k => _fsIdb('readonly',  (s,r,j)=>{ const q=s.get(k);   q.onsuccess=()=>r(q.result); q.onerror=()=>j(q.error); });
 const _fsPutK = (k,h) => _fsIdb('readwrite', (s,r,j)=>{ const q=s.put(h,k); q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
 const _fsDelK = k => _fsIdb('readwrite', (s,r,j)=>{ const q=s.delete(k);   q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
-function fileBackupName(day){ return `mydesk-data-${day}.json`; }
-function fileBackupDue(){ try{ return localStorage.getItem(FILE_BACKUP_LAST)!==todayStr(); }catch(_){ return true; } }
-// Writes today's copy if one is due. Never prompts (it runs from save()), so a lapsed permission just waits for the user to reconnect.
-async function fileBackupIfDue(force){
-  if(!backupDirHandle || backupRunning || (!force && !fileBackupDue())) return false;
+function fileBackupName(day){ const base = fileHandle ? fileHandle.name.replace(/\.json$/i, '') : 'mydesk-data'; return `${base}-${day}.json`; }
+function fileBackupDue(){ return !!dirHandle && lastFileBackupDay !== todayStr(); }
+async function fileBackupIfDue(){
+  if(!fileBackupDue() || backupRunning) return false;
   backupRunning = true;
+  const day = todayStr();
   try{
-    if(await backupDirHandle.queryPermission({mode:'readwrite'})!=='granted'){ updateFileBackupUI(); return false; }
-    const sub = await backupDirHandle.getDirectoryHandle(FILE_BACKUP_SUB, {create:true});
-    const w = await (await sub.getFileHandle(fileBackupName(todayStr()), {create:true})).createWritable();
-    await w.write(JSON.stringify(dataPayload())); await w.close();
-    try{ localStorage.setItem(FILE_BACKUP_LAST, todayStr()); }catch(_){}
-    const names = []; for await (const [n] of sub.entries()) if(FILE_BACKUP_RE.test(n)) names.push(n);
-    names.sort().slice(0, Math.max(0, names.length - FILE_BACKUPS_KEEP)).forEach(n=>sub.removeEntry(n).catch(()=>{}));
-    updateFileBackupUI();
-    return true;
+    if(await dirHandle.queryPermission({mode:'readwrite'})!=='granted'){ updateFileBackupUI(); return false; }
+    const sub = await dirHandle.getDirectoryHandle(FILE_BACKUP_SUB, {create:true});
+    const name = fileBackupName(day);
+    let exists = true; try{ await sub.getFileHandle(name); }catch(_){ exists = false; }
+    if(!exists){
+      const w = await (await sub.getFileHandle(name, {create:true})).createWritable();
+      await w.write(JSON.stringify(dataPayload())); await w.close();
+    }
+    lastFileBackupDay = day;
+    return !exists;
   }catch(e){ return false; }
   finally{ backupRunning = false; }
 }
-async function chooseBackupFolder(){
-  if(!window.showDirectoryPicker){ showToast('Folder backups need Chrome or Edge', true); return; }
-  try{
-    const dir = await window.showDirectoryPicker({id:'mydesk-backup', mode:'readwrite'});
-    backupDirHandle = dir;
-    try{ await _fsPutK(FILE_BACKUP_KEY, dir); }catch(_){}
-    const ok = await fileBackupIfDue(true);
-    showToast(ok ? `Backed up to ${dir.name}/${FILE_BACKUP_SUB} — then once a day` : 'Could not write the backup', !ok);
-  }catch(e){ if(e.name!=='AbortError') showToast('Could not set the backup folder', true); }
-}
-async function reconnectBackupFolder(){
-  if(!backupDirHandle) return;
-  try{
-    if(await backupDirHandle.requestPermission({mode:'readwrite'})!=='granted'){ showToast('Permission denied', true); return; }
-    const ok = await fileBackupIfDue(false) || !fileBackupDue();
-    showToast(ok ? 'Daily file backup resumed' : 'Could not write the backup', !ok);
-  }catch(e){ showToast('Could not reconnect the backup folder', true); }
-}
-async function stopFileBackup(){
-  backupDirHandle = null;
-  try{ await _fsDelK(FILE_BACKUP_KEY); }catch(_){}
-  updateFileBackupUI();
-  showToast('Daily file backup turned off');
-}
+// Data menu item: shows the state; for a file linked before folders existed it is the way to add the folder.
 async function fileBackupMenuAction(){
-  if(!backupDirHandle) return chooseBackupFolder();
-  let perm = 'prompt'; try{ perm = await backupDirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
-  if(perm!=='granted') return reconnectBackupFolder();
-  openConfirmModal({
-    title: 'Daily file backup', confirmLabel: 'Choose another folder', danger: false,
-    body: `A copy is saved once a day to ${backupDirHandle.name}/${FILE_BACKUP_SUB} (the newest ${FILE_BACKUPS_KEEP} are kept).`,
-    action: ()=>chooseBackupFolder()
-  });
+  if(!fileHandle){ openFileSyncModal(); return; }
+  if(!dirHandle) return linkBackupFolder();
+  let perm = 'prompt'; try{ perm = await dirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
+  if(perm!=='granted'){
+    try{ await dirHandle.requestPermission({mode:'readwrite'}); }catch(_){}
+    updateFileBackupUI(); const ok = await fileBackupIfDue();
+    showToast(ok ? 'Daily file backup resumed' : 'Daily file backup is on', false);
+    return;
+  }
+  const ok = await fileBackupIfDue();
+  showToast(ok ? `Backed up to ${dirHandle.name}/${FILE_BACKUP_SUB}` : `Today's backup is already in ${dirHandle.name}/${FILE_BACKUP_SUB}`, false);
+}
+// A file linked by the old file picker: ask for its folder (it must really contain the file), then back up.
+async function linkBackupFolder(){
+  const dir = await pickDataFolder(); if(!dir) return;
+  try{
+    const path = await dir.resolve(fileHandle);
+    if(!path){ showToast(`${fileHandle.name} is not in that folder. Pick the folder that holds it.`, true); return; }
+    dirHandle = dir; try{ await _fsPutK(_FS.dirKey, dir); }catch(_){}
+    updateFileBackupUI(); const ok = await fileBackupIfDue();
+    showToast(ok ? `Backed up to ${dir.name}/${FILE_BACKUP_SUB}, then once a day` : 'Folder linked for daily backups', false);
+  }catch(e){ showToast('Could not link the folder', true); }
 }
 async function updateFileBackupUI(){
-  const l = document.getElementById('fileBackupLabel'), d = document.getElementById('fileBackupDesc'), off = document.getElementById('fileBackupOffItem');
-  if(!l || !d) return;
-  if(!backupDirHandle){ l.textContent = 'Daily file backup'; d.textContent = 'Save a daily copy to a Backup folder'; if(off) off.style.display = 'none'; return; }
-  let perm = 'prompt'; try{ perm = await backupDirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
-  l.textContent = perm==='granted' ? 'Daily file backup' : 'Resume file backup';
-  d.textContent = perm==='granted' ? `On — ${backupDirHandle.name}/${FILE_BACKUP_SUB}` : `Permission needed for ${backupDirHandle.name}`;
-  if(off) off.style.display = '';
+  const l = document.getElementById('fileBackupLabel'), d = document.getElementById('fileBackupDesc'); if(!l || !d) return;
+  l.textContent = 'Daily file backup';
+  if(!fileHandle){ d.textContent = 'Link a data file to enable'; return; }
+  if(!dirHandle){ d.textContent = 'Link the data file’s folder to enable'; return; }
+  let perm = 'prompt'; try{ perm = await dirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
+  d.textContent = perm==='granted' ? `On: ${dirHandle.name}/${FILE_BACKUP_SUB}` : `Permission needed for ${dirHandle.name}`;
 }
-async function initFileBackup(){
-  try{ backupDirHandle = (await _fsGetK(FILE_BACKUP_KEY)) || null; }catch(_){ backupDirHandle = null; }
-  await updateFileBackupUI();
-  fileBackupIfDue(false);
-}
-
 async function initFileSync(){
   if(!window.showOpenFilePicker) return;
   updateFileSyncUI();
@@ -6845,6 +6904,7 @@ async function initFileSync(){
     const handle = await _fsGet();
     if(!handle){ showSyncBanner(null); return; }
     fileHandle = handle;
+    try{ dirHandle = (await _fsGetK(_FS.dirKey)) || null; }catch(_){ dirHandle = null; }
     const perm = await handle.queryPermission({mode:'readwrite'});
     if(perm==='granted'){
       try{
@@ -6861,9 +6921,9 @@ async function initFileSync(){
     } else {
       showSyncBanner(handle);
     }
-    updateFileSyncUI();
+    updateFileSyncUI(); updateFileBackupUI(); fileBackupIfDue();
   }catch(e){
-    fileHandle = null;
+    fileHandle = null; dirHandle = null;
     _fsDel().catch(()=>{});
     updateFileSyncUI();
     showSyncBanner(null);
@@ -6877,7 +6937,6 @@ purgeOldCompletedTasks();
 applyAppMode();
 render();
 initFileSync();
-initFileBackup();
 
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('mydesk: service worker registration failed — offline support unavailable', e)); });

@@ -745,12 +745,20 @@ test('no conflict copy when we had not edited since the last sync, or the text i
   assertEqual(notes.length, 1);
 });
 
-test('file backup naming and due-check', function () {
+test('file backup: names, and nothing is due without a linked folder', function () {
   assertTrue(FILE_BACKUP_RE.test(fileBackupName('2026-10-18')));
   assertFalse(FILE_BACKUP_RE.test('notes.json'));
-  localStorage.removeItem(FILE_BACKUP_LAST);
-  assertTrue(fileBackupDue());
-  localStorage.setItem(FILE_BACKUP_LAST, todayStr());
-  assertFalse(fileBackupDue());
-  localStorage.removeItem(FILE_BACKUP_LAST);
+  dirHandle = null; assertFalse(fileBackupDue());
+  dirHandle = {}; lastFileBackupDay = null; assertTrue(fileBackupDue());
+  lastFileBackupDay = todayStr(); assertFalse(fileBackupDue());
+  dirHandle = null; lastFileBackupDay = null;
+});
+
+test('cleanDataFileName accepts plain names, adds .json, rejects path characters', function () {
+  assertEqual(cleanDataFileName('my plan'), 'my plan.json');
+  assertEqual(cleanDataFileName('Work.JSON'), 'Work.json');
+  assertEqual(cleanDataFileName('  '), '');
+  assertEqual(cleanDataFileName('a/b'), '');
+  assertEqual(cleanDataFileName('..'), '');
+  assertEqual(cleanDataFileName('.hidden'), '');
 });
