@@ -648,3 +648,36 @@ test('setSearchQuery in Notes opens the first result when the open note is not o
   setSearchQuery('nothing matches');
   assertEqual(selectedNoteId, 'o2', 'no results: the open note stays');
 });
+
+// ---- list sorting ----
+test('the notes list sorts by date edited (newest first) by default', function () {
+  notes = [ntNote({ id: 'a', title: 'B', updatedAt: 1000 }), ntNote({ id: 'b', title: 'A', updatedAt: 3000 }), ntNote({ id: 'c', title: 'C', updatedAt: 2000 })];
+  assertDeepEqual(visibleNotes().map(n => n.id), ['b', 'c', 'a']);
+});
+
+test('sorting by date created and by title, either way round', function () {
+  notes = [ntNote({ id: 'a', title: 'banana', createdAt: 100, updatedAt: 3000 }), ntNote({ id: 'b', title: 'Apple', createdAt: 300, updatedAt: 2000 }), ntNote({ id: 'c', title: 'cherry', createdAt: 200, updatedAt: 1000 })];
+  setNoteSort('created');
+  assertDeepEqual(visibleNotes().map(n => n.id), ['b', 'c', 'a'], 'newest created first');
+  setNoteSort('created', 'asc');
+  assertDeepEqual(visibleNotes().map(n => n.id), ['a', 'c', 'b'], 'oldest created first');
+  setNoteSort('title');
+  assertDeepEqual(visibleNotes().map(n => n.id), ['b', 'a', 'c'], 'A to Z, case-insensitive');
+  setNoteSort('title', 'desc');
+  assertDeepEqual(visibleNotes().map(n => n.id), ['c', 'a', 'b'], 'Z to A');
+});
+
+test('equal sort values fall back to the newest edit first, and the sort choice is remembered', function () {
+  notes = [ntNote({ id: 'a', title: 'Same', updatedAt: 1000 }), ntNote({ id: 'b', title: 'Same', updatedAt: 2000 })];
+  setNoteSort('title');
+  assertDeepEqual(visibleNotes().map(n => n.id), ['b', 'a']);
+  assertEqual(JSON.parse(localStorage.getItem(NOTES_SORT_KEY)).key, 'title');
+});
+
+test('the sort menu ticks the current key and direction, and names the direction to suit the key', function () {
+  let h = noteSortMenuHtml();
+  assertIncludes(h, 'Newest first'); assertIncludes(h, 'Oldest first'); assertNotIncludes(h, 'A to Z');
+  setNoteSort('title');
+  h = noteSortMenuHtml();
+  assertIncludes(h, 'A to Z'); assertIncludes(h, 'Z to A'); assertNotIncludes(h, 'Newest first');
+});

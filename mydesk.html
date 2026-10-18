@@ -65,11 +65,7 @@
     transition: background-color .2s ease, color .2s ease, border-color .2s ease;
   }
 
-  /* topbar */
-  .topbar { background: var(--bg); border-bottom: 0.5px solid var(--border); padding: 0 20px; height: 52px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-  .topbar-brand { display: flex; align-items: center; gap: 10px; font-size: 21px; font-weight: 500; letter-spacing: -0.02em; }
-  .topbar-brand .brand-my { color: var(--text-2); font-weight: 400; opacity: .6; }
-  .topbar-brand .brand-tasks { color: var(--text); font-weight: 700; }
+  /* sidebar header / tools bar (the old top bar's contents) are styled in the Apple-style layout block at the end */
   .topbar-actions { display: flex; gap: 8px; align-items: center; }
   #fileSyncIndicator:not(:empty) { display: flex; align-items: center; gap: 6px; }
   .topbar-divider { width: 0.5px; height: 20px; background: var(--border-2); margin: 0 2px; }
@@ -509,8 +505,6 @@
   :root { --shadow: 0 1px 2px rgba(20,20,30,.04), 0 4px 16px rgba(20,20,30,.06); }
   html[data-theme="dark"] { --shadow: 0 1px 2px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.35); }
   body { font-size: 16px; }
-  .topbar { height: 56px; border-bottom-width: 1px; }
-  .topbar-brand { font-size: 23px; }
   .topbar-actions { gap: 6px; }
   .topbar-divider { width: 1px; height: 22px; }
   .btn { font-size: 14px; border-width: 1px; padding: 7px 14px; }
@@ -655,7 +649,7 @@
   .drawer.open { width: 420px; border-left-width: 1px; transform: none; }
   .drawer > * { min-width: 420px; }
   @media (max-width: 800px) {
-    .drawer.open { position: fixed; top: 56px; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 151; box-shadow: var(--shadow); }
+    .drawer.open { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 151; box-shadow: var(--shadow); }
     .drawer > * { min-width: 0; }
   }
 
@@ -757,9 +751,8 @@
 
   /* flush window: glass chrome (topbar + sidebar) around flat content */
   html[data-scheme="glass"] .layout { flex: 1; min-height: 0; height: auto; padding: 0; gap: 0; }
-  html[data-scheme="glass"] .topbar { position: relative; z-index: 60; margin: 0; height: 56px; padding: 0 18px; border-radius: 0; border-bottom: 1px solid var(--border); }
   html[data-scheme="glass"] .sidebar { border-radius: 0; border-right: 1px solid var(--border); }
-  html[data-scheme="glass"] :is(.topbar, .sidebar) { background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  html[data-scheme="glass"] .sidebar { background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
   html[data-scheme="glass"] .sidebar-section, html[data-scheme="glass"] .sidebar-footer { border-color: var(--border); }
   html[data-scheme="glass"] .sidebar-search input { border-radius: var(--radius); background: var(--bg-3); border-color: var(--glass-edge); }
 
@@ -798,7 +791,7 @@
   html[data-scheme="glass"] .icon-btn { border-radius: var(--radius); }
   /* capsules: controls that live in the toolbars, as in Mail; everything in the
      content stays at --radius */
-  html[data-scheme="glass"] :is(.topbar, .main-toolbar, .bulk-bar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
+  html[data-scheme="glass"] :is(.sb-head, .sb-tools, .main-toolbar, .bulk-bar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
   html[data-scheme="glass"] .main-toolbar .view-switch-btn { border-radius: 999px; }
   html[data-scheme="glass"] .view-switch { border-radius: var(--radius); padding: 3px; gap: 2px; background: var(--bg-2); border: 1px solid var(--glass-edge); }
   html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: calc(var(--radius) - 3px); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease; }
@@ -841,7 +834,6 @@
   }
 
   /* ── Collapsible sidebar, sortable column headers ─────────────────────────── */
-  .topbar-left { display: flex; align-items: center; gap: 14px; }
   .sidebar-toggle { padding: 6px 9px; }
   .sidebar { transition: width .2s ease, border-width .2s ease; }
   .sidebar-resizer { position: relative; flex: none; width: 0; z-index: 30; }
@@ -856,10 +848,9 @@
   @media (max-width: 800px) {
     /* narrow: the sidebar floats over the content instead of squeezing it */
     .sidebar-resizer { display: none; }   /* the floating sidebar on a narrow window keeps its fixed width */
-    .sidebar { position: fixed; top: 56px; bottom: 0; left: 0; z-index: 140; width: min(300px, 86vw); box-shadow: 0 0 40px rgba(0,0,0,.25); }
+    .sidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 140; width: min(300px, 86vw); box-shadow: 0 0 40px rgba(0,0,0,.25); }
     html.sidebar-collapsed .sidebar { width: min(300px, 86vw); transform: translateX(-100%); box-shadow: none; }
     .sidebar { transition: transform .2s ease; }
-    .topbar-brand > span { display: none; }   /* wordmark hidden on narrow windows so the toggle and the right-hand buttons fit */
   }
   .th-sort { display: flex; align-items: center; gap: 5px; cursor: pointer; user-select: none; border-radius: 6px; }
   .th-sort:hover { color: var(--text); }
@@ -1044,7 +1035,7 @@
   /* In Notes the task sections of the sidebar, the task area and the side panel give way to the folder list and the notes area. */
   #notesSide { display: none; flex-direction: column; flex: 1; min-height: 0; }
   html[data-mode="notes"] #notesSide { display: flex; }
-  html[data-mode="notes"] .sidebar > :not(.sidebar-search):not(#notesSide) { display: none !important; }
+  html[data-mode="notes"] .sidebar > :not(.sidebar-search):not(#notesSide):not(.sb-head):not(.sb-tools) { display: none !important; }
   html[data-mode="notes"] .main, html[data-mode="notes"] .drawer { display: none !important; }
   .notes-main { display: none; flex: 1; min-width: 0; overflow: hidden; background: var(--bg); }
   html[data-mode="notes"] .notes-main { display: flex; }
@@ -1145,61 +1136,109 @@
   .note-body ul.cl > li[data-done="1"]::after { content: ""; position: absolute; left: 8px; top: .5em; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
   .note-body ul.cl > li[data-done="1"] { color: var(--text-3); text-decoration: line-through; }
   @media (max-width: 800px) { .notes-list-pane { width: 220px; } .note-toolbar, .note-scroll { padding-left: 14px; padding-right: 14px; } }
+
+  /* ── Apple-style layout ────────────────────────────────────────────────────
+     No top bar: the sidebar runs the full height (toggle + the Tasks | Notes switch at its top, Link file / Data /
+     text size / Help in a bar at its bottom), and every column starts with its own 52px bar so the three
+     baselines line up. While the sidebar is hidden a small floating toggle (with a mirror of the file-sync chip)
+     takes its place. */
+  @media (min-width: 801px) { .sidebar { position: relative; z-index: 60; } }
+  .sidebar { overflow: visible; }                                  /* the bottom bar's menus open upward over the content */
+  html.sidebar-collapsed .sidebar { overflow: hidden; }
+  .sidebar-resizer { z-index: 61; }
+  .sb-head { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 12px; flex: none; box-sizing: border-box; }
+  .sb-head .mode-switch { margin: 0; flex: 1; display: flex; }
+  .sb-head .mode-switch .view-switch-btn { flex: 1; text-align: center; }
+  .sb-tools { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-top: 0.5px solid var(--border); flex: none; }
+  .sb-tools .topbar-divider { display: none; }
+  .sb-tools .split-btn-menu { top: auto !important; bottom: calc(100% + 8px); left: 0 !important; right: auto !important; }
+  .layout { position: relative; }
+  .sb-float { display: none; position: absolute; top: 9px; left: 12px; z-index: 70; align-items: center; gap: 8px; }
+  html.sidebar-collapsed .sb-float { display: flex; }
+  #fileSyncMini .file-chip { padding: 6px 9px; font-size: 0; }      /* icon only while the sidebar is hidden; its tooltip still says Linked / Link file */
+  #fileSyncMini .file-chip i { font-size: 13px; }
+  html.sidebar-collapsed .main-toolbar, html.sidebar-collapsed .notes-list-head { padding-left: 104px !important; }
+  /* one baseline: every column's bar is 52px with a hairline under it */
+  .main-toolbar { min-height: 52px; box-sizing: border-box; padding: 0 20px !important; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .notes-list-head { height: 52px; box-sizing: border-box; padding: 0 14px 0 18px !important; border-bottom: 1px solid var(--border); }
+  .nl-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; line-height: 1.2; }
+  .notes-list-head h2 { flex: none !important; font-size: 17px !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nl-titles .notes-list-sub { padding: 0 !important; min-height: 0 !important; font-size: 12px; }
+  .note-toolbar { min-height: 52px; box-sizing: border-box; padding: 8px 20px 7px !important; gap: 6px; border-bottom: 1px solid var(--border); }   /* 8 + the 36px controls + 7 + the 1px hairline = the 52px every column bar has */
+  .note-scroll { padding-top: 18px !important; }
+  .notes-list-pane #notesList { padding-top: 6px; }
+  @media (max-width: 800px) { .note-toolbar { padding-left: 14px !important; padding-right: 14px !important; } }
+
+  /* ── Bar controls like Apple Notes ─────────────────────────────────────────
+     The capsules in the column bars (formatting groups, selection actions, the list/board and Project/Status switches, the
+     Filter / sort / folder pills and the sidebar's bottom bar) are soft FILLED pills with no outline, their glyphs a quiet
+     secondary grey one step larger; the bar itself is a hair lighter than the content below it. Icons are unchanged. */
+  html[data-theme="light"] { --cap-fill: rgba(60,60,67,.08); --cap-hover: rgba(60,60,67,.16); --cap-on: rgba(60,60,67,.18); --bar-bg: rgba(244,245,248,.92); }
+  html[data-theme="dark"]  { --cap-fill: rgba(255,255,255,.10); --cap-hover: rgba(255,255,255,.19); --cap-on: rgba(255,255,255,.22); --bar-bg: rgba(255,255,255,.04); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .notes-list-head, .sb-head, .sb-tools) { --bar-ctl-h: 36px; }
+  html[data-scheme="glass"] .main-toolbar, html[data-scheme="glass"] .note-toolbar, html[data-scheme="glass"] .notes-list-head { background: var(--bar-bg); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools, .sb-head) .tool-group { border: 0; background: var(--cap-fill); height: var(--bar-ctl-h); padding: 3px; gap: 2px; box-sizing: border-box; }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn { height: 30px; min-width: 34px; font-size: 16px; color: var(--text-2); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn:hover:not(:disabled) { background: var(--cap-hover); color: var(--text); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn:is(.active, .on) { background: var(--cap-on); color: var(--text); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn.on { background: var(--amber-bg); color: var(--amber-text); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn.tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn:disabled { opacity: .35; }
+  html[data-scheme="glass"] .tool-group .tool-btn .aa-ico { color: inherit; }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar) .tool-sep { background: var(--border-2); height: 18px; }
+  html[data-scheme="glass"][data-theme] .note-toolbar select, html[data-scheme="glass"][data-theme] .main-toolbar select { border: 0; background-color: var(--cap-fill); color: var(--text-2); height: var(--bar-ctl-h); font-size: 13px; font-weight: 500; box-sizing: border-box; }
+  html[data-scheme="glass"][data-theme] .note-toolbar select:hover, html[data-scheme="glass"][data-theme] .main-toolbar select:hover { background-color: var(--cap-hover); color: var(--text); }
+  html[data-scheme="glass"] .main-toolbar .view-switch { border: 0; background: var(--cap-fill); height: var(--bar-ctl-h); box-sizing: border-box; padding: 3px; }
+  html[data-scheme="glass"] .main-toolbar .view-switch-btn { color: var(--text-2); }
+  html[data-scheme="glass"] .main-toolbar .view-switch-btn.active { background: var(--cap-on); color: var(--text); box-shadow: none; }
+  html[data-scheme="glass"] .main-toolbar .btn:not(.btn-primary), html[data-scheme="glass"] .notes-list-head .btn:not(.btn-primary) { border: 0; background: var(--cap-fill); color: var(--text-2); height: var(--bar-ctl-h); font-weight: 500; box-sizing: border-box; }
+  html[data-scheme="glass"] .main-toolbar .btn:not(.btn-primary):hover, html[data-scheme="glass"] .notes-list-head .btn:not(.btn-primary):hover { background: var(--cap-hover); color: var(--text); }
+  html[data-scheme="glass"] .sb-head .view-switch { border: 0; background: var(--cap-fill); height: var(--bar-ctl-h); padding: 3px; box-sizing: border-box; }
+  html[data-scheme="glass"] .sb-head .view-switch-btn.active { background: var(--cap-on); box-shadow: none; }
+  html[data-scheme="glass"] .sb-head .btn-icon, html[data-scheme="glass"] .sb-head .sidebar-toggle { border: 0; background: var(--cap-fill); height: var(--bar-ctl-h); width: var(--bar-ctl-h); color: var(--text-2); }
+  html[data-scheme="glass"] .sb-head .btn-icon:hover { background: var(--cap-hover); color: var(--text); }
+  html[data-scheme="glass"] .sb-tools #fileSyncIndicator .file-chip { border: 0; background: var(--cap-fill); height: var(--bar-ctl-h); font-weight: 500; }
+  /* the new-note button is Apple Notes' round compose button: icon only, same filled capsule as the other bar controls */
+  html[data-scheme="glass"] .note-toolbar .note-new-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
+  /* Apple Notes sets the compose button off from the formatting controls with a thin divider */
+  .note-toolbar .note-new-sep { width: 1px; height: 26px; background: var(--border-2); margin: 0 2px 0 0; flex: none; }
+  /* the notes list column is one continuous surface from the very top: no tinted band or hairline over its header */
+  html[data-scheme="glass"] .notes-list-head { background: transparent; border-bottom: 0; }
+  html[data-scheme="glass"] .notes-list-head .note-sort-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
+  .note-empty-bar { flex: none; }
+  /* the Tasks bar uses the same title block as the Notes list header: 17px/700 over a 12px count, centred in the 52px bar */
+  html[data-scheme="glass"] .main-toolbar .main-title-wrap { justify-content: center; line-height: 1.2; }
+  html[data-scheme="glass"] .main-toolbar .main-title { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
+  html[data-scheme="glass"] .main-toolbar .main-subtitle { font-size: 12px; line-height: 1.2; margin-top: 0; }
+  html[data-scheme="glass"] .main-toolbar { padding-left: 18px !important; }
+  /* Notes toolbar icons share the Tasks toolbar's weight: thin outline glyphs (stroke drawn at the size of Font Awesome's regular style) and plain-text B / I / U / S */
+  .tb-ico2 { width: 18px; height: 18px; display: block; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .tb-txt { font-family: var(--font); font-size: 15px; line-height: 1; font-weight: 600; }
+  .tb-i { font-style: italic; font-weight: 500; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; }
+  .tb-u { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
+  .tb-s { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-left">
-    <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
-  <div class="topbar-brand"><span><span class="brand-my">My</span><span class="brand-tasks">Desk</span></span></div>
-    <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks or Notes">
-      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')">Tasks</button>
-      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')">Notes</button>
-    </div>
-  </div>
-  <div class="topbar-actions">
-    <span id="fileSyncIndicator"></span>
-    <div class="topbar-divider"></div>
-    <div class="tool-group topbar-tools">
-    <div class="lib-dropdown" id="libDropdown">
-      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleLibMenu()" title="Data — export, import, backups" aria-haspopup="menu"><i class="fa-regular fa-hard-drive"></i></button>
-      <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
-        <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
-          <i class="fa-solid fa-download split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export</div><div class="split-btn-menu-desc">Download data as .json</div></div>
-        </div>
-        <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
-          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
-        </div>
-        <div class="split-btn-menu-item" onclick="openBackupsModal();closeLibMenu()">
-          <i class="fa-solid fa-clock-rotate-left split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Backups</div><div class="split-btn-menu-desc">Restore an automatic daily snapshot</div></div>
-        </div>
-      </div>
-    </div>
-    <div class="lib-dropdown" id="uiScaleDropdown">
-      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Appearance — text size and theme" aria-haspopup="menu"><span class="aa-ico" aria-hidden="true"><span class="aa-s">A</span><span class="aa-l">A</span></span></button>
-      <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:210px"></div>
-    </div>
-    <div class="lib-dropdown" id="helpDropdown">
-      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about" aria-haspopup="menu"><i class="fa-regular fa-circle-question"></i></button>
-      <div class="split-btn-menu" id="helpMenu" style="left:auto;right:0">
-        <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Help guide</div></div></div>
-        <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard shortcuts</div></div></div>
-        <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About</div></div></div>
-      </div>
-    </div>
-    </div>
-  </div>
-</div>
 <div class="sync-banner" id="syncBanner" role="status"></div>
 <div class="row-menu" id="rowMenu" role="menu"></div>
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
+<!-- Collapsed sidebar: a floating toggle plus a small mirror of the file-sync status (so "Link file / Linked" is never hidden) -->
+<div class="sb-float" id="sbFloat">
+  <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggleFloat" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
+  <span id="fileSyncMini"></span>
+</div>
   <div class="sidebar">
+    <div class="sb-head" id="sbHead">
+      <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
+    <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks or Notes">
+      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')">Tasks</button>
+      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')">Notes</button>
+    </div>
+    </div>
     <div class="sidebar-search">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
       <input type="text" id="searchInput" placeholder="Search tasks…" oninput="setSearchQuery(this.value)">
@@ -1246,6 +1285,41 @@
     <div class="sidebar-section tags-section" id="tagsSection">
       <div class="sidebar-section-label" role="button" tabindex="0" onclick="toggleTagsSection()" title="Show or hide tags">Tags <i class="fa-solid fa-chevron-down tags-chevron"></i></div>
       <div class="filter-chips" id="tagChips"></div>
+    </div>
+    <div class="sb-tools" id="sbTools">
+    <span id="fileSyncIndicator"></span>
+    <div class="topbar-divider"></div>
+    <div class="tool-group topbar-tools">
+    <div class="lib-dropdown" id="libDropdown">
+      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleLibMenu()" title="Data — export, import, backups" aria-haspopup="menu"><i class="fa-regular fa-hard-drive"></i></button>
+      <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
+        <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
+          <i class="fa-solid fa-download split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Export</div><div class="split-btn-menu-desc">Download data as .json</div></div>
+        </div>
+        <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
+          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
+        </div>
+        <div class="split-btn-menu-item" onclick="openBackupsModal();closeLibMenu()">
+          <i class="fa-solid fa-clock-rotate-left split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Backups</div><div class="split-btn-menu-desc">Restore an automatic daily snapshot</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="lib-dropdown" id="uiScaleDropdown">
+      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Appearance — text size and theme" aria-haspopup="menu"><span class="aa-ico" aria-hidden="true"><span class="aa-s">A</span><span class="aa-l">A</span></span></button>
+      <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:210px"></div>
+    </div>
+    <div class="lib-dropdown" id="helpDropdown">
+      <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about" aria-haspopup="menu"><i class="fa-regular fa-circle-question"></i></button>
+      <div class="split-btn-menu" id="helpMenu" style="left:auto;right:0">
+        <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Help guide</div></div></div>
+        <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard shortcuts</div></div></div>
+        <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About</div></div></div>
+      </div>
+    </div>
+    </div>
     </div>
     <div class="sidebar-footer" id="sidebarFooter"></div>
   </div>
@@ -1315,57 +1389,62 @@
   <div class="notes-main" id="notesMain">
     <div class="notes-list-pane">
       <div class="notes-list-head">
-        <h2 id="notesListTitle">All Notes</h2>
-        <button type="button" class="btn btn-sm" onclick="createNote()" title="New note (N)"><i class="fa-solid fa-plus"></i> New</button>
+        <div class="nl-titles"><h2 id="notesListTitle">All Notes</h2><div class="notes-list-sub" id="notesListSub"></div></div>
+        <button type="button" class="btn note-sort-btn" onclick="openNoteSortMenu(event)" title="Sort notes" aria-label="Sort notes" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
       </div>
-      <div class="notes-list-sub" id="notesListSub"></div>
       <div id="notesList" role="listbox" aria-label="Notes"></div>
     </div>
     <div class="notes-editor-pane">
-      <div class="notes-empty" id="notesEmpty"><i class="fa-regular fa-note-sticky"></i><div>No note selected</div><button type="button" class="btn btn-sm" onclick="createNote()"><i class="fa-solid fa-plus"></i> New note</button></div>
+      <!-- with no note open (an empty folder, or nothing selected) the bar stays, so New note is always one click away -->
+      <div class="note-toolbar note-empty-bar" id="noteEmptyBar">
+        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><i class="fa-regular fa-pen-to-square"></i></button>
+      </div>
+      <div class="notes-empty" id="notesEmpty"><i class="fa-regular fa-note-sticky"></i><div>No note selected</div></div>
       <div class="note-editor" id="noteEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
+          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><i class="fa-regular fa-pen-to-square"></i></button>
+          <span class="note-new-sep" aria-hidden="true"></span>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option>
           </select>
           <div class="tool-group note-fmt">
-            <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><i class="fa-solid fa-rotate-left"></i></button>
-            <button type="button" class="tool-btn" id="noteRedoBtn" onclick="noteCmd('redo')" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><i class="fa-solid fa-rotate-right"></i></button>
+            <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+            <button type="button" class="tool-btn" id="noteRedoBtn" onclick="noteCmd('redo')" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
           </div>
           <div class="tool-group note-fmt">
-            <button type="button" class="tool-btn" data-cmd="bold" onclick="noteCmd('bold')" title="Bold (⌘B)" aria-label="Bold"><i class="fa-solid fa-bold"></i></button>
-            <button type="button" class="tool-btn" data-cmd="italic" onclick="noteCmd('italic')" title="Italic (⌘I)" aria-label="Italic"><i class="fa-solid fa-italic"></i></button>
-            <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><i class="fa-solid fa-underline"></i></button>
-            <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
+            <button type="button" class="tool-btn" data-cmd="bold" onclick="noteCmd('bold')" title="Bold (⌘B)" aria-label="Bold"><span class="tb-txt tb-b">B</span></button>
+            <button type="button" class="tool-btn" data-cmd="italic" onclick="noteCmd('italic')" title="Italic (⌘I)" aria-label="Italic"><span class="tb-txt tb-i">I</span></button>
+            <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><span class="tb-txt tb-u">U</span></button>
+            <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><span class="tb-txt tb-s">S</span></button>
           </div>
           <div class="tool-group note-fmt">
             <div class="lib-dropdown" id="noteListDropdown">
-              <button type="button" class="tool-btn" data-cmd="list" onclick="event.stopPropagation();toggleNoteListMenu()" title="Lists" aria-label="Lists" aria-haspopup="menu"><i class="fa-solid fa-list-ul"></i></button>
+              <button type="button" class="tool-btn" data-cmd="list" onclick="event.stopPropagation();toggleNoteListMenu()" title="Lists" aria-label="Lists" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button>
               <div class="split-btn-menu tool-menu note-list-menu" id="noteListMenu" role="menu"></div>
             </div>
             <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><i class="fa-regular fa-square-check"></i></button>
             <div class="lib-dropdown" id="noteTableDropdown">
-              <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><i class="fa-solid fa-table"></i></button>
+              <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
               <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
             </div>
           </div>
           <div class="tool-group note-fmt note-table-bar" id="noteTableBar" role="group" aria-label="Table">
             <span class="tbl-bar-label">Row</span>
-            <button type="button" class="tool-btn" onclick="noteTableEdit('rowBefore')" title="Insert row above" aria-label="Insert row above"><i class="fa-solid fa-arrow-up"></i></button>
-            <button type="button" class="tool-btn" onclick="noteTableEdit('rowAfter')" title="Insert row below" aria-label="Insert row below"><i class="fa-solid fa-arrow-down"></i></button>
-            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delRow')" title="Delete row" aria-label="Delete row"><i class="fa-solid fa-minus"></i></button>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('rowBefore')" title="Insert row above" aria-label="Insert row above"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg></button>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('rowAfter')" title="Insert row below" aria-label="Insert row below"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></button>
+            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delRow')" title="Delete row" aria-label="Delete row"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
             <span class="tool-sep"></span>
             <span class="tbl-bar-label">Column</span>
-            <button type="button" class="tool-btn" onclick="noteTableEdit('colBefore')" title="Insert column left" aria-label="Insert column left"><i class="fa-solid fa-arrow-left"></i></button>
-            <button type="button" class="tool-btn" onclick="noteTableEdit('colAfter')" title="Insert column right" aria-label="Insert column right"><i class="fa-solid fa-arrow-right"></i></button>
-            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delCol')" title="Delete column" aria-label="Delete column"><i class="fa-solid fa-minus"></i></button>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('colBefore')" title="Insert column left" aria-label="Insert column left"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg></button>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('colAfter')" title="Insert column right" aria-label="Insert column right"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></button>
+            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delCol')" title="Delete column" aria-label="Delete column"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
             <span class="tool-sep"></span>
-            <button type="button" class="tool-btn" id="noteTableHeaderBtn" onclick="noteTableEdit('header')" title="Header row" aria-label="Header row"><i class="fa-solid fa-heading"></i></button>
+            <button type="button" class="tool-btn" id="noteTableHeaderBtn" onclick="noteTableEdit('header')" title="Header row" aria-label="Header row"><span class="tb-txt tb-b">H</span></button>
             <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delTable')" title="Delete table" aria-label="Delete table"><i class="fa-regular fa-trash-can"></i></button>
           </div>
           <div class="tool-group note-fmt">
-            <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><i class="fa-solid fa-link"></i></button>
-            <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><i class="fa-solid fa-eraser"></i></button>
+            <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+            <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
           </div>
           <span class="note-toolbar-grow"></span>
           <select id="noteFolderSelect" class="note-select" aria-label="Folder" title="Move to folder" onchange="moveNote(noteEditorId, this.value)"></select>
@@ -1475,7 +1554,7 @@
         <div class="help-section">
           <div class="help-section-title">Adding and opening tasks</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>Add a task</strong>: type in <em>Add a task…</em> at the top and press <kbd>Enter</kbd>. Shorthand sets fields as you type — <code>!high</code> <code>!med</code> <code>!low</code> (<code>!!</code> for high), <code>#project</code>, <code>@tag</code> and a date word (<code>today</code>, <code>tomorrow</code>, a weekday, <code>next week</code>, <code>in 3 days</code>, <code>2026-12-24</code>). A preview under the bar shows what it understood; <kbd>Shift</kbd>+<kbd>Enter</kbd> adds the text exactly as typed.</span></div>
+          <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>Add a task</strong>: type in <em>Add a task…</em> at the top and press <kbd>Enter</kbd>. The field is left and the new task is selected in the list, so <kbd>Tab</kbd> adds a subtask to it right away; press <kbd>↑</kbd> or <kbd>N</kbd> to go back and add another task. Shorthand sets fields as you type — <code>!high</code> <code>!med</code> <code>!low</code> (<code>!!</code> for high), <code>#project</code>, <code>@tag</code> and a date word (<code>today</code>, <code>tomorrow</code>, a weekday, <code>next week</code>, <code>in 3 days</code>, <code>2026-12-24</code>). A preview under the bar shows what it understood; <kbd>Shift</kbd>+<kbd>Enter</kbd> adds the text exactly as typed.</span></div>
           <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Where it goes</strong>: a <code>#project</code> you type wins; otherwise the project you are viewing; otherwise the <strong>default project</strong> picked at the right end of the bar; otherwise Inbox. In <em>My Day</em> an undated task gets today's date.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-pointer"></i><span><strong>Click selects, double-click opens.</strong> A single click only selects a task. A <strong>double-click</strong> anywhere on it (list row or board card) opens it in the side panel; a double-click on the title text renames it instead. Cards and rows behave the same.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>Rename</strong>: double-click the title or a subtask’s text, or press <kbd>F2</kbd> on the selected task. <kbd>Enter</kbd> saves, <kbd>Esc</kbd> cancels.</span></div>
@@ -1558,7 +1637,7 @@
         <div class="help-section">
           <div class="help-section-title">Sidebar</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-window-maximize"></i><span>The sidebar button at the top left, or <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, hides and shows the sidebar. In a narrow window it starts hidden and floats over the list; choosing a project closes it again.</span></div>
+          <div class="help-row"><i class="fa-regular fa-window-maximize"></i><span>The sidebar button at the top of the sidebar (it floats at the top left while the sidebar is hidden), or <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, hides and shows the sidebar. In a narrow window it starts hidden and floats over the list; choosing a project closes it again.</span></div>
           </div>
         </div>
       </div>
@@ -1587,6 +1666,7 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
+          <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table a <em>Row</em> / <em>Column</em> strip appears in the toolbar: insert above or below, left or right, delete, toggle the header row, or delete the table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock in a note's toolbar makes it read-only. You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
@@ -1610,9 +1690,9 @@
         <div class="help-section">
           <div class="help-section-title">Look and feel</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-solid fa-font"></i><span>The <strong>aA</strong> button in the top bar opens <strong>Appearance</strong>: <em>Text size</em> (Medium or Large) and <em>Theme</em> — Light, Dark, or Auto, which follows your system and switches live.</span></div>
+          <div class="help-row"><i class="fa-solid fa-font"></i><span>The <strong>aA</strong> button at the bottom of the sidebar opens <strong>Appearance</strong>: <em>Text size</em> (Medium or Large) and <em>Theme</em> — Light, Dark, or Auto, which follows your system and switches live.</span></div>
           <div class="help-row"><i class="fa-solid fa-display"></i><span>These are <strong>per-device</strong> choices — saved in this browser, not in your data file — so each machine can follow its own system. The same goes for the sidebar state, the board grouping and the default project.</span></div>
-          <div class="help-row"><i class="fa-regular fa-clone"></i><span>The top bar and sidebar are frosted glass over a soft backdrop; the list, board and side panel are flat and opaque. With <em>Reduce transparency</em> or <em>Increase contrast</em> on in your system settings the glass becomes solid.</span></div>
+          <div class="help-row"><i class="fa-regular fa-clone"></i><span>The sidebar is frosted glass over a soft backdrop; the list, board and side panel are flat and opaque. With <em>Reduce transparency</em> or <em>Increase contrast</em> on in your system settings the glass becomes solid.</span></div>
           </div>
         </div>
       </div>
@@ -1629,7 +1709,7 @@
         <div class="help-section">
           <div class="help-section-title">Backups and moving data</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-solid fa-download"></i><span>The <strong>Data</strong> menu (drive icon, top right) can <strong>export</strong> a backup file, <strong>import</strong> one — merging with or replacing what you have (a replace backs up first) — and open <strong>Backups</strong>.</span></div>
+          <div class="help-row"><i class="fa-solid fa-download"></i><span>The <strong>Data</strong> menu (drive icon, bottom of the sidebar) can <strong>export</strong> a backup file, <strong>import</strong> one — merging with or replacing what you have (a replace backs up first) — and open <strong>Backups</strong>.</span></div>
           <div class="help-row"><i class="fa-regular fa-clock"></i><span><strong>Daily snapshots</strong> of the last seven days are kept automatically; pick one under Data → Backups to restore it.</span></div>
           </div>
           <div class="help-tip"><strong>Nothing leaves your machine.</strong> There is no server, no account and no admin rights are needed. Link a file to be safe against clearing browser data.</div>
@@ -1742,8 +1822,9 @@ const SIDEBAR_KEY = 'mytasks_sidebar_collapsed';
 let sidebarCollapsed = false;
 function applySidebarState(){
   document.documentElement.classList.toggle('sidebar-collapsed', sidebarCollapsed);
-  const b = document.getElementById('sidebarToggle');
-  if(b){
+  for(const id of ['sidebarToggle', 'sidebarToggleFloat']){       // the one in the sidebar header and the floating one shown while it is hidden
+    const b = document.getElementById(id);
+    if(!b) continue;
     b.setAttribute('aria-expanded', String(!sidebarCollapsed));
     const mac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
     b.title = (sidebarCollapsed ? 'Show' : 'Hide') + ' sidebar (' + (mac ? '⌘B' : 'Ctrl+B') + ')';
@@ -1762,6 +1843,14 @@ function collapseSidebarIfNarrow(){
   let v = null; try{ v = localStorage.getItem(SIDEBAR_KEY); }catch(_){}
   sidebarCollapsed = v==='1' ? true : v==='0' ? false : (typeof window!=='undefined' && window.innerWidth <= 800);
   applySidebarState();
+})();
+// While the sidebar is hidden, #fileSyncMini (next to the floating toggle) mirrors the file-sync chip.
+(function(){
+  const src = document.getElementById('fileSyncIndicator'), mini = document.getElementById('fileSyncMini');
+  if(!src || !mini || typeof MutationObserver==='undefined') return;
+  const mirror = ()=>{ mini.innerHTML = src.innerHTML; mini.style.display = src.style.display; };
+  new MutationObserver(mirror).observe(src, { childList: true, subtree: true, attributes: true });
+  mirror();
 })();
 // Sidebar width: drag the sidebar's right edge (or use the arrow keys on it); a per-device display preference like the collapse state.
 const SIDEBAR_W_KEY = 'mytasks_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 200, SIDEBAR_W_MAX = 480;
@@ -3354,10 +3443,17 @@ function selectFirstTaskFromQuickAdd(){
   const first = viewMode==='board' ? (getBoardColumns().find(c=>c.tasks.length)||{tasks:[]}).tasks[0] : getVisibleListTasks().tasks[0];
   const input = document.getElementById('quickAddInput'); if(input && input.blur) input.blur();
   if(!first) return;
-  selectedTaskIds.clear(); kbdSelectedTaskId = first.id; lastClickedTaskId = first.id;
+  selectTaskInList(first.id);
+}
+function selectTaskInList(id){
+  selectedTaskIds.clear(); kbdSelectedTaskId = id; lastClickedTaskId = id;
   paintSelection();
-  const el = document.querySelector(`.task-row[data-id="${first.id}"], .board-card[data-id="${first.id}"]`);
+  const el = document.querySelector(`.task-row[data-id="${id}"], .board-card[data-id="${id}"]`);
   if(el && el.scrollIntoView) el.scrollIntoView({block:'nearest'});
+}
+// Is this task on screen right now (it can be hidden by a filter, or folded away on the board)?
+function taskIsListed(id){
+  return viewMode==='board' ? getBoardColumns().some(c=>c.tasks.some(t=>t.id===id)) : getVisibleListTasks().tasks.some(t=>t.id===id);
 }
 function leaveTasksToQuickAdd(){
   kbdSelectedTaskId = null; selectedTaskIds.clear(); paintSelection();
@@ -3375,8 +3471,9 @@ function quickAddTask(event){
   const typed = input.value.trim();
   if(!typed) return;
   const pr = event.shiftKey ? { title: typed, projectId:null, priority:null, dueDate:null, tags:[] } : parseQuickAdd(typed);
+  const newId = genId();
   tasks.unshift({
-    id: genId(), title: pr.title, notes:'',
+    id: newId, title: pr.title, notes:'',
     projectId: pr.projectId || filterProjectId || quickAddDefaultProjectId(),
     status: 'todo',
     priority: pr.priority || 'medium',
@@ -3388,6 +3485,14 @@ function quickAddTask(event){
   input.value = '';
   updateQuickAddPreview();
   save(); render();
+  // Leave the field and land on the new task, so Tab adds a subtask to it straight away (↑ or N goes back to the field to add another).
+  // If a filter hides the new task, stay in the field instead.
+  if(taskIsListed(newId)){
+    if(event.preventDefault) event.preventDefault();
+    if(event.stopPropagation) event.stopPropagation();       // the field is blurred first, so the list's own Enter handler would otherwise take this same keypress and open the task
+    if(input.blur) input.blur();
+    selectTaskInList(newId);
+  }
 }
 
 function advanceRecurring(id){
@@ -4535,15 +4640,18 @@ function scPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.
 // ({id,title,body,folderId,createdAt,updatedAt}); `body` is sanitized HTML written in a
 // contenteditable editor. Notes ride along in the same data blob as tasks, so they save,
 // back up, export/import and sync (newer edit of a note wins; deletions are tombstoned).
-const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder', NOTES_COLLAPSED_KEY = 'mytasks_notes_collapsed';
+const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder', NOTES_COLLAPSED_KEY = 'mytasks_notes_collapsed', NOTES_SORT_KEY = 'mytasks_notes_sort';
 const NOTES_DEFAULT_FOLDER = 'nf-notes';
 const noteFoldersCollapsed = new Set();   // top-level folders folded shut in the sidebar (per device)
 let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '';
 try{
   if(localStorage.getItem(MODE_KEY)==='notes') appMode = 'notes';
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
+  const savedSort = JSON.parse(localStorage.getItem(NOTES_SORT_KEY) || 'null');
+  if(savedSort && ['edited','created','title'].includes(savedSort.key) && ['asc','desc'].includes(savedSort.dir)){ noteSortKey = savedSort.key; noteSortDir = savedSort.dir; }
   const savedCollapsed = JSON.parse(localStorage.getItem(NOTES_COLLAPSED_KEY) || '[]'); if(Array.isArray(savedCollapsed)) savedCollapsed.forEach(x=>{ if(typeof x==='string') noteFoldersCollapsed.add(x); });
 }catch(_){}
+let noteSortKey = 'edited', noteSortDir = 'desc';   // how the notes list is ordered (per device): edited | created | title, desc | asc
 let noteEditCount = 0;   // edits made in the open note since it was loaded: ⌘Z only undoes typing when there is some
 let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRange = null, noteDragFromEditor = false, editingFolderId = null;
 
@@ -4861,11 +4969,42 @@ function folderMenuRun(kind){
 }
 
 // ---- lists ----
+// The order of the notes list: by date edited (default), date created or title, either way round. Ties fall back to newest-edited first.
+function noteSorter(){
+  const dir = noteSortDir==='asc' ? 1 : -1;
+  return (a, b)=>{
+    const cmp = noteSortKey==='title' ? (a.title || 'New note').localeCompare(b.title || 'New note', undefined, {sensitivity:'base'})
+      : noteSortKey==='created' ? a.createdAt - b.createdAt : a.updatedAt - b.updatedAt;
+    return cmp * dir || (b.updatedAt - a.updatedAt);
+  };
+}
+const noteSortDefaultDir = key=>key==='title' ? 'asc' : 'desc';
+function setNoteSort(key, dir){
+  noteSortKey = key; noteSortDir = dir || noteSortDefaultDir(key);
+  try{ localStorage.setItem(NOTES_SORT_KEY, JSON.stringify({key: noteSortKey, dir: noteSortDir})); }catch(_){}
+  closeRowMenu(); renderNotesList();
+}
+function noteSortMenuHtml(){
+  const o = (fn, icon, label, cur)=>menuOpt(fn, {icon}, label, cur), sep = '<div class="row-menu-sep"></div>';
+  const isTitle = noteSortKey==='title';
+  return o(`setNoteSort('edited')`, 'pen', 'Date edited', noteSortKey==='edited') + o(`setNoteSort('created')`, 'calendar-plus', 'Date created', noteSortKey==='created') + o(`setNoteSort('title')`, 'font', 'Title', isTitle) + sep
+    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'asc' : 'desc'}')`, 'arrow-down', isTitle ? 'A to Z' : 'Newest first', noteSortDir===(isTitle ? 'asc' : 'desc'))
+    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest first', noteSortDir===(isTitle ? 'desc' : 'asc'));
+}
+function openNoteSortMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = noteSortMenuHtml();
+  const r = e.currentTarget.getBoundingClientRect();
+  placeRowMenu(menu, r.right - 190, r.bottom + 6, e.currentTarget);
+}
 function visibleNotes(){
   const words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
   return notes
     .filter(n=>(words.length || noteInFilter(n)) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
-    .sort((a,b)=>b.updatedAt - a.updatedAt);
+    .sort(noteSorter());
 }
 function folderById(id){ return noteFolders.find(f=>f.id===id); }
 function fmtNoteDate(ts){
@@ -4918,7 +5057,7 @@ function renderNotesList(vis){
     const sel = n.id===selectedNoteId, fol = folderById(n.folderId);
     return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')">
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
-      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
+      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
       ${fol && (searching || noteFolderFilter==='all' || folderChildren(noteFolderFilter).length) ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(folderPath(fol))}</div>` : ''}
     </div>`;
   }).join('');
@@ -4930,9 +5069,9 @@ function updateNoteMeta(n){
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
-  const ed = document.getElementById('noteEditor'), empty = document.getElementById('notesEmpty');
-  if(!n){ ed?.classList.remove('open'); if(empty) empty.style.display = ''; noteEditorId = null; return; }
-  ed?.classList.add('open'); if(empty) empty.style.display = 'none';
+  const ed = document.getElementById('noteEditor'), empty = document.getElementById('notesEmpty'), emptyBar = document.getElementById('noteEmptyBar');
+  if(!n){ ed?.classList.remove('open'); if(empty) empty.style.display = ''; if(emptyBar) emptyBar.style.display = ''; noteEditorId = null; return; }
+  ed?.classList.add('open'); if(empty) empty.style.display = 'none'; if(emptyBar) emptyBar.style.display = 'none';
   const title = document.getElementById('noteTitle');
   let body = document.getElementById('noteBody');
   if(noteEditorId!==n.id || noteEditorStamp!==n.updatedAt){

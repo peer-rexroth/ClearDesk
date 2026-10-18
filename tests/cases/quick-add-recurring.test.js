@@ -87,3 +87,36 @@ test('advanceRecurring().undo restores the previous dueDate, repeat, and subtask
   assertTrue(tasks[0].subtasks[0].subtasks[0].done, 'undo should restore the nested step done-state too, not share a mutated reference with the live task');
   assertTrue(tasks[0].subtasks[0].subtasks[0].subtasks[0].done, 'undo should restore the nested sub-step done-state too');
 });
+
+test('Enter in quick-add leaves the field and selects the new task, so Tab can add a subtask to it', function () {
+  viewMode = 'list'; kbdSelectedTaskId = null; selectedTaskIds = new Set();
+  const input = document.getElementById('quickAddInput');
+  let blurred = false; input.blur = function () { blurred = true; };
+  input.value = 'Plan the trip';
+  quickAddTask({ key: 'Enter', target: input });
+  assertEqual(tasks[0].title, 'Plan the trip');
+  assertEqual(kbdSelectedTaskId, tasks[0].id, 'the new task is the keyboard selection');
+  assertTrue(blurred, 'the quick-add field gives up focus');
+});
+
+test('if a filter hides the new task, quick-add keeps focus instead of selecting something invisible', function () {
+  viewMode = 'list'; kbdSelectedTaskId = null; selectedTaskIds = new Set();
+  filterPriority = ['high'];                             // a new task is Medium unless !high, so it is filtered out
+  const input = document.getElementById('quickAddInput');
+  let blurred = false; input.blur = function () { blurred = true; };
+  input.value = 'Hidden by the filter';
+  quickAddTask({ key: 'Enter', target: input });
+  assertEqual(tasks[0].title, 'Hidden by the filter');
+  assertFalse(blurred, 'focus stays in the field');
+  assertEqual(kbdSelectedTaskId, null);
+});
+
+test('taskIsListed reflects the active filters', function () {
+  viewMode = 'list';
+  const input = document.getElementById('quickAddInput');
+  input.value = 'Listed task'; quickAddTask({ key: 'Enter', target: input });
+  const id = tasks[0].id;
+  assertTrue(taskIsListed(id), 'visible with the default filters');
+  filterStatus = [];
+  assertFalse(taskIsListed(id), 'no status selected: nothing is listed');
+});

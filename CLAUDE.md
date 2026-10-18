@@ -233,6 +233,7 @@ parity.
   it (a reserved 46px slot used to push every project count left). Same disc hover as the list rows.
   While the capsule shows, the name gives up 76px (`margin-right` on `.pname`, which has `text-overflow: ellipsis`), so a long
   name ends in "…" before the capsule instead of running under it; `tipIfTruncated` then adds the full name as a tooltip.
+- **Enter in the quick-add field leaves it**: the new task is selected in the list (`selectTaskInList`) and the field blurred, so **Tab** adds a subtask to it straight away (↑ / N go back to the field); if a filter hides the new task (`taskIsListed`), focus stays in the field. `quickAddTask` must `stopPropagation()` on that Enter, or the list's own Enter handler takes the same keypress and opens the task.
 - **Arrow keys cross the quick-add field**: ArrowDown in it selects the first task (list: first row; board: first card of
   the first non-empty column), keeping whatever you typed; ArrowUp from the first task (or a column's first card) clears the
   selection and focuses the field (`selectFirstTaskFromQuickAdd` / `leaveTasksToQuickAdd`). The field's handler must
@@ -290,7 +291,7 @@ parity.
   `expandedCompletedProjects` Set.
 - **First-run file-sync prompt is a banner, not a modal** (`#syncBanner`,
   `showSyncBanner`): dismissed per session; the modal still opens from the
-  banner/topbar button. Topbar: after the Link-file status chip, one icon-only
+  banner/Link-file button. Sidebar bottom bar (`.sb-tools`): the Link-file status chip, then one icon-only
   capsule group (`.tool-group.topbar-tools`) of Data (export/import/backups),
   Appearance (an "aA" glyph — a palette would suggest colour choices that no longer
   exist) and Help (guide, shortcuts, about), each opening its own dropdown with a
@@ -440,7 +441,7 @@ parity.
   (20 characters). Due is set by the *widest locale date* (22 locales tried via `fmtDate`'s `toLocaleDateString`):
   pt-BR "28 de mar." needs 108, hu-HU 104, English only 89 — so it carries a few px of buffer. Re-measure before
   narrowing any of them. The panel-open layout (`.layout:has(.drawer.open)`) has its own, tighter widths.
-- **Collapsible sidebar**: the toggle (topbar, left) and **Cmd/Ctrl+B** flip
+- **Collapsible sidebar**: the toggle (top of the sidebar; a floating copy at the content's top-left while it is hidden) and **Cmd/Ctrl+B** flip
   `sidebarCollapsed` (per-device `mytasks_sidebar_collapsed`), applied as
   `html.sidebar-collapsed`. With no saved choice it starts collapsed at ≤800px,
   where the sidebar floats over the content; picking a project/view there closes
@@ -482,6 +483,23 @@ parity.
   like Milestone's — amber *Link file* (opens the Link/Create modal), green
   *Linked* (click → confirm → unlink), red *Reconnect*. It replaced the old
   split button + filename + unlink icon.
+
+## Layout: Apple-Notes style, no top bar
+
+There is **no top bar**. The sidebar runs the full window height: `.sb-head` (sidebar toggle + the Tasks | Notes `#modeSwitch`), the
+search box, the lists, then `.sb-tools` (Link-file chip `#fileSyncIndicator` + the Data / Appearance / Help capsule `.topbar-tools`,
+the old top bar's right-hand group) and the counts footer. Every column then starts with its own **52px** bar (`.main-toolbar`,
+`.notes-list-head`, `.note-toolbar`) so the baselines line up, with a hairline under it. The first-run sync banner stays a full-width strip above
+`.layout`. Rules to keep:
+- The dropdown menus in `.sb-tools` open **upward** and must escape the sidebar, so `.sidebar` is `overflow: visible` (hidden again
+  while collapsed) with `z-index: 60` on desktop; their inline `left/right` are overridden with `!important` in the layout block.
+- While the sidebar is hidden (⌘B, or by default under 800px) `#sbFloat` — inside `.layout`, so it sits below the banner — shows a floating
+  toggle plus `#fileSyncMini`, a mirror of the file-sync chip kept by a MutationObserver (icon only), and the columns' bars pad
+  their left edge (`html.sidebar-collapsed … padding-left`) to make room. `applySidebarState` updates both toggles.
+- Narrow windows: the sidebar and the opened drawer float from `top: 0`; the sidebar resizer is hidden.
+- Notes mode hides every sidebar child except search, `#notesSide`, `.sb-head` and `.sb-tools` (the `:not()` chain in the
+  `html[data-mode="notes"] .sidebar >` rule — add a new always-visible sidebar block there).
+- The wordmark is gone from the UI (About, the page title and the manifest still say MyDesk).
 
 ## Shared state that spans views
 
@@ -680,7 +698,7 @@ still has one is simply ignored by `load()`).
 
 - **The look** (Apple Liquid Glass / Mail-style) changes *layout and material*,
   not just colours. It copies Apple Mail's rule: **the chrome is glass, the
-  content is flat.** The topbar and sidebar are translucent and blur a soft
+  content is flat.** The sidebar is translucent and blurs a soft
   graphite wallpaper on `body` (`--wall`, light and dark) — the web stand-in for
   macOS vibrancy;
   the toolbar controls are capsules; the list, board and detail panel are opaque
@@ -691,7 +709,7 @@ still has one is simply ignored by `load()`).
     them is flat automatically. Chrome keeps the translucent values. When adding
     a Glass rule, reach for those variables rather than hard-coding colors.
   - `backdrop-filter` can't see through a parent that has its own, so only
-    body-level surfaces (topbar, sidebar, row menu, modals, toast, banner) blur;
+    body-level surfaces (sidebar, row menu, modals, toast, banner) blur;
     popovers inside the content use the near-opaque `--glass-strong` (97%; at 88%
     the content underneath ghosted through the Appearance menu).
   - The light and dark blocks must define the **same** variables (the light
@@ -704,7 +722,7 @@ still has one is simply ignored by `load()`).
     `.task-row:hover:not(.kbd-selected):not(.bulk-selected)` (same specificity,
     later in the file, it used to erase the selected look while the mouse was
     still on the row).
-  **Corner radii**: toolbar controls (topbar, `.main-toolbar`, bulk bar) are
+  **Corner radii**: toolbar controls (sidebar header/tools bar, `.main-toolbar`, bulk bar) are
   capsules like Mail's; everything in the content uses `--radius` (10px), task
   rows `--glass-r-row` (8px), the quick-add bar `--glass-r-bar` (12px), board
   columns `--radius-lg` (14px) and menus/modals `--glass-r-menu` (16px); chips and
@@ -725,6 +743,7 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 - **Security rule:** every path that stores or renders a note body goes through `sanitizeNoteHtml()` (string-based allowlist, no DOM, so it runs in the test harness): `normalizeNotes()` (the boundary for external data), paste, drop, and editor input. Never assign unsanitised HTML to `#noteBody`.
 - **Editor:** contenteditable + `execCommand`; checklists are `<ul class="cl"><li data-done="1">` toggled by clicking the left 28px; saves are debounced 500ms; empty notes are auto-removed (tombstoned); deletes offer Undo.
 - **Tables:** `table/thead/tbody/tr/th/td` are in `NOTE_TAGS` with every attribute stripped (no colspan/rowspan/styles), so pasted tables survive as plain grids. The toolbar's table button is one menu (`noteTableMenuHtml`): sizes outside a table, row/column/header/delete actions inside one. Every edit goes through `noteTableEdit`, which edits a clone and swaps it in with `execCommand('insertHTML')` so native Undo covers it (never mutate the live table directly). `noteIsEmpty` counts a table as content. While the caret is in a table the toolbar's `#noteTableBar` strip (Row / Column / header / delete table) is shown by `updateNoteToolbarState`; pointing at a table also shows two edge "+" buttons (`tblHandlesShow`, an overlay `#tblHandles` beside `#noteBody`, never inside it, so never saved; positions are divided by the zoom factor measured from `.note-doc`). Every action calls `noteTableEdit(op, ref?)`.
+- **List order:** `noteSortKey` (`edited` | `created` | `title`) and `noteSortDir`, per-device (`mytasks_notes_sort`), set from the ⋯ button in the list header (`openNoteSortMenu` → `setNoteSort`); `noteSorter()` ties fall back to newest-edited, and the row date follows the key. The list header has no tint or hairline so the column reads as one surface to the top (the other column bars keep theirs).
 - **Search:** `visibleNotes()` ignores the folder filter whenever there is a query (a search always covers every folder, titled "Search results"), and `setSearchQuery` opens the first result when the open note is not one.
 - **List styles:** `noteListStyle` acts on every list the selection touches (`noteListsInSelection`), not just the one under the caret, so a selection that spans a whole list, a checklist or a mix of bullets and numbers all convert; it also lifts a list out of a stray `<p>`.
 - **Undo in notes:** the browser keeps ONE undo history per page, so `renderNoteEditor` swaps in a fresh `#noteBody` element whenever a different note loads (otherwise ⌘Z would reach back into the previous note). `noteEditCount` counts edits since load: with none, ⌘Z falls through to the toast's Undo (`onNoteKeydown`). The Undo/Redo buttons track `queryCommandEnabled`.
