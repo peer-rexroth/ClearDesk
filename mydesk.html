@@ -1090,6 +1090,16 @@
   .note-body pre { font-family: var(--mono); font-size: 13px; padding: 10px 12px; border-radius: 8px; background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
   .note-body hr { border: 0; border-top: 1px solid var(--border-2); margin: 1em 0; }
   /* checklists: a round box drawn on the <li>; clicking in the left 28px ticks it */
+  .note-body ul[data-ls="square"] { list-style-type: square; }
+  .note-body ul[data-ls="dash"] { list-style-type: "\2013\00a0\00a0"; }
+  .note-body ul[data-ls="emdash"] { list-style-type: "\2014\00a0\00a0"; }
+  .note-body ol[data-ls="alpha"] { list-style-type: lower-alpha; }
+  .note-body ol[data-ls="roman"] { list-style-type: lower-roman; }
+  .pop-glyph { flex: none; width: 22px; margin-right: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; color: var(--text-2); }
+  .pop-glyph.sym { font-size: 19px; font-weight: 700; }   /* the bullet marks are tiny characters: scaled up to the visual weight of "1." "a." "i." */
+  .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
+  .note-list-menu .pop-check { width: 14px; }
+  .note-list-menu .pop-label { white-space: nowrap; }
   .note-body ul.cl { list-style: none; padding-left: 2px; }
   .note-body ul.cl > li { position: relative; padding-left: 28px; }
   .note-body ul.cl > li::before { content: ""; position: absolute; left: 3px; top: .32em; width: 16px; height: 16px; box-sizing: border-box; border: 1.5px solid var(--border-2); border-radius: 50%; background: var(--bg); cursor: default; }
@@ -1290,8 +1300,10 @@
             <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
           </div>
           <div class="tool-group">
-            <button type="button" class="tool-btn" data-cmd="bullets" onclick="noteBullets()" title="Bulleted list" aria-label="Bulleted list"><i class="fa-solid fa-list-ul"></i></button>
-            <button type="button" class="tool-btn" data-cmd="numbers" onclick="noteCmd('insertOrderedList')" title="Numbered list" aria-label="Numbered list"><i class="fa-solid fa-list-ol"></i></button>
+            <div class="lib-dropdown" id="noteListDropdown">
+              <button type="button" class="tool-btn" data-cmd="list" onclick="event.stopPropagation();toggleNoteListMenu()" title="Lists" aria-label="Lists" aria-haspopup="menu"><i class="fa-solid fa-list-ul"></i></button>
+              <div class="split-btn-menu tool-menu note-list-menu" id="noteListMenu" role="menu"></div>
+            </div>
             <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><i class="fa-regular fa-square-check"></i></button>
           </div>
           <div class="tool-group">
@@ -1512,6 +1524,7 @@
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em> and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
+          <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
           </div>
         </div>
@@ -4216,7 +4229,7 @@ const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var
 // One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
 // tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
 function popOptInner(lead, label){
-  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"></i>`;
+  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
 function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
@@ -4421,6 +4434,7 @@ let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRan
 // test harness, which has no DOM. ----
 const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr']);
 const NOTE_VOID = new Set(['br','hr']);
+const NOTE_UL_STYLES = ['square','dash','emdash'], NOTE_OL_STYLES = ['alpha','roman'];   // list looks kept on paste/load; anything else becomes the plain default
 function decodeHtmlEntities(s){
   return String(s)
     .replace(/&#x([0-9a-f]+);?/gi, (m,h)=>String.fromCharCode(parseInt(h,16)))
@@ -4451,7 +4465,11 @@ function sanitizeNoteHtml(html){
       out += href ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">` : '<a>';
     }
     else if(name==='li') out += /\bdata-done\s*=\s*["']?1/i.test(attrs) ? '<li data-done="1">' : '<li>';
-    else if(name==='ul') out += /\bclass\s*=\s*["']?[^"'>]*\bcl\b/i.test(attrs) ? '<ul class="cl">' : '<ul>';
+    else if(name==='ul' || name==='ol'){
+      const lm = /\bdata-ls\s*=\s*["']?([a-z]+)/i.exec(attrs), ls = lm ? lm[1].toLowerCase() : '';
+      if(name==='ul' && /\bclass\s*=\s*["']?[^"'>]*\bcl\b/i.test(attrs)) out += '<ul class="cl">';
+      else out += (name==='ul' ? NOTE_UL_STYLES : NOTE_OL_STYLES).includes(ls) ? `<${name} data-ls="${ls}">` : `<${name}>`;
+    }
     else out += `<${name}>`;
   }
   return out;
@@ -4744,11 +4762,50 @@ function noteClosest(node, tag){
 function noteFocusBody(){ const b = document.getElementById('noteBody'); if(b && document.activeElement!==b) b.focus(); }
 function noteCmd(cmd, val){ noteFocusBody(); document.execCommand(cmd, false, val); onNoteInput(); updateNoteToolbarState(); }
 function noteBlock(tag){ noteFocusBody(); document.execCommand('formatBlock', false, `<${tag}>`); onNoteInput(); updateNoteToolbarState(); }
-function noteBullets(){
+// The list button opens one menu with every bullet and numbering style; the current style is ticked and picking it again turns the list off.
+const NOTE_LIST_STYLES = [
+  ['disc','•','Bullet'], ['square','▪','Square'], ['dash','–','Dash'], ['emdash','—','Em dash'], null,
+  ['decimal','1.','Numbers'], ['alpha','a.','Letters'], ['roman','i.','Roman']
+];
+function noteCurrentListStyle(){
+  const sel = window.getSelection && window.getSelection();
+  if(!sel || !sel.rangeCount) return null;
+  const node = sel.anchorNode, ul = noteClosest(node, 'UL'), ol = noteClosest(node, 'OL');
+  if(ul && !ul.classList.contains('cl') && (!ol || ul.contains(ol))) return ul.getAttribute('data-ls') || 'disc';
+  if(ol) return ol.getAttribute('data-ls') || 'decimal';
+  return null;
+}
+function noteListMenuHtml(){
+  const cur = noteCurrentListStyle();
+  return NOTE_LIST_STYLES.map(it=> it ? menuOpt(`noteListStyle('${it[0]}')`, {glyph: it[1]}, it[2], cur===it[0]) : '<div class="row-menu-sep"></div>').join('');
+}
+function toggleNoteListMenu(){
+  const m = document.getElementById('noteListMenu'); if(!m) return;
+  const wasOpen = m.classList.contains('open');
+  closeNoteListMenu();
+  if(wasOpen) return;
+  m.innerHTML = noteListMenuHtml();
+  m.classList.add('open');
+}
+function closeNoteListMenu(){ document.getElementById('noteListMenu')?.classList.remove('open'); }
+// kind: disc|square|dash|emdash for bullets, decimal|alpha|roman for numbers. Applies to the list the cursor is in (starting one if needed);
+// choosing the style the list already has turns the list off.
+function noteListStyle(kind){
+  closeNoteListMenu();
   noteFocusBody();
-  const sel = window.getSelection(), ul = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'UL') : null;
-  if(ul && ul.classList.contains('cl')) ul.classList.remove('cl');          // checklist → plain bullets
-  else document.execCommand('insertUnorderedList', false);
+  const wantOl = kind==='decimal' || kind==='alpha' || kind==='roman';
+  if(noteCurrentListStyle()===kind){ document.execCommand(wantOl ? 'insertOrderedList' : 'insertUnorderedList', false); onNoteInput(); updateNoteToolbarState(); return; }
+  const sel = window.getSelection(), at = ()=> sel && sel.rangeCount ? sel.anchorNode : null;
+  let list = at() ? noteClosest(at(), wantOl ? 'OL' : 'UL') : null;
+  if(list && list.classList.contains('cl')){ list.classList.remove('cl'); list.querySelectorAll('li').forEach(li=>li.removeAttribute('data-done')); }
+  if(!list){
+    document.execCommand(wantOl ? 'insertOrderedList' : 'insertUnorderedList', false);   // from a paragraph, or converts the other list type
+    list = at() ? noteClosest(at(), wantOl ? 'OL' : 'UL') : null;
+  }
+  if(list){
+    if(kind==='disc' || kind==='decimal') list.removeAttribute('data-ls'); else list.setAttribute('data-ls', kind);
+    list.classList.remove('cl');
+  }
   onNoteInput(); updateNoteToolbarState();
 }
 function noteChecklist(){
@@ -4775,7 +4832,7 @@ function updateNoteToolbarState(){
   const set = (cmd, on)=>{ const b = document.querySelector(`.note-toolbar [data-cmd="${cmd}"]`); if(b) b.classList.toggle('active', !!on); };
   ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, document.queryCommandState(c)));
   const ul = noteClosest(sel.anchorNode, 'UL'), ol = noteClosest(sel.anchorNode, 'OL');
-  set('bullets', ul && !ul.classList.contains('cl')); set('checklist', ul && ul.classList.contains('cl')); set('numbers', !!ol);
+  set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
   const style = document.getElementById('noteStyleSelect'); if(style) style.value = /^h[1-3]$/.test(v) ? v : 'p';
 }
@@ -5009,6 +5066,7 @@ function setUiScale(v){
 
 document.addEventListener('click', e=>{
   if(!e.target.closest('#libDropdown')) closeLibMenu();
+  if(!e.target.closest('#noteListDropdown')) closeNoteListMenu();
   if(!e.target.closest('#uiScaleDropdown')) closeUiScaleMenu();
   if(!e.target.closest('#helpDropdown')) closeHelpMenu();
   if(!e.target.closest('#filterDropdown')) closeFilterMenu();
