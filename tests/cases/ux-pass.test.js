@@ -549,3 +549,18 @@ test('the shortcuts dialog is built from groups, each with a label, an icon and 
   });
   assertTrue(scRowHtml(['Open selected task', ['↵']]).indexOf('<kbd>') !== -1, 'keys render as kbd');
 });
+
+test('the confirm dialog names its action: Delete by default, Unlink / Restore where that is what it does', function () {
+  var btn = document.getElementById('confirmModalBtn');
+  openConfirmModal({ title: 'Delete task?', body: 'x', action: function () {} });
+  assertEqual(btn.textContent, 'Delete');
+  assertEqual(btn.className, 'btn btn-danger');
+  openConfirmModal({ title: 'Unlink file?', body: 'x', action: function () {}, confirmLabel: 'Unlink' });
+  assertEqual(btn.textContent, 'Unlink');
+  assertEqual(btn.className, 'btn btn-danger', 'unlinking stays a red, cautionary button');
+  openConfirmModal({ title: 'Restore this backup?', body: 'x', action: function () {}, confirmLabel: 'Restore', danger: false });
+  assertEqual(btn.textContent, 'Restore');
+  assertEqual(btn.className, 'btn btn-primary');
+  openConfirmModal({ title: 'Delete task?', body: 'x', action: function () {} });
+  assertEqual(btn.textContent, 'Delete', 'the label resets for the next dialog');
+});

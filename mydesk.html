@@ -1217,6 +1217,28 @@
   .tb-i { font-style: italic; font-weight: 500; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; }
   .tb-u { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
   .tb-s { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+
+  /* ── Add-a-task is a "ghost row" (after Apple Reminders' new-item line) ───────
+     No box: an empty circle where a checkbox will be, muted placeholder text, a hairline under it that turns accent while typing,
+     and a quiet pop-up button for the project on the right. */
+  html[data-scheme="glass"] .quickadd { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; margin: 10px 20px 0; padding: 0; gap: 8px; }
+  .quickadd .qa-plus { flex: none; margin-left: 12px; font-size: 13px; color: var(--text-3); transition: color .12s ease; }   /* the "+" sits at the row's left edge, as it always did */
+  html[data-scheme="glass"] .quickadd input { padding: 11px 10px 11px 0; font-size: 14px; }
+  .quickadd input::placeholder { color: var(--text-3); }
+  html[data-scheme="glass"] .quickadd:has(#quickAddInput:focus) { border-bottom-color: var(--sel-bg); box-shadow: none; }
+  .quickadd:has(#quickAddInput:focus) .qa-plus { color: var(--sel-bg); }
+  .qa-wrap { position: relative; flex: none; margin-right: 2px; }
+  .qa-popup { display: inline-flex; align-items: center; gap: 7px; height: 28px; max-width: 190px; padding: 0 9px 0 11px; border: 0; border-radius: 8px; background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text-2); font: 500 13px var(--font); cursor: pointer; white-space: nowrap; }
+  .qa-popup:hover:not(:disabled) { background: var(--cap-hover, rgba(120,120,128,.22)); color: var(--text); }
+  .qa-popup:disabled { opacity: .55; cursor: default; }
+  .qa-popup #qaProjectName { overflow: hidden; text-overflow: ellipsis; }
+  .qa-updown { flex: none; width: 8px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
+  .qa-menu { left: auto; right: 0; top: calc(100% + 6px); min-width: var(--submenu-w); z-index: 80; }
+  /* the list header's fold-all button: no ring, a plain glyph that gets a soft fill on hover, like the row disclosure chevrons */
+  html[data-scheme="glass"] .task-list-header > .subtask-toggle { background: transparent; border: 0; box-shadow: none; color: var(--text-3); width: 28px; height: 28px; margin: 0 0 0 -2px; }
+  html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text); box-shadow: none; }
+  /* the column-header row: its 28px controls sit in the middle of the band (they used to hug the hairline above, 10px of air below) */
+  html[data-scheme="glass"] .task-list-header { padding-top: 6px; padding-bottom: 6px; align-items: center; }
 </style>
 </head>
 <body>
@@ -1374,9 +1396,12 @@
     </div>
     <div class="bulk-bar" id="bulkBar"></div>
     <div class="quickadd">
-      <i class="fa-solid fa-plus"></i>
+      <i class="fa-solid fa-plus qa-plus" aria-hidden="true"></i>
       <input spellcheck="true" type="text" id="quickAddInput" placeholder="Add a task" oninput="updateQuickAddPreview()" onkeydown="quickAddTask(event)">
-      <select id="quickAddProject" class="quickadd-project" onchange="setQuickAddProject(this.value)" aria-label="Project for new tasks"></select>
+      <div class="qa-wrap" id="quickAddProjectWrap">
+        <button type="button" id="quickAddProject" class="qa-popup" onclick="toggleQuickAddProjectMenu(event)" aria-haspopup="menu" aria-label="Project for new tasks"><span id="qaProjectName">Inbox</span><svg class="qa-updown" viewBox="0 0 10 14" aria-hidden="true"><path d="M1.5 5 5 1.8 8.5 5M1.5 9 5 12.2 8.5 9"/></svg></button>
+        <div class="split-btn-menu tool-menu qa-menu" id="quickAddProjectMenu" role="menu"></div>
+      </div>
     </div>
     <div class="quickadd-preview" id="quickAddPreview"></div>
     <div class="task-list" id="taskListWrap">
@@ -3372,14 +3397,30 @@ function setQuickAddProject(id){
   renderQuickAddProject();
   const input = document.getElementById('quickAddInput'); if(input && input.focus) input.focus();
 }
-function renderQuickAddProject(){
-  const sel = document.getElementById('quickAddProject'); if(!sel) return;
-  const viewing = filterProjectId && visibleProjects().some(p=>p.id===filterProjectId) ? filterProjectId : null;
-  sel.innerHTML = visibleProjects().map(p=>`<option value="${esc(p.id)}">${esc(abbreviateName(p.name, 18))}</option>`).join('');
-  sel.value = viewing || quickAddDefaultProjectId();
-  sel.disabled = !!viewing;
-  sel.title = viewing ? "New tasks go to the project you're viewing" : 'Project for new tasks (type #name to override)';
+// The project picker beside the quick-add field is a pop-up button (soft fill, stacked chevrons) that opens the shared popover menu with a tick on the current project.
+function quickAddProjectMenuHtml(cur){
+  return visibleProjects().map(p=>menuOpt(`pickQuickAddProject('${p.id}')`, {icon: p.icon || 'folder'}, abbreviateName(p.name, 24), p.id===cur)).join('');
 }
+function renderQuickAddProject(){
+  const btn = document.getElementById('quickAddProject'); if(!btn) return;
+  const viewing = filterProjectId && visibleProjects().some(p=>p.id===filterProjectId) ? filterProjectId : null;
+  const cur = viewing || quickAddDefaultProjectId(), p = projById(cur);
+  const name = document.getElementById('qaProjectName'); if(name) name.textContent = p ? abbreviateName(p.name, 18) : 'Inbox';
+  btn.disabled = !!viewing;
+  btn.title = viewing ? "New tasks go to the project you're viewing" : 'Project for new tasks (type #name to override)';
+  const menu = document.getElementById('quickAddProjectMenu'); if(menu && menu.classList.contains('open')) menu.innerHTML = quickAddProjectMenuHtml(cur);
+}
+function closeQuickAddProjectMenu(){ document.getElementById('quickAddProjectMenu')?.classList.remove('open'); }
+function toggleQuickAddProjectMenu(e){
+  if(e) e.stopPropagation();
+  const menu = document.getElementById('quickAddProjectMenu'), btn = document.getElementById('quickAddProject'); if(!menu || !btn || btn.disabled) return;
+  const wasOpen = menu.classList.contains('open');
+  closeQuickAddProjectMenu();
+  if(wasOpen) return;
+  menu.innerHTML = quickAddProjectMenuHtml(quickAddDefaultProjectId());
+  menu.classList.add('open');
+}
+function pickQuickAddProject(id){ closeQuickAddProjectMenu(); setQuickAddProject(id); }
 function parseQuickAdd(raw){
   const trimmed = String(raw).trim();
   const out = { title: trimmed, projectId: null, priority: null, dueDate: null, tags: [] };
@@ -4543,9 +4584,12 @@ function closeAllModals(){
   document.querySelectorAll('.modal-bg').forEach(el=>el.classList.remove('open'));
   modalTarget = null; pendingImportData = null;
 }
-function openConfirmModal({title, body, action}){
+// `confirmLabel` names what the button does (it used to say "Delete" for everything); `danger: false` makes it the plain accent button.
+function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger = true}){
   document.getElementById('confirmModalTitle').textContent = title;
   document.getElementById('confirmModalBody').textContent = body;
+  const btn = document.getElementById('confirmModalBtn');
+  if(btn){ btn.textContent = confirmLabel; btn.className = danger ? 'btn btn-danger' : 'btn btn-primary'; }
   modalTarget = { action };
   document.getElementById('confirmModalBg').classList.add('open');
 }
@@ -5781,6 +5825,7 @@ function setUiScale(v){
 document.addEventListener('click', e=>{
   if(!e.target.closest('#libDropdown')) closeLibMenu();
   if(!e.target.closest('#noteListDropdown')) closeNoteListMenu();
+  if(!e.target.closest('#quickAddProjectWrap')) closeQuickAddProjectMenu();
   if(!e.target.closest('#noteTableDropdown')) closeNoteTableMenu();
   if(!e.target.closest('#uiScaleDropdown')) closeUiScaleMenu();
   if(!e.target.closest('#helpDropdown')) closeHelpMenu();
@@ -6240,7 +6285,7 @@ function restoreBackup(date){
   if(!b) return;
   closeAllModals();
   openConfirmModal({
-    title: 'Restore this backup?',
+    title: 'Restore this backup?', confirmLabel: 'Restore', danger: false,
     body: `This replaces your current data with the snapshot from ${fmtDate(date)}. Your current data will be backed up to a file first.`,
     action: ()=>{
       downloadBackup(projects, tasks, `mydesk-backup-before-restore-${todayStr()}.json`, {notes, noteFolders});
@@ -6432,7 +6477,7 @@ function onFileSyncChipClick(state){
   if(state==='unlinked') openFileSyncModal();
   else if(state==='lapsed') reconnectFile();
   else openConfirmModal({
-    title: 'Unlink file?',
+    title: 'Unlink file?', confirmLabel: 'Unlink',
     body: `Your tasks stay in this browser, but stop being saved to ${fileHandle ? fileHandle.name : 'the file'}. You can link it again any time.`,
     action: ()=>unlinkFile()
   });
