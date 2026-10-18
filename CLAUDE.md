@@ -714,6 +714,16 @@ still has one is simply ignored by `load()`).
   A real pointer click (`e.detail>0`) also blurs `[role="button"]` divs so a
   clicked badge cell doesn't keep a focus ring for the next key press.
 
+## Notes (second app mode)
+
+A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-device, `data-mode` on `<html>`) is switched by `#modeSwitch` / `setAppMode()`. `render()` early-returns into `renderNotes()` in notes mode; `setSearchQuery` and the main keydown listener route to the notes versions (`handleNotesKeys`).
+
+- **Data:** `notes` `{id, title, body(HTML), folderId, created, updated}`, `noteFolders` `{id, name}`, plus tombstones `deletedNoteIds` / `deletedNoteFolderIds`. All four live in `dataPayload()` (the single saved/synced object), backups, export/import and `mergeData()` (`mergeNotesData`: newer `updated` wins, tombstones respected). Selected note / folder filter are per-device, not synced.
+- **Security rule:** every path that stores or renders a note body goes through `sanitizeNoteHtml()` (string-based allowlist, no DOM, so it runs in the test harness): `normalizeNotes()` (the boundary for external data), paste, drop, and editor input. Never assign unsanitised HTML to `#noteBody`.
+- **Editor:** contenteditable + `execCommand`; checklists are `<ul class="cl"><li data-done="1">` toggled by clicking the left 28px; saves are debounced 500ms; empty notes are auto-removed (tombstoned); deletes offer Undo.
+- **Maintain:** Help "Notes" pane (`helpPane-notes`, `HELP_TABS`) and the `notes` group in `shortcutGroups()` when behaviour changes. Tests: `tests/cases/notes.test.js`; `resetState()` in the harness resets the notes globals.
+- Not built yet: task linking, images/attachments, notebook-level sync decision.
+
 ## Conventions from this project's history
 
 - Font Awesome 6.5 (`fa-solid`/`fa-regular`) via CDN, used throughout.

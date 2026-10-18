@@ -765,14 +765,14 @@
   html[data-scheme="glass"] .sidebar-search input { border-radius: var(--radius); background: var(--bg-3); border-color: var(--glass-edge); }
 
   /* content: opaque and neutral — achieved by scoping the variables (see header) */
-  html[data-scheme="glass"] :is(.main, .drawer) {
+  html[data-scheme="glass"] :is(.main, .drawer, .notes-main) {
     --bg: #ffffff; --bg-2: #f6f6f9; --bg-3: #ececf1;
     --glass-strong: #ffffff; --glass-edge: rgba(40,44,70,.16); --glass-rim: transparent;
     --border: rgba(40,44,70,.10); --border-2: rgba(40,44,70,.20);
     --ink-border: var(--border); --ink-border-2: var(--border-2);
     background: var(--bg); border-radius: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none;
   }
-  html[data-scheme="glass"][data-theme="dark"] :is(.main, .drawer) {
+  html[data-scheme="glass"][data-theme="dark"] :is(.main, .drawer, .notes-main) {
     --bg: #1e1f24; --bg-2: #26272d; --bg-3: #31323a;
     --glass-strong: #26272d; --glass-edge: rgba(255,255,255,.14); --glass-rim: transparent;
     --border: rgba(255,255,255,.10); --border-2: rgba(255,255,255,.20);
@@ -824,8 +824,8 @@
      pill's right edge, so Glass draws a light, thin one (appearance:none keeps the
      native popup list). Must come after every Glass rule that sets the `background`
      shorthand (it would reset these). Two data-URIs because a data-URI can't read CSS variables. */
-  html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .quickadd-project, html[data-scheme="glass"] .field select, html[data-scheme="glass"] .modal select, html[data-scheme="glass"] .bulk-bar select { -webkit-appearance: none; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%2315161b' stroke-opacity='.45' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 12px 8px; }
-  html[data-scheme="glass"][data-theme="dark"] .main-toolbar select, html[data-scheme="glass"][data-theme="dark"] .quickadd-project, html[data-scheme="glass"][data-theme="dark"] .field select, html[data-scheme="glass"][data-theme="dark"] .modal select, html[data-scheme="glass"][data-theme="dark"] .bulk-bar select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%23f5f6fa' stroke-opacity='.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .quickadd-project, html[data-scheme="glass"] .field select, html[data-scheme="glass"] .modal select, html[data-scheme="glass"] .bulk-bar select, html[data-scheme="glass"] .note-select { -webkit-appearance: none; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%2315161b' stroke-opacity='.45' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 12px 8px; }
+  html[data-scheme="glass"][data-theme="dark"] .main-toolbar select, html[data-scheme="glass"][data-theme="dark"] .quickadd-project, html[data-scheme="glass"][data-theme="dark"] .field select, html[data-scheme="glass"][data-theme="dark"] .modal select, html[data-scheme="glass"][data-theme="dark"] .bulk-bar select, html[data-scheme="glass"][data-theme="dark"] .note-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%23f5f6fa' stroke-opacity='.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
   /* toolbar capsules sit a step lighter than the content (Mail: white capsules); background-color
      only, so the chevron image above is not reset */
@@ -1028,6 +1028,75 @@
   .aa-l { font-size: 17px; }
   .topbar-tools .tool-btn { min-width: 34px; height: 30px; }
   .ui-scale-panel .view-switch-btn { font-weight: 600; line-height: 1.2; }
+
+  /* ── Notes ─────────────────────────────────────────────────────────────────── */
+  .mode-switch { margin-left: 14px; }
+  html[data-scheme="glass"] .mode-switch .view-switch-btn { padding: 4px 12px; font-weight: 600; }
+  html[data-scheme="glass"] .mode-switch .view-switch-btn.active { background: var(--glass-strong); color: var(--text); box-shadow: inset 0 1px 0 var(--glass-rim), 0 2px 8px rgba(40,50,110,.15); }
+  /* In Notes the task sections of the sidebar, the task area and the side panel give way to the folder list and the notes area. */
+  #notesSide { display: none; flex-direction: column; flex: 1; min-height: 0; }
+  html[data-mode="notes"] #notesSide { display: flex; }
+  html[data-mode="notes"] .sidebar > :not(.sidebar-search):not(#notesSide) { display: none !important; }
+  html[data-mode="notes"] .main, html[data-mode="notes"] .drawer { display: none !important; }
+  .notes-main { display: none; flex: 1; min-width: 0; overflow: hidden; background: var(--bg); }
+  html[data-mode="notes"] .notes-main { display: flex; }
+  .notes-list-pane { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); }
+  .notes-list-head { display: flex; align-items: center; gap: 10px; padding: 16px 14px 4px 20px; }
+  .notes-list-head h2 { flex: 1; min-width: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .notes-list-sub { padding: 0 20px 8px; min-height: 22px; font-size: 12px; color: var(--text-3); }
+  #notesList { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 10px 16px; }
+  .notes-list-empty { padding: 28px 12px; text-align: center; font-size: 13px; color: var(--text-3); }
+  .note-row { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; border-radius: 10px; cursor: default; }
+  .note-row:hover:not(.selected) { background: var(--bg-2); }
+  .note-row:focus-visible { outline: none; }
+  .note-row.selected { background: var(--sel-bg); color: #fff; }
+  .note-row-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .note-row-sub { display: flex; gap: 8px; min-width: 0; font-size: 12px; color: var(--text-3); }
+  .note-row-date { flex-shrink: 0; color: var(--text-2); }
+  .note-row-snippet { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .note-row-folder { font-size: 11px; color: var(--text-3); }
+  .note-row-folder i { margin-right: 3px; }
+  .note-row.selected :is(.note-row-sub, .note-row-date, .note-row-folder) { color: rgba(255,255,255,.82); }
+  .notes-editor-pane { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+  .notes-empty { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-3); font-size: 14px; }
+  .notes-empty i { font-size: 30px; opacity: .5; }
+  .note-editor { display: none; flex-direction: column; flex: 1; min-height: 0; }
+  .note-editor.open { display: flex; }
+  .note-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 12px 24px 8px; }
+  .note-toolbar-grow { flex: 1; }
+  .note-toolbar .tool-btn.active { background: var(--bg-3); color: var(--text); }
+  .note-select { font-size: 12px; border: 1px solid var(--border-2); border-radius: 999px; padding: 4px 26px 4px 12px; background-color: var(--bg-2); color: var(--text); font-family: var(--font); max-width: 170px; }
+  .note-linkbar { display: flex; align-items: center; gap: 8px; margin: 0 24px 6px; padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--text) 5%, transparent); }
+  .note-linkbar[hidden] { display: none; }
+  .note-linkbar i { color: var(--text-3); font-size: 12px; }
+  .note-linkbar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; outline: none; box-shadow: none !important; }
+  .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 24px 56px; }
+  .note-doc { max-width: 760px; margin: 0 auto; }
+  .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
+  .note-title::placeholder { color: var(--text-3); }
+  .note-meta { margin-bottom: 14px; font-size: 12px; color: var(--text-3); }
+  .note-body { min-height: 50vh; outline: none; font-size: 15px; line-height: 1.65; color: var(--text); overflow-wrap: anywhere; }
+  .note-body.is-empty::before { content: attr(data-placeholder); color: var(--text-3); pointer-events: none; position: absolute; }
+  .note-body > :first-child { margin-top: 0; }
+  .note-body p, .note-body div { margin: 0 0 .45em; }
+  .note-body h1 { font-size: 24px; font-weight: 700; line-height: 1.3; margin: .9em 0 .35em; }
+  .note-body h2 { font-size: 20px; font-weight: 700; line-height: 1.3; margin: .85em 0 .3em; }
+  .note-body h3 { font-size: 16px; font-weight: 700; line-height: 1.35; margin: .8em 0 .25em; }
+  .note-body ul, .note-body ol { margin: .2em 0 .5em; padding-left: 26px; }
+  .note-body li { margin: .1em 0; }
+  .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
+  .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
+  .note-body code { font-family: var(--mono); font-size: .88em; padding: 1px 5px; border-radius: 4px; background: var(--bg-3); }
+  .note-body pre { font-family: var(--mono); font-size: 13px; padding: 10px 12px; border-radius: 8px; background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
+  .note-body hr { border: 0; border-top: 1px solid var(--border-2); margin: 1em 0; }
+  /* checklists: a round box drawn on the <li>; clicking in the left 28px ticks it */
+  .note-body ul.cl { list-style: none; padding-left: 2px; }
+  .note-body ul.cl > li { position: relative; padding-left: 28px; }
+  .note-body ul.cl > li::before { content: ""; position: absolute; left: 3px; top: .32em; width: 16px; height: 16px; box-sizing: border-box; border: 1.5px solid var(--border-2); border-radius: 50%; background: var(--bg); cursor: default; }
+  .note-body ul.cl > li[data-done="1"]::before { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2.5px var(--green-bg); }
+  .note-body ul.cl > li[data-done="1"]::after { content: ""; position: absolute; left: 8px; top: .5em; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .note-body ul.cl > li[data-done="1"] { color: var(--text-3); text-decoration: line-through; }
+  @media (max-width: 800px) { .notes-list-pane { width: 220px; } .note-toolbar, .note-scroll { padding-left: 14px; padding-right: 14px; } }
 </style>
 </head>
 <body>
@@ -1036,6 +1105,10 @@
   <div class="topbar-left">
     <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
   <div class="topbar-brand"><i class="fa-solid fa-list-check"></i><span><span class="brand-my">my</span><span class="brand-tasks">tasks</span></span></div>
+    <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks or Notes">
+      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')">Tasks</button>
+      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')">Notes</button>
+    </div>
   </div>
   <div class="topbar-actions">
     <span id="fileSyncIndicator"></span>
@@ -1082,6 +1155,20 @@
     <div class="sidebar-search">
       <i class="fa-solid fa-magnifying-glass search-icon"></i>
       <input type="text" id="searchInput" placeholder="Search tasks…" oninput="setSearchQuery(this.value)">
+    </div>
+    <div id="notesSide">
+      <div class="sidebar-section">
+        <div class="nav-item" id="allNotesNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('all')">
+          <span><i class="fa-regular fa-note-sticky" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Notes</span>
+          <span class="count" id="allNotesCount"></span>
+        </div>
+      </div>
+      <div class="sidebar-section grow">
+        <div class="sidebar-section-label">Folders <span class="sidebar-section-actions">
+          <button class="icon-btn" onclick="openFolderModal()" title="New folder"><i class="fa-solid fa-plus"></i></button>
+        </span></div>
+        <div id="noteFolderList"></div>
+      </div>
     </div>
     <div class="sidebar-section">
       <div class="nav-item" id="allTasksNav" role="button" tabindex="0" aria-pressed="false" onclick="setProjectFilter(null)">
@@ -1176,6 +1263,58 @@
     <div class="board" id="board" style="display:none"></div>
   </div>
   <div class="drawer" id="drawer"></div>
+  <div class="notes-main" id="notesMain">
+    <div class="notes-list-pane">
+      <div class="notes-list-head">
+        <h2 id="notesListTitle">All Notes</h2>
+        <button type="button" class="btn btn-sm" onclick="createNote()" title="New note (N)"><i class="fa-solid fa-plus"></i> New</button>
+      </div>
+      <div class="notes-list-sub" id="notesListSub"></div>
+      <div id="notesList" role="listbox" aria-label="Notes"></div>
+    </div>
+    <div class="notes-editor-pane">
+      <div class="notes-empty" id="notesEmpty"><i class="fa-regular fa-note-sticky"></i><div>No note selected</div><button type="button" class="btn btn-sm" onclick="createNote()"><i class="fa-solid fa-plus"></i> New note</button></div>
+      <div class="note-editor" id="noteEditor">
+        <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
+          <select id="noteStyleSelect" class="note-select" aria-label="Text style" onchange="noteBlock(this.value)">
+            <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option>
+          </select>
+          <div class="tool-group">
+            <button type="button" class="tool-btn" data-cmd="bold" onclick="noteCmd('bold')" title="Bold (⌘B)" aria-label="Bold"><i class="fa-solid fa-bold"></i></button>
+            <button type="button" class="tool-btn" data-cmd="italic" onclick="noteCmd('italic')" title="Italic (⌘I)" aria-label="Italic"><i class="fa-solid fa-italic"></i></button>
+            <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><i class="fa-solid fa-underline"></i></button>
+            <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><i class="fa-solid fa-strikethrough"></i></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" class="tool-btn" data-cmd="bullets" onclick="noteBullets()" title="Bulleted list" aria-label="Bulleted list"><i class="fa-solid fa-list-ul"></i></button>
+            <button type="button" class="tool-btn" data-cmd="numbers" onclick="noteCmd('insertOrderedList')" title="Numbered list" aria-label="Numbered list"><i class="fa-solid fa-list-ol"></i></button>
+            <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><i class="fa-regular fa-square-check"></i></button>
+          </div>
+          <div class="tool-group">
+            <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><i class="fa-solid fa-link"></i></button>
+            <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><i class="fa-solid fa-eraser"></i></button>
+          </div>
+          <span class="note-toolbar-grow"></span>
+          <select id="noteFolderSelect" class="note-select" aria-label="Folder" title="Move to folder" onchange="moveNote(noteEditorId, this.value)"></select>
+          <button type="button" class="tool-btn tool-danger note-del" onclick="deleteNote(noteEditorId)" title="Delete note" aria-label="Delete note"><i class="fa-regular fa-trash-can"></i></button>
+        </div>
+        <div class="note-linkbar" id="noteLinkBar" hidden>
+          <i class="fa-solid fa-link"></i>
+          <input type="text" id="noteLinkInput" placeholder="Paste or type a link" aria-label="Link address" autocomplete="off" onkeydown="onNoteLinkKey(event)">
+          <button type="button" class="btn btn-sm" onclick="applyNoteLink()">Apply</button>
+          <button type="button" class="btn btn-sm" onclick="closeNoteLinkBar()">Cancel</button>
+        </div>
+        <div class="note-scroll">
+          <div class="note-doc">
+            <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
+            <div class="note-meta" id="noteMeta"></div>
+            <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing…"
+                 oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -1187,6 +1326,18 @@
     <div class="modal-actions">
       <button class="btn" onclick="closeAllModals()">Cancel</button>
       <button class="btn btn-danger" id="confirmModalBtn" onclick="confirmModalAction()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Folder modal -->
+<div class="modal-bg" id="folderModalBg" onclick="if(event.target===this) closeAllModals()">
+  <div class="modal">
+    <h3 id="folderModalTitle">New Folder</h3>
+    <input spellcheck="true" type="text" id="folderNameInput" placeholder="Folder name" maxlength="40" onkeydown="if(event.key==='Enter') saveFolderModal()">
+    <div class="modal-actions">
+      <button class="btn" onclick="closeAllModals()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFolderModal()">Save</button>
     </div>
   </div>
 </div>
@@ -1230,6 +1381,7 @@
         <button type="button" role="tab" id="helpTab-nest" aria-selected="false" tabindex="-1" aria-controls="helpPane-nest" onclick="setHelpTab('nest')"><i class="fa-solid fa-list-check"></i><span>Subtasks &amp; repeating</span></button>
         <button type="button" role="tab" id="helpTab-views" aria-selected="false" tabindex="-1" aria-controls="helpPane-views" onclick="setHelpTab('views')"><i class="fa-solid fa-table-columns"></i><span>Views &amp; filters</span></button>
         <button type="button" role="tab" id="helpTab-org" aria-selected="false" tabindex="-1" aria-controls="helpPane-org" onclick="setHelpTab('org')"><i class="fa-regular fa-folder"></i><span>Projects &amp; tags</span></button>
+        <button type="button" role="tab" id="helpTab-notes" aria-selected="false" tabindex="-1" aria-controls="helpPane-notes" onclick="setHelpTab('notes')"><i class="fa-regular fa-note-sticky"></i><span>Notes</span></button>
         <button type="button" role="tab" id="helpTab-look" aria-selected="false" tabindex="-1" aria-controls="helpPane-look" onclick="setHelpTab('look')"><i class="fa-solid fa-circle-half-stroke"></i><span>Appearance</span></button>
         <button type="button" role="tab" id="helpTab-data" aria-selected="false" tabindex="-1" aria-controls="helpPane-data" onclick="setHelpTab('data')"><i class="fa-solid fa-hard-drive"></i><span>Data &amp; sync</span></button>
       </div>
@@ -1346,6 +1498,26 @@
           <div class="help-section-title">Tags</div>
           <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-tag"></i><span>Tags (<em>waiting on</em>, <em>deep work</em>, <em>someday</em>) are added to a task as chips in the side panel. On a list row they show as pills next to the title, on a board card as coloured strips. Click one in the sidebar to filter by it.</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="help-pane" id="helpPane-notes" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-notes" hidden>
+        <div class="help-section">
+          <div class="help-section-title">Writing notes</div>
+          <div class="help-list">
+          <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em> and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
+          <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
+          <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
+          <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
+          </div>
+        </div>
+        <div class="help-section">
+          <div class="help-section-title">Folders &amp; finding notes</div>
+          <div class="help-list">
+          <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Folders</strong>: <strong>+</strong> beside <em>Folders</em> adds one; hover a folder to rename or delete it. Deleting a folder moves its notes to <em>Notes</em> (undo is in the toast). Move a note with the folder menu in its toolbar.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of the notes in the current folder.</span></div>
+          <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Delete</kbd> while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
+          <div class="help-row"><i class="fa-solid fa-hard-drive"></i><span>Notes are part of your data: they are saved in this browser, included in <strong>Export</strong>, <strong>Import</strong> and <strong>Backups</strong>, and kept in the linked file. When two copies of a note differ, the newer edit wins.</span></div>
           </div>
         </div>
       </div>
@@ -1581,6 +1753,8 @@ let projects = [], tasks = [];
 // (an old linked file, another device) gets treated as new and silently
 // resurrects it. See mergeData() for how these gate re-adding an id.
 let deletedTaskIds = [], deletedProjectIds = [];
+// Notes (see the Notes section below): folders and notes ride in the same data blob; their tombstones work like the tasks'.
+let notes = [], noteFolders = [], deletedNoteIds = [], deletedNoteFolderIds = [];
 let activeTaskId = null;
 let kbdSelectedTaskId = null;
 let renamingTaskId = null;
@@ -1698,6 +1872,7 @@ function normalizeData(){
   deletedProjectIds = deletedProjectIds.filter(x=>x && x.id);
   if(!Array.isArray(allTasksHiddenProjectIds)) allTasksHiddenProjectIds=[];
   allTasksHiddenProjectIds = allTasksHiddenProjectIds.filter(id=>projects.some(p=>p.id===id));
+  normalizeNotes();
 }
 function load(){
   try{
@@ -1708,6 +1883,8 @@ function load(){
       tasks = d.tasks || defaultTasks();
       deletedTaskIds = d.deletedTaskIds || [];
       deletedProjectIds = d.deletedProjectIds || [];
+      notes = d.notes || []; noteFolders = d.noteFolders || [];
+      deletedNoteIds = d.deletedNoteIds || []; deletedNoteFolderIds = d.deletedNoteFolderIds || [];
       allTasksHiddenProjectIds = d.allTasksHiddenProjectIds || [];
       sortBy = d.sortBy || 'smart';
       if(d.viewMode==='board'||d.viewMode==='list'){ viewMode=d.viewMode; localStorage.setItem(VIEW_KEY, viewMode); }
@@ -1720,10 +1897,15 @@ function load(){
   }catch(e){
     projects = defaultProjects();
     tasks = defaultTasks();
+    notes = []; noteFolders = []; deletedNoteIds = []; deletedNoteFolderIds = []; normalizeNotes();
   }
 }
+// Everything that is saved to localStorage and to the linked file. (Per-device choices — theme, mode, sidebar — are not in it.)
+function dataPayload(){
+  return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
+}
 function save(){
-  const data = { projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
+  const data = dataPayload();
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
   maybeSnapshotBackup();
@@ -1741,7 +1923,7 @@ function maybeSnapshotBackup(){
     const backups = getBackups();
     const today = todayStr();
     if(backups.length && backups[backups.length-1].date===today) return;
-    backups.push({ date: today, savedAt: Date.now(), projects, tasks });
+    backups.push({ date: today, savedAt: Date.now(), projects, tasks, notes, noteFolders });
     while(backups.length > MAX_BACKUPS) backups.shift();
     localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
   }catch(e){ /* backups are a bonus, not a requirement for save() to succeed */ }
@@ -1891,6 +2073,7 @@ function isThisWeek(dueDate){
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
+  if(appMode==='notes'){ renderNotes(); return; }
   renderSidebar();
   if(viewMode==='board'){ renderBoard(); } else { renderList(); }
   renderDrawer();
@@ -4112,7 +4295,10 @@ function setTagFilter(tg){
   save(); render();
 }
 function setSortBy(v){ sortBy = v; save(); render(); }
-function setSearchQuery(v){ searchQuery = v; render(); }
+function setSearchQuery(v){
+  if(appMode==='notes'){ noteSearchQuery = v; renderNotesList(); return; }   // in Notes the search box filters notes
+  searchQuery = v; render();
+}
 
 // ── Modals ────────────────────────────────────────────────────────────────────
 function closeAllModals(){
@@ -4149,6 +4335,9 @@ function shortcutGroups(){
       ['Open a task', ['Double-click']], ['Rename the selected task', ['F2']], ['Open the row menu', ['Right-click']],
       ['Rename title or subtask', ['Double-click text']], ['Change priority, status or due date', ['Click its badge']],
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
+    { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
+      ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
+      ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -4207,9 +4396,471 @@ function scTabKey(e){
   e.preventDefault(); setScTab(ids[next]); document.getElementById('scTab-' + ids[next]).focus();
 }
 function scPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.classList.contains('help-pane')){ e.preventDefault(); focusScTab(); } }
+
+// ── Notes ─────────────────────────────────────────────────────────────────────
+// A second area of the app: folders ({id,name,locked?}) holding notes
+// ({id,title,body,folderId,createdAt,updatedAt}); `body` is sanitized HTML written in a
+// contenteditable editor. Notes ride along in the same data blob as tasks, so they save,
+// back up, export/import and sync (newer edit of a note wins; deletions are tombstoned).
+const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder';
+const NOTES_DEFAULT_FOLDER = 'nf-notes';
+let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '';
+try{
+  if(localStorage.getItem(MODE_KEY)==='notes') appMode = 'notes';
+  const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
+}catch(_){}
+let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRange = null, noteDragFromEditor = false, editingFolderId = null;
+
+// ---- the HTML allowlist. Note bodies are HTML that comes from a contenteditable *and* from pasted text and from files we
+// merge in, so every path (paste, drop, save, load, merge) goes through this: only the tags below survive, attributes are
+// rebuilt from scratch (never copied), and a link must be http(s) or mailto. It is string-based on purpose: it also runs in the
+// test harness, which has no DOM. ----
+const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr']);
+const NOTE_VOID = new Set(['br','hr']);
+function decodeHtmlEntities(s){
+  return String(s)
+    .replace(/&#x([0-9a-f]+);?/gi, (m,h)=>String.fromCharCode(parseInt(h,16)))
+    .replace(/&#(\d+);?/g, (m,d)=>String.fromCharCode(parseInt(d,10)))
+    .replace(/&(colon|tab|newline|lpar|rpar);?/gi, (m,n)=>({colon:':',tab:'\t',newline:'\n',lpar:'(',rpar:')'})[n.toLowerCase()])
+    .replace(/&amp;/gi, '&');
+}
+function safeNoteHref(v){
+  const u = decodeHtmlEntities(v||'').replace(/[\u0000-\u0020\u007f-\u009f\u200b-\u200f\u2028\u2029\ufeff]/g, '');
+  return /^(https?:\/\/|mailto:)/i.test(u) ? u.slice(0,2000) : '';
+}
+function sanitizeNoteHtml(html){
+  let s = String(html==null ? '' : html);
+  if(!s) return '';
+  s = s.replace(/<!--[\s\S]*?-->/g, '')
+       .replace(/<(script|style|iframe|object|embed|template|svg|math|noscript|title|head|textarea|select|button|form|xmp|plaintext)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
+  const re = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>|([^<]+)|</g;
+  let out = '', m;
+  while((m = re.exec(s))){
+    if(m[4]!==undefined){ out += m[4]; continue; }            // text: entities stay as written, so it stays inert
+    if(m[2]===undefined){ out += '&lt;'; continue; }          // a stray "<"
+    const closing = m[1]==='/', name = m[2].toLowerCase(), attrs = m[3] || '';
+    if(!NOTE_TAGS.has(name)) continue;                        // everything else is dropped (its text is kept)
+    if(closing){ if(!NOTE_VOID.has(name)) out += `</${name}>`; continue; }
+    if(name==='a'){
+      const hm = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i.exec(attrs);
+      const href = hm ? safeNoteHref(hm[1]!==undefined ? hm[1] : hm[2]!==undefined ? hm[2] : hm[3]) : '';
+      out += href ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer">` : '<a>';
+    }
+    else if(name==='li') out += /\bdata-done\s*=\s*["']?1/i.test(attrs) ? '<li data-done="1">' : '<li>';
+    else if(name==='ul') out += /\bclass\s*=\s*["']?[^"'>]*\bcl\b/i.test(attrs) ? '<ul class="cl">' : '<ul>';
+    else out += `<${name}>`;
+  }
+  return out;
+}
+function noteText(body){
+  return String(body||'')
+    .replace(/<(br|\/p|\/div|\/li|\/h[1-3]|\/blockquote|\/pre)[^>]*>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ').trim();
+}
+function noteSnippet(n){ return noteText(n.body).slice(0, 110); }
+function noteIsEmpty(n){ return !n.title.trim() && !noteText(n.body) && !/<(hr|ul|ol)\b/i.test(n.body); }
+
+function normalizeNotes(){
+  if(!Array.isArray(notes)) notes = [];
+  if(!Array.isArray(noteFolders)) noteFolders = [];
+  noteFolders = noteFolders.filter(f=>f && typeof f==='object');
+  noteFolders.forEach(f=>{ if(!isSafeId(f.id)) f.id = genId(); f.name = String(f.name || 'Folder').slice(0,40); });
+  if(!noteFolders.some(f=>f.id===NOTES_DEFAULT_FOLDER)) noteFolders.unshift({id:NOTES_DEFAULT_FOLDER, name:'Notes', locked:true});
+  noteFolders.forEach(f=>{ if(f.id===NOTES_DEFAULT_FOLDER) f.locked = true; });
+  notes = notes.filter(n=>n && typeof n==='object');
+  notes.forEach(n=>{
+    if(!isSafeId(n.id)) n.id = genId();
+    n.title = String(n.title || '').slice(0,200);
+    n.body = sanitizeNoteHtml(n.body);
+    if(!noteFolders.some(f=>f.id===n.folderId)) n.folderId = NOTES_DEFAULT_FOLDER;
+    if(!n.createdAt) n.createdAt = Date.now();
+    if(!n.updatedAt) n.updatedAt = n.createdAt;
+  });
+  if(!Array.isArray(deletedNoteIds)) deletedNoteIds = [];
+  if(!Array.isArray(deletedNoteFolderIds)) deletedNoteFolderIds = [];
+  deletedNoteIds = deletedNoteIds.filter(x=>x && x.id);
+  deletedNoteFolderIds = deletedNoteFolderIds.filter(x=>x && x.id);
+}
+// Same rules as tasks: the newer edit of a note wins, a tombstone keeps a deleted note deleted unless the incoming copy is newer.
+function mergeNotesData(data, respectTombstones){
+  let added = 0, updated = 0;
+  const mergeTombs = (local, incoming)=>(incoming||[]).forEach(d=>{
+    if(!d || !d.id) return;
+    const ex = local.find(x=>x.id===d.id);
+    if(!ex) local.push({id:d.id, deletedAt:d.deletedAt||Date.now()});
+    else if((d.deletedAt||0) > ex.deletedAt) ex.deletedAt = d.deletedAt;
+  });
+  mergeTombs(deletedNoteFolderIds, data.deletedNoteFolderIds);
+  mergeTombs(deletedNoteIds, data.deletedNoteIds);
+  (data.noteFolders||[]).forEach(f=>{
+    if(!f || !f.id || noteFolders.some(x=>x.id===f.id)) return;
+    if(f.id!==NOTES_DEFAULT_FOLDER && respectTombstones && deletedNoteFolderIds.some(x=>x.id===f.id)) return;
+    if(!respectTombstones) untombstone(deletedNoteFolderIds, f.id);
+    noteFolders.push(f);
+  });
+  (data.notes||[]).forEach(it=>{
+    if(!it || !it.id) return;
+    const existing = notes.find(n=>n.id===it.id);
+    if(existing){ if((it.updatedAt||0) > (existing.updatedAt||0)){ Object.assign(existing, it); updated++; } return; }
+    const tomb = deletedNoteIds.find(x=>x.id===it.id);
+    if(respectTombstones && tomb && tomb.deletedAt >= (it.updatedAt||0)) return;
+    if(tomb) untombstone(deletedNoteIds, it.id);
+    notes.push(it); added++;
+  });
+  return {added, updated};
+}
+
+// ---- mode ----
+function applyAppMode(){
+  document.documentElement.setAttribute('data-mode', appMode);
+  const si = document.getElementById('searchInput');
+  if(si){ si.placeholder = appMode==='notes' ? 'Search notes…' : 'Search tasks…'; si.value = appMode==='notes' ? noteSearchQuery : searchQuery; }
+  document.querySelectorAll('#modeSwitch .view-switch-btn').forEach(b=>{ const on = b.dataset.mode===appMode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+}
+function setAppMode(mode){
+  mode = mode==='notes' ? 'notes' : 'tasks';
+  if(mode===appMode) return;
+  if(appMode==='notes'){ flushNoteEdit(); removeIfEmptyNote(selectedNoteId); }
+  appMode = mode;
+  try{ localStorage.setItem(MODE_KEY, mode); }catch(_){}
+  applyAppMode(); render();
+}
+
+// ---- lists ----
+function visibleNotes(){
+  const words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return notes
+    .filter(n=>(noteFolderFilter==='all' || n.folderId===noteFolderFilter) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
+    .sort((a,b)=>b.updatedAt - a.updatedAt);
+}
+function folderById(id){ return noteFolders.find(f=>f.id===id); }
+function fmtNoteDate(ts){
+  const d = new Date(ts), now = new Date();
+  const day = x=>new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const diff = Math.round((day(now) - day(d)) / 86400000);
+  if(diff===0) return d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'});
+  if(diff===1) return 'Yesterday';
+  if(diff>1 && diff<7) return d.toLocaleDateString(undefined, {weekday:'long'});
+  return d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
+}
+function renderNotesSidebar(){
+  const counts = {}; notes.forEach(n=>{ counts[n.folderId] = (counts[n.folderId]||0) + 1; });
+  const all = document.getElementById('allNotesNav'), cnt = document.getElementById('allNotesCount');
+  if(cnt) cnt.textContent = notes.length;
+  if(all){ all.classList.toggle('active', noteFolderFilter==='all'); all.setAttribute('aria-pressed', noteFolderFilter==='all' ? 'true' : 'false'); }
+  const list = document.getElementById('noteFolderList');
+  if(list) list.innerHTML = noteFolders.map(f=>`<div class="project-row ${noteFolderFilter===f.id?'active':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')">
+      <i class="fa-regular fa-folder picon"></i>
+      <span class="pname">${esc(f.name)}</span>
+      <span class="count">${counts[f.id]||0}</span>
+      ${f.locked ? '' : `<span class="project-actions row-actions">
+        <button class="icon-btn" onclick="event.stopPropagation();openFolderModal('${f.id}')" title="Rename"><i class="fa-solid fa-pen"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();deleteNoteFolder('${f.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+      </span>`}
+    </div>`).join('');
+}
+function renderNotesList(vis){
+  vis = vis || visibleNotes();
+  const title = document.getElementById('notesListTitle'), sub = document.getElementById('notesListSub'), list = document.getElementById('notesList');
+  const f = folderById(noteFolderFilter);
+  if(title) title.textContent = noteFolderFilter==='all' ? 'All Notes' : (f ? f.name : 'Notes');
+  if(sub) sub.textContent = vis.length ? `${vis.length} note${vis.length===1?'':'s'}` : '';
+  if(!list) return;
+  if(!vis.length){
+    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No notes match your search.' : 'No notes yet.'}</div>`;
+    return;
+  }
+  list.innerHTML = vis.map(n=>{
+    const sel = n.id===selectedNoteId, fol = folderById(n.folderId);
+    return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')">
+      <div class="note-row-title">${esc(n.title || 'New note')}</div>
+      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
+      ${noteFolderFilter==='all' && fol ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(fol.name)}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+function updateNoteMeta(n){
+  const el = document.getElementById('noteMeta'); if(!el || !n) return;
+  const fol = folderById(n.folderId);
+  el.textContent = `Edited ${new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})}${fol ? ' · ' + fol.name : ''}`;
+}
+function renderNoteEditor(){
+  const n = notes.find(x=>x.id===selectedNoteId);
+  const ed = document.getElementById('noteEditor'), empty = document.getElementById('notesEmpty');
+  if(!n){ ed?.classList.remove('open'); if(empty) empty.style.display = ''; noteEditorId = null; return; }
+  ed?.classList.add('open'); if(empty) empty.style.display = 'none';
+  const title = document.getElementById('noteTitle'), body = document.getElementById('noteBody');
+  if(noteEditorId!==n.id || noteEditorStamp!==n.updatedAt){
+    // (re)load: a different note, or one changed from outside (a sync) that is not being edited right now
+    title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt;
+    body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
+  }
+  const sel = document.getElementById('noteFolderSelect');
+  if(sel) sel.innerHTML = noteFolders.map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${esc(f.name)}</option>`).join('');
+  updateNoteMeta(n);
+}
+function renderNotes(){
+  if(noteFolderFilter!=='all' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
+  const vis = visibleNotes();
+  if(selectedNoteId && !notes.some(n=>n.id===selectedNoteId)) selectedNoteId = null;
+  if(!selectedNoteId && vis.length) selectedNoteId = vis[0].id;      // open the newest note, like Apple Notes
+  renderNotesSidebar(); renderNotesList(vis); renderNoteEditor();
+}
+
+// ---- editing state ----
+function scheduleNoteSave(){ if(typeof clearTimeout==='function') clearTimeout(noteSaveTimer); noteSaveTimer = (typeof setTimeout==='function') ? setTimeout(commitNoteEdit, 500) : null; }
+function flushNoteEdit(){ if(noteSaveTimer){ if(typeof clearTimeout==='function') clearTimeout(noteSaveTimer); noteSaveTimer = null; commitNoteEdit(); } }
+function commitNoteEdit(){
+  noteSaveTimer = null;
+  const n = notes.find(x=>x.id===noteEditorId); if(!n) return;
+  const title = (document.getElementById('noteTitle').value || '').slice(0,200);
+  const body = sanitizeNoteHtml(document.getElementById('noteBody').innerHTML);
+  if(title===n.title && body===n.body) return;
+  n.title = title; n.body = body; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
+  save(); renderNotesList(); updateNoteMeta(n);
+}
+function removeIfEmptyNote(id){
+  const n = notes.find(x=>x.id===id);
+  if(!n || !noteIsEmpty(n)) return;
+  notes.splice(notes.indexOf(n), 1); tombstone(deletedNoteIds, id); save();
+}
+function syncSearchBox(){ const si = document.getElementById('searchInput'); if(si && appMode==='notes') si.value = noteSearchQuery; }
+
+// ---- actions ----
+function selectNote(id){
+  if(id===selectedNoteId) return;
+  flushNoteEdit();
+  const leaving = selectedNoteId; selectedNoteId = id;
+  removeIfEmptyNote(leaving);
+  render();
+}
+function createNote(){
+  flushNoteEdit();
+  const leaving = selectedNoteId;
+  const now = Date.now();
+  const n = { id: genId(), title:'', body:'', folderId: folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, createdAt: now, updatedAt: now };
+  notes.push(n); selectedNoteId = n.id;
+  if(leaving && leaving!==n.id) removeIfEmptyNote(leaving);
+  noteSearchQuery = ''; syncSearchBox();
+  save(); render();
+  document.getElementById('noteTitle')?.focus();
+}
+function deleteNote(id){
+  const idx = notes.findIndex(n=>n.id===id); if(idx===-1) return;
+  flushNoteEdit();
+  const vis = visibleNotes(), vi = vis.findIndex(n=>n.id===id);
+  const [removed] = notes.splice(idx, 1);
+  tombstone(deletedNoteIds, id);
+  if(selectedNoteId===id){ const next = vis[vi+1] || vis[vi-1]; selectedNoteId = next ? next.id : null; }
+  noteEditorId = null;
+  save(); render();
+  showToast('Note deleted', false, ()=>{
+    untombstone(deletedNoteIds, id);
+    removed.updatedAt = Date.now();
+    notes.push(removed); selectedNoteId = id; noteEditorId = null;
+    save(); render(); showToast('Note restored');
+  });
+}
+function moveNote(id, folderId){
+  const n = notes.find(x=>x.id===id); if(!n || !folderById(folderId) || n.folderId===folderId) return;
+  flushNoteEdit();
+  n.folderId = folderId; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
+  if(noteFolderFilter!=='all' && noteFolderFilter!==folderId) selectedNoteId = null;
+  save(); render();
+}
+function setNoteFolder(id){
+  flushNoteEdit();
+  const leaving = selectedNoteId;
+  noteFolderFilter = (id==='all' || folderById(id)) ? id : 'all';
+  try{ localStorage.setItem(NOTES_FOLDER_KEY, noteFolderFilter); }catch(_){}
+  selectedNoteId = null; removeIfEmptyNote(leaving);
+  render();
+}
+function openFolderModal(id){
+  editingFolderId = id || null;
+  const f = id ? folderById(id) : null;
+  document.getElementById('folderModalTitle').textContent = f ? 'Rename Folder' : 'New Folder';
+  const input = document.getElementById('folderNameInput'); input.value = f ? f.name : '';
+  document.getElementById('folderModalBg').classList.add('open');
+  if(typeof setTimeout==='function') setTimeout(()=>{ input.focus(); input.select(); }, 50);   // the dialog fades in; a hidden field cannot take focus
+}
+function saveFolderModal(){
+  const name = (document.getElementById('folderNameInput').value || '').trim().slice(0,40);
+  if(!name) return;
+  if(editingFolderId){ const f = folderById(editingFolderId); if(f && !f.locked) f.name = name; }
+  else { const f = {id: genId(), name}; noteFolders.push(f); noteFolderFilter = f.id; try{ localStorage.setItem(NOTES_FOLDER_KEY, f.id); }catch(_){} selectedNoteId = null; }
+  closeAllModals(); save(); render();
+}
+function deleteNoteFolder(id){
+  const f = folderById(id); if(!f || f.locked) return;
+  const count = notes.filter(n=>n.folderId===id).length;
+  openConfirmModal({
+    title: `Delete "${f.name}"?`,
+    body: (count ? `${count} note${count===1?'':'s'} will move to Notes. ` : '') + 'You can undo this from the toast right after deleting.',
+    action: ()=>{
+      const idx = noteFolders.findIndex(x=>x.id===id); if(idx===-1) return;
+      flushNoteEdit();
+      const [removed] = noteFolders.splice(idx, 1);
+      tombstone(deletedNoteFolderIds, id);
+      const moved = [];
+      notes.forEach(n=>{ if(n.folderId===id){ moved.push(n.id); n.folderId = NOTES_DEFAULT_FOLDER; n.updatedAt = Date.now(); } });
+      if(noteFolderFilter===id) noteFolderFilter = 'all';
+      noteEditorId = null;
+      save(); render();
+      showToast('Folder deleted', false, ()=>{
+        untombstone(deletedNoteFolderIds, id);
+        noteFolders.splice(idx, 0, removed);
+        moved.forEach(nid=>{ const n = notes.find(x=>x.id===nid); if(n){ n.folderId = id; n.updatedAt = Date.now(); } });
+        noteEditorId = null; save(); render(); showToast('Folder restored');
+      });
+    }
+  });
+}
+
+// ---- the editor (contenteditable + execCommand: deprecated on paper, but it is what every browser still ships and needs no library) ----
+function noteClosest(node, tag){
+  const body = document.getElementById('noteBody');
+  while(node && node!==body){ if(node.nodeType===1 && node.tagName===tag) return node; node = node.parentNode; }
+  return null;
+}
+function noteFocusBody(){ const b = document.getElementById('noteBody'); if(b && document.activeElement!==b) b.focus(); }
+function noteCmd(cmd, val){ noteFocusBody(); document.execCommand(cmd, false, val); onNoteInput(); updateNoteToolbarState(); }
+function noteBlock(tag){ noteFocusBody(); document.execCommand('formatBlock', false, `<${tag}>`); onNoteInput(); updateNoteToolbarState(); }
+function noteBullets(){
+  noteFocusBody();
+  const sel = window.getSelection(), ul = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'UL') : null;
+  if(ul && ul.classList.contains('cl')) ul.classList.remove('cl');          // checklist → plain bullets
+  else document.execCommand('insertUnorderedList', false);
+  onNoteInput(); updateNoteToolbarState();
+}
+function noteChecklist(){
+  noteFocusBody();
+  const sel = window.getSelection();
+  let ul = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'UL') : null;
+  if(ul && ul.classList.contains('cl')){ document.execCommand('insertUnorderedList', false); }   // off
+  else {
+    if(!ul) document.execCommand('insertUnorderedList', false);
+    ul = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'UL') : null;
+    if(ul) ul.classList.add('cl');
+  }
+  onNoteInput(); updateNoteToolbarState();
+}
+function noteClearFormat(){ noteFocusBody(); document.execCommand('removeFormat', false); document.execCommand('formatBlock', false, '<p>'); onNoteInput(); updateNoteToolbarState(); }
+function updateNoteToolbarState(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection ? window.getSelection() : null;
+  if(!body || !sel || !sel.rangeCount || !body.contains(sel.anchorNode)) return;
+  const set = (cmd, on)=>{ const b = document.querySelector(`.note-toolbar [data-cmd="${cmd}"]`); if(b) b.classList.toggle('active', !!on); };
+  ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, document.queryCommandState(c)));
+  const ul = noteClosest(sel.anchorNode, 'UL'), ol = noteClosest(sel.anchorNode, 'OL');
+  set('bullets', ul && !ul.classList.contains('cl')); set('checklist', ul && ul.classList.contains('cl')); set('numbers', !!ol);
+  const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
+  const style = document.getElementById('noteStyleSelect'); if(style) style.value = /^h[1-3]$/.test(v) ? v : 'p';
+}
+function onNoteInput(e){
+  const body = document.getElementById('noteBody');
+  if(e && e.inputType==='insertParagraph'){            // a new checklist line starts unticked
+    const sel = window.getSelection(), li = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'LI') : null;
+    if(li) li.removeAttribute('data-done');
+  }
+  body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
+  scheduleNoteSave();
+}
+function onNoteKeydown(e){
+  if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase()==='k'){ e.preventDefault(); openNoteLinkBar(); return; }
+  if(e.key==='Tab'){
+    const sel = window.getSelection();
+    if(sel && sel.rangeCount && noteClosest(sel.anchorNode, 'LI')){ e.preventDefault(); document.execCommand(e.shiftKey ? 'outdent' : 'indent', false); onNoteInput(); }
+  }
+}
+function onNoteTitleKey(e){ if(e.key==='Enter'){ e.preventDefault(); const b = document.getElementById('noteBody'); if(b) b.focus(); } }
+function onNoteBodyClick(e){
+  const t = e.target;
+  if(t && t.tagName==='LI' && t.parentNode && t.parentNode.classList && t.parentNode.classList.contains('cl') && e.offsetX < 28){
+    if(t.getAttribute('data-done')==='1') t.removeAttribute('data-done'); else t.setAttribute('data-done', '1');
+    onNoteInput(); return;
+  }
+  const a = t && t.closest ? t.closest('a') : null;
+  if(a && (e.metaKey || e.ctrlKey)){ e.preventDefault(); const h = safeNoteHref(a.getAttribute('href')); if(h) window.open(h, '_blank', 'noopener'); }
+}
+function noteInsertClean(html, text){
+  if(html) document.execCommand('insertHTML', false, sanitizeNoteHtml(html));
+  else document.execCommand('insertText', false, text || '');
+}
+function onNotePaste(e){
+  e.preventDefault();
+  const cd = e.clipboardData; if(!cd) return;
+  noteInsertClean(cd.getData('text/html'), cd.getData('text/plain'));
+  onNoteInput();
+}
+function onNoteDrop(e){
+  if(noteDragFromEditor){ noteDragFromEditor = false; return; }     // moving text around inside the editor is fine
+  e.preventDefault();                                              // anything dragged in from outside is cleaned like a paste
+  const dt = e.dataTransfer; if(!dt) return;
+  if(document.caretRangeFromPoint){
+    const r = document.caretRangeFromPoint(e.clientX, e.clientY);
+    if(r){ const s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
+  }
+  noteInsertClean(dt.getData('text/html'), dt.getData('text/plain'));
+  onNoteInput();
+}
+// ---- the link bar (the selection is lost when the field takes focus, so it is remembered and put back) ----
+function openNoteLinkBar(){
+  const bar = document.getElementById('noteLinkBar'), input = document.getElementById('noteLinkInput');
+  const sel = window.getSelection();
+  noteSavedRange = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
+  const a = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'A') : null;
+  input.value = a ? (a.getAttribute('href') || '') : '';
+  bar.hidden = false; input.focus(); input.select();
+}
+function closeNoteLinkBar(){ const bar = document.getElementById('noteLinkBar'); if(bar) bar.hidden = true; noteFocusBody(); }
+function applyNoteLink(){
+  const input = document.getElementById('noteLinkInput');
+  let v = (input.value || '').trim();
+  const body = document.getElementById('noteBody');
+  body.focus();
+  if(noteSavedRange){ const s = window.getSelection(); s.removeAllRanges(); s.addRange(noteSavedRange); }
+  if(!v){ document.execCommand('unlink', false); }
+  else {
+    if(!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'mailto:' + v : 'https://' + v;
+    const href = safeNoteHref(v);
+    if(href){
+      const s = window.getSelection();
+      if(s && s.isCollapsed) document.execCommand('insertHTML', false, `<a href="${esc(href)}">${esc(v)}</a>`);
+      else document.execCommand('createLink', false, href);
+    }
+  }
+  document.getElementById('noteLinkBar').hidden = true;
+  onNoteInput();
+}
+function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
+document.addEventListener('selectionchange', ()=>{ if(appMode==='notes') updateNoteToolbarState(); });
+window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); });
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') flushNoteEdit(); });
+
+// ---- keyboard (the list side; the editor has its own handlers) ----
+function handleNotesKeys(e){
+  if(document.querySelector('.modal-bg.open')) return;
+  const el = document.activeElement, typing = isTypingTarget(el);
+  const onList = !el || el===document.body || (el.classList && el.classList.contains('note-row'));
+  if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
+  if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
+  if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
+  if(!onList || typing) return;
+  const vis = visibleNotes(), i = vis.findIndex(n=>n.id===selectedNoteId);
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){
+    e.preventDefault();
+    if(!vis.length) return;
+    const next = vis[Math.max(0, Math.min(vis.length-1, i + (e.key==='ArrowDown' ? 1 : -1)))];
+    if(next && next.id!==selectedNoteId){ selectNote(next.id); document.querySelector(`.note-row[data-id="${next.id}"]`)?.focus(); }
+  } else if(e.key==='Enter' && selectedNoteId){ e.preventDefault(); document.getElementById('noteBody')?.focus(); }
+  else if((e.key==='Delete' || e.key==='Backspace') && selectedNoteId){ e.preventDefault(); deleteNote(selectedNoteId); }
+}
+
 // ── Help dialog (tabbed, with search — modelled on Milestone's) ────────────────
-const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'look', 'data'];
-const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', look: 'Appearance', data: 'Data & sync' };
+const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'notes', 'look', 'data'];
+const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', notes: 'Notes', look: 'Appearance', data: 'Data & sync' };
 let helpTab = 'start';   // the topic last read (this session): the dialog reopens where you left it
 let helpSearching = false;
 function openHelpModal(tab){
@@ -4419,6 +5070,7 @@ document.addEventListener('keydown', e=>{
     }
     return;
   }
+  if(appMode==='notes'){ handleNotesKeys(e); return; }     // Notes has its own keys; the task handlers below must not touch the hidden list
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='a' && !isTypingTarget(document.activeElement) && !document.querySelector('.modal-bg.open') && !activeTaskId){
     e.preventDefault();
     const ids = getVisibleListTasks().tasks.map(t=>t.id);
@@ -4660,15 +5312,15 @@ function triggerToastUndo(){
 }
 
 // ── Export / Import ───────────────────────────────────────────────────────────
-function downloadBackup(proj, tsk, filename){
-  const blob = new Blob([JSON.stringify({version:1, exported:new Date().toISOString(), projects:proj, tasks:tsk}, null, 2)], {type:'application/json'});
+function downloadBackup(proj, tsk, filename, extra){
+  const blob = new Blob([JSON.stringify({version:1, exported:new Date().toISOString(), projects:proj, tasks:tsk, ...(extra||{})}, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url; a.download = filename;
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `mytasks-${new Date().toISOString().slice(0,10)}.json`);
+  downloadBackup(projects, tasks, `mytasks-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 function handleFileImport(event){
@@ -4728,14 +5380,17 @@ function mergeData(data, opts){
     if(tomb) untombstone(deletedTaskIds, it.id); // incoming edit is newer than our deletion (or tombstones are being ignored) — let it back in
     tasks.push(it); added++;
   });
+  const nm = mergeNotesData(data, respectTombstones); added += nm.added; updated += nm.updated;
   return {added, updated};
 }
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `mytasks-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`);
+    downloadBackup(projects, tasks, `mytasks-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
+    // an older export has no notes: leave yours alone rather than wiping them
+    if(Array.isArray(pendingImportData.notes)){ notes = pendingImportData.notes; noteFolders = pendingImportData.noteFolders || []; }
     normalizeData();
     showToast('Backed up previous data, then replaced');
   } else {
@@ -4779,7 +5434,7 @@ function renderBackupsModal(){
     <div class="backup-row">
       <div class="backup-row-info">
         <div class="backup-row-date">${fmtDate(b.date)}</div>
-        <div class="backup-row-desc">${(b.tasks||[]).length} task${(b.tasks||[]).length===1?'':'s'}</div>
+        <div class="backup-row-desc">${(b.tasks||[]).length} task${(b.tasks||[]).length===1?'':'s'}${(b.notes||[]).length ? ` · ${b.notes.length} note${b.notes.length===1?'':'s'}` : ''}</div>
       </div>
       <button class="btn btn-sm" onclick="restoreBackup('${b.date}')">Restore</button>
     </div>
@@ -4794,9 +5449,10 @@ function restoreBackup(date){
     title: 'Restore this backup?',
     body: `This replaces your current data with the snapshot from ${fmtDate(date)}. Your current data will be backed up to a file first.`,
     action: ()=>{
-      downloadBackup(projects, tasks, `mytasks-backup-before-restore-${todayStr()}.json`);
+      downloadBackup(projects, tasks, `mytasks-backup-before-restore-${todayStr()}.json`, {notes, noteFolders});
       projects = b.projects || defaultProjects();
       tasks = b.tasks || [];
+      if(Array.isArray(b.notes)){ notes = b.notes; noteFolders = b.noteFolders || []; }
       normalizeData();
       save(); render();
       showToast(`Restored backup from ${fmtDate(date)}`);
@@ -4838,7 +5494,7 @@ async function fileSyncWrite(data){
           const {added, updated} = mergeData(externalData);
           if(added || updated){
             normalizeData();
-            payload = { ...data, projects, tasks };
+            payload = { ...data, projects, tasks, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
             render();
             showToast(`Synced changes from another tab/device (${added} added, ${updated} updated)`);
@@ -4869,7 +5525,7 @@ async function createNewLinkedFile(){
     });
     fileHandle = handle;
     try{ await _fsPut(handle); }catch(_){}
-    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale});
+    await fileSyncWrite(dataPayload());
     updateFileSyncUI();
     showToast(`Linked — auto-saving to ${handle.name}`);
   }catch(e){ if(e.name!=='AbortError') showToast('Could not create file', true); }
@@ -4901,7 +5557,7 @@ async function linkFile(){
       }
       return;
     }
-    await fileSyncWrite({projects, tasks, deletedTaskIds, deletedProjectIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale});
+    await fileSyncWrite(dataPayload());
     updateFileSyncUI();
     showToast(`Linked — auto-saving to ${handle.name}`);
   }catch(e){ if(e.name!=='AbortError') showToast('Could not link file', true); }
@@ -5031,8 +5687,10 @@ async function initFileSync(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(_){}   // Enter in the note editor makes <p>, not <div>
 load();
 purgeOldCompletedTasks();
+applyAppMode();
 render();
 initFileSync();
 
