@@ -789,3 +789,5 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 - Verified in Chromium through the origin-private file system with a stubbed `showDirectoryPicker` (create, same-day no-overwrite, link one file, chooser for several, legacy folder link).
 
 **Removed:** the in-browser daily snapshots (`mytasks_backups`, `getBackups`/`maybeSnapshotBackup`/`restoreBackup`, the Backups modal and its Data-menu item). Safety copies are the daily file backup above (history on disk) and Export; the startup code deletes the old `mytasks_backups` key to free localStorage quota.
+
+**Drag a note to a folder:** note rows (unlocked) are `draggable`; `handleNoteDragStart` sets `draggedNoteId` and a custom drag type (`application/x-mydesk-note`, no text/plain, so dropping on the editor inserts nothing; `onNoteDrop` also ignores it). The folder rows' existing drag handlers branch on `draggedNoteId`: `.drop-into` highlight while over a valid folder, drop calls `moveNote()` (so the Moved-to toast has Undo). Locked notes and the note's own folder are refused (`noteDropOk`).

@@ -730,3 +730,13 @@ test('cleanDataFileName accepts plain names, adds .json, rejects path characters
   assertEqual(cleanDataFileName('..'), '');
   assertEqual(cleanDataFileName('.hidden'), '');
 });
+
+test('dropping a dragged note on a folder moves it; locked notes and the same folder are refused', function () {
+  noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true }, { id: 'f2', name: 'Work' }];
+  notes = [ntNote({ id: 'a', updatedAt: 1 }), ntNote({ id: 'b', locked: true })];
+  draggedNoteId = 'a';
+  assertFalse(noteDropOk(NOTES_DEFAULT_FOLDER)); assertTrue(noteDropOk('f2')); assertFalse(noteDropOk('nope'));
+  handleFolderDrop({ preventDefault: function () {}, stopPropagation: function () {} }, 'f2');
+  assertEqual(notes[0].folderId, 'f2'); assertEqual(draggedNoteId, null);
+  draggedNoteId = 'b'; assertFalse(noteDropOk('f2')); draggedNoteId = null;
+});

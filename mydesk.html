@@ -136,6 +136,8 @@
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
+  .project-row.drop-into { background: color-mix(in srgb, var(--sel-bg, var(--blue-text)) 24%, transparent); box-shadow: inset 0 0 0 1.5px var(--sel-bg, var(--blue-text)); }
+  .note-row.dragging { opacity: .4; }
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
   .project-row.settle { animation: rowSettle .22s ease-out; }
   .project-row .picon { width: 14px; text-align: center; font-size: 12px; color: var(--text-3); flex-shrink: 0; }
@@ -1072,7 +1074,7 @@
   .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--text-3); cursor: pointer; font-size: 9px; }
   .project-row .folder-twisty:hover { background: var(--bg-3); color: var(--text); }
   .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
-  .project-row.sub-folder { padding-left: 28px; }
+  .project-row.sub-folder { padding-left: 44px; }
   .note-row-lock { font-size: 10px; color: var(--text-3); margin-left: 4px; }
   .note-row.selected .note-row-lock { color: inherit; opacity: .8; }
   .note-linkbar { display: flex; align-items: center; gap: 8px; margin: 0 24px 6px; padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--text) 5%, transparent); }
@@ -4883,7 +4885,7 @@ function moveFolderBy(id, delta){
   if(i===-1 || j<0 || j>=sibs.length) return;
   reorderFolder(id, sibs[j].id, delta<0);
 }
-let draggedFolderId = null;
+let draggedFolderId = null, draggedNoteId = null;
 function handleFolderDragStart(e, id){ draggedFolderId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', id); e.currentTarget.classList.add('dragging'); }
 function handleFolderDragEnd(){
   draggedFolderId = null;
@@ -4893,15 +4895,32 @@ function folderDropOk(targetId){
   const d = folderById(draggedFolderId), t = folderById(targetId);
   return !!(d && t && d.id!==t.id && (d.parentId || '')===(t.parentId || ''));     // reordering stays inside one level
 }
+// A note dragged from the list onto a folder row moves it there (moveNote: undoable, ignores locked notes).
+function handleNoteDragStart(e, id){
+  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-mydesk-note', id);
+  e.currentTarget.classList.add('dragging');
+}
+function handleNoteDragEnd(){
+  draggedNoteId = null;
+  document.querySelectorAll('#notesList .dragging, #noteFolderList .drop-into').forEach(el=>el.classList.remove('dragging', 'drop-into'));
+}
+function noteDropOk(folderId){ const n = notes.find(x=>x.id===draggedNoteId); return !!(n && !n.locked && folderById(folderId) && n.folderId!==folderId); }
 function handleFolderDragOver(e, targetId){
+  if(draggedNoteId){ if(!noteDropOk(targetId)) return; e.preventDefault(); e.stopPropagation(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop-into'); return; }
   if(!draggedFolderId || !folderDropOk(targetId)) return;
   e.preventDefault(); e.stopPropagation();
   const row = e.currentTarget, rect = row.getBoundingClientRect();
   row.classList.remove('drag-over-top', 'drag-over-bottom');
   row.classList.add((e.clientY - rect.top) / rect.height < 0.5 ? 'drag-over-top' : 'drag-over-bottom');
 }
-function handleFolderDragLeave(e){ e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom'); }
+function handleFolderDragLeave(e){ e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom', 'drop-into'); }
 function handleFolderDrop(e, targetId){
+  if(draggedNoteId){
+    e.preventDefault(); e.stopPropagation();
+    const id = draggedNoteId, ok = noteDropOk(targetId); handleNoteDragEnd();
+    if(ok) moveNote(id, targetId);
+    return;
+  }
   if(!draggedFolderId || !folderDropOk(targetId)) return;
   e.preventDefault(); e.stopPropagation();
   const row = e.currentTarget, rect = row.getBoundingClientRect();
@@ -5169,7 +5188,7 @@ function renderNotesList(vis){
   }
   list.innerHTML = vis.map(n=>{
     const sel = n.id===selectedNoteId, fol = folderById(n.folderId);
-    return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')">
+    return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
       ${fol && (searching || noteFolderFilter==='all' || folderChildren(noteFolderFilter).length) ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(folderPath(fol))}</div>` : ''}
@@ -5884,6 +5903,7 @@ function onNotePaste(e){
   onNoteInput();
 }
 function onNoteDrop(e){
+  if(draggedNoteId){ e.preventDefault(); return; }                  // a note row dragged over the editor is not text to insert
   if(noteDragFromEditor){ noteDragFromEditor = false; return; }     // moving text around inside the editor is fine
   e.preventDefault();                                              // anything dragged in from outside is cleaned like a paste
   const dt = e.dataTransfer; if(!dt) return;
