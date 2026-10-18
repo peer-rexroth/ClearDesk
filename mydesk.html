@@ -5368,6 +5368,18 @@ function toggleNoteListMenu(){
 function closeNoteListMenu(){ document.getElementById('noteListMenu')?.classList.remove('open'); }
 // kind: disc|square|dash|emdash for bullets, decimal|alpha|roman for numbers. Applies to the list the cursor is in (starting one if needed);
 // choosing the style the list already has turns the list off.
+function noteCaretAtTextIndex(idx){
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel) return false;
+  const w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  let n, acc = 0;
+  while((n = w.nextNode())){
+    const len = n.nodeValue.length;
+    if(acc + len >= idx){ const r = document.createRange(); r.setStart(n, idx - acc); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); return true; }
+    acc += len;
+  }
+  return false;
+}
 function noteListStyle(kind){
   closeNoteListMenu();
   noteFocusBody();
@@ -5376,8 +5388,15 @@ function noteListStyle(kind){
   if(lists.length && noteCurrentListStyle()===kind){ document.execCommand(cmd, false); onNoteInput(); updateNoteToolbarState(); return; }   // the same style again turns the list off
   lists.forEach(l=>{ if(l.classList.contains('cl')){ l.classList.remove('cl'); l.querySelectorAll('li').forEach(li=>li.removeAttribute('data-done')); } });   // a checklist becomes plain bullets
   if(!lists.some(l=>l.tagName===wantTag)){
+    const body = document.getElementById('noteBody'), before = new Set(body.querySelectorAll('ul, ol')), cur = window.getSelection();
+    let caretAt = -1;                                   // where the caret is, as a count of text characters from the start of the note
+    if(cur.rangeCount && cur.isCollapsed && body.contains(cur.anchorNode)){ const r = document.createRange(); r.setStart(body, 0); r.setEnd(cur.anchorNode, cur.anchorOffset); caretAt = r.toString().length; }
     document.execCommand(cmd, false);                  // from plain lines, or converting the other list type
+    if(caretAt>0) noteCaretAtTextIndex(caretAt);        // Chromium can drop the caret to the start of the line when it wraps a bare line in a list
     lists = noteListsInSelection();
+    // In a still-empty note the browser leaves the caret on the note itself, outside the list it just made, so the selection finds
+    // nothing: take the list(s) the command created instead (this is why the style only applied on the second try).
+    if(!lists.length) lists = [...body.querySelectorAll('ul, ol')].filter(l=>!before.has(l));
   }
   const sel = window.getSelection(), keep = sel.rangeCount ? [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset] : null;
   lists = lists.map(l=>{                               // a selection that also covers lists of the other type: turn those over too
