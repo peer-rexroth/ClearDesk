@@ -1111,6 +1111,10 @@
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
   .note-list-menu .pop-check { width: 14px; }
   .note-list-menu .pop-label { white-space: nowrap; }
+  .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: .4em 0 .8em; }
+  .note-body th, .note-body td { border: 1px solid var(--border-2); padding: 6px 10px; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
+  .note-body th { background: var(--bg-2); font-weight: 600; }
+  .note-body td:empty::after, .note-body th:empty::after { content: "\200b"; }
   .note-body ul.cl { list-style: none; padding-left: 2px; }
   .note-body ul.cl > li { position: relative; padding-left: 28px; }
   .note-body ul.cl > li::before { content: ""; position: absolute; left: 3px; top: .32em; width: 16px; height: 16px; box-sizing: border-box; border: 1.5px solid var(--border-2); border-radius: 50%; background: var(--bg); cursor: default; }
@@ -1316,6 +1320,10 @@
               <div class="split-btn-menu tool-menu note-list-menu" id="noteListMenu" role="menu"></div>
             </div>
             <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><i class="fa-regular fa-square-check"></i></button>
+            <div class="lib-dropdown" id="noteTableDropdown">
+              <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><i class="fa-solid fa-table"></i></button>
+              <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
+            </div>
           </div>
           <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><i class="fa-solid fa-link"></i></button>
@@ -1540,6 +1548,7 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button inserts a 2×2 to 5×5 table with a header row. Inside a table the same button adds or deletes rows and columns, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock in a note's toolbar makes it read-only. You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -4457,7 +4466,7 @@ let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRan
 // merge in, so every path (paste, drop, save, load, merge) goes through this: only the tags below survive, attributes are
 // rebuilt from scratch (never copied), and a link must be http(s) or mailto. It is string-based on purpose: it also runs in the
 // test harness, which has no DOM. ----
-const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr']);
+const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','table','thead','tbody','tr','th','td']);
 const NOTE_VOID = new Set(['br','hr']);
 const NOTE_UL_STYLES = ['square','dash','emdash'], NOTE_OL_STYLES = ['alpha','roman'];   // list looks kept on paste/load; anything else becomes the plain default
 function decodeHtmlEntities(s){
@@ -4501,13 +4510,13 @@ function sanitizeNoteHtml(html){
 }
 function noteText(body){
   return String(body||'')
-    .replace(/<(br|\/p|\/div|\/li|\/h[1-3]|\/blockquote|\/pre)[^>]*>/gi, ' ')
+    .replace(/<(br|\/p|\/div|\/li|\/t[dh]|\/tr|\/h[1-3]|\/blockquote|\/pre)[^>]*>/gi, ' ')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ').trim();
 }
 function noteSnippet(n){ return noteText(n.body).slice(0, 110); }
-function noteIsEmpty(n){ return !n.title.trim() && !noteText(n.body) && !/<(hr|ul|ol)\b/i.test(n.body); }
+function noteIsEmpty(n){ return !n.title.trim() && !noteText(n.body) && !/<(hr|ul|ol|table)\b/i.test(n.body); }
 
 function normalizeNotes(){
   if(!Array.isArray(notes)) notes = [];
@@ -5050,7 +5059,7 @@ function noteListMenuHtml(){
 function toggleNoteListMenu(){
   const m = document.getElementById('noteListMenu'); if(!m) return;
   const wasOpen = m.classList.contains('open');
-  closeNoteListMenu();
+  closeNoteListMenu(); closeNoteTableMenu();
   if(wasOpen) return;
   m.innerHTML = noteListMenuHtml();
   m.classList.add('open');
@@ -5076,6 +5085,103 @@ function noteListStyle(kind){
   }
   onNoteInput(); updateNoteToolbarState();
 }
+// ---- tables ----
+// A table is plain <table><tbody><tr><th|td>. Inserting and every row/column edit go through execCommand('insertHTML') (the edit is
+// applied to a clone of the table, which then replaces the original), so the browser's own undo — the toolbar's Undo and Cmd+Z — covers them.
+function noteSelectedCell(){
+  const sel = window.getSelection && window.getSelection(), body = document.getElementById('noteBody');
+  let node = sel && sel.rangeCount ? sel.anchorNode : null;
+  while(node && node!==body){ if(node.nodeType===1 && (node.tagName==='TD' || node.tagName==='TH')) return node; node = node.parentNode; }
+  return null;
+}
+function noteTableHtml(rows, cols){
+  const cell = t=>`<${t}><br></${t}>`;
+  let h = '<table><tbody>';
+  for(let r=0; r<rows; r++) h += '<tr>' + cell(r===0 ? 'th' : 'td').repeat(cols) + '</tr>';
+  return h + '</tbody></table><p><br></p>';
+}
+function noteCaretIn(cell){
+  if(!cell) return;
+  const r = document.createRange(), sel = window.getSelection();
+  r.selectNodeContents(cell); r.collapse(true);
+  sel.removeAllRanges(); sel.addRange(r);
+}
+function noteCellPos(cell){ const tr = cell.parentNode, table = tr.closest('table'); return { table, r: [...table.rows].indexOf(tr), c: cell.cellIndex }; }
+function noteTableEdit(op){
+  closeNoteTableMenu();
+  noteFocusBody();
+  const cell = noteSelectedCell(); if(!cell) return;
+  const { table, r, c } = noteCellPos(cell);
+  const body = document.getElementById('noteBody'), idx = [...body.querySelectorAll('table')].indexOf(table);
+  const clone = table.cloneNode(true), rowsN = clone.rows.length, colsN = Math.max(...[...clone.rows].map(x=>x.cells.length));
+  const sel = window.getSelection(), range = document.createRange();
+  const mk = tag=>{ const e = document.createElement(tag); e.innerHTML = '<br>'; return e; };
+  const swap = (el, tag)=>{ const n = document.createElement(tag); n.innerHTML = el.innerHTML; el.replaceWith(n); };
+  let focusR = r, focusC = c;
+  if(op==='delTable' || (op==='delRow' && rowsN===1) || (op==='delCol' && colsN===1)){
+    range.selectNode(table); sel.removeAllRanges(); sel.addRange(range);
+    document.execCommand('delete', false);
+    onNoteInput(); updateNoteToolbarState();
+    return;
+  }
+  if(op==='rowBefore' || op==='rowAfter'){
+    const tr = document.createElement('tr');
+    for(let i=0; i<colsN; i++) tr.appendChild(mk('td'));
+    const ref = clone.rows[r];
+    if(op==='rowBefore') ref.before(tr); else { ref.after(tr); focusR = r + 1; }
+  }
+  else if(op==='colBefore' || op==='colAfter'){
+    [...clone.rows].forEach(row=>{
+      const ref = row.cells[Math.min(c, row.cells.length - 1)]; if(!ref) return;
+      const n = mk(ref.tagName.toLowerCase());
+      if(op==='colBefore') ref.before(n); else ref.after(n);
+    });
+    if(op==='colAfter') focusC = c + 1;
+  }
+  else if(op==='delRow'){ clone.deleteRow(r); focusR = Math.min(r, rowsN - 2); }
+  else if(op==='delCol'){ [...clone.rows].forEach(row=>{ if(row.cells[c]) row.deleteCell(c); }); focusC = Math.min(c, colsN - 2); }
+  else if(op==='header'){
+    const first = [...clone.rows[0].cells], allTh = first.every(x=>x.tagName==='TH');
+    first.forEach(x=>swap(x, allTh ? 'td' : 'th'));
+  }
+  range.selectNode(table); sel.removeAllRanges(); sel.addRange(range);
+  document.execCommand('insertHTML', false, clone.outerHTML);
+  const t = body.querySelectorAll('table')[idx];
+  if(t){ const row = t.rows[Math.max(0, Math.min(focusR, t.rows.length - 1))]; noteCaretIn(row && row.cells[Math.max(0, Math.min(focusC, row.cells.length - 1))]); }
+  onNoteInput(); updateNoteToolbarState();
+}
+function noteTableInsert(rows, cols){
+  closeNoteTableMenu();
+  noteFocusBody();
+  if(noteSelectedCell()) return;
+  const body = document.getElementById('noteBody'), before = new Set(body.querySelectorAll('table'));
+  document.execCommand('insertHTML', false, noteTableHtml(rows, cols));
+  const fresh = [...body.querySelectorAll('table')].find(t=>!before.has(t));
+  if(fresh) noteCaretIn(fresh.rows[0].cells[0]);
+  onNoteInput(); updateNoteToolbarState();
+}
+function noteTableMenuHtml(){
+  const cell = noteSelectedCell();
+  if(!cell) return [[2,2],[3,3],[4,4],[5,5]].map(([r,c])=>menuOpt(`noteTableInsert(${r},${c})`, {icon:'table'}, `${r} × ${c} table`)).join('');
+  const { table } = noteCellPos(cell), hasHead = [...table.rows[0].cells].every(x=>x.tagName==='TH');
+  const o = (op, icon, label, cur)=>menuOpt(`noteTableEdit('${op}')`, {icon}, label, cur);
+  const danger = h=>h.replace('row-menu-item menu-opt', 'row-menu-item menu-opt danger');
+  const sep = '<div class="row-menu-sep"></div>';
+  return [
+    o('rowBefore','arrow-up','Row above'), o('rowAfter','arrow-down','Row below'), o('colBefore','arrow-left','Column left'), o('colAfter','arrow-right','Column right'), sep,
+    o('header','heading','Header row', hasHead), sep,
+    danger(o('delRow','minus','Delete row')), danger(o('delCol','minus','Delete column')), danger(o('delTable','trash','Delete table'))
+  ].join('');
+}
+function toggleNoteTableMenu(){
+  const m = document.getElementById('noteTableMenu'); if(!m) return;
+  const wasOpen = m.classList.contains('open');
+  closeNoteTableMenu(); closeNoteListMenu();
+  if(wasOpen) return;
+  m.innerHTML = noteTableMenuHtml();
+  m.classList.add('open');
+}
+function closeNoteTableMenu(){ document.getElementById('noteTableMenu')?.classList.remove('open'); }
 function noteChecklist(){
   noteFocusBody();
   const sel = window.getSelection();
@@ -5100,7 +5206,7 @@ function updateNoteToolbarState(){
   const set = (cmd, on)=>{ const b = document.querySelector(`.note-toolbar [data-cmd="${cmd}"]`); if(b) b.classList.toggle('active', !!on); };
   ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, document.queryCommandState(c)));
   const ul = noteClosest(sel.anchorNode, 'UL'), ol = noteClosest(sel.anchorNode, 'OL');
-  set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
+  set('table', !!noteSelectedCell()); set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
   const style = document.getElementById('noteStyleSelect'); if(style) style.value = /^h[1-3]$/.test(v) ? v : 'p';
 }
@@ -5117,6 +5223,13 @@ function onNoteKeydown(e){
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase()==='k'){ e.preventDefault(); openNoteLinkBar(); return; }
   if(e.key==='Tab'){
     const sel = window.getSelection();
+    const cell = noteSelectedCell();
+    if(cell){                                          // in a table, Tab walks the cells (and adds a row after the last one)
+      e.preventDefault();
+      const cells = [...noteCellPos(cell).table.querySelectorAll('th,td')], j = cells.indexOf(cell) + (e.shiftKey ? -1 : 1);
+      if(j>=cells.length) noteTableEdit('rowAfter'); else if(j>=0) noteCaretIn(cells[j]);
+      return;
+    }
     if(sel && sel.rangeCount && noteClosest(sel.anchorNode, 'LI')){ e.preventDefault(); document.execCommand(e.shiftKey ? 'outdent' : 'indent', false); onNoteInput(); }
   }
 }
@@ -5336,6 +5449,7 @@ function setUiScale(v){
 document.addEventListener('click', e=>{
   if(!e.target.closest('#libDropdown')) closeLibMenu();
   if(!e.target.closest('#noteListDropdown')) closeNoteListMenu();
+  if(!e.target.closest('#noteTableDropdown')) closeNoteTableMenu();
   if(!e.target.closest('#uiScaleDropdown')) closeUiScaleMenu();
   if(!e.target.closest('#helpDropdown')) closeHelpMenu();
   if(!e.target.closest('#filterDropdown')) closeFilterMenu();

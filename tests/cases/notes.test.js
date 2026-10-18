@@ -561,3 +561,37 @@ test('renaming or moving a folder stamps updatedAt; Undo restores the order too'
   triggerToastUndo();
   assertEqual(f.parentId, undefined); assertEqual(f.name, 'Home'); assertEqual(f.order, 3000);
 });
+
+// ---- tables ----
+test('sanitizeNoteHtml keeps table structure and strips every attribute from it', function () {
+  assertEqual(
+    sanitizeNoteHtml('<table style="width:1px" onclick="x()" class="c"><thead><tr><th colspan="2" style="color:red">H</th></tr></thead><tbody><tr><td rowspan="2" onmouseover="x()">a</td><td>b</td></tr></tbody></table>'),
+    '<table><thead><tr><th>H</th></tr></thead><tbody><tr><td>a</td><td>b</td></tr></tbody></table>'
+  );
+});
+
+test('sanitizeNoteHtml drops table parts it does not know but keeps their text', function () {
+  assertEqual(sanitizeNoteHtml('<table><caption>Cap</caption><colgroup><col width="5"></colgroup><tr><td>a</td></tr></table>'), '<table>Cap<tr><td>a</td></tr></table>');
+  assertNotIncludes(sanitizeNoteHtml('<table><tr><td><script>alert(1)</script>x</td></tr></table>'), '<script');
+});
+
+test('table text becomes a spaced snippet, and a note holding only an empty table is not "empty"', function () {
+  assertEqual(noteText('<table><tr><td>a</td><td>b</td></tr><tr><td>c</td></tr></table>'), 'a b c');
+  assertFalse(noteIsEmpty({ title: '', body: '<table><tbody><tr><th><br></th></tr></tbody></table>' }), 'an empty table is content');
+  assertTrue(noteIsEmpty({ title: '', body: '' }));
+});
+
+test('noteTableHtml builds a header row, body rows, and a paragraph after it to keep typing', function () {
+  const h = noteTableHtml(3, 2);
+  assertEqual((h.match(/<tr>/g) || []).length, 3);
+  assertEqual((h.match(/<th>/g) || []).length, 2, 'only the first row is a header');
+  assertEqual((h.match(/<td>/g) || []).length, 4);
+  assertTrue(h.endsWith('<p><br></p>'));
+  assertEqual(sanitizeNoteHtml(h), h, 'what we insert survives the sanitiser unchanged');
+});
+
+test('the table menu offers table sizes when the cursor is outside a table', function () {
+  const h = noteTableMenuHtml();
+  assertIncludes(h, '2 × 2 table'); assertIncludes(h, '5 × 5 table');
+  assertNotIncludes(h, 'Delete');
+});
