@@ -1085,8 +1085,8 @@
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
   .note-editor.locked .tbl-handles { display: none; }
-  .tbl-plus { position: absolute; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sel-bg, var(--blue-text)); color: #fff; font-size: 7px; cursor: pointer; opacity: .45; transition: opacity .12s ease, transform .12s ease; }
-  .tbl-plus:hover { opacity: 1; transform: scale(1.18); }
+  .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 6px; cursor: pointer; transition: background .12s ease, color .12s ease, border-color .12s ease; }
+  .tbl-plus:hover { background: var(--cap-hover); color: var(--text); }
   .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
   .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
   .note-title::placeholder { color: var(--text-3); }
@@ -1116,7 +1116,8 @@
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
   .note-list-menu .pop-check { width: 14px; }
   .note-list-menu .pop-label { white-space: nowrap; }
-  .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: .4em 0 .8em; }
+  .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0 .8em; }
+  .note-body > table:first-child { margin-top: 24px; }
   .note-body th, .note-body td { border: 1px solid var(--border-2); padding: 6px 10px; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
   .note-body th { background: var(--bg-2); font-weight: 600; }
   .note-table-menu:has(.tbl-picker) { min-width: 0; }
@@ -1267,12 +1268,12 @@
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
   .tbl-grip.row:not(.sel) { width: 14px; height: 32px; }
-  .tbl-grip:hover { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
+  .tbl-grip:hover { background: var(--cap-hover); color: var(--text); }
   .tbl-grip.sel { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
   .tbl-grip.col.sel { height: 22px; border-radius: 6px 6px 0 0; gap: 6px; justify-content: center; position: absolute; }
-  .tbl-grip.col.sel .tbl-grip-chev { position: absolute; right: 8px; font-size: 10px; }
   .tbl-grip.row.sel { width: 22px; border-radius: 6px 0 0 6px; }
   .tbl-sel { position: absolute; box-sizing: border-box; border: 2px solid var(--sel-bg, var(--blue-text)); pointer-events: none !important; border-radius: 2px; }
+  .tbl-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--sel-bg, var(--blue-text)); border: 2px solid var(--edit, #fff); box-sizing: border-box; cursor: col-resize; touch-action: none; z-index: 3; }
 </style>
 </head>
 <body>
@@ -1710,7 +1711,7 @@
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row and open its menu — add before/after, delete, header row, delete table (right-click inside a selected column or row shows the same menu). The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the <strong>⋯</strong> menu at the right of a note's toolbar has <em>Lock</em>: a locked note is read-only (the ⋯ turns amber while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -5522,29 +5523,38 @@ function noteTableEdit(op, ref){
   const sel = window.getSelection(), range = document.createRange();
   const mk = tag=>{ const e = document.createElement(tag); e.innerHTML = '<br>'; return e; };
   const swap = (el, tag)=>{ const n = document.createElement(tag); n.innerHTML = el.innerHTML; el.replaceWith(n); };
+  // a column/row SELECTION (ref.a..ref.b, inclusive) makes every operation act on all of it; a plain call acts on the one row/column
+  const lo = ref && ref.a!==undefined ? ref.a : null, hi = ref && ref.b!==undefined ? ref.b : null;
+  const rowLo = lo!==null ? lo : r, rowHi = hi!==null ? hi : r, colLo = lo!==null ? lo : c, colHi = hi!==null ? hi : c;
+  const nRows = rowHi - rowLo + 1, nCols = colHi - colLo + 1;
   let focusR = r, focusC = c;
-  if(op==='delTable' || (op==='delRow' && rowsN===1) || (op==='delCol' && colsN===1)){
+  if(op==='delTable' || (op==='delRow' && nRows>=rowsN) || (op==='delCol' && nCols>=colsN)){
     range.selectNode(table); sel.removeAllRanges(); sel.addRange(range);
     document.execCommand('delete', false);
     onNoteInput(); updateNoteToolbarState();
     return;
   }
   if(op==='rowBefore' || op==='rowAfter'){
-    const tr = document.createElement('tr');
-    for(let i=0; i<colsN; i++) tr.appendChild(mk('td'));
-    const ref = clone.rows[r];
-    if(op==='rowBefore') ref.before(tr); else { ref.after(tr); focusR = r + 1; }
+    const anchor = clone.rows[op==='rowBefore' ? rowLo : rowHi];
+    for(let k=0; k<nRows; k++){
+      const tr = document.createElement('tr');
+      for(let i=0; i<colsN; i++) tr.appendChild(mk('td'));
+      if(op==='rowBefore') anchor.before(tr); else anchor.after(tr);
+    }
+    focusR = op==='rowBefore' ? rowLo : rowHi + 1;
   }
   else if(op==='colBefore' || op==='colAfter'){
     [...clone.rows].forEach(row=>{
-      const ref = row.cells[Math.min(c, row.cells.length - 1)]; if(!ref) return;
-      const n = mk(ref.tagName.toLowerCase());
-      if(op==='colBefore') ref.before(n); else ref.after(n);
+      const ref2 = row.cells[Math.min(op==='colBefore' ? colLo : colHi, row.cells.length - 1)]; if(!ref2) return;
+      for(let k=0; k<nCols; k++){
+        const n = mk(ref2.tagName.toLowerCase());
+        if(op==='colBefore') ref2.before(n); else ref2.after(n);
+      }
     });
-    if(op==='colAfter') focusC = c + 1;
+    focusC = op==='colBefore' ? colLo : colHi + 1;
   }
-  else if(op==='delRow'){ clone.deleteRow(r); focusR = Math.min(r, rowsN - 2); }
-  else if(op==='delCol'){ [...clone.rows].forEach(row=>{ if(row.cells[c]) row.deleteCell(c); }); focusC = Math.min(c, colsN - 2); }
+  else if(op==='delRow'){ for(let k=rowHi; k>=rowLo; k--) clone.deleteRow(k); focusR = Math.min(rowLo, rowsN - nRows - 1); }
+  else if(op==='delCol'){ [...clone.rows].forEach(row=>{ for(let k=colHi; k>=colLo; k--) if(row.cells[k]) row.deleteCell(k); }); focusC = Math.min(colLo, colsN - nCols - 1); }
   else if(op==='header'){
     const first = [...clone.rows[0].cells], allTh = first.every(x=>x.tagName==='TH');
     first.forEach(x=>swap(x, allTh ? 'td' : 'th'));
@@ -5594,14 +5604,15 @@ function closeNoteTableMenu(){ document.getElementById('noteTableMenu')?.classLi
 // column / row (an accent outline with a tab on it) and opens its menu (add before/after, delete, header, delete table). Pointing at a
 // table also shows a "+" on its right and bottom edge to add a column or row. All of it lives in the overlay #tblHandles beside the
 // note, never inside it, so none of it is saved; positions are divided by the zoom factor measured from .note-doc.
-let tblHandlesTable = null, tblHandlesTimer = null, tblSel = null, tblMenuRef = null;     // tblSel: {kind:'col'|'row', i, cell} while a column/row is selected
+let tblDragging = false, tblHandlesTable = null, tblHandlesTimer = null, tblSel = null, tblMenuRef = null;     // tblSel: {kind:'col'|'row', i, cell} while a column/row is selected
 function noteCaretTable(){ const c = noteSelectedCell(); return c && !noteIsLocked(noteEditorId) ? c.parentNode.closest('table') : null; }
 function tblHandlesHide(){
-  tblHandlesTable = null; tblSel = null;
+  tblHandlesTable = null;
+  if(tblSel && tblSel.cell!==noteSelectedCell()) tblSel = null;              // a column/row selection lives as long as the caret stays in its cell, not until the pointer wanders off
   const h = document.getElementById('tblHandles'); if(h) h.innerHTML = '';
   const t = noteCaretTable(); if(t) tblHandlesShow(t);                       // the caret's own table keeps its grips
 }
-function tblHandlesLeave(){ if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
+function tblHandlesLeave(){ if(tblDragging) return; if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
 function tblHandlesMove(e){
   if(noteIsLocked(noteEditorId)){ if(tblHandlesTable) tblHandlesHide(); return; }
   const t = e.target;
@@ -5630,67 +5641,97 @@ function tblHandlesShow(table){
     const ci = mine.cellIndex, ri = [...table.rows].indexOf(mine.parentNode);
     const cr = mine.getBoundingClientRect(), rr = mine.parentNode.getBoundingClientRect();
     const cx = (cr.left - dr.left) / k, cw = cr.width / k, ry = (rr.top - dr.top) / k, rh = rr.height / k;
-    const colSel = tblSel && tblSel.kind==='col', rowSel = tblSel && tblSel.kind==='row';
-    if(colSel) html += `<div class="tbl-sel" style="left:${p(cx)}px;top:${p(top)}px;width:${p(cw)}px;height:${p(h)}px"></div>`;
-    html += colSel
-      ? `<div class="tbl-grip col sel" style="left:${p(cx)}px;top:${p(top - 22)}px;width:${p(cw)}px" role="button" aria-label="Column actions" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'col',${ci})"><i class="fa-solid fa-ellipsis"></i><i class="fa-solid fa-chevron-down tbl-grip-chev"></i></div>`
-      : `<div class="tbl-grip col" style="left:${p(cx + cw / 2 - 16)}px;top:${p(top - 18)}px" role="button" aria-label="Column actions" title="Column" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'col',${ci})"><i class="fa-solid fa-ellipsis"></i></div>`;
-    if(rowSel) html += `<div class="tbl-sel" style="left:${p(left)}px;top:${p(ry)}px;width:${p(w)}px;height:${p(rh)}px"></div>`;
-    html += rowSel
-      ? `<div class="tbl-grip row sel" style="left:${p(left - 22)}px;top:${p(ry)}px;height:${p(rh)}px" role="button" aria-label="Row actions" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'row',${ri})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`
-      : `<div class="tbl-grip row" style="left:${p(left - 20)}px;top:${p(ry + rh / 2 - 16)}px" role="button" aria-label="Row actions" title="Row" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'row',${ri})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`;
+    const sel = tblSel, colSel = sel && sel.kind==='col', rowSel = sel && sel.kind==='row';
+    if(colSel){                                                       // a run of columns a..b: outline, tab and the two drag handles
+      const c0 = table.rows[0].cells[sel.a].getBoundingClientRect(), c1 = table.rows[0].cells[sel.b].getBoundingClientRect();
+      const x0 = (c0.left - dr.left) / k, x1 = (c1.right - dr.left) / k, hy = top + h / 2;
+      html += `<div class="tbl-sel" style="left:${p(x0)}px;top:${p(top)}px;width:${p(x1 - x0)}px;height:${p(h)}px"></div>`;
+      html += `<div class="tbl-grip col sel" style="left:${p(x0)}px;top:${p(top - 22)}px;width:${p(x1 - x0)}px" role="button" aria-label="Column actions" onmousedown="event.preventDefault()" oncontextmenu="tblGripContext(event,'col',${sel.a})"><i class="fa-solid fa-ellipsis"></i></div>`;
+      html += `<div class="tbl-dot" style="left:${p(x0)}px;top:${p(hy)}px" title="Drag to select more columns" onpointerdown="tblDotDown(event,'a')"></div><div class="tbl-dot" style="left:${p(x1)}px;top:${p(hy)}px" title="Drag to select more columns" onpointerdown="tblDotDown(event,'b')"></div>`;
+    } else html += `<div class="tbl-grip col" style="left:${p(cx + cw / 2 - 16)}px;top:${p(top - 18)}px" role="button" aria-label="Column actions" title="Column" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'col',${ci})" oncontextmenu="tblGripContext(event,'col',${ci})"><i class="fa-solid fa-ellipsis"></i></div>`;
+    if(rowSel){
+      const r0 = table.rows[sel.a].getBoundingClientRect(), r1 = table.rows[sel.b].getBoundingClientRect();
+      const y0 = (r0.top - dr.top) / k, y1 = (r1.bottom - dr.top) / k, hx = left + w / 2;
+      html += `<div class="tbl-sel" style="left:${p(left)}px;top:${p(y0)}px;width:${p(w)}px;height:${p(y1 - y0)}px"></div>`;
+      html += `<div class="tbl-grip row sel" style="left:${p(left - 22)}px;top:${p(y0)}px;height:${p(y1 - y0)}px" role="button" aria-label="Row actions" onmousedown="event.preventDefault()" oncontextmenu="tblGripContext(event,'row',${sel.a})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`;
+      html += `<div class="tbl-dot" style="left:${p(hx)}px;top:${p(y0)}px" title="Drag to select more rows" onpointerdown="tblDotDown(event,'a')"></div><div class="tbl-dot" style="left:${p(hx)}px;top:${p(y1)}px" title="Drag to select more rows" onpointerdown="tblDotDown(event,'b')"></div>`;
+    } else html += `<div class="tbl-grip row" style="left:${p(left - 20)}px;top:${p(ry + rh / 2 - 16)}px" role="button" aria-label="Row actions" title="Row" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'row',${ri})" oncontextmenu="tblGripContext(event,'row',${ri})"><i class="fa-solid fa-ellipsis-vertical"></i></div>`;
   }
-  html += `<div class="tbl-plus" style="left:${p(left + w + 6)}px;top:${p(top + h / 2 - 7)}px" role="button" aria-label="Add a column" title="Add column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div>`;
-  html += `<div class="tbl-plus" style="left:${p(left + w / 2 - 7)}px;top:${p(top + h + 6)}px" role="button" aria-label="Add a row" title="Add row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div>`;
+  html += `<div class="tbl-plus" style="left:${p(left + w + 6)}px;top:${p(top + h / 2 - 6)}px" role="button" aria-label="Add a column" title="Add column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div>`;
+  html += `<div class="tbl-plus" style="left:${p(left + w / 2 - 6)}px;top:${p(top + h + 6)}px" role="button" aria-label="Add a row" title="Add row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div>`;
   layer.innerHTML = html;
 }
 function tblPlus(e, op, r, c){ e.stopPropagation(); if(tblHandlesTable) noteTableEdit(op, { table: tblHandlesTable, r, c }); }
-function tblGripMenuHtml(kind, i, table){
-  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+function tblGripMenuHtml(kind, sel, table){
+  const a = sel.a, b = sel.b, n = b - a + 1, item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+  const noun = kind==='col' ? 'column' : 'row', nounN = n>1 ? `${n} ${noun}s` : noun;
+  const before = kind==='col' ? 'before' : 'above', after = kind==='col' ? 'after' : 'below';
   const head = table && table.rows[0] ? [...table.rows[0].cells].every(x=>x.tagName==='TH') : false;
-  if(kind==='col') return [
-    item('fa-solid fa-plus', 'Add column before', `tblGripRun('colBefore')`), item('fa-solid fa-plus', 'Add column after', `tblGripRun('colAfter')`), sep,
-    item('fa-solid fa-minus', 'Delete column', `tblGripRun('delCol')`, {danger:true}), item('fa-regular fa-trash-can', 'Delete table', `tblGripRun('delTable')`, {danger:true})
-  ].join('');
+  // Grouped by scope: add, then the selection's own delete, then the table-level items (header toggle, delete table) last.
   return [
-    item('fa-solid fa-plus', 'Add row above', `tblGripRun('rowBefore')`), item('fa-solid fa-plus', 'Add row below', `tblGripRun('rowAfter')`), sep,
-    ...(i===0 ? [menuOpt(`tblGripRun('header')`, {icon:'heading'}, 'Header row', head), sep] : []),
-    item('fa-solid fa-minus', 'Delete row', `tblGripRun('delRow')`, {danger:true}), item('fa-regular fa-trash-can', 'Delete table', `tblGripRun('delTable')`, {danger:true})
+    item('fa-solid fa-plus', `Add ${nounN} ${before}`, `tblGripRun('${kind==='col' ? 'colBefore' : 'rowBefore'}')`), item('fa-solid fa-plus', `Add ${nounN} ${after}`, `tblGripRun('${kind==='col' ? 'colAfter' : 'rowAfter'}')`), sep,
+    item('fa-solid fa-minus', `Delete ${nounN}`, `tblGripRun('${kind==='col' ? 'delCol' : 'delRow'}')`, {danger:true}), sep,
+    item('fa-solid fa-heading', 'Header row', `tblGripRun('header')`, {hint: head ? '<i class="fa-solid fa-check"></i>' : ''}), item('fa-regular fa-trash-can', 'Delete table', `tblGripRun('delTable')`, {danger:true})
   ].join('');
 }
-// Open the menu of the selected column/row at a position (next to its grip, or at the pointer for a right-click).
-function tblShowMenuAt(kind, i, x, y, measureEl){
-  const table = tblHandlesTable, menu = document.getElementById('rowMenu'); if(!table || !menu) return;
+// Open the menu of the selected column(s)/row(s) at a position (the pointer, for a right-click).
+function tblShowMenuAt(x, y, measureEl){
+  const table = tblHandlesTable, sel = tblSel, menu = document.getElementById('rowMenu'); if(!table || !sel || !menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu();
-  tblMenuRef = { table, r: kind==='row' ? i : 0, c: kind==='col' ? i : 0 };
+  tblMenuRef = { table, r: sel.kind==='row' ? sel.a : 0, c: sel.kind==='col' ? sel.a : 0, a: sel.a, b: sel.b };
   noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = tblGripMenuHtml(kind, i, table);
+  menu.innerHTML = tblGripMenuHtml(sel.kind, sel, table);
   placeRowMenu(menu, x, y, measureEl);
 }
-// Click a grip: select that column / row (accent outline) and open its menu next to the grip.
+// Click a grip: just SELECT that column / row (accent outline and tab). Its options appear on right-click, never on the click itself.
+// Drag the round handles on the outline to take in neighbouring columns / rows, as in Apple Notes.
 function tblGripOpen(e, kind, i){
   e.preventDefault(); e.stopPropagation();
   const cell = noteSelectedCell(); if(!tblHandlesTable || !cell) return;
-  tblSel = { kind, i, cell };
+  tblSel = { kind, a: i, b: i, cell };
   tblHandlesShow(tblHandlesTable);                                   // redraw with the selection outline (this replaces the grip under the pointer)
-  const g = document.querySelector('#tblHandles .tbl-grip.sel'), r = (g || e.currentTarget).getBoundingClientRect();
-  tblShowMenuAt(kind, i, kind==='col' ? r.left : r.right + 6, kind==='col' ? r.bottom + 4 : r.top, g || e.currentTarget);
 }
-// Right-click inside a selected column / row shows that column's / row's menu (anywhere else the browser's own menu stays).
+// Which column (kind 'col') or row ('row') is under the pointer, clamped to the table's edges.
+function tblIndexAt(table, kind, x, y){
+  const items = kind==='col' ? [...table.rows[0].cells] : [...table.rows];
+  for(let i=0; i<items.length; i++){ const r = items[i].getBoundingClientRect(); if(kind==='col' ? x < r.right : y < r.bottom) return i; }
+  return items.length - 1;
+}
+function tblDotDown(e, which){
+  e.preventDefault(); e.stopPropagation();
+  if(!tblSel || !tblHandlesTable) return;
+  const table = tblHandlesTable; tblDragging = true;
+  const move = ev=>{
+    const idx = tblIndexAt(table, tblSel.kind, ev.clientX, ev.clientY);
+    if(which==='a') tblSel.a = Math.min(idx, tblSel.b); else tblSel.b = Math.max(idx, tblSel.a);
+    tblHandlesShow(table);
+  };
+  const up = ()=>{ tblDragging = false; document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); };
+  document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
+}
+// Right-click on a grip: select that column / row (unless it already is) and show its options at the pointer.
+function tblGripContext(e, kind, i){
+  e.preventDefault(); e.stopPropagation();
+  const cell = noteSelectedCell(); if(!tblHandlesTable || !cell) return;
+  if(!tblSel || tblSel.kind!==kind) tblSel = { kind, a: i, b: i, cell };
+  tblHandlesShow(tblHandlesTable);
+  tblShowMenuAt(e.clientX, e.clientY, e.currentTarget);
+}
+// Right-click inside a selected column / row shows that selection's menu (anywhere else the browser's own menu stays).
 // The selection is remembered at mousedown, because the right-click itself moves the caret and would end it.
 let tblSelAtMouseDown = null;
-function noteBodyMouseDown(e){ tblSelAtMouseDown = e.button===2 && tblSel ? { kind: tblSel.kind, i: tblSel.i } : null; }
+function noteBodyMouseDown(e){ tblSelAtMouseDown = e.button===2 && tblSel ? { kind: tblSel.kind, a: tblSel.a, b: tblSel.b } : null; }
 function onNoteContextMenu(e){
   const pending = tblSelAtMouseDown; tblSelAtMouseDown = null;
   if(!pending || !tblHandlesTable) return;
   const cell = e.target && e.target.closest ? e.target.closest('td, th') : null;
   if(!cell || cell.parentNode.closest('table')!==tblHandlesTable) return;
-  const inside = pending.kind==='col' ? cell.cellIndex===pending.i : [...tblHandlesTable.rows].indexOf(cell.parentNode)===pending.i;
-  if(!inside) return;
+  const at = pending.kind==='col' ? cell.cellIndex : [...tblHandlesTable.rows].indexOf(cell.parentNode);
+  if(at < pending.a || at > pending.b) return;
   e.preventDefault();
-  tblSel = { kind: pending.kind, i: pending.i, cell };               // keep the outline on while its menu is open
+  tblSel = { kind: pending.kind, a: pending.a, b: pending.b, cell };   // keep the outline on while its menu is open
   tblHandlesShow(tblHandlesTable);
-  tblShowMenuAt(pending.kind, pending.i, e.clientX, e.clientY, cell);
+  tblShowMenuAt(e.clientX, e.clientY, cell);
 }
 function tblGripRun(op){
   const ref = tblMenuRef; closeRowMenu(); tblSel = null;
