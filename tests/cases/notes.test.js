@@ -681,3 +681,11 @@ test('the sort menu ticks the current key and direction, and names the direction
   h = noteSortMenuHtml();
   assertIncludes(h, 'A to Z'); assertIncludes(h, 'Z to A'); assertNotIncludes(h, 'Newest first');
 });
+
+test('the notes list width is clamped between 200px and 600px, and 300px is the default it resets to', function () {
+  assertEqual(clampNotesListW(120), 200, 'it can be narrower than the default, down to 200');
+  assertEqual(clampNotesListW(250), 250);
+  assertEqual(clampNotesListW(417.4), 417);
+  assertEqual(clampNotesListW(5000), 600);
+  assertEqual(NOTES_LIST_W_DEFAULT, 300);
+});
