@@ -231,3 +231,26 @@ test('fmtNoteDate shows a time for today and a date for older notes', function (
   assertEqual(fmtNoteDate(now - 86400000), 'Yesterday');
   assertTrue(fmtNoteDate(now - 40 * 86400000).length > 4);
 });
+
+test('moving a note offers Undo that puts it back in its old folder', function () {
+  const f = { id: 'f-work', name: 'Work' };
+  noteFolders = [f];
+  const n = ntNote({ id: 'nm1', folderId: NOTES_DEFAULT_FOLDER });
+  notes = [n];
+  moveNote('nm1', 'f-work');
+  assertEqual(n.folderId, 'f-work');
+  assertTrue(!!toastUndoAction, 'the move offers an Undo');
+  triggerToastUndo();
+  assertEqual(notes[0].folderId, NOTES_DEFAULT_FOLDER);
+});
+
+test('renaming a folder offers Undo that restores the old name', function () {
+  const f = { id: 'f-work', name: 'Work' };
+  noteFolders = [f];
+  editingFolderId = 'f-work';
+  document.getElementById('folderNameInput').value = 'Projects';
+  saveFolderModal();
+  assertEqual(f.name, 'Projects');
+  triggerToastUndo();
+  assertEqual(f.name, 'Work');
+});
