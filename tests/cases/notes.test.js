@@ -689,3 +689,58 @@ test('the notes list width is clamped between 200px and 600px, and 300px is the 
   assertEqual(clampNotesListW(5000), 600);
   assertEqual(NOTES_LIST_W_DEFAULT, 300);
 });
+
+test('only the newest snapshots keep their notes, so old ones do not eat the storage quota', function () {
+  var seeded = [];
+  for (var i = 1; i <= MAX_BACKUPS - 1; i++) seeded.push({ date: '2020-01-0' + i, savedAt: i, projects: [], tasks: [], notes: [ntNote({ id: 'o' + i })], noteFolders: [] });
+  localStorage.setItem(BACKUPS_KEY, JSON.stringify(seeded));
+  notes = [ntNote({ id: 'now' })];
+  maybeSnapshotBackup();
+  var b = getBackups();
+  assertEqual(b.length, MAX_BACKUPS);
+  var withNotes = b.filter(function (x) { return Array.isArray(x.notes); });
+  assertEqual(withNotes.length, MAX_BACKUPS_WITH_NOTES);
+  assertEqual(b[b.length - 1].notes[0].id, 'now');
+  assertTrue(!b[0].notes, 'the oldest snapshot has dropped its notes');
+});
+
+test('restoring a snapshot without notes leaves the current notes alone', function () {
+  notes = [ntNote({ id: 'keep', title: 'keep me' })];
+  localStorage.setItem(BACKUPS_KEY, JSON.stringify([{ date: '2020-02-02', savedAt: 1, projects: [], tasks: [] }]));
+  restoreBackup('2020-02-02'); confirmModalAction();
+  assertEqual(notes.length, 1); assertEqual(notes[0].title, 'keep me');
+});
+
+test('save() survives a full localStorage and warns once', function () {
+  var real = localStorage.setItem, toasts = 0, realToast = showToast;
+  localStorage.setItem = function () { throw new Error('QuotaExceededError'); };
+  showToast = function () { toasts++; };
+  storageFullWarned = false;
+  try { save(); save(); } finally { localStorage.setItem = real; showToast = realToast; storageFullWarned = false; }
+  assertEqual(toasts, 1, 'one warning, not one per save');
+});
+
+test('a note edited on both sides keeps both versions: the newer in place, the other as a conflicted copy', function () {
+  notes = [ntNote({ id: 'c1', title: 'Plan', body: '<p>mine</p>', updatedAt: 200, baseAt: 100 })];
+  var r = mergeNotesData({ notes: [ntNote({ id: 'c1', title: 'Plan', body: '<p>theirs</p>', updatedAt: 300 })] }, true);
+  assertEqual(notes.length, 2);
+  assertEqual(notes[0].body, '<p>theirs</p>'); assertEqual(notes[0].baseAt, 300);
+  assertTrue(notes[1].title.indexOf('(conflicted copy)') > -1);
+  assertEqual(notes[1].body, '<p>mine</p>');
+  assertEqual(r.added, 1);
+});
+
+test('conflict: when our edit is the newer one it stays, and their text is kept as the copy', function () {
+  notes = [ntNote({ id: 'c2', body: '<p>mine</p>', updatedAt: 400, baseAt: 100 })];
+  mergeNotesData({ notes: [ntNote({ id: 'c2', body: '<p>theirs</p>', updatedAt: 300 })] }, true);
+  assertEqual(notes[0].body, '<p>mine</p>'); assertEqual(notes.length, 2); assertEqual(notes[1].body, '<p>theirs</p>');
+});
+
+test('no conflict copy when we had not edited since the last sync, or the text is the same', function () {
+  notes = [ntNote({ id: 'c3', body: '<p>old</p>', updatedAt: 100, baseAt: 100 })];
+  mergeNotesData({ notes: [ntNote({ id: 'c3', body: '<p>new</p>', updatedAt: 300 })] }, true);
+  assertEqual(notes.length, 1); assertEqual(notes[0].body, '<p>new</p>');
+  notes = [ntNote({ id: 'c4', body: '<p>same</p>', updatedAt: 200, baseAt: 100 })];
+  mergeNotesData({ notes: [ntNote({ id: 'c4', body: '<p>same</p>', updatedAt: 300 })] }, true);
+  assertEqual(notes.length, 1);
+});

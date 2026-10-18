@@ -2033,6 +2033,7 @@ const TAGS = [
 const COMPLETED_RETENTION_DAYS = 90;
 const BACKUPS_KEY = 'mytasks_backups';
 const MAX_BACKUPS = 7;
+const MAX_BACKUPS_WITH_NOTES = 3;   // older snapshots drop their notes: they would otherwise multiply the notes' share of the ~5 MB localStorage quota
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let projects = [], tasks = [];
@@ -2194,9 +2195,13 @@ function load(){
 function dataPayload(){
   return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
+let storageFullWarned = false;
 function save(){
   const data = dataPayload();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); storageFullWarned = false; }
+  catch(e){                                                          // quota exceeded: say so once instead of silently losing edits
+    if(!storageFullWarned){ storageFullWarned = true; showToast('Storage is full, so changes are not saved in this browser. Link a data file or export a backup.', true); }
+  }
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
   maybeSnapshotBackup();
 }
@@ -2215,6 +2220,7 @@ function maybeSnapshotBackup(){
     if(backups.length && backups[backups.length-1].date===today) return;
     backups.push({ date: today, savedAt: Date.now(), projects, tasks, notes, noteFolders });
     while(backups.length > MAX_BACKUPS) backups.shift();
+    backups.forEach((b, i)=>{ if(i < backups.length - MAX_BACKUPS_WITH_NOTES){ delete b.notes; delete b.noteFolders; } });
     localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
   }catch(e){ /* backups are a bonus, not a requirement for save() to succeed */ }
 }
@@ -4830,6 +4836,7 @@ function normalizeNotes(){
     if(!n.createdAt) n.createdAt = Date.now();
     if(!n.updatedAt) n.updatedAt = n.createdAt;
     n.locked = n.locked===true;
+    if(!Number.isFinite(n.baseAt)) n.baseAt = n.updatedAt;           // legacy / imported notes count as already in sync
   });
   if(!Array.isArray(deletedNoteIds)) deletedNoteIds = [];
   if(!Array.isArray(deletedNoteFolderIds)) deletedNoteFolderIds = [];
@@ -4945,11 +4952,24 @@ function mergeNotesData(data, respectTombstones){
   (data.notes||[]).forEach(it=>{
     if(!it || !it.id) return;
     const existing = notes.find(n=>n.id===it.id);
-    if(existing){ if((it.updatedAt||0) > (existing.updatedAt||0)){ Object.assign(existing, it); updated++; } return; }
+    if(existing){
+      // baseAt = the version of this note we last had in sync with the file. If we edited it since AND the other side did too (both past
+      // baseAt, different text), neither edit may silently vanish: the newer stays, the other is kept as a "conflicted copy" note.
+      const base = Number.isFinite(existing.baseAt) ? existing.baseAt : existing.updatedAt, inUpd = it.updatedAt||0, exUpd = existing.updatedAt||0;
+      const bothEdited = exUpd > base && inUpd > base && inUpd !== exUpd && (it.body!==existing.body || it.title!==existing.title);
+      if(bothEdited){
+        const incomingWins = inUpd > exUpd, loser = incomingWins ? {...existing} : {...it}, now = Date.now();
+        notes.push({...loser, id:genId(), title:String(loser.title || 'Untitled').slice(0,170) + ' (conflicted copy)', createdAt:now, updatedAt:now, baseAt:0});
+        added++;
+        if(incomingWins){ Object.assign(existing, it); existing.baseAt = existing.updatedAt; updated++; }
+        else existing.baseAt = inUpd;                                 // our version stays; the other side's edit is now accounted for
+      } else if(inUpd > exUpd){ Object.assign(existing, it); existing.baseAt = existing.updatedAt; updated++; }
+      return;
+    }
     const tomb = deletedNoteIds.find(x=>x.id===it.id);
     if(respectTombstones && tomb && tomb.deletedAt >= (it.updatedAt||0)) return;
     if(tomb) untombstone(deletedNoteIds, it.id);
-    notes.push(it); added++;
+    it.baseAt = it.updatedAt||0; notes.push(it); added++;
   });
   return {added, updated};
 }
@@ -6579,10 +6599,12 @@ async function fileSyncWrite(data){
       }
     }
     const w = await fileHandle.createWritable();
-    const text = JSON.stringify(payload, null, 2);
+    const sent = new Map(notes.map(n=>[n.id, n.updatedAt]));        // what this write contains, for the conflict baseline below
+    const text = JSON.stringify(payload);                         // compact: the file is for syncing, not hand-editing
     await w.write(text);
     await w.close();
     lastSyncedSnapshot = text;
+    notes.forEach(n=>{ if(sent.has(n.id)) n.baseAt = sent.get(n.id); });   // everything just written is now the shared version
     updateFileSyncUI();
   }catch(e){ /* localStorage remains the authoritative fallback */ }
 }

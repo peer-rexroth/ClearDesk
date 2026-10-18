@@ -777,3 +777,8 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 - Commit messages in this repo tend to explain *why*, and call out when a
   fix was verified by execution (not just by reading), since that's the
   actual verification method available here.
+
+## Notes: storage and sync safety
+- `save()` catches a full localStorage and warns once (`storageFullWarned`) instead of throwing; the linked file is written compact (`JSON.stringify(payload)`, no indent).
+- Daily snapshots: only the newest `MAX_BACKUPS_WITH_NOTES` (3) keep `notes`/`noteFolders`; older ones drop them to protect the ~5 MB quota. `restoreBackup` leaves current notes alone when a snapshot has none.
+- Per-note conflicts: each note has `baseAt` (the `updatedAt` last in sync with the file; set after a file write and when a merge adopts a note; legacy notes default to `updatedAt`). In `mergeNotesData`, if both sides changed a note past `baseAt` with different text, the newer stays and the other becomes a new note "<title> (conflicted copy)" in the same folder. No copy when we hadn't edited since the last sync or the text is identical.
