@@ -1354,7 +1354,7 @@
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
         </div>
-        <div class="split-btn-menu-item" id="fileBackupItem" onclick="fileBackupMenuAction();closeLibMenu()">
+        <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label" id="fileBackupLabel">Daily file backup</div><div class="split-btn-menu-desc" id="fileBackupDesc">Link a data file to enable</div></div>
         </div>
@@ -6032,7 +6032,7 @@ function openFileSyncModal(reconnectHandle){
   document.getElementById('fileSyncModalBg').classList.add('open');
 }
 function closeFileSyncModal(){ document.getElementById('fileSyncModalBg')?.classList.remove('open'); }
-function toggleLibMenu(){ document.getElementById('libMenu')?.classList.toggle('open'); }
+function toggleLibMenu(){ updateFileBackupUI(); document.getElementById('libMenu')?.classList.toggle('open'); }
 function closeLibMenu(){ document.getElementById('libMenu')?.classList.remove('open'); }
 // Light/Dark icons: thin outlined sun and crescent moon, drawn in the SF Symbols
 // idiom (round caps, ~1px stroke, currentColor) rather than the heavy solid Font
@@ -6787,17 +6787,12 @@ async function fileBackupIfDue(){
 }
 // Data menu item: shows the state; for a file linked before folders existed it is the way to add the folder.
 async function fileBackupMenuAction(){
-  if(!fileHandle){ openFileSyncModal(); return; }
+  if(!fileHandle) return;
   if(!dirHandle) return linkBackupFolder();
-  let perm = 'prompt'; try{ perm = await dirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
-  if(perm!=='granted'){
-    try{ await dirHandle.requestPermission({mode:'readwrite'}); }catch(_){}
-    updateFileBackupUI(); const ok = await fileBackupIfDue();
-    showToast(ok ? 'Daily file backup resumed' : 'Daily file backup is on', false);
-    return;
-  }
+  try{ await dirHandle.requestPermission({mode:'readwrite'}); }catch(_){}
   const ok = await fileBackupIfDue();
-  showToast(ok ? `Backed up to ${dirHandle.name}/${FILE_BACKUP_SUB}` : `Today's backup is already in ${dirHandle.name}/${FILE_BACKUP_SUB}`, false);
+  updateFileBackupUI();
+  showToast(ok ? 'Daily file backup resumed' : 'Daily file backup is on', false);
 }
 // A file linked by the old file picker: ask for its folder (it must really contain the file), then back up.
 async function linkBackupFolder(){
@@ -6810,13 +6805,16 @@ async function linkBackupFolder(){
     showToast(ok ? `Backed up to ${dir.name}/${FILE_BACKUP_SUB}, then once a day` : 'Folder linked for daily backups', false);
   }catch(e){ showToast('Could not link the folder', true); }
 }
+// The Data menu row exists only when backups need the user: a file linked before folders (needs its folder) or a lapsed permission.
 async function updateFileBackupUI(){
-  const l = document.getElementById('fileBackupLabel'), d = document.getElementById('fileBackupDesc'); if(!l || !d) return;
-  l.textContent = 'Daily file backup';
-  if(!fileHandle){ d.textContent = 'Link a data file to enable'; return; }
-  if(!dirHandle){ d.textContent = 'Link the data file’s folder to enable'; return; }
-  let perm = 'prompt'; try{ perm = await dirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
-  d.textContent = perm==='granted' ? `On: ${dirHandle.name}/${FILE_BACKUP_SUB}` : `Permission needed for ${dirHandle.name}`;
+  const item = document.getElementById('fileBackupItem'), l = document.getElementById('fileBackupLabel'), d = document.getElementById('fileBackupDesc'); if(!item || !l || !d) return;
+  let need = '';
+  if(fileHandle && !dirHandle){ l.textContent = 'Enable daily file backup'; d.textContent = 'Link the data file\u2019s folder'; need = 'x'; }
+  else if(fileHandle && dirHandle){
+    let perm = 'prompt'; try{ perm = await dirHandle.queryPermission({mode:'readwrite'}); }catch(_){}
+    if(perm!=='granted'){ l.textContent = 'Resume daily file backup'; d.textContent = `Permission needed for ${dirHandle.name}`; need = 'x'; }
+  }
+  item.style.display = need ? '' : 'none';
 }
 async function initFileSync(){
   if(!window.showOpenFilePicker) return;
