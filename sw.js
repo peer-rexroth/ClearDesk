@@ -1,7 +1,8 @@
-const CACHE_NAME = 'mydesk-cache-v4';
+const CACHE_NAME = 'mydesk-cache-v5';
 const APP_SHELL = [
   'mydesk.html',
   'manifest.json',
+  'icons/favicon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
   // Font Awesome (CSS + the two font files actually used — solid/regular,
