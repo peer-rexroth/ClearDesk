@@ -486,12 +486,6 @@
   ::-webkit-scrollbar-thumb { background: var(--border-2); border-radius: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
 
-  /* Backups modal */
-  .backups-list { display: flex; flex-direction: column; gap: 8px; max-height: 320px; overflow-y: auto; }
-  .backups-empty { font-size: 13px; color: var(--text-2); padding: 8px 2px; line-height: 1.5; }
-  .backup-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: var(--radius); border: 0.5px solid var(--border-2); }
-  .backup-row-date { font-size: 13px; font-weight: 600; }
-  .backup-row-desc { font-size: 12px; color: var(--text-2); margin-top: 1px; }
 
   /* ── Polish pass (modelled on Milestone's UI) ─────────────────────────────
      Geometry/type only — no colors.
@@ -1360,10 +1354,6 @@
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
         </div>
-        <div class="split-btn-menu-item" onclick="openBackupsModal();closeLibMenu()">
-          <i class="fa-solid fa-clock-rotate-left split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Backups</div><div class="split-btn-menu-desc">Restore an automatic daily snapshot</div></div>
-        </div>
         <div class="split-btn-menu-item" id="fileBackupItem" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label" id="fileBackupLabel">Daily file backup</div><div class="split-btn-menu-desc" id="fileBackupDesc">Link a data file to enable</div></div>
@@ -1781,15 +1771,6 @@
   </div>
 </div>
 
-<!-- Backups modal -->
-<div class="modal-bg" id="backupsModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" style="width:400px">
-    <h3>Backups</h3>
-    <div class="backups-list" id="backupsList"></div>
-    <div class="modal-actions"><button class="btn btn-primary" onclick="closeAllModals()">Done</button></div>
-  </div>
-</div>
-
 <!-- All Tasks projects modal -->
 <div class="modal-bg" id="allTasksProjectsModalBg" onclick="if(event.target===this) closeAllModals()">
   <div class="modal" style="width:360px">
@@ -1885,6 +1866,7 @@
 <script>
 // ── Constants ─────────────────────────────────────────────────────────────────
 const STORAGE_KEY = 'mytasks_data_v1';
+try{ localStorage.removeItem('mytasks_backups'); }catch(_){}   // the old in-browser daily snapshots are gone; this frees their share of the quota
 const THEME_KEY = 'mytasks_theme';
 const VIEW_KEY = 'mytasks_view';
 // Sidebar collapse — a per-device display preference (localStorage), like the
@@ -2062,9 +2044,6 @@ const TAGS = [
   {id:'someday',     label:'someday',    color:'teal'}
 ];
 const COMPLETED_RETENTION_DAYS = 90;
-const BACKUPS_KEY = 'mytasks_backups';
-const MAX_BACKUPS = 7;
-const MAX_BACKUPS_WITH_NOTES = 3;   // older snapshots drop their notes: they would otherwise multiply the notes' share of the ~5 MB localStorage quota
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let projects = [], tasks = [];
@@ -2236,26 +2215,6 @@ function save(){
   }
   if(fileHandle) fileSyncWrite(data).catch(()=>{});
   if(fileBackupDue()) fileBackupIfDue();
-  maybeSnapshotBackup();
-}
-function getBackups(){
-  try{ return JSON.parse(localStorage.getItem(BACKUPS_KEY)) || []; }
-  catch(e){ return []; }
-}
-// Takes at most one rolling snapshot per calendar day, keeping the last
-// MAX_BACKUPS days — a local safety net distinct from the linked-file sync,
-// which mirrors live state rather than preserving history. Never lets a
-// storage error (e.g. quota) interrupt the actual save.
-function maybeSnapshotBackup(){
-  try{
-    const backups = getBackups();
-    const today = todayStr();
-    if(backups.length && backups[backups.length-1].date===today) return;
-    backups.push({ date: today, savedAt: Date.now(), projects, tasks, notes, noteFolders });
-    while(backups.length > MAX_BACKUPS) backups.shift();
-    backups.forEach((b, i)=>{ if(i < backups.length - MAX_BACKUPS_WITH_NOTES){ delete b.notes; delete b.noteFolders; } });
-    localStorage.setItem(BACKUPS_KEY, JSON.stringify(backups));
-  }catch(e){ /* backups are a bonus, not a requirement for save() to succeed */ }
 }
 // housekeeping: silently drop tasks that have sat completed for longer than the retention window
 function purgeOldCompletedTasks(){
@@ -6551,44 +6510,6 @@ function toggleAllTasksProject(id){
   allTasksHiddenProjectIds = allTasksHiddenProjectIds.includes(id) ? allTasksHiddenProjectIds.filter(x=>x!==id) : [...allTasksHiddenProjectIds, id];
   save(); render(); renderAllTasksProjectsModal();
 }
-function openBackupsModal(){ renderBackupsModal(); document.getElementById('backupsModalBg').classList.add('open'); }
-function renderBackupsModal(){
-  const backups = getBackups();
-  const el = document.getElementById('backupsList');
-  if(backups.length===0){
-    el.innerHTML = `<div class="backups-empty">No backups yet — one is taken automatically the first time you save each day, kept for the last ${MAX_BACKUPS} days.</div>`;
-    return;
-  }
-  el.innerHTML = backups.slice().reverse().map(b=>`
-    <div class="backup-row">
-      <div class="backup-row-info">
-        <div class="backup-row-date">${fmtDate(b.date)}</div>
-        <div class="backup-row-desc">${(b.tasks||[]).length} task${(b.tasks||[]).length===1?'':'s'}${(b.notes||[]).length ? ` · ${b.notes.length} note${b.notes.length===1?'':'s'}` : ''}</div>
-      </div>
-      <button class="btn btn-sm" onclick="restoreBackup('${b.date}')">Restore</button>
-    </div>
-  `).join('');
-}
-function restoreBackup(date){
-  const backups = getBackups();
-  const b = backups.find(x=>x.date===date);
-  if(!b) return;
-  closeAllModals();
-  openConfirmModal({
-    title: 'Restore this backup?', confirmLabel: 'Restore', danger: false,
-    body: `This replaces your current data with the snapshot from ${fmtDate(date)}. Your current data will be backed up to a file first.`,
-    action: ()=>{
-      downloadBackup(projects, tasks, `mydesk-backup-before-restore-${todayStr()}.json`, {notes, noteFolders});
-      projects = b.projects || defaultProjects();
-      tasks = b.tasks || [];
-      if(Array.isArray(b.notes)){ notes = b.notes; noteFolders = b.noteFolders || []; }
-      normalizeData();
-      save(); render();
-      showToast(`Restored backup from ${fmtDate(date)}`);
-    }
-  });
-}
-
 // ── File System Access API ────────────────────────────────────────────────────
 let fileHandle = null;
 const _FS = { db: 'mytasks-fs', store: 'handles', key: 'linked-file', dirKey: 'linked-dir' };

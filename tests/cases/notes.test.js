@@ -182,17 +182,6 @@ test('export includes notes and folders', function () {
   assertEqual(out.notes.length, 1); assertTrue(Array.isArray(out.noteFolders));
 });
 
-test('the daily snapshot includes notes, and restoring it brings them back', function () {
-  notes = [ntNote({ id: 's1', title: 'snap' })];
-  localStorage.removeItem(BACKUPS_KEY);
-  maybeSnapshotBackup();
-  var b = getBackups()[0];
-  assertEqual(b.notes.length, 1);
-  notes = [];
-  restoreBackup(b.date); confirmModalAction();
-  assertEqual(notes.length, 1); assertEqual(notes[0].title, 'snap');
-});
-
 test('moveNote changes the folder and bumps updatedAt; an unknown folder is refused', function () {
   noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true }, { id: 'f2', name: 'Work' }];
   notes = [ntNote({ id: 'a', updatedAt: 1 })];
@@ -688,27 +677,6 @@ test('the notes list width is clamped between 200px and 600px, and 300px is the 
   assertEqual(clampNotesListW(417.4), 417);
   assertEqual(clampNotesListW(5000), 600);
   assertEqual(NOTES_LIST_W_DEFAULT, 300);
-});
-
-test('only the newest snapshots keep their notes, so old ones do not eat the storage quota', function () {
-  var seeded = [];
-  for (var i = 1; i <= MAX_BACKUPS - 1; i++) seeded.push({ date: '2020-01-0' + i, savedAt: i, projects: [], tasks: [], notes: [ntNote({ id: 'o' + i })], noteFolders: [] });
-  localStorage.setItem(BACKUPS_KEY, JSON.stringify(seeded));
-  notes = [ntNote({ id: 'now' })];
-  maybeSnapshotBackup();
-  var b = getBackups();
-  assertEqual(b.length, MAX_BACKUPS);
-  var withNotes = b.filter(function (x) { return Array.isArray(x.notes); });
-  assertEqual(withNotes.length, MAX_BACKUPS_WITH_NOTES);
-  assertEqual(b[b.length - 1].notes[0].id, 'now');
-  assertTrue(!b[0].notes, 'the oldest snapshot has dropped its notes');
-});
-
-test('restoring a snapshot without notes leaves the current notes alone', function () {
-  notes = [ntNote({ id: 'keep', title: 'keep me' })];
-  localStorage.setItem(BACKUPS_KEY, JSON.stringify([{ date: '2020-02-02', savedAt: 1, projects: [], tasks: [] }]));
-  restoreBackup('2020-02-02'); confirmModalAction();
-  assertEqual(notes.length, 1); assertEqual(notes[0].title, 'keep me');
 });
 
 test('save() survives a full localStorage and warns once', function () {

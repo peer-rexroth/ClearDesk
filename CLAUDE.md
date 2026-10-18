@@ -293,7 +293,7 @@ parity.
 - **First-run file-sync prompt is a banner, not a modal** (`#syncBanner`,
   `showSyncBanner`): dismissed per session; the modal still opens from the
   banner/Link-file button. Sidebar bottom bar (`.sb-tools`): the Link-file status chip, then one icon-only
-  capsule group (`.tool-group.topbar-tools`) of Data (export/import/backups),
+  capsule group (`.tool-group.topbar-tools`) of Data (export/import/daily file backup),
   Appearance (an "aA" glyph — a palette would suggest colour choices that no longer
   exist) and Help (guide, shortcuts, about), each opening its own dropdown with a
   tooltip. Menus that
@@ -567,7 +567,7 @@ card with no way back.
 defaults, etc.) and is called by `load()` after reading from `localStorage`.
 **Anything else that assigns to `projects`/`tasks` from an external source
 must also call `normalizeData()` before `render()`** — `applyImport()` (both
-replace and merge modes) and `restoreBackup()` do this; the bug this fixed
+replace and merge modes) do this; the bug this fixed
 was importing an older `.json` export whose schema predated steps/project-
 icons and crashing on render because nothing had migrated it. A full-app
 review later found the same mistake in four separate places at once
@@ -780,7 +780,6 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 
 ## Notes: storage and sync safety
 - `save()` catches a full localStorage and warns once (`storageFullWarned`) instead of throwing; the linked file is written compact (`JSON.stringify(payload)`, no indent).
-- Daily snapshots: only the newest `MAX_BACKUPS_WITH_NOTES` (3) keep `notes`/`noteFolders`; older ones drop them to protect the ~5 MB quota. `restoreBackup` leaves current notes alone when a snapshot has none.
 - Per-note conflicts: each note has `baseAt` (the `updatedAt` last in sync with the file; set after a file write and when a merge adopts a note; legacy notes default to `updatedAt`). In `mergeNotesData`, if both sides changed a note past `baseAt` with different text, the newer stays and the other becomes a new note "<title> (conflicted copy)" in the same folder. No copy when we hadn't edited since the last sync or the text is identical.
 
 ## Linking by folder and the daily file backup
@@ -788,3 +787,5 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 - **Daily backup**: `fileBackupIfDue()` (from `save()`, after linking and at startup; gate `lastFileBackupDay`, in memory) writes `Backup/mydesk-data-YYYY-MM-DD.json` (compact `dataPayload()`) into the linked folder. Like Milestone/Pulse: first writer each day wins (an existing file for today is left alone, probed with `getFileHandle` without `create`), best-effort and silent, never prompts, **kept forever** (nothing is deleted). No separate backup-folder pick.
 - A file linked by the old picker keeps working without a folder; Data menu -> *Daily file backup* (`fileBackupMenuAction`) shows the state and, for such a file, `linkBackupFolder()` asks for its folder (must contain the file, checked with `dir.resolve()`). A lapsed folder permission shows "Permission needed" there; clicking re-grants and backs up.
 - Verified in Chromium through the origin-private file system with a stubbed `showDirectoryPicker` (create, same-day no-overwrite, link one file, chooser for several, legacy folder link).
+
+**Removed:** the in-browser daily snapshots (`mytasks_backups`, `getBackups`/`maybeSnapshotBackup`/`restoreBackup`, the Backups modal and its Data-menu item). Safety copies are the daily file backup above (history on disk) and Export; the startup code deletes the old `mytasks_backups` key to free localStorage quota.
