@@ -113,7 +113,7 @@
   .layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 52px); }
 
   /* sidebar */
-  .sidebar { width: 300px; flex-shrink: 0; background: var(--bg); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .sidebar { width: var(--sidebar-w, 300px); flex-shrink: 0; background: var(--bg); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
   .sidebar-search { padding: 10px 12px; border-bottom: 0.5px solid var(--border); position: relative; }
   .sidebar-search input { width: 100%; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 7px 10px 7px 30px; font-size: 13px; color: var(--text); outline: none; font-family: var(--font); }
   .sidebar-search input:focus { border-color: var(--border-2); }
@@ -844,9 +844,18 @@
   .topbar-left { display: flex; align-items: center; gap: 14px; }
   .sidebar-toggle { padding: 6px 9px; }
   .sidebar { transition: width .2s ease, border-width .2s ease; }
+  .sidebar-resizer { position: relative; flex: none; width: 0; z-index: 30; }
+  .sidebar-resizer::before { content: ""; position: absolute; top: 0; bottom: 0; left: -4px; width: 9px; cursor: col-resize; }
+  .sidebar-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--sel-bg, var(--blue-text)); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .sidebar-resizer:hover::after, .sidebar-resizer:focus-visible::after, html.sidebar-resizing .sidebar-resizer::after { opacity: .7; }
+  .sidebar-resizer:focus { outline: none; }
+  html.sidebar-resizing, html.sidebar-resizing * { cursor: col-resize !important; user-select: none !important; }
+  html.sidebar-resizing .sidebar { transition: none; }
+  html.sidebar-collapsed .sidebar-resizer { display: none; }
   html.sidebar-collapsed .sidebar { width: 0; border-right-width: 0; visibility: hidden; transition: width .2s ease, border-width .2s ease, visibility 0s linear .2s; }
   @media (max-width: 800px) {
     /* narrow: the sidebar floats over the content instead of squeezing it */
+    .sidebar-resizer { display: none; }   /* the floating sidebar on a narrow window keeps its fixed width */
     .sidebar { position: fixed; top: 56px; bottom: 0; left: 0; z-index: 140; width: min(300px, 86vw); box-shadow: 0 0 40px rgba(0,0,0,.25); }
     html.sidebar-collapsed .sidebar { width: min(300px, 86vw); transform: translateX(-100%); box-shadow: none; }
     .sidebar { transition: transform .2s ease; }
@@ -1085,14 +1094,11 @@
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
   .note-editor.locked .tbl-handles { display: none; }
-  .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border-2); color: var(--text-3); font-size: 9px; cursor: pointer; }
-  .tbl-grip.col { height: 14px; }
-  .tbl-grip.row { width: 14px; }
-  .tbl-grip.row i { transform: rotate(90deg); }
-  .tbl-grip:hover { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
-  .tbl-plus { position: absolute; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sel-bg, var(--blue-text)); color: #fff; font-size: 8px; cursor: pointer; opacity: 0; transition: opacity .12s ease, transform .12s ease; }
-  .tbl-plus.end { opacity: .5; }
+  .tbl-plus { position: absolute; width: 14px; height: 14px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--sel-bg, var(--blue-text)); color: #fff; font-size: 7px; cursor: pointer; opacity: .45; transition: opacity .12s ease, transform .12s ease; }
   .tbl-plus:hover { opacity: 1; transform: scale(1.18); }
+  .tbl-bar-label { padding: 0 4px 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); white-space: nowrap; }
+  .note-toolbar .note-table-bar { display: none; }
+  .note-toolbar .note-table-bar.show { display: inline-flex; }
   .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
   .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
   .note-title::placeholder { color: var(--text-3); }
@@ -1243,6 +1249,7 @@
     </div>
     <div class="sidebar-footer" id="sidebarFooter"></div>
   </div>
+  <div class="sidebar-resizer" id="sidebarResizer" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" aria-valuemin="200" aria-valuemax="480" tabindex="0" title="Drag to resize (double-click to reset)"></div>
 
   <div class="main">
     <div class="main-toolbar">
@@ -1341,6 +1348,20 @@
               <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><i class="fa-solid fa-table"></i></button>
               <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
             </div>
+          </div>
+          <div class="tool-group note-fmt note-table-bar" id="noteTableBar" role="group" aria-label="Table">
+            <span class="tbl-bar-label">Row</span>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('rowBefore')" title="Insert row above" aria-label="Insert row above"><i class="fa-solid fa-arrow-up"></i></button>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('rowAfter')" title="Insert row below" aria-label="Insert row below"><i class="fa-solid fa-arrow-down"></i></button>
+            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delRow')" title="Delete row" aria-label="Delete row"><i class="fa-solid fa-minus"></i></button>
+            <span class="tool-sep"></span>
+            <span class="tbl-bar-label">Column</span>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('colBefore')" title="Insert column left" aria-label="Insert column left"><i class="fa-solid fa-arrow-left"></i></button>
+            <button type="button" class="tool-btn" onclick="noteTableEdit('colAfter')" title="Insert column right" aria-label="Insert column right"><i class="fa-solid fa-arrow-right"></i></button>
+            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delCol')" title="Delete column" aria-label="Delete column"><i class="fa-solid fa-minus"></i></button>
+            <span class="tool-sep"></span>
+            <button type="button" class="tool-btn" id="noteTableHeaderBtn" onclick="noteTableEdit('header')" title="Header row" aria-label="Header row"><i class="fa-solid fa-heading"></i></button>
+            <button type="button" class="tool-btn tool-danger" onclick="noteTableEdit('delTable')" title="Delete table" aria-label="Delete table"><i class="fa-regular fa-trash-can"></i></button>
           </div>
           <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><i class="fa-solid fa-link"></i></button>
@@ -1527,7 +1548,7 @@
         <div class="help-section">
           <div class="help-section-title">Finding your way</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-solid fa-inbox"></i><span>The <strong>sidebar</strong> lists All Tasks, My Day (due today), This Week, Overdue, then your projects and a collapsible Tags list, each with a count.</span></div>
+          <div class="help-row"><i class="fa-solid fa-inbox"></i><span>The <strong>sidebar</strong> lists All Tasks, My Day (due today), This Week, Overdue, then your projects and a collapsible Tags list, each with a count. Drag the sidebar's right edge to make it wider or narrower (double-click the edge to reset; with the edge focused, the arrow keys resize it too).</span></div>
           <div class="help-row"><i class="fa-solid fa-table-list"></i><span><strong>List</strong> shows one line per task with Project, Priority, Status and Due columns. <strong>Board</strong> shows cards in columns — switch with the List / Board buttons, and choose <strong>Project | Status</strong> to decide what the columns are. Dragging a card to another column changes that field.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) matches titles, notes, subtasks and tags. <strong>Filter</strong> narrows by status, priority and tag; a count appears on the button and ✕ clears it. <strong>Sort</strong> picks the order.</span></div>
           <div class="help-row"><i class="fa-regular fa-eye"></i><span>The small slider icon beside <strong>+</strong> in the Projects heading chooses which projects appear in All Tasks and as board columns.</span></div>
@@ -1566,7 +1587,7 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. Point at a table to see grips above each column and beside each row (click or right-click one for Insert and Delete), and <strong>+</strong> buttons on the boundaries to add a column or row right there. Inside a table the toolbar button also adds or deletes rows and columns, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table a <em>Row</em> / <em>Column</em> strip appears in the toolbar: insert above or below, left or right, delete, toggle the header row, or delete the table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock in a note's toolbar makes it read-only. You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -1579,7 +1600,7 @@
           <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Folders</strong>: <strong>+</strong> beside <em>Folders</em> adds one; hover a folder to edit or delete it. Deleting a folder moves its notes to <em>Notes</em>. Move a note with the folder menu in its toolbar. Deleting, moving or renaming shows an <strong>Undo</strong> toast, and <kbd>⌘Z</kbd> does the same while you are not typing; inside a note, <kbd>⌘Z</kbd> undoes your typing.</span></div>
           <div class="help-row"><i class="fa-regular fa-folder-open"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows its own notes plus those of its subfolders, and its count includes them. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
           <div class="help-row"><i class="fa-solid fa-arrows-up-down"></i><span><strong>Reordering folders</strong>: drag a folder up or down within its level, or right-click it and choose <em>Move up</em> / <em>Move down</em>. The order, renames and moves sync between devices like note edits.</span></div>
-          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of the notes in the current folder.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of <em>every</em> note, whatever folder you are in, and opens the first result.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Delete</kbd> while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
           <div class="help-row"><i class="fa-solid fa-hard-drive"></i><span>Notes are part of your data: they are saved in this browser, included in <strong>Export</strong>, <strong>Import</strong> and <strong>Backups</strong>, and kept in the linked file. When two copies of a note differ, the newer edit wins.</span></div>
           </div>
@@ -1741,6 +1762,43 @@ function collapseSidebarIfNarrow(){
   let v = null; try{ v = localStorage.getItem(SIDEBAR_KEY); }catch(_){}
   sidebarCollapsed = v==='1' ? true : v==='0' ? false : (typeof window!=='undefined' && window.innerWidth <= 800);
   applySidebarState();
+})();
+// Sidebar width: drag the sidebar's right edge (or use the arrow keys on it); a per-device display preference like the collapse state.
+const SIDEBAR_W_KEY = 'mytasks_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 200, SIDEBAR_W_MAX = 480;
+const clampSidebarW = v=>Math.max(SIDEBAR_W_MIN, Math.min(SIDEBAR_W_MAX, Math.round(v)));
+let sidebarW = SIDEBAR_W_DEFAULT;   // the chosen width (the element's own width lags while the .2s transition runs)
+function setSidebarWidth(v, save){
+  const w = sidebarW = clampSidebarW(v);
+  if(w===SIDEBAR_W_DEFAULT) document.documentElement.style.removeProperty('--sidebar-w'); else document.documentElement.style.setProperty('--sidebar-w', w + 'px');
+  const r = document.getElementById('sidebarResizer'); if(r) r.setAttribute('aria-valuenow', String(w));
+  if(save){ try{ if(w===SIDEBAR_W_DEFAULT) localStorage.removeItem(SIDEBAR_W_KEY); else localStorage.setItem(SIDEBAR_W_KEY, String(w)); }catch(_){} }
+  return w;
+}
+(function(){
+  try{ const v = parseInt(localStorage.getItem(SIDEBAR_W_KEY), 10); if(Number.isFinite(v)) setSidebarWidth(v, false); }catch(_){}
+  const bar = document.getElementById('sidebarResizer'); if(!bar) return;
+  bar.setAttribute('aria-valuenow', String(sidebarW));
+  bar.addEventListener('pointerdown', e=>{
+    if(e.button!==0) return;
+    e.preventDefault();
+    const sb = document.querySelector('.sidebar'), rect = sb.getBoundingClientRect(), k = sb.offsetWidth ? rect.width / sb.offsetWidth : 1;   // the UI-size zoom: viewport px != CSS px
+    document.documentElement.classList.add('sidebar-resizing');
+    try{ bar.setPointerCapture(e.pointerId); }catch(_){}
+    const move = ev=>setSidebarWidth((ev.clientX - rect.left) / k, false);
+    const up = ev=>{
+      bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); bar.removeEventListener('pointercancel', up);
+      document.documentElement.classList.remove('sidebar-resizing');
+      setSidebarWidth((ev.clientX - rect.left) / k, true);
+    };
+    bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+  });
+  bar.addEventListener('dblclick', ()=>setSidebarWidth(SIDEBAR_W_DEFAULT, true));
+  bar.addEventListener('keydown', e=>{
+    const step = e.shiftKey ? 48 : 16;
+    if(e.key==='ArrowLeft'){ e.preventDefault(); setSidebarWidth(sidebarW - step, true); }
+    else if(e.key==='ArrowRight'){ e.preventDefault(); setSidebarWidth(sidebarW + step, true); }
+    else if(e.key==='Home' || e.key==='Enter'){ e.preventDefault(); setSidebarWidth(SIDEBAR_W_DEFAULT, true); }
+  });
 })();
 const UI_SCALE_KEY = 'mytasks_uiscale';
 // Two stops: Medium (the default) and Large. Small and Extra Large were removed at
@@ -4364,7 +4422,14 @@ function setTagFilter(tg){
 }
 function setSortBy(v){ sortBy = v; save(); render(); }
 function setSearchQuery(v){
-  if(appMode==='notes'){ noteSearchQuery = v; renderNotesList(); return; }   // in Notes the search box filters notes
+  if(appMode==='notes'){                                    // in Notes the search box filters notes, across every folder
+    noteSearchQuery = v;
+    const vis = visibleNotes();
+    if(vis.length && !vis.some(n=>n.id===selectedNoteId)){   // the open note is not a result: open the first one, like Apple Notes
+      flushNoteEdit(); const leaving = selectedNoteId; selectedNoteId = vis[0].id; removeIfEmptyNote(leaving); render();
+    } else renderNotesList();
+    return;
+  }
   searchQuery = v; render();
 }
 
@@ -4405,7 +4470,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -4479,6 +4544,7 @@ try{
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
   const savedCollapsed = JSON.parse(localStorage.getItem(NOTES_COLLAPSED_KEY) || '[]'); if(Array.isArray(savedCollapsed)) savedCollapsed.forEach(x=>{ if(typeof x==='string') noteFoldersCollapsed.add(x); });
 }catch(_){}
+let noteEditCount = 0;   // edits made in the open note since it was loaded: ⌘Z only undoes typing when there is some
 let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRange = null, noteDragFromEditor = false, editingFolderId = null;
 
 // ---- the HTML allowlist. Note bodies are HTML that comes from a contenteditable *and* from pasted text and from files we
@@ -4798,7 +4864,7 @@ function folderMenuRun(kind){
 function visibleNotes(){
   const words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
   return notes
-    .filter(n=>noteInFilter(n) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
+    .filter(n=>(words.length || noteInFilter(n)) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
     .sort((a,b)=>b.updatedAt - a.updatedAt);
 }
 function folderById(id){ return noteFolders.find(f=>f.id===id); }
@@ -4840,7 +4906,8 @@ function renderNotesList(vis){
   vis = vis || visibleNotes();
   const title = document.getElementById('notesListTitle'), sub = document.getElementById('notesListSub'), list = document.getElementById('notesList');
   const f = folderById(noteFolderFilter);
-  if(title) title.textContent = noteFolderFilter==='all' ? 'All Notes' : (f ? f.name : 'Notes');
+  const searching = !!noteSearchQuery.trim();                                   // a search looks through every folder
+  if(title) title.textContent = searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : (f ? f.name : 'Notes');
   if(sub) sub.textContent = vis.length ? `${vis.length} note${vis.length===1?'':'s'}` : '';
   if(!list) return;
   if(!vis.length){
@@ -4852,7 +4919,7 @@ function renderNotesList(vis){
     return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')">
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
-      ${fol && (noteFolderFilter==='all' || folderChildren(noteFolderFilter).length) ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(folderPath(fol))}</div>` : ''}
+      ${fol && (searching || noteFolderFilter==='all' || folderChildren(noteFolderFilter).length) ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(folderPath(fol))}</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -4866,16 +4933,25 @@ function renderNoteEditor(){
   const ed = document.getElementById('noteEditor'), empty = document.getElementById('notesEmpty');
   if(!n){ ed?.classList.remove('open'); if(empty) empty.style.display = ''; noteEditorId = null; return; }
   ed?.classList.add('open'); if(empty) empty.style.display = 'none';
-  const title = document.getElementById('noteTitle'), body = document.getElementById('noteBody');
+  const title = document.getElementById('noteTitle');
+  let body = document.getElementById('noteBody');
   if(noteEditorId!==n.id || noteEditorStamp!==n.updatedAt){
     // (re)load: a different note, or one changed from outside (a sync) that is not being edited right now
-    title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; tblHandlesHide();
+    // The browser keeps one undo history for the whole page, so loading another note into the same element would let ⌘Z reach back into the
+    // previous note's typing. A fresh element (same attributes and handlers) starts with an empty history.
+    if(noteEditorId!==n.id && body.parentNode){
+      const fresh = body.cloneNode(false), had = document.activeElement===body;
+      body.replaceWith(fresh); body = fresh; noteSavedRange = null;
+      if(had) fresh.focus();
+    }
+    title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
   const sel = document.getElementById('noteFolderSelect');
   if(sel){ sel.innerHTML = orderedFolders().map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${f.parentId ? '\u00a0\u00a0\u00a0' : ''}${esc(f.name)}</option>`).join(''); sel.disabled = !!n.locked; }
   const locked = !!n.locked;
   ed?.classList.toggle('locked', locked);
+  updateNoteToolbarState();                         // the table strip hides on a locked note
   body.contentEditable = locked ? 'false' : 'true'; title.readOnly = locked;
   const lockBtn = document.getElementById('noteLockBtn');
   if(lockBtn){ lockBtn.classList.toggle('on', locked); lockBtn.innerHTML = locked ? NOTE_ICON_LOCK : NOTE_ICON_UNLOCK; lockBtn.title = locked ? 'Unlock to enable editing' : 'Lock to prevent editing'; lockBtn.setAttribute('aria-pressed', locked ? 'true' : 'false'); }
@@ -5063,13 +5139,22 @@ const NOTE_LIST_STYLES = [
   ['disc','•','Bullet'], ['square','▪','Square'], ['dash','–','Dash'], ['emdash','—','Em dash'], null,
   ['decimal','1.','Numbers'], ['alpha','a.','Letters'], ['roman','i.','Roman']
 ];
+// Every list the selection touches (a selection that spans a whole list has the note itself as its anchor, so the caret alone is not enough),
+// plus the lists around a collapsed caret.
+function noteListsInSelection(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection && window.getSelection();
+  if(!body || !sel || !sel.rangeCount) return [];
+  const r = sel.getRangeAt(0), out = new Set();
+  body.querySelectorAll('ul, ol').forEach(l=>{ if(r.intersectsNode(l)) out.add(l); });
+  [sel.anchorNode, sel.focusNode].forEach(n=>{ for(let x = n; x && x!==body; x = x.parentNode){ if(x.nodeType===1 && (x.tagName==='UL' || x.tagName==='OL')) out.add(x); } });
+  return [...out];
+}
+const noteListKind = l=>l.getAttribute('data-ls') || (l.tagName==='OL' ? 'decimal' : 'disc');
 function noteCurrentListStyle(){
-  const sel = window.getSelection && window.getSelection();
-  if(!sel || !sel.rangeCount) return null;
-  const node = sel.anchorNode, ul = noteClosest(node, 'UL'), ol = noteClosest(node, 'OL');
-  if(ul && !ul.classList.contains('cl') && (!ol || ul.contains(ol))) return ul.getAttribute('data-ls') || 'disc';
-  if(ol) return ol.getAttribute('data-ls') || 'decimal';
-  return null;
+  const ls = noteListsInSelection().filter(l=>!l.classList.contains('cl'));
+  if(!ls.length) return null;
+  const kinds = new Set(ls.map(noteListKind));
+  return kinds.size===1 ? [...kinds][0] : null;       // mixed lists: no single current style
 }
 function noteListMenuHtml(){
   const cur = noteCurrentListStyle();
@@ -5089,19 +5174,28 @@ function closeNoteListMenu(){ document.getElementById('noteListMenu')?.classList
 function noteListStyle(kind){
   closeNoteListMenu();
   noteFocusBody();
-  const wantOl = kind==='decimal' || kind==='alpha' || kind==='roman';
-  if(noteCurrentListStyle()===kind){ document.execCommand(wantOl ? 'insertOrderedList' : 'insertUnorderedList', false); onNoteInput(); updateNoteToolbarState(); return; }
-  const sel = window.getSelection(), at = ()=> sel && sel.rangeCount ? sel.anchorNode : null;
-  let list = at() ? noteClosest(at(), wantOl ? 'OL' : 'UL') : null;
-  if(list && list.classList.contains('cl')){ list.classList.remove('cl'); list.querySelectorAll('li').forEach(li=>li.removeAttribute('data-done')); }
-  if(!list){
-    document.execCommand(wantOl ? 'insertOrderedList' : 'insertUnorderedList', false);   // from a paragraph, or converts the other list type
-    list = at() ? noteClosest(at(), wantOl ? 'OL' : 'UL') : null;
+  const wantOl = kind==='decimal' || kind==='alpha' || kind==='roman', wantTag = wantOl ? 'OL' : 'UL', cmd = wantOl ? 'insertOrderedList' : 'insertUnorderedList';
+  let lists = noteListsInSelection();
+  if(lists.length && noteCurrentListStyle()===kind){ document.execCommand(cmd, false); onNoteInput(); updateNoteToolbarState(); return; }   // the same style again turns the list off
+  lists.forEach(l=>{ if(l.classList.contains('cl')){ l.classList.remove('cl'); l.querySelectorAll('li').forEach(li=>li.removeAttribute('data-done')); } });   // a checklist becomes plain bullets
+  if(!lists.some(l=>l.tagName===wantTag)){
+    document.execCommand(cmd, false);                  // from plain lines, or converting the other list type
+    lists = noteListsInSelection();
   }
-  if(list){
-    if(kind==='disc' || kind==='decimal') list.removeAttribute('data-ls'); else list.setAttribute('data-ls', kind);
-    list.classList.remove('cl');
-  }
+  const sel = window.getSelection(), keep = sel.rangeCount ? [sel.anchorNode, sel.anchorOffset, sel.focusNode, sel.focusOffset] : null;
+  lists = lists.map(l=>{                               // a selection that also covers lists of the other type: turn those over too
+    if(l.tagName===wantTag) return l;
+    const n = document.createElement(wantTag.toLowerCase());
+    while(l.firstChild) n.appendChild(l.firstChild);
+    l.replaceWith(n); return n;
+  });
+  lists.filter(l=>l.tagName===wantTag).forEach(l=>{
+    if(kind==='disc' || kind==='decimal') l.removeAttribute('data-ls'); else l.setAttribute('data-ls', kind);
+    l.classList.remove('cl'); if(!l.getAttribute('class')) l.removeAttribute('class');
+    const p = l.parentNode;                            // the browser can leave the list inside a <p>, which is invalid HTML: lift it out
+    if(p && p.tagName==='P' && p.childNodes.length===1){ p.parentNode.insertBefore(l, p); p.remove(); }
+  });
+  if(keep && keep[0] && keep[2] && keep[0].isConnected && keep[2].isConnected) sel.setBaseAndExtent(keep[0], keep[1], keep[2], keep[3]);
   onNoteInput(); updateNoteToolbarState();
 }
 // ---- tables ----
@@ -5239,10 +5333,10 @@ function toggleNoteTableMenu(){
   m.classList.add('open');
 }
 function closeNoteTableMenu(){ document.getElementById('noteTableMenu')?.classList.remove('open'); }
-// ---- hover handles ----
-// Pointing at a table shows grips above each column and left of each row (click or right-click for that column's / row's menu) and
-// "+" buttons on the column and row boundaries. They live in an overlay next to the note, never inside it, so they are not saved.
-let tblHandlesTable = null, tblHandlesTimer = null, tblMenuRef = null;
+// ---- edge "+" ----
+// Pointing at a table shows one "+" at its right edge (add a column) and one at its bottom edge (add a row). They live in an overlay next
+// to the note, never inside it, so they are not saved. Everything else (insert/delete rows and columns, header, delete table) is the strip.
+let tblHandlesTable = null, tblHandlesTimer = null;
 function tblHandlesHide(){ tblHandlesTable = null; const h = document.getElementById('tblHandles'); if(h) h.innerHTML = ''; }
 function tblHandlesLeave(){ if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
 function tblHandlesMove(e){
@@ -5259,48 +5353,13 @@ function tblHandlesShow(table){
   const layer = document.getElementById('tblHandles'), doc = layer && layer.parentNode; if(!layer || !table) return;
   tblHandlesTable = table;
   const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1;   // the UI-size zoom makes viewport px differ from CSS px
-  const tr = table.getBoundingClientRect(), left = (tr.left - dr.left) / k, top = (tr.top - dr.top) / k;
-  const rows = [...table.rows], cols = rows[0] ? [...rows[0].cells] : [], p = n=>Math.round(n * 10) / 10;
-  let h = '';
-  cols.forEach((cell, i)=>{
-    const cr = cell.getBoundingClientRect(), cx = (cr.left - dr.left) / k, cw = cr.width / k, gw = Math.max(14, Math.min(32, cw - 28));
-    h += `<div class="tbl-grip col" style="left:${p(cx + cw / 2 - gw / 2)}px;top:${p(top - 20)}px;width:${p(gw)}px" role="button" aria-label="Column ${i + 1} actions" title="Column actions" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'col',${i})" oncontextmenu="tblGripOpen(event,'col',${i})"><i class="fa-solid fa-ellipsis"></i></div>`;
-    h += `<div class="tbl-plus${i===cols.length - 1 ? ' end' : ''}" style="left:${p(cx + cw - 8)}px;top:${p(top - 22)}px" role="button" aria-label="Insert a column after column ${i + 1}" title="Insert column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${i})"><i class="fa-solid fa-plus"></i></div>`;
-  });
-  rows.forEach((row, i)=>{
-    const rr = row.getBoundingClientRect(), ry = (rr.top - dr.top) / k, rh = rr.height / k, gh = Math.max(14, Math.min(32, rh - 20));
-    h += `<div class="tbl-grip row" style="left:${p(left - 20)}px;top:${p(ry + rh / 2 - gh / 2)}px;height:${p(gh)}px" role="button" aria-label="Row ${i + 1} actions" title="Row actions" onmousedown="event.preventDefault()" onclick="tblGripOpen(event,'row',${i})" oncontextmenu="tblGripOpen(event,'row',${i})"><i class="fa-solid fa-ellipsis"></i></div>`;
-    h += `<div class="tbl-plus${i===rows.length - 1 ? ' end' : ''}" style="left:${p(left - 26)}px;top:${p(ry + rh - 8)}px" role="button" aria-label="Insert a row after row ${i + 1}" title="Insert row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${i},0)"><i class="fa-solid fa-plus"></i></div>`;
-  });
-  layer.innerHTML = h;
+  const tr = table.getBoundingClientRect(), left = (tr.left - dr.left) / k, top = (tr.top - dr.top) / k, w = tr.width / k, h = tr.height / k, p = n=>Math.round(n * 10) / 10;
+  const rows = table.rows.length, cols = table.rows[0] ? table.rows[0].cells.length : 0;
+  layer.innerHTML =
+    `<div class="tbl-plus" style="left:${p(left + w + 6)}px;top:${p(top + h / 2 - 7)}px" role="button" aria-label="Add a column" title="Add column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div>` +
+    `<div class="tbl-plus" style="left:${p(left + w / 2 - 7)}px;top:${p(top + h + 6)}px" role="button" aria-label="Add a row" title="Add row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div>`;
 }
 function tblPlus(e, op, r, c){ e.stopPropagation(); if(tblHandlesTable) noteTableEdit(op, { table: tblHandlesTable, r, c }); }
-function tblGripMenuHtml(kind, i){
-  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
-  if(kind==='col') return [
-    item('fa-solid fa-arrow-left', 'Insert left', `tblGripRun('colBefore')`), item('fa-solid fa-arrow-right', 'Insert right', `tblGripRun('colAfter')`), sep,
-    item('fa-solid fa-trash', 'Delete column', `tblGripRun('delCol')`, {danger:true})
-  ].join('');
-  return [
-    item('fa-solid fa-arrow-up', 'Insert above', `tblGripRun('rowBefore')`), item('fa-solid fa-arrow-down', 'Insert below', `tblGripRun('rowAfter')`), sep,
-    ...(i===0 ? [item('fa-solid fa-heading', 'Header row', `tblGripRun('header')`), sep] : []),
-    item('fa-solid fa-trash', 'Delete row', `tblGripRun('delRow')`, {danger:true})
-  ].join('');
-}
-function tblGripOpen(e, kind, i){
-  e.preventDefault(); e.stopPropagation();
-  const menu = document.getElementById('rowMenu'); if(!menu || !tblHandlesTable) return;
-  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu();
-  tblMenuRef = { table: tblHandlesTable, r: kind==='row' ? i : 0, c: kind==='col' ? i : 0 };
-  noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = tblGripMenuHtml(kind, i);
-  const rect = e.currentTarget.getBoundingClientRect();
-  placeRowMenu(menu, e.type==='click' ? rect.left : e.clientX, e.type==='click' ? rect.bottom + 4 : e.clientY, e.currentTarget);
-}
-function tblGripRun(op){
-  const ref = tblMenuRef; closeRowMenu();
-  if(ref && ref.table && ref.table.isConnected) noteTableEdit(op, ref);
-}
 window.addEventListener('resize', tblHandlesRefresh);
 function noteChecklist(){
   noteFocusBody();
@@ -5316,10 +5375,17 @@ function noteChecklist(){
 }
 function noteClearFormat(){ noteFocusBody(); document.execCommand('removeFormat', false); document.execCommand('formatBlock', false, '<p>'); onNoteInput(); updateNoteToolbarState(); }
 function updateNoteToolbarState(){
+  const bar = document.getElementById('noteTableBar');
+  if(bar){                                              // the table strip shows only while the caret is in a table
+    const cell = noteSelectedCell();
+    bar.classList.toggle('show', !!cell && !noteIsLocked(noteEditorId));
+    const hb = document.getElementById('noteTableHeaderBtn');
+    if(hb && cell) hb.classList.toggle('active', [...cell.parentNode.closest('table').rows[0].cells].every(x=>x.tagName==='TH'));
+  }
   const body = document.getElementById('noteBody'), sel = window.getSelection ? window.getSelection() : null;
   try{
     const u = document.getElementById('noteUndoBtn'), r = document.getElementById('noteRedoBtn');
-    if(u) u.disabled = !document.queryCommandEnabled('undo');
+    if(u) u.disabled = !(noteEditCount>0 && document.queryCommandEnabled('undo'));
     if(r) r.disabled = !document.queryCommandEnabled('redo');
   }catch(_){}
   if(!body || !sel || !sel.rangeCount || !body.contains(sel.anchorNode)) return;
@@ -5336,12 +5402,16 @@ function onNoteInput(e){
     const sel = window.getSelection(), li = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'LI') : null;
     if(li) li.removeAttribute('data-done');
   }
+  noteEditCount++;
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
+  updateNoteToolbarState();                            // keeps the Undo / Redo buttons in step, including after ⌘Z and ⇧⌘Z
   scheduleNoteSave();
 }
 function onNoteKeydown(e){
   if(noteTablePickerKey(e)) return;
+  // ⌘Z in the note undoes typing. With nothing left to undo there, it falls through to the toast's Undo (a just-made clone, delete or move).
+  if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='z' && toastUndoAction && noteEditCount===0){ e.preventDefault(); triggerToastUndo(); return; }
   if(e.key==='Escape' && document.querySelector('#noteTableMenu.open, #noteListMenu.open')){ e.preventDefault(); closeNoteTableMenu(); closeNoteListMenu(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase()==='k'){ e.preventDefault(); openNoteLinkBar(); return; }
   if(e.key==='Tab'){
@@ -5648,7 +5718,7 @@ document.addEventListener('keydown', e=>{
       return;
     }
   }
-  if((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase()==='z' && !isTypingTarget(document.activeElement) && !document.querySelector('.modal-bg.open')){
+  if((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase()==='z' && (!isTypingTarget(document.activeElement) || document.activeElement.tagName==='SELECT') && !document.querySelector('.modal-bg.open')){
     if(toastUndoAction){
       e.preventDefault();
       triggerToastUndo();

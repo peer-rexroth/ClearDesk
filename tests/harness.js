@@ -159,7 +159,7 @@ async function run(argv) {
   searchQuery = ''; sortBy = 'smart'; viewMode = 'list'; currentTheme = 'light'; colorScheme = 'standard'; compactMode = true; uiScale = UI_SCALE_DEFAULT;
   modalTarget = null; pendingImportData = null; editingProjectId = null; newProjIcon = 'folder';
   notes = []; noteFolders = []; deletedNoteIds = []; deletedNoteFolderIds = [];
-  appMode = 'tasks'; selectedNoteId = null; noteFolderFilter = 'all'; noteSearchQuery = ''; noteEditorId = null; noteEditorStamp = 0; noteSaveTimer = null; editingFolderId = null; noteFoldersCollapsed.clear();
+  appMode = 'tasks'; selectedNoteId = null; noteFolderFilter = 'all'; noteSearchQuery = ''; noteEditorId = null; noteEditorStamp = 0; noteSaveTimer = null; editingFolderId = null; noteFoldersCollapsed.clear(); noteEditCount = 0;
   normalizeData();
 }
 `;

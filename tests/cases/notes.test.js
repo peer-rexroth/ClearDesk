@@ -618,11 +618,33 @@ test('the picker grows by one row or column at its edge, up to 10 x 10', functio
   assertEqual(st.rows, 10, 'it does not shrink while the picker is open');
 });
 
-test('the grip menus: columns offer insert left/right and delete; the first row also offers the header toggle', function () {
-  const col = tblGripMenuHtml('col', 1);
-  assertIncludes(col, 'Insert left'); assertIncludes(col, 'Insert right'); assertIncludes(col, 'Delete column');
-  assertNotIncludes(col, 'Header row');
-  const row0 = tblGripMenuHtml('row', 0), row2 = tblGripMenuHtml('row', 2);
-  assertIncludes(row0, 'Insert above'); assertIncludes(row0, 'Insert below'); assertIncludes(row0, 'Header row'); assertIncludes(row0, 'Delete row');
-  assertNotIncludes(row2, 'Header row', 'only the first row can be the header');
+
+// ---- search ----
+test('searching looks through every folder, not just the one on screen', function () {
+  noteFolders.push({ id: 'f-work', name: 'Work', order: 2000 });
+  notes = [ntNote({ id: 's1', title: 'Alpha', body: '<p>needle</p>', folderId: 'f-work' }), ntNote({ id: 's2', title: 'Beta', body: '<p>hay</p>', folderId: NOTES_DEFAULT_FOLDER })];
+  noteFolderFilter = NOTES_DEFAULT_FOLDER;
+  noteSearchQuery = '';
+  assertDeepEqual(visibleNotes().map(n => n.id), ['s2'], 'without a search the folder limits the list');
+  noteSearchQuery = 'needle';
+  assertDeepEqual(visibleNotes().map(n => n.id), ['s1'], 'a search finds it in another folder');
+  noteSearchQuery = 'NEEDLE alpha';
+  assertDeepEqual(visibleNotes().map(n => n.id), ['s1'], 'case-insensitive, every word must match (title or body)');
+});
+
+test('search finds text inside tables and ignores markup', function () {
+  notes = [ntNote({ id: 's3', title: 'T', body: '<table><tbody><tr><td>apple</td><td>pear</td></tr></tbody></table>' })];
+  noteSearchQuery = 'pear';
+  assertEqual(visibleNotes().length, 1);
+  noteSearchQuery = 'tbody';
+  assertEqual(visibleNotes().length, 0, 'tag names are not searchable text');
+});
+
+test('setSearchQuery in Notes opens the first result when the open note is not one', function () {
+  notes = [ntNote({ id: 'o1', title: 'Open', body: '<p>zzz</p>', updatedAt: 3000 }), ntNote({ id: 'o2', title: 'Hit', body: '<p>needle</p>', updatedAt: 2000 })];
+  appMode = 'notes'; selectedNoteId = 'o1';
+  setSearchQuery('needle');
+  assertEqual(selectedNoteId, 'o2');
+  setSearchQuery('nothing matches');
+  assertEqual(selectedNoteId, 'o2', 'no results: the open note stays');
 });
