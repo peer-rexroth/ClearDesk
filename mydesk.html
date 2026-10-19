@@ -1120,8 +1120,9 @@
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
   /* one capsule holding the icon and a small chevron (as in a macOS toolbar pop-up button): hover and "on" fill the whole capsule */
   .note-toolbar .tool-split { display: inline-flex; align-items: center; border-radius: 999px; }
-  .note-toolbar .tool-split:hover, .note-toolbar .tool-split:has(.active), .note-toolbar .tool-split:has(+ .note-list-menu.open) { background: var(--cap-hover, var(--bg-3)); }
-  html .note-toolbar .tool-split .tool-btn, html[data-scheme] .note-toolbar .tool-split .tool-btn:hover:not(:disabled), html .note-toolbar .tool-split .tool-btn.active { background: transparent; }
+  .note-toolbar .tool-split:hover, .note-toolbar .tool-split:has(+ .note-list-menu.open) { background: var(--cap-hover, var(--bg-3)); }
+  .note-toolbar .tool-split:has(.active) { background: var(--cap-on, var(--bg-3)); }
+  html[data-scheme] .note-toolbar .tool-split .tool-btn, html[data-scheme] .note-toolbar .tool-split .tool-btn:hover:not(:disabled), html[data-scheme] .note-toolbar .tool-split .tool-btn:is(.active, .on) { background: transparent; }
   .note-toolbar .tool-split .list-main { min-width: 0 !important; padding: 0 3px 0 10px; }
   .note-toolbar .tool-split .list-caret { min-width: 0 !important; width: auto; padding: 0 9px 0 2px; color: var(--text-3); }
   .note-list-menu .pop-check { width: 14px; }
@@ -5425,7 +5426,7 @@ function noteListsInSelection(){
   const body = document.getElementById('noteBody'), sel = window.getSelection && window.getSelection();
   if(!body || !sel || !sel.rangeCount) return [];
   const r = sel.getRangeAt(0), out = new Set();
-  body.querySelectorAll('ul, ol').forEach(l=>{ if(r.intersectsNode(l)) out.add(l); });
+  if(!r.collapsed) body.querySelectorAll('ul, ol').forEach(l=>{ if(r.intersectsNode(l)) out.add(l); });   // a bare caret only counts the lists around it: intersectsNode also matches a list that merely ends where the caret sits, which turned a neighbouring bullet list into numbers
   [sel.anchorNode, sel.focusNode].forEach(n=>{ for(let x = n; x && x!==body; x = x.parentNode){ if(x.nodeType===1 && (x.tagName==='UL' || x.tagName==='OL')) out.add(x); } });
   return [...out];
 }
@@ -5476,8 +5477,8 @@ function noteListStyle(kind){
   lists.forEach(l=>{ if(l.classList.contains('cl')){ l.classList.remove('cl'); l.querySelectorAll('li').forEach(li=>li.removeAttribute('data-done')); } });   // a checklist becomes plain bullets
   if(!lists.some(l=>l.tagName===wantTag)){
     const body = document.getElementById('noteBody'), before = new Set(body.querySelectorAll('ul, ol')), cur = window.getSelection();
-    let caretAt = -1;                                   // where the caret is, as a count of text characters from the start of the note
-    if(cur.rangeCount && cur.isCollapsed && body.contains(cur.anchorNode)){ const r = document.createRange(); r.setStart(body, 0); r.setEnd(cur.anchorNode, cur.anchorOffset); caretAt = r.toString().length; }
+    let caretAt = -1;                                   // where the caret is, as a count of text characters from the start of the note (left at -1 on an empty line: the count would point at the END of the previous line, into the list above)
+    if(cur.rangeCount && cur.isCollapsed && body.contains(cur.anchorNode) && (cur.anchorNode.textContent||'').length){ const r = document.createRange(); r.setStart(body, 0); r.setEnd(cur.anchorNode, cur.anchorOffset); caretAt = r.toString().length; }
     document.execCommand(cmd, false);                  // from plain lines, or converting the other list type
     if(caretAt>0) noteCaretAtTextIndex(caretAt);        // Chromium can drop the caret to the start of the line when it wraps a bare line in a list
     lists = noteListsInSelection();
@@ -5875,8 +5876,26 @@ function noteTableArrow(e){
   sel.removeAllRanges(); sel.addRange(pos);
   return true;
 }
+// Typing "- " / "* " (or "1. ") at the start of a plain line turns it into a bulleted (or numbered) list, like Word. Bullets use the last-used style.
+function noteAutoBullet(e){
+  if(e.key!==' ' || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.isComposing) return false;
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || !body.contains(sel.anchorNode) || noteIsLocked(noteEditorId)) return false;
+  if(noteClosest(sel.anchorNode, 'LI') || noteClosest(sel.anchorNode, 'TD') || noteClosest(sel.anchorNode, 'TH') || noteClosest(sel.anchorNode, 'PRE')) return false;
+  const n = sel.anchorNode;
+  if(n.nodeType!==3) return false;
+  const marker = n.textContent.slice(0, sel.anchorOffset), numbered = /^\d{1,3}[.)]$/.test(marker);
+  if(marker!=='-' && marker!=='*' && !numbered) return false;
+  const prev = n.previousSibling;                                   // the marker must be the first thing on its line
+  if(prev && prev.nodeName!=='BR') return false;
+  e.preventDefault();
+  for(let i = 0; i<marker.length; i++) document.execCommand('delete', false);   // remove the marker (keeps native undo)
+  noteListStyle(numbered ? 'decimal' : noteBulletKind);
+  return true;
+}
 function onNoteKeydown(e){
   if(noteTablePickerKey(e)) return;
+  if(noteAutoBullet(e)) return;
   if(noteTableArrow(e)) return;
   // ⌘Z in the note undoes typing. With nothing left to undo there, it falls through to the toast's Undo (a just-made clone, delete or move).
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='z' && toastUndoAction && noteEditCount===0){ e.preventDefault(); triggerToastUndo(); return; }
