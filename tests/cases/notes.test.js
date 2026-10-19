@@ -622,6 +622,21 @@ test('noteLinkMatches does not link the same text twice and keeps results in ord
   assertTrue(m.every((x, i)=>i===0 || x.start >= m[i - 1].end));
 });
 
+test('noteLinkClassify turns what was typed into a link and says what it opens', function () {
+  const c = x=>{ const r = noteLinkClassify(x); return r.kind + ' ' + r.href; };
+  assertEqual(c('example.com/a'), 'web https://example.com/a');
+  assertEqual(c('https://example.com'), 'web https://example.com');
+  assertEqual(c('anna@firma.de'), 'mail mailto:anna@firma.de');
+  assertEqual(c('+49 30 123456'), 'phone tel:+4930123456');
+  assertEqual(c('0170 1234567'), 'phone tel:01701234567');
+  assertEqual(c('mailto:a@b.de'), 'mail mailto:a@b.de');
+  assertEqual(c('  '), ' ');
+  assertEqual(c('javascript:alert(1)'), 'bad ');
+  assertEqual(c('file:///etc/passwd'), 'bad ');
+  assertEqual(c('two words'), 'bad ');
+  assertEqual(noteLinkClassify('anna@firma.de').hint, 'Opens in your mail app');
+});
+
 test('safeNoteHref allows web, mailto and tel links and nothing else', function () {
   assertEqual(safeNoteHref('tel:+491701234567'), 'tel:+491701234567');
   assertEqual(safeNoteHref('tel:030 123456'), 'tel:030123456');

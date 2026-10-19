@@ -1083,8 +1083,12 @@
   .nlp-row + .nlp-row { border-top: 1px solid var(--border); }
   .nlp-row span { flex: none; width: 34px; font-size: 12px; color: var(--text-3); }
   .nlp-row input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; outline: none; box-shadow: none !important; padding: 2px 0; }
+  .nlp-hint { min-height: 15px; padding: 6px 12px 0; font-size: 11px; color: var(--text-3); }
+  .nlp-hint.bad { color: var(--red-text); }
   .nlp-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
-  .nlp-actions .nlp-remove { color: #d92d20; border-color: transparent; background: transparent; padding-left: 6px; padding-right: 6px; }
+  /* Remove Link is plain red text, not a boxed button (the Glass .btn rule would otherwise give it a border, fill and shadow) */
+  html[data-scheme] .note-link-pop .nlp-actions .nlp-remove { color: var(--red-text); background: transparent; border: 0; box-shadow: none; padding: 5px 8px; }
+  html[data-scheme] .note-link-pop .nlp-actions .nlp-remove:hover { background: color-mix(in srgb, var(--red-text) 14%, transparent); }
   .nlp-actions .nlp-remove[hidden] { display: none; }
   .nlp-actions .btn-primary { margin-left: auto; }
   .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 24px 56px; }
@@ -1329,8 +1333,9 @@
 <div class="note-link-pop" id="noteLinkPop" role="dialog" aria-label="Link">
   <div class="nlp-list">
     <label class="nlp-row"><span>Text</span><input type="text" id="noteLinkText" placeholder="Text to show" aria-label="Text to show" autocomplete="off" onkeydown="onNoteLinkKey(event)"></label>
-    <label class="nlp-row"><span>Link</span><input type="text" id="noteLinkInput" placeholder="Paste or type a link" aria-label="Link address" autocomplete="off" onkeydown="onNoteLinkKey(event)"></label>
+    <label class="nlp-row"><span>Link</span><input type="text" id="noteLinkInput" placeholder="Web address, e-mail or phone number" aria-label="Link address" autocomplete="off" oninput="noteLinkHintUpdate()" onkeydown="onNoteLinkKey(event)"></label>
   </div>
+  <div class="nlp-hint" id="noteLinkHint" aria-live="polite"></div>
   <div class="nlp-actions">
     <button type="button" class="btn btn-sm nlp-remove" id="noteLinkRemove" onclick="removeNoteLink()">Remove Link</button>
     <button type="button" class="btn btn-primary btn-sm" onclick="applyNoteLink()">Done</button>
@@ -1758,7 +1763,7 @@
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em> and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
-          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
+          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
@@ -6532,9 +6537,12 @@ function openNoteLinkBar(){
   text.value = a ? a.textContent : (sel && sel.rangeCount && !sel.isCollapsed ? sel.toString() : '');
   input.value = a ? (a.getAttribute('href') || '') : '';
   document.getElementById('noteLinkRemove').hidden = !a;
+  noteLinkHintUpdate();
   closeRowMenu(); closeNoteTableMenu(); closeNoteListMenu();
-  const r = btn.getBoundingClientRect();
-  placeRowMenu(pop, r.left, r.bottom + 6, btn);                  // under the Link button, kept inside the window
+  // Anchor it to what you are editing (the link, the selected text or the caret), as Apple's popovers are; the Link button only if there is no usable rectangle.
+  let rc = a ? a.getBoundingClientRect() : (noteSavedRange && noteSavedRange.getClientRects()[0]) || null;
+  if(!rc || !(rc.height > 0)) rc = btn.getBoundingClientRect();
+  placeRowMenu(pop, rc.left, rc.bottom + 6, btn);                // just under it, kept inside the window
   const first = text.value ? input : text;                       // the text is known: ask for the address; otherwise ask for the text first
   first.focus(); first.select();
 }
@@ -6543,27 +6551,43 @@ function closeNoteLinkBar(refocus){
   noteLinkEditing = null;
   if(refocus!==false){ noteFocusBody(); if(noteSavedRange){ const s = window.getSelection(); s.removeAllRanges(); s.addRange(noteSavedRange); } }
 }
+// What a typed address becomes: {kind:'web'|'mail'|'phone'|'bad'|'', href, hint}. An address without a scheme is a mail address, a phone number or a web address;
+// anything the sanitizer would refuse (javascript:, file:, text with spaces ...) is 'bad', so the popover can say so instead of silently doing nothing.
+function noteLinkClassify(raw){
+  const typed = String(raw || '').trim();
+  if(!typed) return { kind: '', href: '', hint: '' };
+  let v = typed;
+  if(!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'mailto:' + v : /^[+\d][\d\s().-]{5,}$/.test(v) ? 'tel:' + v.replace(/[^\d+]/g, '') : /\s/.test(v) ? '' : 'https://' + v;
+  const href = v ? safeNoteHref(v) : '';
+  if(!href) return { kind: 'bad', href: '', hint: 'Not a web address, e-mail or phone number' };
+  if(/^mailto:/i.test(href)) return { kind: 'mail', href, hint: 'Opens in your mail app' };
+  if(/^tel:/i.test(href)) return { kind: 'phone', href, hint: 'Opens in your phone app' };
+  return { kind: 'web', href, hint: 'Opens in a new tab' };
+}
+function noteLinkHintUpdate(){
+  const hint = document.getElementById('noteLinkHint'); if(!hint) return;
+  const c = noteLinkClassify(document.getElementById('noteLinkInput').value);
+  hint.textContent = c.hint; hint.classList.toggle('bad', c.kind==='bad');
+}
 function applyNoteLink(){
   const input = document.getElementById('noteLinkInput'), textInput = document.getElementById('noteLinkText');
-  const raw = (input.value || '').trim(); let v = raw;
+  const raw = (input.value || '').trim();
   const shown = (textInput.value || '').trim();
   const body = document.getElementById('noteBody'), editing = noteLinkEditing && noteLinkEditing.isConnected ? noteLinkEditing : null;
-  if(!v && !editing){ closeNoteLinkBar(); return; }               // nothing to link, nothing to remove
+  if(!raw && !editing){ closeNoteLinkBar(); return; }             // nothing to link, nothing to remove
+  const c = noteLinkClassify(raw);
+  if(raw && c.kind==='bad'){ noteLinkHintUpdate(); input.focus(); return; }   // say why, and stay open
   body.focus();
   const s = window.getSelection();
   if(editing){ const r = document.createRange(); r.selectNodeContents(editing); s.removeAllRanges(); s.addRange(r); }          // edit the whole link
   else if(noteSavedRange){ s.removeAllRanges(); s.addRange(noteSavedRange); }
-  if(!v){ document.execCommand('unlink', false); }
+  if(!raw){ document.execCommand('unlink', false); }
   else {
-    if(!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'mailto:' + v : /^[+\d][\d\s().-]{5,}$/.test(v) ? 'tel:' + v.replace(/[^\d+]/g, '') : 'https://' + v;
-    const href = safeNoteHref(v);
-    if(href){
-      const cur = window.getSelection(), selText = cur && !cur.isCollapsed ? cur.toString() : '';
-      const display = shown || selText || raw;                    // the name you typed; else the selected text; else the address as typed
-      if(selText && display===selText) document.execCommand('createLink', false, href);   // same text: keep its formatting, just add / change the link
-      else document.execCommand('insertHTML', false, `<a href="${esc(href)}">${esc(display)}</a>`);
-      noteCaretOutsideLink();
-    }
+    const cur = window.getSelection(), selText = cur && !cur.isCollapsed ? cur.toString() : '';
+    const display = shown || selText || raw;                      // the name you typed; else the selected text; else the address as typed
+    if(selText && display===selText) document.execCommand('createLink', false, c.href);   // same text: keep its formatting, just add / change the link
+    else document.execCommand('insertHTML', false, `<a href="${esc(c.href)}">${esc(display)}</a>`);
+    noteCaretOutsideLink();
   }
   noteLinkEditing = null;
   document.getElementById('noteLinkPop').classList.remove('open');
