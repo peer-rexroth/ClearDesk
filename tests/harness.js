@@ -48,7 +48,10 @@ async function run(argv) {
   if (openIdx === -1 || closeIdx === -1) {
     throw new Error('Could not find an inline <script>...</script> block in mydesk.html — did the markup change?');
   }
-  const appCode = html.slice(openIdx + openTag.length, closeIdx);
+  // The icon registry (ICONS, which MENU_SVG aliases) lives in a head script with an id, so it is not the first plain <script>: prepend it.
+  const iconsOpen = html.indexOf('<script id="icons">'), iconsClose = iconsOpen === -1 ? -1 : html.indexOf('</script>', iconsOpen);
+  const iconsCode = iconsOpen === -1 ? '' : html.slice(iconsOpen + '<script id="icons">'.length, iconsClose);
+  const appCode = iconsCode + '\n' + html.slice(openIdx + openTag.length, closeIdx);
 
   // ---- minimal fake DOM element ----
   // Deliberately loose: every element supports every property/method any
