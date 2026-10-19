@@ -561,8 +561,15 @@ test('sanitizeNoteHtml keeps table structure and strips every attribute from it'
 });
 
 test('sanitizeNoteHtml drops table parts it does not know but keeps their text', function () {
-  assertEqual(sanitizeNoteHtml('<table><caption>Cap</caption><colgroup><col width="5"></colgroup><tr><td>a</td></tr></table>'), '<table>Cap<tr><td>a</td></tr></table>');
+  assertEqual(sanitizeNoteHtml('<table><caption>Cap</caption><tfoot><tr><td>a</td></tr></tfoot></table>'), '<table>Cap<tr><td>a</td></tr></table>');
   assertNotIncludes(sanitizeNoteHtml('<table><tr><td><script>alert(1)</script>x</td></tr></table>'), '<script');
+});
+
+test('sanitizeNoteHtml keeps a table\'s column widths as plain percentages and nothing else', function () {
+  assertEqual(sanitizeNoteHtml('<table><colgroup><col style="width:30%"><col style="width: 70.5%"></colgroup><tr><td>a</td><td>b</td></tr></table>'),
+    '<table><colgroup><col style="width:30%"><col style="width:70.5%"></colgroup><tr><td>a</td><td>b</td></tr></table>');
+  assertEqual(sanitizeNoteHtml('<colgroup onclick="x()"><col style="width:20%;background:url(javascript:x)" class="a" width="9"></colgroup>'), '<colgroup><col style="width:20%"></colgroup>');
+  assertEqual(sanitizeNoteHtml('<col style="width:500%"><col style="width:12px"><col style="color:red">'), '<col><col><col>', 'only a percentage up to 100 survives');
 });
 
 test('table text becomes a spaced snippet, and a note holding only an empty table is not "empty"', function () {
