@@ -572,6 +572,33 @@ test('sanitizeNoteHtml keeps a table\'s column widths as plain percentages and n
   assertEqual(sanitizeNoteHtml('<col style="width:500%"><col style="width:12px"><col style="color:red">'), '<col><col><col>', 'only a percentage up to 100 survives');
 });
 
+test('a table sized to its content keeps a plain percentage width; anything else is dropped', function () {
+  assertEqual(sanitizeNoteHtml('<table style="width:44%"><tr><td>a</td></tr></table>'), '<table style="width:44%"><tr><td>a</td></tr></table>');
+  assertEqual(sanitizeNoteHtml('<table style="width:44%;background:url(x)" class="a"><tr><td>a</td></tr></table>'), '<table style="width:44%"><tr><td>a</td></tr></table>');
+  assertEqual(sanitizeNoteHtml('<table style="width:100%"><tr><td>a</td></tr></table>'), '<table><tr><td>a</td></tr></table>', 'full width is the default, so it is not stored');
+  assertEqual(sanitizeNoteHtml('<table style="width:5%"><tr><td>a</td></tr></table>'), '<table><tr><td>a</td></tr></table>', 'absurdly narrow is ignored');
+  assertEqual(sanitizeNoteHtml('<table style="width:300px"><tr><td>a</td></tr></table>'), '<table><tr><td>a</td></tr></table>');
+});
+
+test('tables pasted from outside get the width a new table of that column count gets', function () {
+  const two = '<table><tbody><tr><th>a</th><th>b</th></tr><tr><td>1</td><td>2</td></tr></tbody></table>';
+  assertEqual(noteSizeNewTables(sanitizeNoteHtml('<table border="1" width="900" style="width:900px"><tr><td colspan="2">a</td><td>b</td></tr></table>')), '<table style="width:44%"><tr><td>a</td><td>b</td></tr></table>', 'outside width and attributes are dropped, then the two cells decide');
+  assertEqual(noteSizeNewTables(two), two.replace('<table>', '<table style="width:44%">'));
+  assertEqual(noteSizeNewTables('<table><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr></table>'), '<table><tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr></table>', 'five columns fill the line');
+  assertEqual(noteSizeNewTables('<table style="width:70%"><tr><td>a</td><td>b</td></tr></table>'), '<table style="width:70%"><tr><td>a</td><td>b</td></tr></table>', 'an existing width is kept');
+  assertEqual(noteSizeNewTables('<p>x</p><table><tr><td>a</td></tr></table><p>y</p><table><tr><td>a</td><td>b</td></tr></table>'),
+    '<p>x</p><table style="width:35%"><tr><td>a</td></tr></table><p>y</p><table style="width:44%"><tr><td>a</td><td>b</td></tr></table>', 'each table is sized on its own');
+});
+
+test('new tables are sized to their column count, up to the full width', function () {
+  assertEqual(noteTableWidthFor(1), 35);
+  assertEqual(noteTableWidthFor(2), 44);
+  assertEqual(noteTableWidthFor(4), 88);
+  assertEqual(noteTableWidthFor(5), 100);
+  assertIncludes(noteTableHtml(2, 2), '<table style="width:44%">');
+  assertIncludes(noteTableHtml(2, 8), '<table><tbody>');
+});
+
 test('table text becomes a spaced snippet, and a note holding only an empty table is not "empty"', function () {
   assertEqual(noteText('<table><tr><td>a</td><td>b</td></tr><tr><td>c</td></tr></table>'), 'a b c');
   assertFalse(noteIsEmpty({ title: '', body: '<table><tbody><tr><th><br></th></tr></tbody></table>' }), 'an empty table is content');
