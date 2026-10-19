@@ -1105,6 +1105,43 @@
   .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
   .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
   .note-title::placeholder { color: var(--text-3); }
+  /* text colour / highlight: palette names stored in the note, shades chosen per theme */
+  html { --nc-red: #d92d20; --nc-orange: #c2570c; --nc-green: #1a7f37; --nc-blue: #2563eb; --nc-purple: #7c3aed; --nc-gray: #6b7280; --nh-yellow: rgba(255,214,10,.42); --nh-green: rgba(52,199,89,.32); --nh-blue: rgba(10,132,255,.30); --nh-pink: rgba(255,55,95,.30); --nh-purple: rgba(175,82,222,.30); --nh-gray: rgba(142,142,147,.34); }
+  html[data-theme="dark"] { --nc-red: #ff7b72; --nc-orange: #ffa657; --nc-green: #56d364; --nc-blue: #79c0ff; --nc-purple: #d2a8ff; --nc-gray: #9ca3af; }
+  .note-body span[data-tc="red"], .nc-tc-red { color: var(--nc-red); }
+  .note-body span[data-tc="orange"], .nc-tc-orange { color: var(--nc-orange); }
+  .note-body span[data-tc="green"], .nc-tc-green { color: var(--nc-green); }
+  .note-body span[data-tc="blue"], .nc-tc-blue { color: var(--nc-blue); }
+  .note-body span[data-tc="purple"], .nc-tc-purple { color: var(--nc-purple); }
+  .note-body span[data-tc="gray"], .nc-tc-gray { color: var(--nc-gray); }
+  .note-body mark[data-hl="yellow"], .nc-sw.nc-hl-yellow { background: var(--nh-yellow); }
+  .note-body mark[data-hl="green"], .nc-sw.nc-hl-green { background: var(--nh-green); }
+  .note-body mark[data-hl="blue"], .nc-sw.nc-hl-blue { background: var(--nh-blue); }
+  .note-body mark[data-hl="pink"], .nc-sw.nc-hl-pink { background: var(--nh-pink); }
+  .note-body mark[data-hl="purple"], .nc-sw.nc-hl-purple { background: var(--nh-purple); }
+  .note-body mark[data-hl="gray"], .nc-sw.nc-hl-gray { background: var(--nh-gray); }
+  .note-body mark { color: inherit; border-radius: 3px; padding: 0 1px; }
+  .tb-color { line-height: 1; padding-bottom: 1px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #ff7b72, #ffa657, #56d364, #79c0ff, #d2a8ff) 1; }
+  .note-color-menu { width: max-content; min-width: 0 !important; padding: 8px 10px 10px; }
+  .nc-label { margin: 4px 2px 5px; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-3); }
+  .nc-row { display: flex; gap: 6px; }
+  .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg-2); font: 700 13px/1 var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .nc-sw:hover { box-shadow: 0 0 0 2px var(--sel-bg, var(--blue-text)); }
+  .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
+  ::highlight(note-search) { background-color: rgba(255, 214, 10, .45); color: inherit; }
+  #notePrintArea { display: none; }
+  @media print {
+    html, body { background: #fff !important; color: #000 !important; height: auto !important; overflow: visible !important; }
+    body > *:not(#notePrintArea) { display: none !important; }
+    #notePrintArea { display: block !important; padding: 0; }
+  }
+  .note-section { padding: 10px 12px 4px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
+  .notes-list-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 4px 6px; padding: 8px 10px; border-radius: 10px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, transparent); }
+  .note-trash-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 8px 12px; border-radius: 10px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--red-text) 10%, transparent); }
+  .note-trash-bar[hidden] { display: none; }
+  .note-trash-bar span { flex: 1; }
+  .note-trash-bar .nlp-remove { color: var(--red-text); }
+  .note-editor.trashed #noteLockBtn { display: none; }
   .note-meta { margin-bottom: 14px; font-size: 12px; color: var(--text-3); }
   .note-meta-locked { color: var(--amber-text); white-space: nowrap; }   /* the one fact that changes what you can do, so it is the one that stands out */
   .note-meta-locked i { font-size: 10px; margin-right: 2px; }
@@ -1311,6 +1348,7 @@
   html[data-scheme="glass"] .note-toolbar .note-more-btn.on { background: var(--amber-bg); color: var(--amber-text); }
   /* keep the editor bar on ONE row in a narrower pane: the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
+  @container notepane (max-width: 740px) { .note-toolbar .tool-btn { min-width: 28px !important; } .note-toolbar .tool-group { gap: 0; } .note-toolbar .note-clear-btn { display: none; } }   /* the rarest button steps aside so the bar stays on one row */
   @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
@@ -1373,6 +1411,12 @@
           <button class="icon-btn" onclick="openFolderModal()" title="New folder"><i class="fa-solid fa-plus"></i></button>
         </span></div>
         <div id="noteFolderList"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="nav-item" id="trashNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('trash')">
+          <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
+          <span class="count" id="trashCount"></span>
+        </div>
       </div>
     </div>
     <div class="sidebar-section">
@@ -1528,7 +1572,7 @@
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
           <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><i class="fa-regular fa-pen-to-square"></i></button>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
-            <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option>
+            <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="blockquote">Quote</option><option value="pre">Code</option>
           </select>
           <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
@@ -1539,6 +1583,10 @@
             <button type="button" class="tool-btn" data-cmd="italic" onclick="noteCmd('italic')" title="Italic (⌘I)" aria-label="Italic"><span class="tb-txt tb-i">I</span></button>
             <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><span class="tb-txt tb-u">U</span></button>
             <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><span class="tb-txt tb-s">S</span></button>
+            <div class="lib-dropdown" id="noteColorDropdown">
+              <button type="button" class="tool-btn" data-cmd="color" onclick="event.stopPropagation();toggleNoteColorMenu()" title="Text colour and highlight" aria-label="Text colour and highlight" aria-haspopup="menu"><span class="tb-txt tb-color">A</span></button>
+              <div class="split-btn-menu tool-menu note-color-menu" id="noteColorMenu" role="menu"></div>
+            </div>
           </div>
           <div class="tool-group note-fmt">
             <div class="lib-dropdown" id="noteListDropdown">
@@ -1551,7 +1599,7 @@
               <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
             </div>
             <button type="button" class="tool-btn" id="noteLinkBtn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link" aria-haspopup="dialog"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
-            <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
+            <button type="button" class="tool-btn note-clear-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
           </div>
                     <span class="note-toolbar-grow"></span>
           <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><i class="fa-solid fa-lock-open"></i></button>
@@ -1561,6 +1609,7 @@
           <div class="note-doc" onmousemove="tblHandlesMove(event)" onmouseleave="tblHandlesLeave()">
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
+            <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing…"
                  oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
@@ -1764,6 +1813,12 @@
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
+          <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
+          <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a note moves it to <em>Recently Deleted</em> at the bottom of the sidebar, where it stays for 30 days. Open it there to <em>Restore</em> it or <em>Delete Now</em>; <em>Delete All</em> empties the list. Deleting a note that is already there removes it for good.</span></div>
+          <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
+          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and print</strong>: <strong>⋯</strong> → <em>Export</em> saves the note as a Markdown file or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. <em>Copy note</em> puts it on the clipboard for pasting into Mail.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search and word count</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view. The line under the title ends with the note's word count.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
@@ -4740,7 +4795,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', [mod,'⇧ C']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', [mod,'⇧ C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -4824,8 +4879,11 @@ let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRan
 // merge in, so every path (paste, drop, save, load, merge) goes through this: only the tags below survive, attributes are
 // rebuilt from scratch (never copied), and a link must be http(s) or mailto. It is string-based on purpose: it also runs in the
 // test harness, which has no DOM. ----
-const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','table','colgroup','col','thead','tbody','tr','th','td']);
+const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','span','mark','table','colgroup','col','thead','tbody','tr','th','td']);
 const NOTE_VOID = new Set(['br','hr','col']);
+// the names a note may carry as text colour / highlight (see noteApplyColor); defined with the sanitizer that needs them
+const NOTE_TEXT_COLORS = ['red', 'orange', 'green', 'blue', 'purple', 'gray'], NOTE_HL_COLORS = ['yellow', 'green', 'blue', 'pink', 'purple', 'gray'];
+
 const NOTE_UL_STYLES = ['dot','square','dash','emdash'], NOTE_OL_STYLES = ['alpha','roman'];   // list looks kept on paste/load; anything else becomes the plain default
 function decodeHtmlEntities(s){
   return String(s)
@@ -4879,11 +4937,20 @@ function sanitizeNoteHtml(html){
        .replace(/<(script|style|iframe|object|embed|template|svg|math|noscript|title|head|textarea|select|button|form|xmp|plaintext)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
   const re = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>|([^<]+)|</g;
   let out = '', m;
+  const colorStack = [];
   while((m = re.exec(s))){
     if(m[4]!==undefined){ out += m[4]; continue; }            // text: entities stay as written, so it stays inert
     if(m[2]===undefined){ out += '&lt;'; continue; }          // a stray "<"
     const closing = m[1]==='/', name = m[2].toLowerCase(), attrs = m[3] || '';
     if(!NOTE_TAGS.has(name)) continue;                        // everything else is dropped (its text is kept)
+    if(name==='span' || name==='mark'){                       // only a palette colour survives; a span / mark without one is dropped, closing tag included
+      if(closing){ for(let i = colorStack.length - 1; i>=0; i--) if(colorStack[i].name===name){ const k = colorStack.splice(i, 1)[0]; if(k.kept) out += `</${name}>`; break; } continue; }
+      const cm = new RegExp('\\bdata-' + (name==='span' ? 'tc' : 'hl') + '\\s*=\\s*["\']?([a-z]+)', 'i').exec(attrs), cn = cm ? cm[1].toLowerCase() : '';
+      const ok = (name==='span' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).includes(cn);
+      colorStack.push({ name, kept: ok });
+      if(ok) out += `<${name} data-${name==='span' ? 'tc' : 'hl'}="${cn}">`;
+      continue;
+    }
     if(closing){ if(!NOTE_VOID.has(name)) out += `</${name}>`; continue; }
     if(name==='a'){
       const hm = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i.exec(attrs);
@@ -4906,6 +4973,7 @@ function sanitizeNoteHtml(html){
     }
     else out += `<${name}>`;
   }
+  for(let prev = ''; prev!==out; ){ prev = out; out = out.replace(/<span data-tc="(\w+)">([^<]*)<\/span><span data-tc="\1">/g, '<span data-tc="$1">$2').replace(/<mark data-hl="(\w+)">([^<]*)<\/mark><mark data-hl="\1">/g, '<mark data-hl="$1">$2'); }   // a recoloured word leaves neighbouring runs of one colour: join them
   return out;
 }
 function noteText(body){
@@ -4939,8 +5007,12 @@ function normalizeNotes(){
     if(!n.createdAt) n.createdAt = Date.now();
     if(!n.updatedAt) n.updatedAt = n.createdAt;
     n.locked = n.locked===true;
+    n.pinned = n.pinned===true;
+    if(!Number.isFinite(n.deletedAt)) delete n.deletedAt;            // in Recently Deleted since this time (see deleteNote)
     if(!Number.isFinite(n.baseAt)) n.baseAt = n.updatedAt;           // legacy / imported notes count as already in sync
   });
+  const trashCut = Date.now() - NOTE_TRASH_DAYS * 86400000;           // Recently Deleted keeps a note for 30 days, then it is really gone (and tombstoned)
+  notes = notes.filter(n=>{ if(Number.isFinite(n.deletedAt) && n.deletedAt < trashCut){ tombstone(deletedNoteIds, n.id); return false; } return true; });
   if(!Array.isArray(deletedNoteIds)) deletedNoteIds = [];
   if(!Array.isArray(deletedNoteFolderIds)) deletedNoteFolderIds = [];
   deletedNoteIds = deletedNoteIds.filter(x=>x && x.id);
@@ -5046,6 +5118,7 @@ function toggleFolderCollapsed(id){
   renderNotesSidebar();
 }
 // Same rules as tasks: the newer edit of a note wins, a tombstone keeps a deleted note deleted unless the incoming copy is newer.
+function adoptNote(existing, it){ Object.assign(existing, it); if(!Number.isFinite(it.deletedAt)) delete existing.deletedAt; if(it.pinned!==true) existing.pinned = false; }   // Object.assign alone would keep a stale deletedAt / pinned
 function mergeNotesData(data, respectTombstones){
   let added = 0, updated = 0;
   const mergeTombs = (local, incoming)=>(incoming||[]).forEach(d=>{
@@ -5081,9 +5154,9 @@ function mergeNotesData(data, respectTombstones){
         const incomingWins = inUpd > exUpd, loser = incomingWins ? {...existing} : {...it}, now = Date.now();
         notes.push({...loser, id:genId(), title:String(loser.title || 'Untitled').slice(0,170) + ' (conflicted copy)', createdAt:now, updatedAt:now, baseAt:0});
         added++;
-        if(incomingWins){ Object.assign(existing, it); existing.baseAt = existing.updatedAt; updated++; }
+        if(incomingWins){ adoptNote(existing, it); existing.baseAt = existing.updatedAt; updated++; }
         else existing.baseAt = inUpd;                                 // our version stays; the other side's edit is now accounted for
-      } else if(inUpd > exUpd){ Object.assign(existing, it); existing.baseAt = existing.updatedAt; updated++; }
+      } else if(inUpd > exUpd){ adoptNote(existing, it); existing.baseAt = existing.updatedAt; updated++; }
       return;
     }
     const tomb = deletedNoteIds.find(x=>x.id===it.id);
@@ -5114,7 +5187,9 @@ function setAppMode(mode){
 const NOTE_ICON_LOCK   = '<svg class="tb-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.8" y="9.8" width="16.4" height="11.8" rx="3"/><path d="M7.4 9.8V7.6a4.6 4.6 0 0 1 9.2 0v2.2"/></svg>';
 const NOTE_ICON_UNLOCK = '<svg class="tb-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.8" y="9.8" width="16.4" height="11.8" rx="3"/><path d="M7.4 9.8V7.6a4.6 4.6 0 0 1 8.8-1.9"/></svg>';
 // A locked note is read-only: no typing, formatting, moving or deleting until it is unlocked (cloning and copying still work).
-function noteIsLocked(id){ const n = notes.find(x=>x.id===id); return !!(n && n.locked); }
+const NOTE_TRASH_DAYS = 30;
+const noteTrashed = n=>!!n && Number.isFinite(n.deletedAt);                // in Recently Deleted
+function noteIsLocked(id){ const n = notes.find(x=>x.id===id); return !!(n && (n.locked || noteTrashed(n))); }   // a deleted note is read-only too
 function toggleNoteLock(id){
   const n = notes.find(x=>x.id===id); if(!n) return;
   if(id===noteEditorId) flushNoteEdit();
@@ -5182,6 +5257,8 @@ function noteToPlainText(root){
   while(lines.length && lines[0]==='') lines.shift();
   return lines.join('\n').replace(/\n{3,}/g, '\n\n');
 }
+const NOTE_MAIL_TEXT = { red:'#d92d20', orange:'#c2570c', green:'#1a7f37', blue:'#2563eb', purple:'#7c3aed', gray:'#6b7280' };            // light shades: the mail has its own (light) background
+const NOTE_MAIL_HL = { yellow:'#fff3a3', green:'#c9f0d2', blue:'#cfe3ff', pink:'#ffd6e0', purple:'#e6d6fb', gray:'#e3e3e8' };
 function noteToMailHtml(root){
   const CELL = 'border:1px solid #c8c8cc;padding:4px 8px;vertical-align:top;text-align:left';
   const listType = l=>({ decimal:'decimal', alpha:'lower-alpha', roman:'lower-roman', square:'square', dot:'disc', dash:'disc', emdash:'disc', disc:'disc' })[noteListKind(l)] || 'disc';
@@ -5192,6 +5269,8 @@ function noteToMailHtml(root){
     const t = n.tagName;
     switch(t){
       case 'B': case 'STRONG': case 'I': case 'EM': case 'U': case 'S': case 'STRIKE': return `<${t.toLowerCase()}>${kids(n)}</${t.toLowerCase()}>`;
+      case 'SPAN': { const c = NOTE_MAIL_TEXT[n.getAttribute('data-tc')]; return c ? `<span style="color:${c}">${kids(n)}</span>` : kids(n); }
+      case 'MARK': { const c = NOTE_MAIL_HL[n.getAttribute('data-hl')]; return c ? `<span style="background:${c}">${kids(n)}</span>` : kids(n); }
       case 'BR': return '<br>';
       case 'HR': return '<hr style="border:0;border-top:1px solid #c8c8cc;margin:12px 0">';
       case 'A': { const h = n.getAttribute('href') || ''; return h ? `<a href="${esc(h)}">${kids(n)}</a>` : kids(n); }
@@ -5253,6 +5332,89 @@ function noteWriteClipboard(html, plain){
   }
   return Promise.resolve(legacy());
 }
+// ---- export: Markdown file, Print / PDF ----
+// noteToMarkdown(root) walks the sanitised body: headings #, bold **, italic _, strikethrough ~~, code `, links [text](url), lists with two-space indents
+// (checklists as - [ ] / - [x]), tables as pipe tables, quotes >, code blocks as fences, rules ---. Colours and highlights are dropped (plain Markdown has none).
+function noteToMarkdown(root){
+  const inline = n=>{
+    if(n.nodeType===3) return n.nodeValue.replace(/[ ]/g, ' ');
+    if(n.nodeType!==1) return '';
+    const kids = [...n.childNodes].map(inline).join('');
+    switch(n.tagName){
+      case 'BR': return '  \n';
+      case 'B': case 'STRONG': return kids.trim() ? `**${kids}**` : kids;
+      case 'I': case 'EM': return kids.trim() ? `_${kids}_` : kids;
+      case 'S': case 'STRIKE': return kids.trim() ? `~~${kids}~~` : kids;
+      case 'U': return kids.trim() ? `<u>${kids}</u>` : kids;
+      case 'CODE': return '`' + kids + '`';
+      case 'A': { const h = n.getAttribute('href') || ''; return h ? `[${kids}](${h})` : kids; }
+      default: return kids;
+    }
+  };
+  const blocks = []; let listId = 0;
+  const list = (ul, indent, lid)=>{
+    lid = lid || ++listId;                                          // one id per top-level list: its lines stay together, the next list is separated by a blank line
+    const ol = ul.tagName==='OL', cl = ul.classList.contains('cl'); let i = 0;
+    [...ul.childNodes].forEach(li=>{
+      if(noteCopyIsList(li)){ list(li, indent + '  ', lid); return; }
+      if(li.nodeType!==1 || li.tagName!=='LI') return;
+      i++;
+      const own = [...li.childNodes].filter(c=>!noteCopyIsList(c)).map(inline).join('').replace(/\s+/g, ' ').trim();
+      const mark = cl ? (li.getAttribute('data-done')==='1' ? '- [x]' : '- [ ]') : ol ? `${i}.` : '-';
+      blocks.push({ lid, text: `${indent}${mark} ${own}` });
+      [...li.childNodes].filter(noteCopyIsList).forEach(sub=>list(sub, indent + '  ', lid));
+    });
+  };
+  const walk = parent=>{
+    let buf = '';
+    const flush = ()=>{ const t = buf.replace(/[ \t\r\n]+/g, ' ').trim(); if(t) blocks.push({ text: t }); buf = ''; };
+    [...parent.childNodes].forEach(n=>{
+      if(n.nodeType===3){ buf += n.nodeValue; return; }
+      if(n.nodeType!==1) return;
+      const tag = n.tagName;
+      if(tag==='UL' || tag==='OL'){ flush(); list(n, ''); return; }
+      if(tag==='TABLE'){
+        flush(); const rows = [...n.rows].map(r=>[...r.cells].map(c=>inline(c).replace(/\s+/g, ' ').replace(/\|/g, '\\|').trim()));
+        if(rows.length){ const head = rows[0], cols = head.length; blocks.push({ text: ['| ' + head.join(' | ') + ' |', '| ' + head.map(()=>'---').join(' | ') + ' |', ...rows.slice(1).map(r=>'| ' + Array.from({length: cols}, (_, i)=>r[i] || '').join(' | ') + ' |')].join('\n') }); }
+        return;
+      }
+      if(tag==='HR'){ flush(); blocks.push({ text: '---' }); return; }
+      if(tag==='PRE'){ flush(); blocks.push({ text: '```\n' + n.textContent.replace(/\n$/, '') + '\n```' }); return; }
+      if(tag==='BLOCKQUOTE'){ flush(); const sub = noteToMarkdown(n); if(sub) blocks.push({ text: sub.split('\n').map(l=>l ? '> ' + l : '>').join('\n') }); return; }
+      if(/^H[1-3]$/.test(tag)){ flush(); const t = inline(n).replace(/\s+/g, ' ').trim(); if(t) blocks.push({ text: '#'.repeat(+tag[1]) + ' ' + t }); return; }
+      if(tag==='P' || tag==='DIV'){ flush(); walk(n); return; }
+      buf += inline(n);
+    });
+    flush();
+  };
+  walk(root);
+  let md = '';
+  blocks.forEach((b, i)=>{ md += (i ? (b.lid && blocks[i - 1].lid===b.lid ? '\n' : '\n\n') : '') + b.text; });
+  return md;
+}
+function noteFileName(n, ext){ return ((n.title || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Note') + ext; }
+function noteExportMarkdown(id){
+  const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
+  if(n.id===noteEditorId) flushNoteEdit();
+  const m = notes.find(x=>x.id===n.id), holder = document.createElement('div');
+  holder.innerHTML = sanitizeNoteHtml(m.body);
+  const md = ((m.title || '').trim() ? '# ' + m.title.trim() + '\n\n' : '') + noteToMarkdown(holder) + '\n';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown;charset=utf-8' })); a.download = noteFileName(m, '.md');
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  showToast(`Saved ${a.download}`);
+}
+// Print / Save as PDF: the note's mail-safe HTML goes into #notePrintArea, which only shows when printing (the rest of the app is hidden by the print CSS).
+function noteExportPrint(id){
+  const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
+  if(n.id===noteEditorId) flushNoteEdit();
+  let area = document.getElementById('notePrintArea');
+  if(!area){ area = document.createElement('div'); area.id = 'notePrintArea'; document.body.appendChild(area); }
+  area.innerHTML = noteCopyContent(notes.find(x=>x.id===n.id)).html;
+  document.title = noteFileName(n, '').replace(/ $/, '');                                       // the PDF's suggested file name
+  const done = ()=>{ area.innerHTML = ''; document.title = 'MyDesk'; window.removeEventListener('afterprint', done); };
+  window.addEventListener('afterprint', done);
+  window.print();
+}
 function copyNote(id){
   const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
   if(n.id===noteEditorId) flushNoteEdit();                          // what is on screen, not the last autosave
@@ -5282,10 +5444,17 @@ let noteMenuId = null, folderMenuId = null;
 function noteMenuHtml(id, opts){
   const n = notes.find(x=>x.id===id); if(!n) return '';
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+  if(noteTrashed(n)){                                                              // a deleted note: bring it back, copy it, or delete it for good
+    return [item('fa-solid fa-rotate-left', 'Restore', `noteMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`), sep,
+            item('fa-solid fa-trash', 'Delete Permanently', `noteMenuRun('delete')`, {danger:true})].join('');
+  }
   const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {icon:'folder', indent:!!f.parentId}, f.name, f.id===n.folderId)).join('');
   return [
+    item('fa-solid fa-thumbtack', n.pinned ? 'Unpin Note' : 'Pin Note', `noteMenuRun('pin')`),
     ...(opts && opts.noLock ? [] : [item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`)]),   // the toolbar has its own lock button
+    sep,
     item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`),
+    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {icon:'file-lines'}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {icon:'print'}, 'Print / Save as PDF…')),
     item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
     sep,
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace('<i class="fa-solid fa-chevron-right"></i>', 'Unlock first') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
@@ -5307,6 +5476,10 @@ function noteMenuRun(kind, value){
   if(!id) return;
   if(kind==='lock') toggleNoteLock(id);
   else if(kind==='copy') copyNote(id);
+  else if(kind==='pin') toggleNotePin(id);
+  else if(kind==='exportmd') noteExportMarkdown(id);
+  else if(kind==='print') noteExportPrint(id);
+  else if(kind==='restore') restoreNote(id);
   else if(kind==='clone') cloneNote(id);
   else if(kind==='move') moveNote(id, value);
   else if(kind==='delete') deleteNote(id);
@@ -5375,9 +5548,10 @@ function openNoteSortMenu(e){
 }
 function visibleNotes(){
   const words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const inTrash = noteFolderFilter==='trash', sorter = noteSorter();
   return notes
-    .filter(n=>(words.length || noteInFilter(n)) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
-    .sort(noteSorter());
+    .filter(n=>noteTrashed(n)===inTrash && (inTrash || words.length || noteInFilter(n)) && words.every(w=>(n.title + ' ' + noteText(n.body)).toLowerCase().includes(w)))
+    .sort(inTrash ? (a, b)=>b.deletedAt - a.deletedAt : (a, b)=>(b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || sorter(a, b));   // pinned notes first, then the chosen order
 }
 function folderById(id){ return noteFolders.find(f=>f.id===id); }
 function fmtNoteDate(ts){
@@ -5390,10 +5564,13 @@ function fmtNoteDate(ts){
   return d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
 }
 function renderNotesSidebar(){
-  const own = {}; notes.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
+  const live = notes.filter(n=>!noteTrashed(n)), own = {}; live.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
   const total = f=>(own[f.id]||0) + folderChildren(f.id).reduce((a,c)=>a + (own[c.id]||0), 0);   // a folder's count includes its subfolders
   const all = document.getElementById('allNotesNav'), cnt = document.getElementById('allNotesCount');
-  if(cnt) cnt.textContent = notes.length;
+  if(cnt) cnt.textContent = live.length;
+  const trashNav = document.getElementById('trashNav'), trashCount = document.getElementById('trashCount');
+  if(trashCount) trashCount.textContent = notes.length - live.length || '';
+  if(trashNav){ trashNav.classList.toggle('active', noteFolderFilter==='trash'); trashNav.setAttribute('aria-pressed', noteFolderFilter==='trash' ? 'true' : 'false'); }
   if(all){ all.classList.toggle('active', noteFolderFilter==='all'); all.setAttribute('aria-pressed', noteFolderFilter==='all' ? 'true' : 'false'); }
   const list = document.getElementById('noteFolderList');
   const activeF = folderById(noteFolderFilter);
@@ -5419,25 +5596,52 @@ function renderNotesList(vis){
   const title = document.getElementById('notesListTitle'), sub = document.getElementById('notesListSub'), list = document.getElementById('notesList');
   const f = folderById(noteFolderFilter);
   const searching = !!noteSearchQuery.trim();                                   // a search looks through every folder
-  if(title) title.textContent = searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : (f ? f.name : 'Notes');
+  const inTrash = noteFolderFilter==='trash';
+  if(title) title.textContent = inTrash ? 'Recently Deleted' : searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : (f ? f.name : 'Notes');
   if(sub) sub.textContent = vis.length ? `${vis.length} note${vis.length===1?'':'s'}` : '';
   if(!list) return;
   if(!vis.length){
-    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No notes match your search.' : 'No notes yet.'}</div>`;
+    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No notes match your search.' : inTrash ? 'No deleted notes.' : 'No notes yet.'}</div>`;
     return;
   }
-  list.innerHTML = vis.map(n=>{
-    const sel = n.id===selectedNoteId;
-    return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
+  const anyPinned = !inTrash && vis.some(n=>n.pinned);
+  let seen = '';                                                                   // section headers: "Pinned" then "Notes", only when something is pinned
+  const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted notes are removed after ${NOTE_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyTrash()">Delete All</button></div>` : '';
+  list.innerHTML = banner + vis.map(n=>{
+    const sel = n.id===selectedNoteId, sec = anyPinned ? (n.pinned ? 'Pinned' : 'Notes') : '';
+    const head = sec && sec!==seen ? `<div class="note-section">${sec}</div>` : ''; seen = sec || seen;
+    return head + `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked || inTrash ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
-      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span></div>
+      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? n.deletedAt : noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span></div>
     </div>`;   // a row is just the title and its timestamp: no text snippet, no folder line
   }).join('');
 }
+// ---- search highlighting ----
+// While a search is active the matches are shown in the open note with the CSS Custom Highlight API (ranges, nothing is added to the note), and the first
+// match is scrolled into view when the note or the search words change. Where the API is missing the note just shows no highlight.
+let noteHighlightKey = '';
+function noteApplySearchHighlight(){
+  if(typeof CSS==='undefined' || !CSS.highlights || typeof Highlight==='undefined') return;
+  CSS.highlights.delete('note-search');
+  const body = document.getElementById('noteBody'), words = noteSearchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if(!body || !words.length){ noteHighlightKey = ''; return; }
+  const ranges = [], w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  let n; while((n = w.nextNode())){
+    const low = n.nodeValue.toLowerCase();
+    words.forEach(word=>{ for(let i = low.indexOf(word); i>=0; i = low.indexOf(word, i + word.length)){ const r = document.createRange(); r.setStart(n, i); r.setEnd(n, i + word.length); ranges.push(r); } });
+  }
+  if(!ranges.length) return;
+  CSS.highlights.set('note-search', new Highlight(...ranges));
+  const key = selectedNoteId + '|' + words.join(' ');
+  if(key!==noteHighlightKey){ noteHighlightKey = key; const el = ranges[0].startContainer.parentElement; if(el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); }
+}
+// Words and characters of a note's text (letters and digits; an apostrophe or hyphen inside a word keeps it one word).
+function noteWordCount(text){ return (String(text || '').match(/[\p{L}\p{N}]+(?:['\u2019-][\p{L}\p{N}]+)*/gu) || []).length; }
+function noteCountText(text){ const w = noteWordCount(text); return `${w.toLocaleString()} word${w===1 ? '' : 's'}`; }
 function updateNoteMeta(n){
   const el = document.getElementById('noteMeta'); if(!el || !n) return;
   const fol = folderById(n.folderId);
-  el.innerHTML = `Edited ${esc(new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''}`;
+  el.innerHTML = `${noteTrashed(n) ? 'Deleted' : 'Edited'} ${esc(new Date(noteTrashed(n) ? n.deletedAt : n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''} · <span id="noteMetaCount">${noteCountText(noteText(n.body))}</span>`;
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
@@ -5460,20 +5664,27 @@ function renderNoteEditor(){
     if(!noteIsLocked(n.id)) noteEnsureTrailingLine(body);
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
-  const locked = !!n.locked;
-  ed?.classList.toggle('locked', locked);
+  const trashed = noteTrashed(n), locked = !!n.locked || trashed;                  // a deleted note is read-only like a locked one
+  ed?.classList.toggle('locked', locked); ed?.classList.toggle('trashed', trashed);
   updateNoteToolbarState();                         // the table strip hides on a locked note
   body.contentEditable = locked ? 'false' : 'true'; title.readOnly = locked;
   const lockBtn = document.getElementById('noteLockBtn');                          // the lock toggle in the toolbar: amber and closed while the note is locked
   if(lockBtn){
-    lockBtn.classList.toggle('on', locked); lockBtn.setAttribute('aria-pressed', String(locked));
-    lockBtn.title = locked ? 'Unlock note' : 'Lock note'; lockBtn.setAttribute('aria-label', lockBtn.title);
-    lockBtn.innerHTML = locked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+    const lk = !!n.locked;
+    lockBtn.classList.toggle('on', lk); lockBtn.setAttribute('aria-pressed', String(lk));
+    lockBtn.title = lk ? 'Unlock note' : 'Lock note'; lockBtn.setAttribute('aria-label', lockBtn.title);
+    lockBtn.innerHTML = lk ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+  }
+  const tbar = document.getElementById('noteTrashBar');                              // the Recently Deleted bar: when it goes, and Restore / Delete Now
+  if(tbar){
+    tbar.hidden = !trashed;
+    if(trashed) document.getElementById('noteTrashText').textContent = `In Recently Deleted. It will be removed on ${new Date(n.deletedAt + NOTE_TRASH_DAYS * 86400000).toLocaleDateString(undefined, {dateStyle:'medium'})}.`;
   }
   updateNoteMeta(n);
+  noteApplySearchHighlight();
 }
 function renderNotes(){
-  if(noteFolderFilter!=='all' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
+  if(noteFolderFilter!=='all' && noteFolderFilter!=='trash' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
   const vis = visibleNotes();
   if(selectedNoteId && !notes.some(n=>n.id===selectedNoteId)) selectedNoteId = null;
   if(!selectedNoteId && vis.length) selectedNoteId = vis[0].id;      // open the newest note, like Apple Notes
@@ -5509,6 +5720,7 @@ function selectNote(id){
 }
 function createNote(){
   flushNoteEdit();
+  if(noteFolderFilter==='trash') noteFolderFilter = 'all';                          // a new note cannot live in Recently Deleted
   const leaving = selectedNoteId;
   const now = Date.now();
   const n = { id: genId(), title:'', body:'', folderId: folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, createdAt: now, updatedAt: now };
@@ -5518,25 +5730,56 @@ function createNote(){
   save(); render();
   document.getElementById('noteTitle')?.focus();
 }
+// Delete moves a note to Recently Deleted (kept 30 days, restorable, and the delete syncs as an edit); deleting it THERE is permanent.
 function deleteNote(id){
-  const idx = notes.findIndex(n=>n.id===id); if(idx===-1) return;
-  if(notes[idx].locked){ showToast('Unlock the note to delete it', true); return; }
+  const n = notes.find(x=>x.id===id); if(!n) return;
+  if(noteTrashed(n)){
+    openConfirmModal({ title: 'Delete this note permanently?', body: 'It will be removed for good. This cannot be undone.', action: ()=>permanentDeleteNote(id), confirmLabel: 'Delete' });
+    return;
+  }
+  if(n.locked){ showToast('Unlock the note to delete it', true); return; }
   flushNoteEdit();
-  const vis = visibleNotes(), vi = vis.findIndex(n=>n.id===id);
-  const [removed] = notes.splice(idx, 1);
-  tombstone(deletedNoteIds, id);
+  const vis = visibleNotes(), vi = vis.findIndex(x=>x.id===id);
+  n.deletedAt = Date.now(); n.updatedAt = n.deletedAt; noteEditorStamp = n.updatedAt;
   if(selectedNoteId===id){ const next = vis[vi+1] || vis[vi-1]; selectedNoteId = next ? next.id : null; }
   noteEditorId = null;
   save(); render();
-  showToast('Note deleted', false, ()=>{
-    untombstone(deletedNoteIds, id);
-    removed.updatedAt = Date.now();
-    notes.push(removed); selectedNoteId = id; noteEditorId = null;
+  showToast('Note moved to Recently Deleted', false, ()=>{
+    const m = notes.find(x=>x.id===id); if(!m) return;
+    delete m.deletedAt; m.updatedAt = Date.now(); selectedNoteId = id; noteEditorId = null;
     save(); render(); showToast('Note restored');
   });
 }
+function permanentDeleteNote(id){
+  const idx = notes.findIndex(n=>n.id===id); if(idx===-1) return;
+  const vis = visibleNotes(), vi = vis.findIndex(n=>n.id===id);
+  notes.splice(idx, 1); tombstone(deletedNoteIds, id);
+  if(selectedNoteId===id){ const next = vis[vi+1] || vis[vi-1]; selectedNoteId = next ? next.id : null; }
+  noteEditorId = null;
+  save(); render(); showToast('Note deleted permanently');
+}
+function restoreNote(id){
+  const n = notes.find(x=>x.id===id); if(!n || !noteTrashed(n)) return;
+  const vis = visibleNotes(), vi = vis.findIndex(x=>x.id===id);
+  delete n.deletedAt; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
+  if(!folderById(n.folderId)) n.folderId = NOTES_DEFAULT_FOLDER;
+  if(selectedNoteId===id && noteFolderFilter==='trash'){ const next = vis[vi+1] || vis[vi-1]; selectedNoteId = next ? next.id : null; }
+  noteEditorId = null;
+  save(); render(); showToast(`Restored to ${(folderById(n.folderId) || {}).name || 'Notes'}`);
+}
+function emptyTrash(){
+  const gone = notes.filter(noteTrashed); if(!gone.length) return;
+  openConfirmModal({ title: `Delete ${gone.length} note${gone.length===1?'':'s'} permanently?`, body: 'They will be removed for good. This cannot be undone.', confirmLabel: 'Delete All',
+    action: ()=>{ gone.forEach(n=>tombstone(deletedNoteIds, n.id)); notes = notes.filter(n=>!noteTrashed(n)); selectedNoteId = null; noteEditorId = null; save(); render(); showToast('Recently Deleted emptied'); } });
+}
+function toggleNotePin(id){
+  const n = notes.find(x=>x.id===id); if(!n || noteTrashed(n)) return;
+  if(id===noteEditorId) flushNoteEdit();
+  n.pinned = !n.pinned; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;                 // an edit like any other, so it syncs
+  save(); render(); showToast(n.pinned ? 'Note pinned' : 'Note unpinned');
+}
 function moveNote(id, folderId){
-  const n = notes.find(x=>x.id===id); if(!n || n.locked || !folderById(folderId) || n.folderId===folderId) return;
+  const n = notes.find(x=>x.id===id); if(!n || n.locked || noteTrashed(n) || !folderById(folderId) || n.folderId===folderId) return;
   flushNoteEdit();
   const prev = n.folderId, dest = folderById(folderId);
   n.folderId = folderId; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
@@ -5552,7 +5795,7 @@ function moveNote(id, folderId){
 function setNoteFolder(id){
   flushNoteEdit();
   const leaving = selectedNoteId;
-  noteFolderFilter = (id==='all' || folderById(id)) ? id : 'all';
+  noteFolderFilter = (id==='all' || id==='trash' || folderById(id)) ? id : 'all';
   try{ localStorage.setItem(NOTES_FOLDER_KEY, noteFolderFilter); }catch(_){}
   const picked = folderById(noteFolderFilter);
   if(picked && picked.parentId && noteFoldersCollapsed.has(picked.parentId)){ noteFoldersCollapsed.delete(picked.parentId); try{ localStorage.setItem(NOTES_COLLAPSED_KEY, JSON.stringify([...noteFoldersCollapsed])); }catch(_){} }
@@ -5647,7 +5890,62 @@ function noteClosest(node, tag){
 }
 function noteFocusBody(){ const b = document.getElementById('noteBody'); if(b && document.activeElement!==b) b.focus(); }
 function noteCmd(cmd, val){ noteFocusBody(); document.execCommand(cmd, false, val); onNoteInput(); updateNoteToolbarState(); }
-function noteBlock(tag){ noteFocusBody(); document.execCommand('formatBlock', false, `<${tag}>`); onNoteInput(); updateNoteToolbarState(); }
+function noteBlock(tag){
+  noteFocusBody();
+  const inQuote = ()=>{ const q = window.getSelection(); return q && q.rangeCount && noteClosest(q.anchorNode, 'BLOCKQUOTE'); };
+  if(tag==='blockquote' && inQuote()){ updateNoteToolbarState(); return; }                          // already a quote: do not nest another
+  if(tag==='p') for(let i = 0; i<6 && inQuote(); i++) document.execCommand('outdent', false);      // formatBlock <p> would leave the paragraph inside its quote
+  document.execCommand('formatBlock', false, `<${tag}>`); onNoteInput(); updateNoteToolbarState();
+}
+// ---- text colour and highlight ----
+// Stored as <span data-tc="red"> / <mark data-hl="yellow"> (names, never raw colours) so the sanitizer can allow exactly these and the CSS picks a
+// shade that reads in both themes. Applied by replacing the selection through execCommand('insertHTML') (one undo step), wrapping each text run.
+const NOTE_COLOR_LABELS = { red:'Red', orange:'Orange', green:'Green', blue:'Blue', purple:'Purple', gray:'Grey', yellow:'Yellow', pink:'Pink' };
+function noteColorMenuHtml(){
+  const sw = (kind, name)=>`<button type="button" class="nc-sw nc-${kind}-${name}" role="menuitem" title="${name==='none' ? 'Default' : NOTE_COLOR_LABELS[name]}" aria-label="${kind==='tc' ? 'Text colour' : 'Highlight'}: ${name==='none' ? 'default' : NOTE_COLOR_LABELS[name]}" onmousedown="event.preventDefault()" onclick="noteApplyColor('${kind}','${name}')">${kind==='tc' ? 'A' : ''}</button>`;
+  return `<div class="nc-label">Text colour</div><div class="nc-row">${['none', ...NOTE_TEXT_COLORS].map(n=>sw('tc', n)).join('')}</div>
+          <div class="nc-label">Highlight</div><div class="nc-row">${['none', ...NOTE_HL_COLORS].map(n=>sw('hl', n)).join('')}</div>`;
+}
+function toggleNoteColorMenu(){
+  const m = document.getElementById('noteColorMenu'); if(!m) return;
+  const wasOpen = m.classList.contains('open');
+  closeNoteListMenu(); closeNoteTableMenu();
+  if(wasOpen) return;
+  m.innerHTML = noteColorMenuHtml(); m.classList.add('open');
+}
+function closeNoteColorMenu(){ document.getElementById('noteColorMenu')?.classList.remove('open'); }
+function noteApplyColor(kind, name){
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  closeNoteColorMenu();
+  if(!body || !sel || !sel.rangeCount || noteIsLocked(noteEditorId)) return;
+  if(sel.isCollapsed || !body.contains(sel.anchorNode)){ showToast('Select some text first'); return; }
+  const range = sel.getRangeAt(0), sel_ = kind==='tc' ? 'span[data-tc]' : 'mark[data-hl]', tag = kind==='tc' ? 'span' : 'mark', attr = kind==='tc' ? 'data-tc' : 'data-hl';
+  const wrapTexts = (root, nm)=>{                                                          // wrap every text run of root in the colour (nm 'none' = no wrapper)
+    root.querySelectorAll(sel_).forEach(el=>{ while(el.firstChild) el.parentNode.insertBefore(el.firstChild, el); el.remove(); });   // a new colour replaces the old one
+    if(nm==='none') return;
+    const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), texts = [];
+    let t; while((t = w.nextNode())) if(t.nodeValue.length) texts.push(t);
+    texts.forEach(tn=>{ const el = document.createElement(tag); el.setAttribute(attr, nm); tn.parentNode.insertBefore(el, tn); el.appendChild(tn); });
+  };
+  const holder = document.createElement('div'); holder.appendChild(range.cloneContents()); wrapTexts(holder, name);
+  // The selection sits INSIDE an existing coloured run: rewrite the whole line's content in ONE command (a single Undo step) with the run replaced by
+  // [its colour before the selection] + [the selection in the new colour] + [its colour after it]. Replacing only the run would inherit its colour.
+  let anc = range.commonAncestorContainer; anc = anc.nodeType===1 ? anc : anc.parentNode;
+  anc = anc && anc.closest ? anc.closest(sel_) : null;
+  const block = anc && body.contains(anc) ? anc.closest('p, div, li, td, th, h1, h2, h3, blockquote') : null;
+  if(anc && block && body.contains(block) && block!==body){
+    const old = anc.getAttribute(attr), part = (fn)=>{ const r = document.createRange(); fn(r); const d = document.createElement('div'); d.appendChild(r.cloneContents()); return d.innerHTML ? `<${tag} ${attr}="${old}">${d.innerHTML}</${tag}>` : ''; };
+    const before = part(r=>{ r.selectNodeContents(anc); r.setEnd(range.startContainer, range.startOffset); });
+    const after = part(r=>{ r.selectNodeContents(anc); r.setStart(range.endContainer, range.endOffset); });
+    const path = []; for(let n = anc; n!==block; n = n.parentNode) path.unshift([...n.parentNode.childNodes].indexOf(n));
+    const clone = block.cloneNode(true); let target = clone; path.forEach(i=>{ target = target.childNodes[i]; });
+    const tpl = document.createElement('template'); tpl.innerHTML = before + holder.innerHTML + after;
+    target.replaceWith(tpl.content);
+    const whole = document.createRange(); whole.selectNodeContents(block); sel.removeAllRanges(); sel.addRange(whole);
+    document.execCommand('insertHTML', false, clone.innerHTML);
+  } else document.execCommand('insertHTML', false, holder.innerHTML);
+  onNoteInput(); updateNoteToolbarState();
+}
 // The list button opens one menu with every bullet and numbering style; the current style is ticked and picking it again turns the list off.
 const NOTE_LIST_STYLES = [
   ['disc','-','Hyphen'], ['dot','•','Dot'], ['square','▪','Square'], ['dash','–','Dash'], ['emdash','—','Em dash'], null,
@@ -5691,7 +5989,7 @@ function toggleNoteListMenu(){
   m.innerHTML = noteListMenuHtml();
   m.classList.add('open');
 }
-function closeNoteListMenu(){ document.getElementById('noteListMenu')?.classList.remove('open'); }
+function closeNoteListMenu(){ document.getElementById('noteListMenu')?.classList.remove('open'); if(typeof closeNoteColorMenu==='function') closeNoteColorMenu(); }   // one menu open at a time
 // kind: disc (the plain hyphen default)|dot|square|dash|emdash for bullets, decimal|alpha|roman for numbers. Applies to the list the cursor is in (starting one if needed);
 // choosing the style the list already has turns the list off.
 function noteCaretAtTextIndex(idx){
@@ -6339,7 +6637,11 @@ function noteChecklist(){
   else {
     if(!ul) document.execCommand('insertUnorderedList', false);
     ul = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'UL') : null;
-    if(ul) ul.classList.add('cl');
+    if(ul){
+      ul.classList.add('cl');
+      const par = ul.parentNode;                                   // Chrome can leave the list inside a <p>, which is invalid: the browser then tidies it into empty paragraphs on the next load
+      if(par && par.tagName==='P' && par.childNodes.length===1){ par.parentNode.insertBefore(ul, par); par.remove(); const li = ul.querySelector('li'), r = document.createRange(); r.selectNodeContents(li); r.collapse(false); sel.removeAllRanges(); sel.addRange(r); }
+    }
   }
   onNoteInput(); updateNoteToolbarState();
 }
@@ -6358,7 +6660,8 @@ function updateNoteToolbarState(){
   const ul = noteClosest(sel.anchorNode, 'UL'), ol = noteClosest(sel.anchorNode, 'OL');
   set('table', !!noteSelectedCell() || !!tblWholeSelected()); set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
-  const style = document.getElementById('noteStyleSelect'); if(style) style.value = /^h[1-3]$/.test(v) ? v : 'p';
+  const style = document.getElementById('noteStyleSelect');
+  if(style) style.value = /^h[1-3]$/.test(v) ? v : noteClosest(sel.anchorNode, 'BLOCKQUOTE') ? 'blockquote' : noteClosest(sel.anchorNode, 'PRE') ? 'pre' : 'p';
 }
 function onNoteInput(e){
   const body = document.getElementById('noteBody');
@@ -6368,6 +6671,7 @@ function onNoteInput(e){
   }
   noteEditCount++;
   noteEnsureTrailingLine(body);
+  const wc = document.getElementById('noteMetaCount'); if(wc) wc.textContent = noteCountText(body.innerText || body.textContent);   // live word count
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
   updateNoteToolbarState();                            // keeps the Undo / Redo buttons in step, including after ⌘Z and ⇧⌘Z
@@ -6423,8 +6727,11 @@ function noteAutoBullet(e){
   const n = sel.anchorNode;
   if(n.nodeType!==3) return false;
   const marker = n.textContent.slice(0, sel.anchorOffset);
-  let kind = null;                                                  // numbered style this marker asks for; null = bullet
-  if(/^\d{1,3}[.)]$/.test(marker)) kind = 'decimal';
+  let kind = null, block = null;                                    // kind: numbered style this marker asks for (null = bullet); block: a Markdown block marker
+  if(/^#{1,3}$/.test(marker)) block = 'h' + marker.length;           // "# " Title, "## " Heading, "### " Subheading
+  else if(/^(\[\]|\[ \])$/.test(marker)) block = 'check';              // "[] " or "[ ] " a checklist
+  else if(marker==='>') block = 'blockquote';                         // "> " a quote
+  else if(/^\d{1,3}[.)]$/.test(marker)) kind = 'decimal';
   else if(/^(i|ii|iii|iv)[.)]$/.test(marker)) kind = 'roman';        // "i." is roman, as in Word; other single letters are alphabetic
   else if(/^[a-z][.)]$/.test(marker)) kind = 'alpha';
   else if(marker!=='-' && marker!=='*') return false;
@@ -6432,7 +6739,23 @@ function noteAutoBullet(e){
   if(prev && prev.nodeName!=='BR') return false;
   e.preventDefault();
   for(let i = 0; i<marker.length; i++) document.execCommand('delete', false);   // remove the marker (keeps native undo)
-  noteListStyle(kind || noteBulletKind);
+  if(block==='check') noteChecklist(); else if(block) noteBlock(block); else noteListStyle(kind || noteBulletKind);
+  return true;
+}
+// "---" / "***" / "___" and Enter makes a divider, "```" and Enter a code block (Markdown habits, like the "- " and "# " triggers above).
+function noteAutoBlockAtEnter(e){
+  if(e.key!=='Enter' || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.isComposing) return false;
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || !body.contains(sel.anchorNode) || noteIsLocked(noteEditorId)) return false;
+  const n = sel.anchorNode;
+  if(n.nodeType!==3 || sel.anchorOffset!==n.nodeValue.length || noteClosest(n, 'LI') || noteClosest(n, 'TD') || noteClosest(n, 'TH') || noteClosest(n, 'PRE')) return false;
+  const line = noteLineOf(n), text = line.textContent.trim();
+  if(line===body || !/^(---|\*\*\*|___|```)$/.test(text) || n.nodeValue.trim()!==text) return false;
+  e.preventDefault();
+  const r = document.createRange(); r.selectNodeContents(n); sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('delete', false);                                       // the typed characters go (native undo keeps them)
+  if(text==='```') noteBlock('pre'); else document.execCommand('insertHorizontalRule', false);
+  onNoteInput();
   return true;
 }
 // A table that is the last thing in a note has nothing below it to click or arrow into (a full-width table leaves no room beside it either), so
@@ -6493,6 +6816,7 @@ function noteBackspaceAfterTable(e){
   return true;
 }
 function onNoteKeydown(e){
+  if(noteAutoBlockAtEnter(e)) return;                                          // --- / *** / ___ / ``` + Enter
   noteAutoLinkAtSpace(e);                                                      // a web / e-mail address is linked as the space after it is typed
   if(e.key==='Enter' && !e.isComposing && !e.metaKey && !e.ctrlKey){ const sel = window.getSelection(); if(sel && sel.rangeCount) noteAutoLinkLine(noteLineOf(sel.anchorNode)); }   // finish the line (link its addresses) before Enter splits it
   if(noteTablePickerKey(e)) return;
@@ -6649,6 +6973,7 @@ function handleNotesKeys(e){
   if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
   if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
+  if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='p' && selectedNoteId){ e.preventDefault(); noteExportPrint(selectedNoteId); return; }   // Print / Save as PDF: this note only
   if((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && e.key.toLowerCase()==='c' && selectedNoteId){ e.preventDefault(); copyNote(selectedNoteId); return; }   // the whole note, for pasting into Mail
   if(!onList || typing) return;
   const vis = visibleNotes(), i = vis.findIndex(n=>n.id===selectedNoteId);
@@ -6791,7 +7116,7 @@ function setUiScale(v){
 
 document.addEventListener('click', e=>{
   if(!e.target.closest('#libDropdown')) closeLibMenu();
-  if(!e.target.closest('#noteListDropdown')) closeNoteListMenu();
+  if(!e.target.closest('#noteListDropdown') && !e.target.closest('#noteColorDropdown')) closeNoteListMenu();
   if(!e.target.closest('#quickAddProjectWrap')) closeQuickAddProjectMenu();
   if(!e.target.closest('#noteTableDropdown')) closeNoteTableMenu();
   if(!e.target.closest('#uiScaleDropdown')) closeUiScaleMenu();

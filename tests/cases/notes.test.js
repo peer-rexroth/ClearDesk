@@ -99,13 +99,54 @@ test('selecting another note drops an empty one but keeps one with content', fun
   assertTrue(notes.some(function (n) { return n.id === 'c'; }), 'note with text kept');
 });
 
-test('deleteNote tombstones, picks a neighbour, and the toast undo restores it', function () {
+test('deleteNote moves a note to Recently Deleted, picks a neighbour, and the toast undo restores it', function () {
   notes = [ntNote({ id: 'a', updatedAt: 3 }), ntNote({ id: 'b', updatedAt: 2 }), ntNote({ id: 'c', updatedAt: 1 })];
   selectedNoteId = 'b';
   deleteNote('b');
-  assertEqual(notes.length, 2); assertEqual(selectedNoteId, 'c'); assertTrue(deletedNoteIds.some(function (d) { return d.id === 'b'; }));
+  assertEqual(notes.length, 3, 'it is kept, not removed'); assertTrue(noteTrashed(notes[1]));
+  assertEqual(visibleNotes().length, 2, 'and gone from the normal list'); assertEqual(selectedNoteId, 'c');
+  assertFalse(deletedNoteIds.some(function (d) { return d.id === 'b'; }), 'not tombstoned yet: it can come back');
   toastUndoAction();
-  assertEqual(notes.length, 3); assertEqual(selectedNoteId, 'b'); assertFalse(deletedNoteIds.some(function (d) { return d.id === 'b'; }));
+  assertFalse(noteTrashed(notes[1])); assertEqual(selectedNoteId, 'b'); assertEqual(visibleNotes().length, 3);
+});
+
+test('Recently Deleted lists deleted notes newest first, restore brings one back, permanent delete tombstones it', function () {
+  notes = [ntNote({ id: 'a' }), ntNote({ id: 'b', deletedAt: 100, updatedAt: 100 }), ntNote({ id: 'c', deletedAt: 300, updatedAt: 300 })];
+  noteFolderFilter = 'trash';
+  assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'c,b');
+  restoreNote('b');
+  assertFalse(noteTrashed(notes[1])); assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'c');
+  permanentDeleteNote('c');
+  assertEqual(notes.length, 2); assertTrue(deletedNoteIds.some(function (d) { return d.id === 'c'; }));
+  noteFolderFilter = 'all';
+  assertEqual(visibleNotes().length, 2);
+});
+
+test('a note in Recently Deleted is read-only, and one deleted over 30 days ago is purged and tombstoned', function () {
+  notes = [ntNote({ id: 'old', deletedAt: Date.now() - 31 * 86400000 }), ntNote({ id: 'new', deletedAt: Date.now() - 86400000 })];
+  normalizeNotes();
+  assertEqual(notes.length, 1); assertEqual(notes[0].id, 'new');
+  assertTrue(deletedNoteIds.some(function (d) { return d.id === 'old'; }));
+  assertTrue(noteIsLocked('new'), 'deleted notes cannot be edited');
+  moveNote('new', NOTES_DEFAULT_FOLDER);
+  assertTrue(noteTrashed(notes[0]));
+});
+
+test('pinned notes sort first, and pin / unpin is a stamped edit that syncs', function () {
+  notes = [ntNote({ id: 'a', updatedAt: 3 }), ntNote({ id: 'b', updatedAt: 2 }), ntNote({ id: 'c', updatedAt: 1, pinned: true })];
+  noteFolderFilter = 'all';
+  assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'c,a,b');
+  toggleNotePin('b');
+  assertTrue(notes[1].pinned === true); assertTrue(notes[1].updatedAt > 2);
+  assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'b,c,a');
+  toggleNotePin('b');
+  assertTrue(notes[1].pinned === false);
+});
+
+test('merging an incoming restore / unpin clears deletedAt and pinned here too', function () {
+  notes = [ntNote({ id: 'm1', updatedAt: 10, deletedAt: 10, pinned: true })];
+  mergeNotesData({ notes: [{ id: 'm1', title: 't', body: '', folderId: NOTES_DEFAULT_FOLDER, createdAt: 1, updatedAt: 20 }] }, true);
+  assertFalse(noteTrashed(notes[0])); assertEqual(notes[0].pinned, false);
 });
 
 test('deleting a folder moves its notes to Notes, and undo puts everything back', function () {
@@ -278,7 +319,7 @@ test('toggleNoteLock flips the lock and stamps the note so a sync prefers it', f
   toggleNoteLock('nl2');
   assertTrue(n.locked === false);
   deleteNote('nl2');
-  assertEqual(notes.length, 0, 'unlocked again, so it can be deleted');
+  assertTrue(noteTrashed(n), 'unlocked again, so it can be deleted (into Recently Deleted)');
 });
 
 test('normalizeNotes only accepts a real boolean lock', function () {
@@ -643,6 +684,30 @@ test('safeNoteHref allows web, mailto and tel links and nothing else', function 
   assertEqual(safeNoteHref('tel:javascript:alert(1)'), '');
   assertEqual(safeNoteHref('javascript:alert(1)'), '');
   assertEqual(sanitizeNoteHtml('<a href="tel:+4930123456">x</a>'), '<a href="tel:+4930123456" target="_blank" rel="noopener noreferrer">x</a>');
+});
+
+test('noteWordCount counts words, keeps apostrophes and hyphens inside a word, and ignores punctuation', function () {
+  assertEqual(noteWordCount(''), 0);
+  assertEqual(noteWordCount('Hello, world!'), 2);
+  assertEqual(noteWordCount("don't stop well-known 3.14 \u2013 x"), 6);
+  assertEqual(noteWordCount('  many   spaces\nand\tlines '), 4);
+  assertEqual(noteWordCount('Gr\u00fc\u00dfe aus M\u00fcnchen'), 3);
+  assertEqual(noteCountText('one'), '1 word'); assertEqual(noteCountText('one two'), '2 words');
+});
+
+test('noteFileName makes a safe file name and falls back to Note', function () {
+  assertEqual(noteFileName({ title: 'Team: update / Q4?' }, '.md'), 'Team update Q4.md');
+  assertEqual(noteFileName({ title: '' }, '.md'), 'Note.md');
+  assertEqual(noteFileName({ title: '   ' }, ''), 'Note');
+  assertEqual(noteFileName({ title: 'x'.repeat(200) }, '.md').length, 83);
+});
+
+test('sanitizeNoteHtml keeps only palette colours on span / mark and drops anything else with its closing tag', function () {
+  assertEqual(sanitizeNoteHtml('<p><span data-tc="red">a</span></p>'), '<p><span data-tc="red">a</span></p>');
+  assertEqual(sanitizeNoteHtml('<p><mark data-hl="yellow">a</mark></p>'), '<p><mark data-hl="yellow">a</mark></p>');
+  assertEqual(sanitizeNoteHtml('<p><span style="color:red" onclick="x()">a</span><span data-tc="evil">b</span><mark data-hl="red">c</mark></p>'), '<p>abc</p>');
+  assertEqual(sanitizeNoteHtml('<p><span data-tc="red">a</span><span data-tc="red">b</span></p>'), '<p><span data-tc="red">ab</span></p>', 'neighbouring runs of one colour are joined');
+  assertEqual(sanitizeNoteHtml('<span data-tc="blue">x <b>y</b></span>'), '<span data-tc="blue">x <b>y</b></span>');
 });
 
 test('the table menus drop empty groups and put one separator between the rest', function () {
