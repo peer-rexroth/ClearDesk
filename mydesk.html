@@ -1305,6 +1305,7 @@
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
+  .tbl-grip.tbl { width: 15px; height: 15px; border-radius: 5px; font-size: 8px; }
   .tbl-grip.row:not(.sel) { width: 14px; height: 32px; }
   .tbl-grip:hover { background: var(--cap-hover); color: var(--text); }
   .tbl-grip.sel { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
@@ -5716,13 +5717,14 @@ function closeNoteTableMenu(){ document.getElementById('noteTableMenu')?.classLi
 // column / row (an accent outline with a tab on it) and opens its menu (add before/after, delete, header, delete table). Pointing at a
 // table also shows a "+" on its right and bottom edge to add a column or row. All of it lives in the overlay #tblHandles beside the
 // note, never inside it, so none of it is saved; positions are divided by the zoom factor measured from .note-doc.
+let tblWhole = null, tblWholeAtMouseDown = null;   // tblWhole: the table selected as a whole (corner grip); the DOM selection really spans it, so ⌘X / ⌘C / Delete act on the table
 let tblDragging = false, tblHandlesTable = null, tblHandlesTimer = null, tblSel = null, tblMenuRef = null;     // tblSel: {kind:'col'|'row', i, cell} while a column/row is selected
 function noteCaretTable(){ const c = noteSelectedCell(); return c && !noteIsLocked(noteEditorId) ? c.parentNode.closest('table') : null; }
 function tblHandlesHide(){
   tblHandlesTable = null;
   if(tblSel && tblSel.cell!==noteSelectedCell()) tblSel = null;              // a column/row selection lives as long as the caret stays in its cell, not until the pointer wanders off
   const h = document.getElementById('tblHandles'); if(h) h.innerHTML = '';
-  const t = noteCaretTable(); if(t) tblHandlesShow(t);                       // the caret's own table keeps its grips
+  const t = noteCaretTable() || (tblWhole && tblWhole.isConnected ? tblWhole : null); if(t) tblHandlesShow(t);   // the caret's own (or the selected) table keeps its grips
 }
 function tblHandlesLeave(){ if(tblDragging) return; if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
 function tblHandlesMove(e){
@@ -5739,6 +5741,7 @@ function tblHandlesRefresh(){ if(!tblHandlesTable) return; if(tblHandlesTable.is
 function tblChromeSync(){
   const cell = noteSelectedCell(), t = noteCaretTable();
   if(tblSel && tblSel.cell!==cell) tblSel = null;
+  if(tblWhole && !tblWholeValid(tblWhole)) tblWhole = null;                 // the table stays selected only while the selection still spans exactly it
   if(t) tblHandlesShow(t); else if(tblHandlesTable) tblHandlesRefresh();
 }
 function tblHandlesShow(table){
@@ -5748,6 +5751,9 @@ function tblHandlesShow(table){
   const tr = table.getBoundingClientRect(), left = (tr.left - dr.left) / k, top = (tr.top - dr.top) / k, w = tr.width / k, h = tr.height / k, p = n=>Math.round(n * 10) / 10;
   const rows = table.rows.length, cols = table.rows[0] ? table.rows[0].cells.length : 0;
   let html = '';
+  const whole = tblWhole===table && tblWholeValid(table);
+  if(whole) html += `<div class="tbl-sel" style="left:${p(left)}px;top:${p(top)}px;width:${p(w)}px;height:${p(h)}px"></div>`;
+  html += `<div class="tbl-grip tbl${whole ? ' sel' : ''}" style="left:${p(left - 20)}px;top:${p(top - 18)}px" role="button" aria-label="Select table" title="Select table · right-click for its options" onmousedown="event.preventDefault()" onclick="tblSelectTable(event)" oncontextmenu="tblTableContext(event)"><i class="fa-solid fa-up-down-left-right"></i></div>`;
   const cell = noteSelectedCell(), mine = cell && !noteIsLocked(noteEditorId) && cell.parentNode.closest('table')===table ? cell : null;
   if(mine){
     const ci = mine.cellIndex, ri = [...table.rows].indexOf(mine.parentNode);
@@ -5902,6 +5908,59 @@ function tblDotDown(e, which){
   const up = ()=>{ tblDragging = false; document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); document.removeEventListener('pointercancel', up); };
   document.addEventListener('pointermove', move); document.addEventListener('pointerup', up); document.addEventListener('pointercancel', up);
 }
+// ---- the whole table (corner grip) ----
+// The grip at the table's top-left corner selects the entire table: a real selection over the <table>, so ⌘X / ⌘C copy or cut it and Delete removes
+// it, plus the accent outline. Its options (header row / column, even columns, cut, copy, delete) are on right-click, like the column / row grips.
+function tblSelectRange(table){ const b = document.getElementById('noteBody'); if(!b) return; b.focus(); const r = document.createRange(), sel = window.getSelection(); r.selectNode(table); sel.removeAllRanges(); sel.addRange(r); }
+function tblWholeValid(table){
+  const sel = window.getSelection(); if(!table.isConnected || !sel || !sel.rangeCount || sel.isCollapsed) return false;
+  const r = sel.getRangeAt(0), t = document.createRange(); t.selectNode(table);
+  return r.compareBoundaryPoints(Range.START_TO_START, t)===0 && r.compareBoundaryPoints(Range.END_TO_END, t)===0;
+}
+function tblSelectTable(e){
+  e.preventDefault(); e.stopPropagation();
+  const table = tblHandlesTable; if(!table || noteIsLocked(noteEditorId)) return;
+  tblSel = null; tblWhole = table; tblSelectRange(table); tblHandlesShow(table);
+}
+function tblTableContext(e){
+  e.preventDefault(); e.stopPropagation();
+  const table = tblHandlesTable; if(!table || noteIsLocked(noteEditorId)) return;
+  tblSel = null; tblWhole = table; tblSelectRange(table); tblHandlesShow(table);
+  tblShowTableMenuAt(e.clientX, e.clientY, e.currentTarget);
+}
+function tblTableMenuHtml(table){
+  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>', tick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
+  return [
+    item('fa-solid fa-heading', 'Header row', `tblTableRun('header')`, tick(tblHeadRow(table))),
+    table.rows.length>1 ? item('fa-solid fa-heading', 'Header column', `tblTableRun('headerCol')`, tick(tblHeadCol(table))) : '',
+    table.querySelector('colgroup') ? item('fa-solid fa-arrows-left-right', 'Distribute columns evenly', `tblTableRun('even')`) : '',
+    sep,
+    item('fa-solid fa-scissors', 'Cut', `tblTableRun('cut')`), item('fa-regular fa-copy', 'Copy', `tblTableRun('copy')`),
+    sep,
+    item('fa-regular fa-trash-can', 'Delete table', `tblTableRun('delTable')`, {danger:true})
+  ].join('');
+}
+function tblShowTableMenuAt(x, y, measureEl){
+  const table = tblWhole, menu = document.getElementById('rowMenu'); if(!table || !menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu();
+  tblMenuRef = { table, r: 0, c: 0 };
+  noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = tblTableMenuHtml(table);
+  placeRowMenu(menu, x, y, measureEl);
+}
+function tblTableRun(op){
+  const ref = tblMenuRef; closeRowMenu();
+  const table = ref && ref.table; if(!table || !table.isConnected) return;
+  if(op==='header' || op==='headerCol' || op==='delTable'){ tblWhole = null; noteTableEdit(op, ref); return; }
+  if(op==='even'){ tblWhole = null; tblCommitColWidths(table, null, null); return; }
+  if(op==='cut' || op==='copy'){
+    tblSelectRange(table);
+    let ok = document.execCommand(op, false);
+    if(!ok && op==='cut' && document.execCommand('copy', false)){ document.execCommand('delete', false); ok = true; }   // never delete a table unless it was really copied
+    if(!ok){ showToast('Could not use the clipboard here', true); tblHandlesRefresh(); return; }
+    if(op==='cut'){ tblWhole = null; onNoteInput(); updateNoteToolbarState(); } else tblHandlesRefresh();
+  }
+}
 // Right-click on a grip: select that column / row (unless it already is) and show its options at the pointer.
 function tblGripContext(e, kind, i){
   e.preventDefault(); e.stopPropagation();
@@ -5913,8 +5972,13 @@ function tblGripContext(e, kind, i){
 // Right-click inside a selected column / row shows that selection's menu (anywhere else the browser's own menu stays).
 // The selection is remembered at mousedown, because the right-click itself moves the caret and would end it.
 let tblSelAtMouseDown = null;
-function noteBodyMouseDown(e){ tblSelAtMouseDown = e.button===2 && tblSel ? { kind: tblSel.kind, a: tblSel.a, b: tblSel.b } : null; }
+function noteBodyMouseDown(e){ tblSelAtMouseDown = e.button===2 && tblSel ? { kind: tblSel.kind, a: tblSel.a, b: tblSel.b } : null; tblWholeAtMouseDown = e.button===2 && tblWhole && tblWholeValid(tblWhole) ? tblWhole : null; }
 function onNoteContextMenu(e){
+  const whole = tblWholeAtMouseDown; tblWholeAtMouseDown = null;
+  if(whole && whole.isConnected && e.target && e.target.closest && e.target.closest('table')===whole){      // right-click on the selected table: its options
+    e.preventDefault(); tblSel = null; tblWhole = whole; tblSelectRange(whole); tblHandlesShow(whole);
+    tblShowTableMenuAt(e.clientX, e.clientY, e.target); return;
+  }
   const pending = tblSelAtMouseDown; tblSelAtMouseDown = null;
   if(!pending || !tblHandlesTable) return;
   const cell = e.target && e.target.closest ? e.target.closest('td, th') : null;
