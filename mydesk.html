@@ -194,7 +194,7 @@
   .btn:hover { background: var(--bg-2); }
   .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
   .btn-primary:hover { opacity: 0.85; background: var(--text); }
-  .btn-danger { background: var(--red-text); color: #fff; border-color: var(--red-text); }
+  .btn-danger { background: var(--red-text); color: var(--on-accent); border-color: var(--red-text); }
   .btn-danger:hover { opacity: 0.85; background: var(--red-text); }
   .btn-icon { padding: 6px 9px; }
   .btn-sm { font-size: 12px; padding: 4px 10px; }
@@ -205,7 +205,7 @@
   .proj-select-row:hover { background: var(--bg-2); }
   .proj-select-check { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
   .proj-select-check.checked { background: var(--blue-text); border-color: var(--blue-text); }
-  .proj-select-check i { font-size: 9px; color: #fff; opacity: 0; transition: opacity .1s; }
+  .proj-select-check i { font-size: 9px; color: var(--on-accent); opacity: 0; transition: opacity .1s; }
   .proj-select-check.checked i { opacity: 1; }
 
   /* split button */
@@ -336,7 +336,7 @@
   .task-checkbox { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
   .task-checkbox:hover { border-color: var(--green-text); }
   .task-checkbox.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 3px var(--green-bg); }
-  .task-checkbox i { font-size: 10px; color: #fff; opacity: 0; transition: opacity .1s; }
+  .task-checkbox i { font-size: 10px; color: var(--on-accent); opacity: 0; transition: opacity .1s; }
   .task-checkbox.checked i { opacity: 1; }
   @keyframes checkPop { 0%{ transform: scale(1); } 40%{ transform: scale(1.35); } 100%{ transform: scale(1); } }
   .task-checkbox.pop, .mini-check.pop, .sub-check.pop { animation: checkPop .3s ease; }
@@ -362,7 +362,7 @@
   .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color .15s, border-color .15s; }
   .task-subtask-row .mini-check:hover { border-color: var(--green-text); }
   .task-subtask-row .mini-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
-  .task-subtask-row .mini-check i { font-size: 7px; color: #fff; opacity: 0; }
+  .task-subtask-row .mini-check i { font-size: 7px; color: var(--on-accent); opacity: 0; }
   .task-subtask-row .mini-check.checked i { opacity: 1; }
   .task-subtask-row.done { color: var(--text-3); }
   .task-subtask-row.done > span { text-decoration: line-through; }   /* strike the text only, not the check circle or buttons */
@@ -444,7 +444,7 @@
   .subtask-row:hover .sub-drag-handle { opacity: 1; }
   .subtask-row .sub-check { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
   .subtask-row .sub-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
-  .subtask-row .sub-check i { font-size: 8px; color: #fff; opacity: 0; }
+  .subtask-row .sub-check i { font-size: 8px; color: var(--on-accent); opacity: 0; }
   .subtask-row .sub-check.checked i { opacity: 1; }
   .subtask-row .sub-text { flex: 1; font-size: 13px; cursor: text; }
   .subtask-row.done .sub-text { text-decoration: line-through; color: var(--text-3); }
@@ -463,7 +463,7 @@
   .weekday-picker { display: flex; gap: 5px; }
   .weekday-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); }
   .weekday-btn:hover { border-color: var(--blue-border); }
-  .weekday-btn.active { background: var(--blue-text); border-color: var(--blue-text); color: #fff; }
+  .weekday-btn.active { background: var(--blue-text); border-color: var(--blue-text); color: var(--on-accent); }
 
   /* modal */
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, visibility .15s ease; }
@@ -492,7 +492,7 @@
   .newfile-field { position: relative; margin: 0; }
   .newfile-field input { width: 100%; padding-right: 58px; }
   .newfile-ext { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-3, var(--text-2)); font-size: 15px; pointer-events: none; }
-  .newfile-error { color: var(--red-text, #d92d20); font-size: 13px; line-height: 1.4; margin-top: -6px; }
+  .newfile-error { color: var(--red-text, var(--danger)); font-size: 13px; line-height: 1.4; margin-top: -6px; }
   .newfile-error:empty { display: none; }
   .sync-head { display: flex; align-items: center; gap: 14px; }
   .sync-head-icon { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue-bg); color: var(--blue-text); font-size: 16px; }
@@ -527,8 +527,8 @@
   .help-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: default; }
   .help-nav button i { width: 16px; text-align: center; font-size: 14px; color: var(--text-3); flex-shrink: 0; }
   .help-nav button:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
-  .help-nav button.active { background: var(--sel-bg); color: #fff; }   /* the same solid accent as a selected row */
-  .help-nav button.active i { color: #fff; }
+  .help-nav button.active { background: var(--sel-bg); color: var(--on-accent); }   /* the same solid accent as a selected row */
+  .help-nav button.active i { color: var(--on-accent); }
   .help-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .help-toolbar { display: flex; align-items: center; gap: 12px; padding: 16px 26px 6px; flex-shrink: 0; }
   .hdr-link { display: inline-flex; align-items: center; gap: 6px; border: 0; background: color-mix(in srgb, var(--text) 7%, transparent); padding: 5px 12px; border-radius: 999px; font: inherit; font-size: 12px; color: var(--text-2); cursor: default; }
@@ -692,7 +692,7 @@
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
   .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
   /* shared menu-row anatomy: tick column, dot or icon, text (cell popovers, row menu, toolbar menus) */
-  .cell-pop-opt:hover, .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: #fff; }
+  .cell-pop-opt:hover, .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .pop-check, .row-menu-item .pop-check { width: 18px; font-size: 11px; visibility: hidden; flex: none; text-align: left; }
   .row-menu-item .pop-check i, .row-menu-item .pop-icon { width: auto; color: inherit; }
   .current > .pop-check { visibility: visible; }
@@ -700,15 +700,15 @@
   .pop-icon { width: 16px; margin-right: 8px; text-align: center; font-size: 13px; color: var(--text-3); flex: none; }
   .row-menu-item .pop-icon { width: 16px; color: var(--text-3); }
   .cell-pop-opt:hover .pop-dot, .row-menu-item:hover .pop-dot { box-shadow: 0 0 0 1.5px rgba(255,255,255,.85); }
-  .cell-pop-opt:hover .pop-icon, .row-menu-item:hover:not(:disabled) i, .row-menu-item:hover .pop-icon, .row-menu-item:hover .row-menu-hint { color: #fff; }
+  .cell-pop-opt:hover .pop-icon, .row-menu-item:hover:not(:disabled) i, .row-menu-item:hover .pop-icon, .row-menu-item:hover .row-menu-hint { color: var(--on-accent); }
   .row-menu-item.menu-opt { gap: 0; padding: 5px 8px; }
   /* submenus: hover (or click) a parent row to open its flyout beside the menu */
   .row-menu-sub { position: relative; }
   .row-menu-flyout { display: none; position: absolute; left: calc(100% - 4px); top: -6px; min-width: var(--submenu-w); flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); z-index: 1; }
   .row-menu-flyout.flip { left: auto; right: calc(100% - 4px); }
   .row-menu-sub:hover > .row-menu-flyout, .row-menu-sub.open > .row-menu-flyout { display: flex; }
-  .row-menu-sub:hover > .sub-parent, .row-menu-sub.open > .sub-parent { background: var(--sel-bg, var(--bg-3)); color: #fff; }
-  .row-menu-sub:hover > .sub-parent i, .row-menu-sub.open > .sub-parent i, .row-menu-sub:hover > .sub-parent .row-menu-hint { color: #fff; }
+  .row-menu-sub:hover > .sub-parent, .row-menu-sub.open > .sub-parent { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
+  .row-menu-sub:hover > .sub-parent i, .row-menu-sub.open > .sub-parent i, .row-menu-sub:hover > .sub-parent .row-menu-hint { color: var(--on-accent); }
   .sub-parent .row-menu-hint i { font-size: 10px; width: auto; }
   /* Due rows never show a tick, so they drop the tick column and the text starts at the row's own padding; the date field spans the
      same inner width as a row (a field is just a wide row), with the toolbar menu inset like the other menus */
@@ -789,10 +789,10 @@
   .row-menu.open { display: block; }
   .row-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); text-align: left; cursor: pointer; }
   .row-menu-item i { width: 16px; text-align: center; color: var(--text-3); }
-  .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: #fff; }
+  .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .row-menu-item:disabled { opacity: .45; cursor: default; }
   .row-menu-item.danger, .row-menu-item.danger i { color: var(--red-text); }
-  .row-menu-item.danger:hover:not(:disabled), .row-menu-item.danger:hover:not(:disabled) i { color: #fff; }
+  .row-menu-item.danger:hover:not(:disabled), .row-menu-item.danger:hover:not(:disabled) i { color: var(--on-accent); }
   .row-menu-hint { margin-left: auto; font-size: 12px; color: var(--text-3); }
   .row-menu-sep { height: 1px; background: var(--border); margin: 6px 2px; }
   .row-menu-label { padding: 6px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
@@ -904,10 +904,10 @@
   html[data-scheme="glass"] .btn { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
   html[data-scheme="glass"] .btn:hover { background: color-mix(in srgb, var(--text) 7%, var(--bg-3)); }   /* hover darkens the fill; no growing shadow */
   html[data-scheme="glass"] .btn:active, html[data-scheme="glass"] .view-switch-btn:active, html[data-scheme="glass"] .f-chip:active { transform: scale(.94); }
-  html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: #fff; border-color: transparent; box-shadow: none; }   /* a flat accent fill, no coloured glow */
+  html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: var(--on-accent); border-color: transparent; box-shadow: none; }   /* a flat accent fill, no coloured glow */
   html[data-scheme="glass"] .btn-primary:hover { background: var(--glass-accent); filter: brightness(1.06); opacity: 1; }
-  html[data-scheme="glass"] .btn-danger { background: #d92d20; color: #fff; border-color: transparent; box-shadow: none; }
-  html[data-scheme="glass"] .btn-danger:hover { background: #d92d20; filter: brightness(1.08); }
+  html[data-scheme="glass"] .btn-danger { background: var(--danger); color: var(--on-accent); border-color: transparent; box-shadow: none; }
+  html[data-scheme="glass"] .btn-danger:hover { background: var(--danger); filter: brightness(1.08); }
   html[data-scheme="glass"] .icon-btn { border-radius: var(--radius); }
   /* capsules: controls that live in the toolbars, as in Mail; everything in the
      content stays at --radius */
@@ -988,17 +988,17 @@
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --sel-bg: #2f6fde; }
-  html[data-theme="dark"] { --sel-bg: #2c62c9; }
+  :root { --accent: #2f6fde; --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
-    background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: #fff;
+    background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
     --text: #fff; --text-2: rgba(255,255,255,.88); --text-3: rgba(255,255,255,.72); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
   }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.22) !important; color: #fff !important; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.22) !important; color: var(--on-accent) !important; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: rgba(255,255,255,.75); box-shadow: none; }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: #fff; border-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: var(--on-accent); border-color: var(--on-accent); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked i { color: var(--sel-bg); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: rgba(255,255,255,.45); color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,.18); }   /* same hover language as the pills below: translucent white, white content */
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: rgba(255,255,255,.45); color: var(--on-accent); box-shadow: 0 0 0 2px rgba(255,255,255,.18); }   /* same hover language as the pills below: translucent white, white content */
   /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
      the cell says "pop-up button" the way a native one does — a small chevron on the pill,
      shown on the selected row/card only so the rest of the list stays calm. (The pill grows
@@ -1011,16 +1011,16 @@
   }
   /* hovering an editable cell in a selected row brightens just its pill, not the whole cell box */
   .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge:not(.cell-pop .badge) { background: rgba(255,255,255,.45) !important; filter: none; box-shadow: 0 0 0 3px rgba(255,255,255,.18); }
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: #fff; background: rgba(255,255,255,.45); border-radius: 999px; box-shadow: 0 0 0 4px rgba(255,255,255,.24); }
-  .board-card:is(.kbd-selected, .bulk-selected) .board-card-priority-icon { color: #fff; }
+  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: var(--on-accent); background: rgba(255,255,255,.45); border-radius: 999px; box-shadow: 0 0 0 4px rgba(255,255,255,.24); }
+  .board-card:is(.kbd-selected, .bulk-selected) .board-card-priority-icon { color: var(--on-accent); }
   /* the Glass card style (html[data-scheme] .board-card) out-ranks .board-card:is(.kbd-selected, .bulk-selected), so restate the fill at higher specificity */
   html[data-scheme="glass"] .board-card:is(.kbd-selected, .bulk-selected) { background: var(--sel-bg); border-color: var(--sel-bg); }
   /* Inline inputs (add subtask, rename) inside a selected row: white text on a white
      field was invisible. Give them a translucent-white field with white text. */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *) { background: rgba(255,255,255,.18); color: #fff; border-color: rgba(255,255,255,.55); caret-color: #fff; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *) { background: rgba(255,255,255,.18); color: var(--on-accent); border-color: rgba(255,255,255,.55); caret-color: #fff; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, textarea):not(.cell-pop *)::placeholder { color: rgba(255,255,255,.72); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check { background: transparent; border-color: rgba(255,255,255,.75); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked { background: #fff; border-color: #fff; box-shadow: none; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked { background: var(--on-accent); border-color: var(--on-accent); box-shadow: none; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
 
   /* ── Selection toolbar (a capsule group that acts on the selection) ─────── */
@@ -1075,7 +1075,7 @@
   .quickadd:has(#quickAddInput:focus-visible) { border-color: var(--focus-edge); box-shadow: 0 0 0 3px var(--focus-ring); }
   .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 var(--focus-ring) !important; border-color: transparent !important; border-radius: 0; }
   /* inside a selected (blue) row the neutral ring would vanish: use white */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):focus-visible { border-color: #fff !important; box-shadow: 0 0 0 3px rgba(255,255,255,.4) !important; }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):focus-visible { border-color: var(--on-accent) !important; box-shadow: 0 0 0 3px rgba(255,255,255,.4) !important; }
 
   /* ── Ghost row: inline "add subtask / step / sub-step" fields ──────────────────
      No box, no dashed border: the field looks like one more line in the list — a
@@ -1168,7 +1168,7 @@
   .note-row { display: flex; flex-direction: column; gap: 2px; padding: 9px 12px; border-radius: 10px; cursor: default; }
   .note-row:hover:not(.selected) { background: var(--bg-2); }
   .note-row:focus-visible { outline: none; }
-  .note-row.selected { background: var(--sel-bg); color: #fff; }
+  .note-row.selected { background: var(--sel-bg); color: var(--on-accent); }
   .note-row-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .note-row-sub { display: flex; gap: 8px; min-width: 0; font-size: 12px; color: var(--text-3); }
   .note-row-date { flex-shrink: 0; color: var(--text-2); }
@@ -1315,10 +1315,10 @@
   .row-menu-item svg.tbl-ins, .row-menu-item svg.mi { flex: none; margin: 0 0 0 0; color: var(--text-3); }
   .row-menu-item.danger svg.mi { color: var(--red-text); }
   .row-menu-hint svg.mi { width: 12px; height: 12px; stroke-width: 2; }
-  .row-menu-item:hover:not(:disabled) .pop-svg, .row-menu-item:hover:not(:disabled) svg.tbl-ins, .row-menu-item:hover:not(:disabled) svg.mi { color: #fff; }
+  .row-menu-item:hover:not(:disabled) .pop-svg, .row-menu-item:hover:not(:disabled) svg.tbl-ins, .row-menu-item:hover:not(:disabled) svg.mi { color: var(--on-accent); }
   .pop-glyph { flex: none; width: 22px; margin-right: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; color: var(--text-2); }
   .pop-glyph.sym { font-size: 19px; font-weight: 700; }   /* the bullet marks are tiny characters: scaled up to the visual weight of "1." "a." "i." */
-  .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
+  .row-menu-item:hover:not(:disabled) .pop-glyph { color: var(--on-accent); }
   /* one capsule holding the icon and a small chevron (as in a macOS toolbar pop-up button): hover and "on" fill the whole capsule */
   .note-toolbar .tool-split { display: inline-flex; align-items: center; border-radius: 999px; }
   .note-toolbar .tool-split:hover, .note-toolbar .tool-split:has(+ .note-list-menu.open) { background: var(--cap-hover, var(--bg-3)); }
@@ -1344,7 +1344,7 @@
   .note-body ul.cl > li { position: relative; padding-left: 28px; }
   .note-body ul.cl > li::before { content: ""; position: absolute; left: 3px; top: .32em; width: 16px; height: 16px; box-sizing: border-box; border: 1.5px solid var(--border-2); border-radius: 50%; background: var(--bg); cursor: default; }
   .note-body ul.cl > li[data-done="1"]::before { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2.5px var(--green-bg); }
-  .note-body ul.cl > li[data-done="1"]::after { content: ""; position: absolute; left: 8px; top: .5em; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  .note-body ul.cl > li[data-done="1"]::after { content: ""; position: absolute; left: 8px; top: .5em; width: 4px; height: 8px; border: solid var(--on-accent); border-width: 0 2px 2px 0; transform: rotate(45deg); }
   .note-body ul.cl > li[data-done="1"] { color: var(--text-3); text-decoration: line-through; }
   @media (max-width: 800px) { .notes-list-pane { width: 220px; } .note-toolbar, .note-scroll { padding-left: 14px; padding-right: 14px; } }
 
@@ -1485,7 +1485,7 @@
   .tbl-grip.tbl:not(.sel) { color: var(--text-3); }   /* the one handle drawn as a shape rather than dots: kept light so it does not outweigh the others */
   .tbl-grip.row:not(.sel) { width: 14px; height: 32px; }
   .tbl-grip:hover { background: var(--cap-hover); color: var(--text); }
-  .tbl-grip.sel { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
+  .tbl-grip.sel { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: var(--on-accent); }
   .tbl-grip.col.sel { height: 22px; border-radius: 6px 6px 0 0; gap: 6px; justify-content: center; position: absolute; }
   .tbl-grip.row.sel { width: 22px; border-radius: 6px 0 0 6px; }
   .tbl-sel { position: absolute; box-sizing: border-box; border: 2px solid var(--sel-bg, var(--blue-text)); pointer-events: none !important; border-radius: 2px; }
