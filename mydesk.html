@@ -204,7 +204,7 @@
   .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: var(--radius); cursor: pointer; font-size: 13px; }
   .proj-select-row:hover { background: var(--bg-2); }
   .proj-select-check { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
-  .proj-select-check.checked { background: var(--blue-text); border-color: var(--blue-text); }
+  .proj-select-check.checked { background: var(--accent); border-color: var(--accent); }
   .proj-select-check i { font-size: 9px; color: var(--on-accent); opacity: 0; transition: opacity .1s; }
   .proj-select-check.checked i { opacity: 1; }
 
@@ -254,7 +254,7 @@
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
-  .project-row.drop-into { background: color-mix(in srgb, var(--sel-bg, var(--blue-text)) 24%, transparent); box-shadow: inset 0 0 0 1.5px var(--sel-bg, var(--blue-text)); }
+  .project-row.drop-into { background: color-mix(in srgb, var(--accent) 24%, transparent); box-shadow: inset 0 0 0 1.5px var(--accent); }
   .note-row.dragging { opacity: .4; }
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
   .project-row.settle { animation: rowSettle .22s ease-out; }
@@ -463,7 +463,7 @@
   .weekday-picker { display: flex; gap: 5px; }
   .weekday-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); }
   .weekday-btn:hover { border-color: var(--blue-border); }
-  .weekday-btn.active { background: var(--blue-text); border-color: var(--blue-text); color: var(--on-accent); }
+  .weekday-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
   /* modal */
   .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.25); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, visibility .15s ease; }
@@ -631,7 +631,7 @@
   .btn-sm { font-size: 13px; padding: 6px 11px; }
   .btn-icon { padding: 6px 10px; }
   .btn:hover { box-shadow: var(--shadow); }
-  .icon-btn { font-size: 13px; }
+  .icon-btn { font-size: 14px; }
   .sidebar { border-right-width: 1px; }
   .sidebar-search input { font-size: 14px; border-width: 1px; padding: 8px 10px 8px 32px; }
   .sidebar-section-label, .toolbar-filter-label, .task-list-header, .field label { font-size: 12px; }
@@ -844,7 +844,6 @@
     --glass-sheen: rgba(255,255,255,.26); --glass-sheen-2: rgba(255,255,255,.10);
     --glass-shadow: 0 10px 40px rgba(40,50,110,.16), 0 2px 8px rgba(40,50,110,.08);
     --glass-blur: blur(26px);
-    --glass-accent: linear-gradient(180deg, #3a9bff, #0a72f0);
     --wall: radial-gradient(55% 45% at 12% 10%, #dfe3ea 0, transparent 70%), radial-gradient(50% 45% at 88% 15%, #f3f4f7 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #cfd5df 0, transparent 70%), linear-gradient(160deg, #eef0f4, #e3e6ec);   /* Graphite — the only wallpaper */
   }
   html[data-scheme="glass"][data-theme="dark"] {
@@ -864,7 +863,6 @@
     --glass-sheen: rgba(255,255,255,.10); --glass-sheen-2: rgba(255,255,255,.04);
     --glass-shadow: 0 12px 44px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.30);
     --glass-blur: blur(28px);
-    --glass-accent: linear-gradient(180deg, #4aa3ff, #1a6fe6);
     --wall: radial-gradient(55% 45% at 12% 10%, #2a2f3a 0, transparent 70%), radial-gradient(50% 45% at 88% 15%, #1b1f29 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #343a48 0, transparent 70%), linear-gradient(160deg, #14161c, #1a1d26);
   }
   html[data-scheme="glass"] body { background: var(--wall); background-attachment: fixed; background-size: cover; }
@@ -958,7 +956,7 @@
   .sidebar { transition: width .2s ease, border-width .2s ease; }
   .sidebar-resizer { position: relative; flex: none; width: 0; z-index: 30; }
   .sidebar-resizer::before { content: ""; position: absolute; top: 0; bottom: 0; left: -4px; width: 9px; cursor: col-resize; }
-  .sidebar-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--sel-bg, var(--blue-text)); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .sidebar-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
   .sidebar-resizer:hover::after, .sidebar-resizer:focus-visible::after, html.sidebar-resizing .sidebar-resizer::after { opacity: .7; }
   .sidebar-resizer:focus { outline: none; }
   html.sidebar-resizing, html.sidebar-resizing * { cursor: col-resize !important; user-select: none !important; }
@@ -988,7 +986,7 @@
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --accent: #2f6fde; --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --accent: #2f6fde; --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1216,7 +1214,7 @@
   .note-editor.locked .tbl-handles { display: none; }
   .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 6px; cursor: pointer; transition: background .12s ease, color .12s ease, border-color .12s ease; }
   .tbl-colrs { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; z-index: 1; }
-  .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: 2px; background: var(--sel-bg, var(--blue-text)); opacity: 0; transition: opacity .12s ease; }
+  .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; }
   .tbl-colrs:hover::after, .tbl-colrs.active::after { opacity: .75; }
   html.tbl-resizing, html.tbl-resizing * { cursor: col-resize !important; user-select: none; }
   .tbl-plus:hover { background: var(--cap-hover); color: var(--text); }
@@ -1243,7 +1241,7 @@
   .nc-label { margin: 4px 2px 5px; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-3); }
   .nc-row { display: flex; gap: 6px; }
   .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg-2); font: 700 13px/1 var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
-  .nc-sw:hover { box-shadow: 0 0 0 2px var(--sel-bg, var(--blue-text)); }
+  .nc-sw:hover { box-shadow: 0 0 0 2px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: rgba(255, 214, 10, .45); color: inherit; }
   /* the copy button on a code block: a small Apple-style material chip in its top right corner, shown while the pointer is over the block */
@@ -1337,7 +1335,7 @@
   .tbl-picker { padding: 7px 8px 5px; user-select: none; }
   .tbl-picker-grid { display: grid; gap: 3px; }
   .tbl-cell { width: 16px; height: 16px; box-sizing: border-box; border: 1px solid var(--border-2); border-radius: 3px; background: var(--bg); cursor: pointer; }
-  .tbl-cell.on { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); }
+  .tbl-cell.on { background: var(--accent); border-color: var(--accent); }
   .tbl-picker-label { margin-top: 7px; text-align: center; font-size: 12px; color: var(--text-2); white-space: nowrap; }
   .note-body td:empty::after, .note-body th:empty::after { content: "\200b"; }
   .note-body ul.cl { list-style: none; padding-left: 2px; }
@@ -1465,7 +1463,7 @@
   .tb-ico2 .band { fill: currentColor; fill-opacity: .3; }
   .notes-list-resizer { position: relative; flex: none; width: 0; z-index: 30; }
   .notes-list-resizer::before { content: ""; position: absolute; top: 0; bottom: 0; left: -4px; width: 9px; cursor: col-resize; }
-  .notes-list-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--sel-bg, var(--blue-text)); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .notes-list-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
   .notes-list-resizer:hover::after, .notes-list-resizer:focus-visible::after, html.nl-resizing .notes-list-resizer::after { opacity: .7; }
   html.nl-resizing, html.nl-resizing * { cursor: col-resize !important; user-select: none !important; }
   .notes-list-resizer:focus { outline: none; }
@@ -1485,11 +1483,11 @@
   .tbl-grip.tbl:not(.sel) { color: var(--text-3); }   /* the one handle drawn as a shape rather than dots: kept light so it does not outweigh the others */
   .tbl-grip.row:not(.sel) { width: 14px; height: 32px; }
   .tbl-grip:hover { background: var(--cap-hover); color: var(--text); }
-  .tbl-grip.sel { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: var(--on-accent); }
+  .tbl-grip.sel { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
   .tbl-grip.col.sel { height: 22px; border-radius: 6px 6px 0 0; gap: 6px; justify-content: center; position: absolute; }
   .tbl-grip.row.sel { width: 22px; border-radius: 6px 0 0 6px; }
-  .tbl-sel { position: absolute; box-sizing: border-box; border: 2px solid var(--sel-bg, var(--blue-text)); pointer-events: none !important; border-radius: 2px; }
-  .tbl-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--sel-bg, var(--blue-text)); border: 2px solid var(--edit, #fff); box-sizing: border-box; cursor: col-resize; touch-action: none; z-index: 3; }
+  .tbl-sel { position: absolute; box-sizing: border-box; border: 2px solid var(--accent); pointer-events: none !important; border-radius: 2px; }
+  .tbl-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--accent); border: 2px solid var(--edit, #fff); box-sizing: border-box; cursor: col-resize; touch-action: none; z-index: 3; }
 </style>
 </head>
 <body>
@@ -1947,7 +1945,7 @@
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and print</strong>: <strong>⋯</strong> → <em>Export</em> saves the note as a Markdown file or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. <em>Copy note</em> puts it on the clipboard for pasting into Mail.</span></div>
-          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search and word count</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view. The line under the title ends with the note's word count.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
@@ -3654,7 +3652,7 @@ function renderDrawer(){
               ? `<input spellcheck="true" type="text" class="sub-text-input" id="renameSubtaskInputDrawer" value="${esc(s.text)}" onblur="commitRenameSubtask('${t.id}','${s.id}', this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
               : `<div class="sub-text" ondblclick="startRenameSubtask('${t.id}','${s.id}','drawer')">${esc(s.text)}</div>`}
             <button class="icon-btn" onclick="demoteSubtaskToStep('${t.id}','${s.id}')" title="Make this a step of the subtask above"><i class="fa-solid fa-indent"></i></button>
-            <button class="icon-btn sub-del" onclick="deleteSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-trash"></i></button>
+            <button class="icon-btn sub-del" title="Delete" aria-label="Delete" onclick="deleteSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-trash"></i></button>
           </div>
           ${stepsOpen ? `
           <div class="task-subtasks" style="margin-left:24px">
@@ -3674,7 +3672,7 @@ function renderDrawer(){
                   : `<div class="sub-text" ondblclick="startRenameSubSubtask('${t.id}','${s.id}','${ss.id}','drawer')">${esc(ss.text)}</div>`}
                 <button class="icon-btn" onclick="demoteStepToSubSubtask('${t.id}','${s.id}','${ss.id}')" title="Make this a sub-step of the step above"><i class="fa-solid fa-indent"></i></button>
                 <button class="icon-btn" onclick="promoteStepToSubtask('${t.id}','${s.id}','${ss.id}')" title="Make this its own subtask"><i class="fa-solid fa-outdent"></i></button>
-                <button class="icon-btn sub-del" onclick="deleteSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-trash"></i></button>
+                <button class="icon-btn sub-del" title="Delete" aria-label="Delete" onclick="deleteSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-trash"></i></button>
               </div>
               ${subStepsOpen ? `
               <div class="task-subtasks" style="margin-left:24px">
@@ -3688,7 +3686,7 @@ function renderDrawer(){
                       ? `<input spellcheck="true" type="text" class="sub-text-input" id="renameSubSubSubtaskInputDrawer" value="${esc(sss.text)}" onblur="commitRenameSubSubSubtask('${t.id}','${s.id}','${ss.id}','${sss.id}', this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubSubSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
                       : `<div class="sub-text" ondblclick="startRenameSubSubSubtask('${t.id}','${s.id}','${ss.id}','${sss.id}','drawer')">${esc(sss.text)}</div>`}
                     <button class="icon-btn" onclick="promoteSubSubtaskToStep('${t.id}','${s.id}','${ss.id}','${sss.id}')" title="Make this its own step"><i class="fa-solid fa-outdent"></i></button>
-                    <button class="icon-btn sub-del" onclick="deleteSubSubSubtask('${t.id}','${s.id}','${ss.id}','${sss.id}')"><i class="fa-solid fa-trash"></i></button>
+                    <button class="icon-btn sub-del" title="Delete" aria-label="Delete" onclick="deleteSubSubSubtask('${t.id}','${s.id}','${ss.id}','${sss.id}')"><i class="fa-solid fa-trash"></i></button>
                   </div>
                 `).join('')}
                 <div class="task-subtask-add-row">
@@ -5805,13 +5803,10 @@ function noteApplySearchHighlight(){
   const key = selectedNoteId + '|' + words.join(' ');
   if(key!==noteHighlightKey){ noteHighlightKey = key; const el = ranges[0].startContainer.parentElement; if(el && el.scrollIntoView) el.scrollIntoView({ block: 'center' }); }
 }
-// Words and characters of a note's text (letters and digits; an apostrophe or hyphen inside a word keeps it one word).
-function noteWordCount(text){ return (String(text || '').match(/[\p{L}\p{N}]+(?:['\u2019-][\p{L}\p{N}]+)*/gu) || []).length; }
-function noteCountText(text){ const w = noteWordCount(text); return `${w.toLocaleString()} word${w===1 ? '' : 's'}`; }
 function updateNoteMeta(n){
   const el = document.getElementById('noteMeta'); if(!el || !n) return;
   const fol = folderById(n.folderId);
-  el.innerHTML = `${noteTrashed(n) ? 'Deleted' : 'Edited'} ${esc(new Date(noteTrashed(n) ? n.deletedAt : n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''} · <span id="noteMetaCount">${noteCountText(noteText(n.body))}</span>`;
+  el.innerHTML = `${noteTrashed(n) ? 'Deleted' : 'Edited'} ${esc(new Date(noteTrashed(n) ? n.deletedAt : n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''}`;
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
@@ -6880,7 +6875,6 @@ function onNoteInput(e){
   }
   noteEditCount++;
   noteEnsureTrailingLine(body);
-  const wc = document.getElementById('noteMetaCount'); if(wc) wc.textContent = noteCountText(body.innerText || body.textContent);   // live word count
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
   updateNoteToolbarState();                            // keeps the Undo / Redo buttons in step, including after ⌘Z and ⇧⌘Z

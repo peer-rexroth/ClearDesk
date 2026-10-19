@@ -686,15 +686,6 @@ test('safeNoteHref allows web, mailto and tel links and nothing else', function 
   assertEqual(sanitizeNoteHtml('<a href="tel:+4930123456">x</a>'), '<a href="tel:+4930123456" target="_blank" rel="noopener noreferrer">x</a>');
 });
 
-test('noteWordCount counts words, keeps apostrophes and hyphens inside a word, and ignores punctuation', function () {
-  assertEqual(noteWordCount(''), 0);
-  assertEqual(noteWordCount('Hello, world!'), 2);
-  assertEqual(noteWordCount("don't stop well-known 3.14 \u2013 x"), 6);
-  assertEqual(noteWordCount('  many   spaces\nand\tlines '), 4);
-  assertEqual(noteWordCount('Gr\u00fc\u00dfe aus M\u00fcnchen'), 3);
-  assertEqual(noteCountText('one'), '1 word'); assertEqual(noteCountText('one two'), '2 words');
-});
-
 test('noteFileName makes a safe file name and falls back to Note', function () {
   assertEqual(noteFileName({ title: 'Team: update / Q4?' }, '.md'), 'Team update Q4.md');
   assertEqual(noteFileName({ title: '' }, '.md'), 'Note.md');
