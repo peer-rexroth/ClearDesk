@@ -227,12 +227,12 @@ test('rowMenuRun toggledone completes a mixed selection, then reopens it', funct
 test('rowMenuHtml offers single-task items only for one row', function () {
   tasks = [uxTask({ id: 'a' }), uxTask({ id: 'b' })];
   const one = rowMenuHtml(['a']);
-  assertIncludes(one, 'Open details');
-  assertIncludes(one, 'Add subtask');
+  assertIncludes(one, 'Open Details');
+  assertIncludes(one, 'Add Subtask');
   assertIncludes(one, 'Duplicate');
   const many = rowMenuHtml(['a', 'b']);
-  assertFalse(many.includes('Open details'));
-  assertIncludes(many, 'Delete 2 tasks');
+  assertFalse(many.includes('Open Details'));
+  assertIncludes(many, 'Delete 2 Tasks');
 });
 
 test('opening the row menu does not change the selection', function () {
@@ -442,7 +442,7 @@ test('toolbarAct applies to the whole selection; with no selection it does nothi
 });
 test('toolMenuHtml lists priorities, due shortcuts and projects', function () {
   PRIORITIES.forEach(p => assertIncludes(toolMenuHtml('priority'), p.label));
-  assertIncludes(toolMenuHtml('due'), 'Next week');
+  assertIncludes(toolMenuHtml('due'), 'Next Week');
   assertIncludes(toolMenuHtml('project'), 'Work');
 });
 

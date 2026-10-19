@@ -3227,7 +3227,7 @@ function toolMenuHtml(which){
   const same = k=>ts.length && ts.every(t=>t[k]===ts[0][k]) ? ts[0][k] : null;
   const opt = (kind, val, lead, label, cur)=>menuOpt(`toolbarAct('${kind}','${val}')`, lead, label, cur);
   if(which==='priority') return PRIORITIES.map(p=>opt('priority', p.id, PRIORITY_DOT[p.id], p.label, same('priority')===p.id)).join('');
-  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear date']].map(d=>opt('due', d[0], null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `toolbarAct('due',this.value||'clear')`);
+  if(which==='due') return [['today','Today'],['tomorrow','Tomorrow'],['week','Next Week'],['clear','Clear Date']].map(d=>opt('due', d[0], null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `toolbarAct('due',this.value||'clear')`);
   return visibleProjects().map(p=>opt('project', p.id, {icon:p.icon}, abbreviateName(p.name, 24), same('projectId')===p.id)).join('');
 }
 function toggleToolMenu(which){
@@ -3255,7 +3255,7 @@ function updateSelectionToolbar(){
   set('toolDue',      { off: n===0, title: n>1 ? `Set due date for ${n} tasks` : 'Due date' });
   set('toolMove',     { off: n===0, title: n>1 ? `Move ${n} tasks` : 'Move to project' });
   set('toolDup',      { off: n!==1, title: 'Duplicate' });
-  set('toolDel',      { off: n===0, title: n>1 ? `Delete ${n} tasks` : 'Delete' });
+  set('toolDel',      { off: n===0, title: n>1 ? `Delete ${n} Tasks` : 'Delete' });
   if(n===0) closeToolMenus();
 }
 // Selection changes without a full render (a click, an arrow key), so re-sync
@@ -3341,18 +3341,18 @@ function rowMenuHtml(ids){
   const sep = '<div class="row-menu-sep"></div>';
   // A submenu: a parent row that opens a flyout of menuOpt rows on hover (or on click, for touch/keyboard).
   const sub = rowMenuSub;
-  const dueQ = [['today','Today'],['tomorrow','Tomorrow'],['week','Next week'],['clear','Clear']];
+  const dueQ = [['today','Today'],['tomorrow','Tomorrow'],['week','Next Week'],['clear','Clear']];
   const parts = [];
-  if(n===1) parts.push(item('fa-solid fa-pen-to-square','Open details','rowMenuRun(\'open\')'));
-  parts.push(item(allDone?'fa-regular fa-circle':'fa-regular fa-circle-check', allDone?'Mark not started':'Mark complete', 'rowMenuRun(\'toggledone\')'));
+  if(n===1) parts.push(item('fa-solid fa-pen-to-square','Open Details','rowMenuRun(\'open\')'));
+  parts.push(item(allDone?'fa-regular fa-circle':'fa-regular fa-circle-check', allDone?'Mark Not Started':'Mark Complete', 'rowMenuRun(\'toggledone\')'));
   parts.push(sep);
   parts.push(sub('fa-regular fa-flag', 'Priority', opts('priority', PRIORITIES, same('priority'), x=>PRIORITY_DOT[x.id])));
   parts.push(sub('fa-regular fa-circle-dot', 'Status', opts('status', STATUSES, same('status'), x=>STATUS_DOT[x.id])));
   parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `rowMenuRun('due',this.value||'clear')`)));
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
-  if(n===1) parts.push(item('fa-solid fa-plus','Add subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-clone','Duplicate','rowMenuRun(\'duplicate\')'));
-  parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'Del'}));
+  if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-clone','Duplicate','rowMenuRun(\'duplicate\')'));
+  parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} Tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'⌫'}));
   return parts.join('');
 }
 // x/y are viewport px from the event. The menu is position:fixed on <body>, and
@@ -5615,7 +5615,7 @@ function noteMenuHtml(id, opts){
   const n = notes.find(x=>x.id===id); if(!n) return '';
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
   if(noteTrashed(n)){                                                              // a deleted note: bring it back, copy it, or delete it for good
-    return [item('fa-solid fa-rotate-left', 'Restore', `noteMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`), sep,
+    return [item('fa-solid fa-rotate-left', 'Restore', `noteMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy Note', `noteMenuRun('copy')`), sep,
             item('fa-solid fa-trash', 'Delete Permanently', `noteMenuRun('delete')`, {danger:true})].join('');
   }
   const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {svg: menuSvg('folder'), indent: !!f.parentId}, f.name, f.id===n.folderId)).join('');
@@ -5623,13 +5623,13 @@ function noteMenuHtml(id, opts){
     item('fa-solid fa-thumbtack', n.pinned ? 'Unpin Note' : 'Pin Note', `noteMenuRun('pin')`),
     ...(opts && opts.noLock ? [] : [item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`)]),   // the toolbar has its own lock button
     sep,
-    item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`),
+    item('fa-regular fa-clipboard', 'Copy Note', `noteMenuRun('copy')`),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
     item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
     sep,
-    (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock first') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
+    (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
-    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock first' : 'Del', off:!!n.locked})
+    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock First' : '⌫', off:!!n.locked})
   ].join('');
 }
 function openNoteMenu(e, id){
@@ -5657,10 +5657,10 @@ function noteMenuRun(kind, value){
 function folderMenuHtml(id){
   const f = folderById(id); if(!f) return '';
   const item = rowMenuItem;
-  const parts = [item('fa-solid fa-plus', 'New note here', `folderMenuRun('new')`)];
-  if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New subfolder', `folderMenuRun('newsub')`));
+  const parts = [item('fa-solid fa-plus', 'New Note Here', `folderMenuRun('new')`)];
+  if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `folderMenuRun('newsub')`));
   const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
-  if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
+  if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
   if(!f.locked) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `folderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true}));
   return parts.join('');
 }
@@ -6454,11 +6454,11 @@ function noteTableMenuHtml(){
   if(!cell) return noteTablePickerHtml(noteTablePicker);
   const { table, r: cr, c: cc } = noteCellPos(cell), item = rowMenuItem, run = op=>`noteTableEdit('${op}')`;
   return tblMenuJoin([
-    [item(tblInsIcon('rowAbove'), 'Insert row above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert row below', run('rowAfter')),
-     item(tblInsIcon('colLeft'), 'Insert column left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert column right', run('colAfter'))],
-    [...(cr===0 ? [item(tblHeaderIcon('row'), 'Header row', run('header'), tblTick(tblHeadRow(table)))] : []),                 // header toggles only where they apply: first row / first column
-     ...(cc===0 && table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header column', run('headerCol'), tblTick(tblHeadCol(table)))] : [])],
-    [item(TBL_ICON.del, 'Delete row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete column', run('delCol'), {danger:true}), item(TBL_ICON.delTable, 'Delete table', run('delTable'), {danger:true})]
+    [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')),
+     item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter'))],
+    [...(cr===0 ? [item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table)))] : []),                 // header toggles only where they apply: first row / first column
+     ...(cc===0 && table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), tblTick(tblHeadCol(table)))] : [])],
+    [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
 function toggleNoteTableMenu(){
@@ -6664,8 +6664,8 @@ function tblGripMenuHtml(kind, sel, table){
   return tblMenuJoin([
     [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), `Insert ${nounN} ${col ? 'left' : 'above'}`, run(col ? 'colBefore' : 'rowBefore')),
      item(tblInsIcon(col ? 'colRight' : 'rowBelow'), `Insert ${nounN} ${col ? 'right' : 'below'}`, run(col ? 'colAfter' : 'rowAfter'))],
-    a===0 && table ? [col ? item(tblHeaderIcon('col'), 'Header column', run('headerCol'), tblTick(tblHeadCol(table))) : item(tblHeaderIcon('row'), 'Header row', run('header'), tblTick(tblHeadRow(table)))] : [],   // only on the first row / column
-    [item(TBL_ICON.del, `Delete ${nounN}`, run(col ? 'delCol' : 'delRow'), {danger:true}), item(TBL_ICON.delTable, 'Delete table', run('delTable'), {danger:true})]
+    a===0 && table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), tblTick(tblHeadCol(table))) : item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table)))] : [],   // only on the first row / column
+    [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
 // Open the menu of the selected column(s)/row(s) at a position (the pointer, for a right-click).
@@ -6728,11 +6728,11 @@ function tblTableContext(e){
 function tblTableMenuHtml(table){
   const item = rowMenuItem, run = op=>`tblTableRun('${op}')`;
   return tblMenuJoin([
-    [item(tblHeaderIcon('row'), 'Header row', run('header'), tblTick(tblHeadRow(table))),
-     ...(table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header column', run('headerCol'), tblTick(tblHeadCol(table)))] : []),
-     ...(table.querySelector('colgroup') ? [item(TBL_ICON.even, 'Distribute columns evenly', run('even'))] : [])],
+    [item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table))),
+     ...(table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), tblTick(tblHeadCol(table)))] : []),
+     ...(table.querySelector('colgroup') ? [item(TBL_ICON.even, 'Distribute Columns Evenly', run('even'))] : [])],
     [item(TBL_ICON.cut, 'Cut', run('cut')), item(TBL_ICON.copy, 'Copy', run('copy'))],
-    [item(TBL_ICON.delTable, 'Delete table', run('delTable'), {danger:true})]
+    [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
 function tblShowTableMenuAt(x, y, measureEl){

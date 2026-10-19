@@ -479,8 +479,8 @@ test('deleting a folder deletes its subfolders, moves all their notes to Notes, 
 
 test('the right-click menus: top-level folders offer a subfolder, subfolders do not; Move to lists every folder', function () {
   ntTree();
-  assertIncludes(folderMenuHtml('f-work'), 'New subfolder');
-  assertNotIncludes(folderMenuHtml('f-q1'), 'New subfolder');
+  assertIncludes(folderMenuHtml('f-work'), 'New Subfolder');
+  assertNotIncludes(folderMenuHtml('f-q1'), 'New Subfolder');
   notes = [ntNote({ id: 'x' })];
   const h = noteMenuHtml('x');
   assertIncludes(h, 'Q1'); assertIncludes(h, 'Q2'); assertIncludes(h, 'Home');
@@ -570,12 +570,12 @@ test('merging: a folder deleted here stays deleted unless the other copy was edi
   assertFalse(deletedNoteFolderIds.some(d => d.id === 'f-gone'));
 });
 
-test('the folder context menu offers Move up / Move down only when there are siblings, and disables the ends', function () {
+test('the folder context menu offers Move Up / Move Down only when there are siblings, and disables the ends', function () {
   ntTree();
-  assertIncludes(folderMenuHtml('f-work'), 'Move up');
-  assertIncludes(folderMenuHtml('f-q1'), 'Move down');
+  assertIncludes(folderMenuHtml('f-work'), 'Move Up');
+  assertIncludes(folderMenuHtml('f-q1'), 'Move Down');
   noteFolders = noteFolders.filter(f => f.id !== 'f-q2');
-  assertNotIncludes(folderMenuHtml('f-q1'), 'Move up', 'a lone subfolder has nothing to move past');
+  assertNotIncludes(folderMenuHtml('f-q1'), 'Move Up', 'a lone subfolder has nothing to move past');
 });
 
 test('renaming or moving a folder stamps updatedAt; Undo restores the order too', function () {
