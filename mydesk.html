@@ -1121,7 +1121,6 @@
   .note-body mark[data-hl="purple"], .nc-sw.nc-hl-purple { background: var(--nh-purple); }
   .note-body mark[data-hl="gray"], .nc-sw.nc-hl-gray { background: var(--nh-gray); }
   .note-body mark { color: inherit; border-radius: 3px; padding: 0 1px; }
-  .tb-color { line-height: 1; padding-bottom: 1px; border-bottom: 3px solid transparent; border-image: linear-gradient(90deg, #ff7b72, #ffa657, #56d364, #79c0ff, #d2a8ff) 1; }
   .note-color-menu { width: max-content; min-width: 0 !important; padding: 8px 10px 10px; }
   .nc-label { margin: 4px 2px 5px; font-size: 11px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-3); }
   .nc-row { display: flex; gap: 6px; }
@@ -1129,12 +1128,19 @@
   .nc-sw:hover { box-shadow: 0 0 0 2px var(--sel-bg, var(--blue-text)); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: rgba(255, 214, 10, .45); color: inherit; }
+  /* the copy button on a code block: a small Apple-style material chip in its top right corner, shown while the pointer is over the block */
+  .note-code-copy { position: absolute; z-index: 3; width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid var(--border-2); background: var(--glass-strong, var(--bg-2)); color: var(--text-2); font-size: 12px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.12); transition: background .12s ease, color .12s ease; }
+  .note-code-copy .tb-ico2 { width: 14px; height: 14px; }
+  .note-code-copy[hidden] { display: none; }
+  .note-code-copy:hover { background: var(--cap-hover, var(--bg-3)); color: var(--text); }
+  .note-code-copy.done { color: var(--green-text, #1a7f37); }
   #notePrintArea { display: none; }
   @media print {
     html, body { background: #fff !important; color: #000 !important; height: auto !important; overflow: visible !important; }
     body > *:not(#notePrintArea) { display: none !important; }
     #notePrintArea { display: block !important; padding: 0; }
   }
+  .note-section i { margin-right: 5px; font-size: 10px; }
   .note-section { padding: 10px 12px 4px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
   .notes-list-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 4px 6px; padding: 8px 10px; border-radius: 10px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, transparent); }
   .note-trash-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 8px 12px; border-radius: 10px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--red-text) 10%, transparent); }
@@ -1157,7 +1163,7 @@
   .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
   .note-body code { font-family: var(--mono); font-size: .88em; padding: 1px 5px; border-radius: 4px; background: var(--bg-3); }
-  .note-body pre { font-family: var(--mono); font-size: 13px; padding: 10px 12px; border-radius: 8px; background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
+  .note-body pre { font-family: var(--mono); font-size: 13px; padding: 10px 40px 10px 12px; border-radius: 8px; background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
   .note-body hr { border: 0; border-top: 1px solid var(--border-2); margin: 1em 0; }
   /* checklists: a round box drawn on the <li>; clicking in the left 28px ticks it */
   .note-body ul:not(.cl) { list-style-type: "-\00a0\00a0"; }   /* the standard bullet is a hyphen */
@@ -1186,9 +1192,12 @@
   .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
   .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) { list-style-type: lower-roman; }
   .pop-svg { flex: none; width: 22px; margin-right: 6px; display: flex; justify-content: center; color: var(--text-2); }
-  .pop-svg svg, .row-menu-item svg.tbl-ins { width: 16px; height: 16px; }
-  .row-menu-item svg.tbl-ins { flex: none; margin: 0 0 0 0; color: var(--text-3); }
-  .row-menu-item:hover:not(:disabled) .pop-svg, .row-menu-item:hover:not(:disabled) svg.tbl-ins { color: #fff; }
+  .pop-svg svg, .row-menu-item svg.tbl-ins, .row-menu-item svg.mi { width: 16px; height: 16px; }
+  svg.mi { fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .row-menu-item svg.tbl-ins, .row-menu-item svg.mi { flex: none; margin: 0 0 0 0; color: var(--text-3); }
+  .row-menu-item.danger svg.mi { color: var(--red-text); }
+  .row-menu-hint svg.mi { width: 12px; height: 12px; stroke-width: 2; }
+  .row-menu-item:hover:not(:disabled) .pop-svg, .row-menu-item:hover:not(:disabled) svg.tbl-ins, .row-menu-item:hover:not(:disabled) svg.mi { color: #fff; }
   .pop-glyph { flex: none; width: 22px; margin-right: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; color: var(--text-2); }
   .pop-glyph.sym { font-size: 19px; font-weight: 700; }   /* the bullet marks are tiny characters: scaled up to the visual weight of "1." "a." "i." */
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
@@ -1348,7 +1357,8 @@
   html[data-scheme="glass"] .note-toolbar .note-more-btn.on { background: var(--amber-bg); color: var(--amber-text); }
   /* keep the editor bar on ONE row in a narrower pane: the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
-  @container notepane (max-width: 740px) { .note-toolbar .tool-btn { min-width: 28px !important; } .note-toolbar .tool-group { gap: 0; } .note-toolbar .note-clear-btn { display: none; } }   /* the rarest button steps aside so the bar stays on one row */
+  @container notepane (max-width: 740px) { .note-toolbar .tool-btn { min-width: 28px !important; } .note-toolbar .tool-group { gap: 0; } .note-toolbar .note-clear-btn { display: none; } }
+  @container notepane (max-width: 720px) { .note-toolbar { gap: 3px; padding-left: 8px !important; padding-right: 8px !important; } .note-toolbar #noteStyleSelect { max-width: 66px; padding-right: 18px; } .note-toolbar .note-new-btn { min-width: 32px; } .note-toolbar .tool-group:has(#noteUndoBtn) { display: none; } }   /* Undo / Redo step aside in a narrow pane (⌘Z still works) */   /* the rarest button steps aside so the bar stays on one row */
   @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
@@ -1565,12 +1575,12 @@
     <div class="notes-editor-pane">
       <!-- with no note open (an empty folder, or nothing selected) the bar stays, so New note is always one click away -->
       <div class="note-toolbar note-empty-bar" id="noteEmptyBar">
-        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><i class="fa-regular fa-pen-to-square"></i></button>
+        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"/><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"/></svg></button>
       </div>
       <div class="notes-empty" id="notesEmpty"><i class="fa-regular fa-note-sticky"></i><div>No note selected</div></div>
       <div class="note-editor" id="noteEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
-          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><i class="fa-regular fa-pen-to-square"></i></button>
+          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"/><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"/></svg></button>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="blockquote">Quote</option><option value="pre">Code</option>
           </select>
@@ -1584,7 +1594,7 @@
             <button type="button" class="tool-btn" data-cmd="underline" onclick="noteCmd('underline')" title="Underline (⌘U)" aria-label="Underline"><span class="tb-txt tb-u">U</span></button>
             <button type="button" class="tool-btn" data-cmd="strikeThrough" onclick="noteCmd('strikeThrough')" title="Strikethrough" aria-label="Strikethrough"><span class="tb-txt tb-s">S</span></button>
             <div class="lib-dropdown" id="noteColorDropdown">
-              <button type="button" class="tool-btn" data-cmd="color" onclick="event.stopPropagation();toggleNoteColorMenu()" title="Text colour and highlight" aria-label="Text colour and highlight" aria-haspopup="menu"><span class="tb-txt tb-color">A</span></button>
+              <button type="button" class="tool-btn" data-cmd="color" onclick="event.stopPropagation();toggleNoteColorMenu()" title="Text colour and highlight" aria-label="Text colour and highlight" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 16.5 12 4.5l5.5 12M8.7 12h6.6"/><path d="M5 20.5h14" opacity=".45"/></svg></button>
               <div class="split-btn-menu tool-menu note-color-menu" id="noteColorMenu" role="menu"></div>
             </div>
           </div>
@@ -1593,7 +1603,7 @@
               <span class="tool-split"><button type="button" class="tool-btn list-main" data-cmd="list" onclick="event.stopPropagation();noteListStyle(noteBulletKind)" title="Bulleted list (click to toggle; the arrow picks a style)" aria-label="Bulleted list"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button><button type="button" class="tool-btn list-caret" onclick="event.stopPropagation();toggleNoteListMenu()" title="List styles" aria-label="List styles" aria-haspopup="menu"><svg viewBox="0 0 10 6" width="8" height="5" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span>
               <div class="split-btn-menu tool-menu note-list-menu" id="noteListMenu" role="menu"></div>
             </div>
-            <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><i class="fa-regular fa-square-check"></i></button>
+            <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="m8.6 12.2 2.4 2.4 4.4-4.8"/></svg></button>
             <div class="lib-dropdown" id="noteTableDropdown">
               <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
               <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
@@ -1602,17 +1612,18 @@
             <button type="button" class="tool-btn note-clear-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
           </div>
                     <span class="note-toolbar-grow"></span>
-          <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><i class="fa-solid fa-lock-open"></i></button>
-          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+          <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg></button>
+          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
         </div>
         <div class="note-scroll">
-          <div class="note-doc" onmousemove="tblHandlesMove(event)" onmouseleave="tblHandlesLeave()">
+          <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyMove(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyLeave()">
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing…"
                  oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
+                        <button type="button" class="note-code-copy" id="noteCodeCopy" hidden aria-label="Copy code" title="Copy code" onmousedown="event.preventDefault()" onclick="noteCodeCopyClick(event)"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg></button>
           </div>
         </div>
       </div>
@@ -1816,7 +1827,7 @@
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a note moves it to <em>Recently Deleted</em> at the bottom of the sidebar, where it stays for 30 days. Open it there to <em>Restore</em> it or <em>Delete Now</em>; <em>Delete All</em> empties the list. Deleting a note that is already there removes it for good.</span></div>
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
-          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu.</span></div>
+          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and print</strong>: <strong>⋯</strong> → <em>Export</em> saves the note as a Markdown file or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. <em>Copy note</em> puts it on the clipboard for pasting into Mail.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search and word count</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view. The line under the title ends with the note's word count.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
@@ -3160,8 +3171,47 @@ function toggleRowSub(e, btn){
 }
 function closeRowMenu(){ document.getElementById('rowMenu')?.classList.remove('open'); if(typeof tblSel!=='undefined' && tblSel){ tblSel = null; if(typeof tblHandlesRefresh==='function') tblHandlesRefresh(); } }
 // The two building blocks of the right-click menus (tasks and notes): a plain row, and a row that opens a flyout of options.
-const rowMenuItem = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}">${icon.startsWith('<svg') ? icon : `<i class="${icon}"></i>`}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
-const rowMenuSub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)"><i class="${icon}"></i><span>${text}</span><span class="row-menu-hint"><i class="fa-solid fa-chevron-right"></i></span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
+// The right-click menus' icons: the same thin outline SVGs as the toolbar (16px here, 1.7 stroke). Call sites keep passing the Font Awesome name; menuIconHtml
+// swaps in the drawing when this registry has one (project icons chosen by the user stay Font Awesome, there are too many).
+const MENU_SVG = {
+  'trash': '<path d="M4.5 7h15"/><path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"/><path d="M6.5 7l.8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"/><path d="M10 11v5M14 11v5"/>',
+  'plus': '<path d="M12 5v14M5 12h14"/>',
+  'minus': '<path d="M5 12h14"/>',
+  'pen': '<path d="m15.8 4.7 3.5 3.5L8.2 19.3l-4.4.9.9-4.4z"/><path d="m13.7 6.8 3.5 3.5"/>',
+  'pen-to-square': '<path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"/><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"/>',
+  'folder': '<path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z"/>',
+  'folder-open': '<path d="M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z"/><path d="M12 11.5v5M9.5 14h5"/>',
+  'clone': '<rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/>',
+  'clipboard': '<rect x="5.5" y="5" width="13" height="15.5" rx="2.5"/><path d="M9 5v-.8A1.2 1.2 0 0 1 10.2 3h3.6A1.2 1.2 0 0 1 15 4.2V5"/>',
+  'thumbtack': '<path d="M9 4h6l-.7 5.2 2.9 3.3H6.8l2.9-3.3z"/><path d="M12 12.5V20"/>',
+  'rotate-left': '<path d="M4.5 12a7.5 7.5 0 1 0 2.3-5.4L4.5 8.8"/><path d="M4.5 4.2v4.6h4.6"/>',
+  'lock': '<rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/>',
+  'lock-open': '<rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/>',
+  'link-slash': '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/><path d="M4 4l16 16"/>',
+  'arrow-up-from-bracket': '<path d="M12 15V4.5M8 8.2l4-4 4 4"/><path d="M6 11.5v6.2a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8v-6.2"/>',
+  'arrow-up': '<path d="M12 19V5M6.5 10.5 12 5l5.5 5.5"/>',
+  'arrow-down': '<path d="M12 5v14M6.5 13.5 12 19l5.5-5.5"/>',
+  'arrows-left-right': '<path d="M4 12h16M7.5 8.5 4 12l3.5 3.5M16.5 8.5 20 12l-3.5 3.5"/>',
+  'circle': '<circle cx="12" cy="12" r="8"/>',
+  'circle-check': '<circle cx="12" cy="12" r="8"/><path d="m8.6 12.2 2.4 2.4 4.4-4.8"/>',
+  'circle-dot': '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/>',
+  'calendar': '<rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4"/>',
+  'flag': '<path d="M6 20.5V4.5"/><path d="M6 5.5h10.5l-2 3.5 2 3.5H6"/>',
+  'envelope': '<rect x="3.5" y="5.5" width="17" height="13" rx="3"/><path d="m4.5 8 7.5 5.5L19.5 8"/>',
+  'phone': '<path d="M8 4h2.3l1.4 3.7-1.8 1.3a10.5 10.5 0 0 0 5.1 5.1l1.3-1.8L20 13.7V16a2.4 2.4 0 0 1-2.4 2.4C10.2 18.4 5.6 13.8 5.6 6.4A2.4 2.4 0 0 1 8 4z"/>',
+  'arrow-up-right-from-square': '<path d="M14 4.5h5.5V10M19.5 4.5l-8 8"/><path d="M18 14v3.5a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2H10"/>',
+  'scissors': '<circle cx="6.5" cy="7" r="2.5"/><circle cx="6.5" cy="17" r="2.5"/><path d="M8.7 8.3 19 17.5M8.7 15.7 19 6.5"/>',
+  'print': '<path d="M7 9V4.5h10V9"/><rect x="4.5" y="9" width="15" height="8" rx="2.5"/><path d="M7 14h10v5.5H7z"/>',
+  'file-lines': '<path d="M7 3.5h6.5L19 9v10a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z"/><path d="M13.5 3.5V9H19M8.5 13h7M8.5 16.5h5"/>',
+  'chevron-right': '<path d="m9.5 6 6 6-6 6"/>',
+  'trash-can': '<path d="M4.5 7h15"/><path d="M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7"/><path d="M6.5 7l.8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7"/><path d="M10 11v5M14 11v5"/>',
+  'copy': '<rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/>'
+};
+const menuSvg = name=>MENU_SVG[name] ? `<svg class="mi" viewBox="0 0 24 24" aria-hidden="true">${MENU_SVG[name]}</svg>` : '';
+const menuIconHtml = icon=>{ if(!icon) return ''; if(icon.startsWith('<svg')) return icon; return menuSvg(icon.split(' ').pop().replace(/^fa-/, '')) || `<i class="${icon}"></i>`; };
+const MENU_CHEVRON = menuSvg('chevron-right');
+const rowMenuItem = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}">${menuIconHtml(icon)}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+const rowMenuSub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)">${menuIconHtml(icon)}<span>${text}</span><span class="row-menu-hint">${MENU_CHEVRON}</span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
 function rowMenuHtml(ids){
   const n = ids.length;
   const ts = ids.map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
@@ -4660,7 +4710,7 @@ const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var
 // One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
 // tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
 function popOptInner(lead, label){
-  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg" aria-hidden="true">${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
+  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg" aria-hidden="true"${lead.indent ? ' style="margin-left:14px"' : ''}>${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
 function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
@@ -4881,6 +4931,8 @@ let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRan
 // test harness, which has no DOM. ----
 const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','span','mark','table','colgroup','col','thead','tbody','tr','th','td']);
 const NOTE_VOID = new Set(['br','hr','col']);
+// The same thin outline icons as the toolbar's other buttons (18px, 1.7 stroke), so the round buttons and the new copy chip match them; used from JS too.
+const ICO_LOCK = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></svg>', ICO_LOCK_OPEN = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg>', ICO_COPY = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg>', ICO_CHECK = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4.2 4.2 8.8-9.5"/></svg>';
 // the names a note may carry as text colour / highlight (see noteApplyColor); defined with the sanitizer that needs them
 const NOTE_TEXT_COLORS = ['red', 'orange', 'green', 'blue', 'purple', 'gray'], NOTE_HL_COLORS = ['yellow', 'green', 'blue', 'pink', 'purple', 'gray'];
 
@@ -5448,16 +5500,16 @@ function noteMenuHtml(id, opts){
     return [item('fa-solid fa-rotate-left', 'Restore', `noteMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`), sep,
             item('fa-solid fa-trash', 'Delete Permanently', `noteMenuRun('delete')`, {danger:true})].join('');
   }
-  const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {icon:'folder', indent:!!f.parentId}, f.name, f.id===n.folderId)).join('');
+  const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {svg: menuSvg('folder'), indent: !!f.parentId}, f.name, f.id===n.folderId)).join('');
   return [
     item('fa-solid fa-thumbtack', n.pinned ? 'Unpin Note' : 'Pin Note', `noteMenuRun('pin')`),
     ...(opts && opts.noLock ? [] : [item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`)]),   // the toolbar has its own lock button
     sep,
     item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`),
-    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {icon:'file-lines'}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {icon:'print'}, 'Print / Save as PDF…')),
+    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
     item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
     sep,
-    (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace('<i class="fa-solid fa-chevron-right"></i>', 'Unlock first') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
+    (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock first') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
     item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock first' : 'Del', off:!!n.locked})
   ].join('');
@@ -5609,7 +5661,7 @@ function renderNotesList(vis){
   const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted notes are removed after ${NOTE_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyTrash()">Delete All</button></div>` : '';
   list.innerHTML = banner + vis.map(n=>{
     const sel = n.id===selectedNoteId, sec = anyPinned ? (n.pinned ? 'Pinned' : 'Notes') : '';
-    const head = sec && sec!==seen ? `<div class="note-section">${sec}</div>` : ''; seen = sec || seen;
+    const head = sec && sec!==seen ? `<div class="note-section">${sec==='Pinned' ? '<i class="fa-solid fa-thumbtack"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
     return head + `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked || inTrash ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? n.deletedAt : noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span></div>
@@ -5673,7 +5725,7 @@ function renderNoteEditor(){
     const lk = !!n.locked;
     lockBtn.classList.toggle('on', lk); lockBtn.setAttribute('aria-pressed', String(lk));
     lockBtn.title = lk ? 'Unlock note' : 'Lock note'; lockBtn.setAttribute('aria-label', lockBtn.title);
-    lockBtn.innerHTML = lk ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+    lockBtn.innerHTML = lk ? ICO_LOCK : ICO_LOCK_OPEN;
   }
   const tbar = document.getElementById('noteTrashBar');                              // the Recently Deleted bar: when it goes, and Restore / Delete Now
   if(tbar){
@@ -6317,6 +6369,45 @@ function tblHandlesHide(){
   const t = noteCaretTable() || (tblWhole && tblWhole.isConnected ? tblWhole : null); if(t) tblHandlesShow(t);   // the caret's own (or the selected) table keeps its grips
 }
 function tblHandlesLeave(){ if(tblDragging) return; if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
+// ---- copy button on a code block ----
+// One floating button (outside the note body, so it is never saved) follows the code block the pointer is over and sits in its top right corner.
+let noteCodeCopyPre = null, noteCodeCopyTimer = null, noteCodeCopyReset = null;
+function noteWriteText(text){
+  if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(()=>true, ()=>noteWriteTextLegacy(text));
+  return Promise.resolve(noteWriteTextLegacy(text));
+}
+function noteWriteTextLegacy(text){
+  const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try{ ok = document.execCommand('copy'); }catch(_){}
+  ta.remove(); return ok;
+}
+function noteCodeCopyShow(pre){
+  const btn = document.getElementById('noteCodeCopy'), doc = btn && btn.parentNode; if(!btn || !doc || !pre) return;
+  noteCodeCopyPre = pre; clearTimeout(noteCodeCopyTimer);
+  const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1, pr = pre.getBoundingClientRect();   // k: the UI-size zoom
+  btn.hidden = false;
+  btn.style.left = Math.round(((pr.right - dr.left) / k - 26 - 7) * 10) / 10 + 'px';
+  btn.style.top = Math.round(((pr.top - dr.top) / k + 7) * 10) / 10 + 'px';
+}
+function noteCodeCopyHide(){ const btn = document.getElementById('noteCodeCopy'); if(btn){ btn.hidden = true; btn.classList.remove('done'); btn.innerHTML = ICO_COPY; } noteCodeCopyPre = null; }
+function noteCodeCopyMove(e){
+  const t = e.target, btn = document.getElementById('noteCodeCopy');
+  if(btn && btn.contains(t)){ clearTimeout(noteCodeCopyTimer); return; }
+  const pre = t && t.closest ? t.closest('#noteBody pre') : null;
+  if(pre) noteCodeCopyShow(pre); else if(noteCodeCopyPre) noteCodeCopyLeave();
+}
+function noteCodeCopyLeave(){ clearTimeout(noteCodeCopyTimer); noteCodeCopyTimer = setTimeout(noteCodeCopyHide, 220); }
+function noteCodeCopyClick(e){
+  e.preventDefault(); e.stopPropagation();
+  const pre = noteCodeCopyPre, btn = document.getElementById('noteCodeCopy'); if(!pre || !pre.isConnected) return;
+  const text = (pre.innerText || pre.textContent).replace(/\n$/, '');
+  noteWriteText(text).then(ok=>{
+    if(!ok){ showToast('Could not use the clipboard here', true); return; }
+    btn.classList.add('done'); btn.innerHTML = ICO_CHECK; btn.title = 'Copied';
+    clearTimeout(noteCodeCopyReset); noteCodeCopyReset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY; btn.title = 'Copy code'; }, 1400);
+  });
+}
 function tblHandlesMove(e){
   if(noteIsLocked(noteEditorId)){ if(tblHandlesTable) tblHandlesHide(); return; }
   const t = e.target;
@@ -6758,23 +6849,48 @@ function noteAutoBlockAtEnter(e){
   onNoteInput();
   return true;
 }
-// A table that is the last thing in a note has nothing below it to click or arrow into (a full-width table leaves no room beside it either), so
+// A table, code block or divider that is the last thing in a note has nothing below it to click or arrow into (a full-width table leaves no room beside it either), so
 // the note always keeps an empty line after a trailing table: added when a note loads and after every edit (paste, drop, deleting the line).
 function noteEnsureTrailingLine(body){
   if(!body) return;
   let last = body.lastChild;
   while(last && last.nodeType===3 && !last.nodeValue.trim()) last = last.previousSibling;
-  if(last && last.nodeType===1 && last.tagName==='TABLE'){ const p = document.createElement('p'); p.innerHTML = '<br>'; body.appendChild(p); }
+  if(last && last.nodeType===1 && /^(TABLE|PRE|HR)$/.test(last.tagName)){ const p = document.createElement('p'); p.innerHTML = '<br>'; body.appendChild(p); }   // nothing below to click or arrow into otherwise
 }
-// Cmd/Ctrl+Enter inside a table: move to the line below it, making an empty one first when the table is followed by nothing or by another table.
+// Inside a code block: Enter on an EMPTY last line leaves the block (a second Enter, as in most editors), and Backspace at its very start turns it back into a
+// normal paragraph (the native key would glue its text onto the line above with stray inline styling, and an emptied block could never be removed).
+function noteCodeKeys(e){
+  if((e.key!=='Enter' && e.key!=='Backspace') || e.shiftKey || e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return false;
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || !body.contains(sel.anchorNode) || noteIsLocked(noteEditorId)) return false;
+  const pre = noteClosest(sel.anchorNode, 'PRE'); if(!pre) return false;
+  const before = document.createRange(); before.selectNodeContents(pre); before.setEnd(sel.anchorNode, sel.anchorOffset);
+  const after = document.createRange(); after.selectNodeContents(pre); after.setStart(sel.anchorNode, sel.anchorOffset);
+  if(e.key==='Backspace'){
+    if(before.toString()!=='' || before.cloneContents().querySelector('br')) return false;          // not at the very start
+    e.preventDefault(); noteBlock('p'); return true;
+  }
+  const emptyEnd = after.toString()==='' && (/<br>$/.test(pre.innerHTML) || /\n$/.test(pre.textContent));     // the caret is on an empty last line
+  if(!emptyEnd) return false;
+  e.preventDefault();
+  if(pre.textContent.trim()!=='' || pre.querySelector('br')) document.execCommand('delete', false);   // take the empty line out (one Undo step) ...
+  noteEnsureTrailingLine(body);
+  let next = pre.nextElementSibling;
+  if(!next){ const p = document.createElement('p'); p.innerHTML = '<br>'; pre.after(p); next = p; }
+  const r = document.createRange(); r.selectNodeContents(next); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);   // ... and carry on below the block
+  onNoteInput(); updateNoteToolbarState();
+  return true;
+}
+// Cmd/Ctrl+Enter inside a table or a code block: move to the line below it, making an empty one first when it is followed by nothing or by another table / code block.
 function noteTableExitDown(e){
   if(e.key!=='Enter' || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.isComposing) return false;
-  const cell = noteSelectedCell(); if(!cell || noteIsLocked(noteEditorId)) return false;
+  const cell = noteSelectedCell(), sel = window.getSelection(), inPre = !cell && sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'PRE') : null;
+  if((!cell && !inPre) || noteIsLocked(noteEditorId)) return false;
   e.preventDefault();
-  const table = cell.closest('table'), sel = window.getSelection();
+  const table = cell ? cell.closest('table') : inPre;                      // the block to leave: the table, or the code block
   let next = table.nextSibling;
   while(next && next.nodeType===3 && !next.nodeValue.trim()) next = next.nextSibling;
-  if(!next || (next.nodeType===1 && next.tagName==='TABLE')){
+  if(!next || (next.nodeType===1 && /^(TABLE|PRE)$/.test(next.tagName))){
     const r = document.createRange(); r.setStartAfter(table); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
     document.execCommand('insertHTML', false, '<p><br></p>');                            // an editing command, so Undo takes it back
     next = table.nextElementSibling;
@@ -6821,6 +6937,7 @@ function onNoteKeydown(e){
   if(e.key==='Enter' && !e.isComposing && !e.metaKey && !e.ctrlKey){ const sel = window.getSelection(); if(sel && sel.rangeCount) noteAutoLinkLine(noteLineOf(sel.anchorNode)); }   // finish the line (link its addresses) before Enter splits it
   if(noteTablePickerKey(e)) return;
   if(noteTableExitDown(e)) return;
+  if(noteCodeKeys(e)) return;
   if(noteBackspaceAfterTable(e)) return;
   if(noteAutoBullet(e)) return;
   if(noteTableArrow(e)) return;
