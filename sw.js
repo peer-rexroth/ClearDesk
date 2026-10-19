@@ -1,17 +1,10 @@
-const CACHE_NAME = 'mydesk-cache-v6';
+const CACHE_NAME = 'mydesk-cache-v7';
 const APP_SHELL = [
   'mydesk.html',
   'manifest.json',
   'icons/favicon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
-  // Font Awesome (CSS + the two font files actually used — solid/regular,
-  // see CLAUDE.md) precached explicitly, since it's cross-origin and would
-  // otherwise only get cached after a first successful online load, leaving
-  // every icon blank if the PWA goes offline before that happens.
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-solid-900.woff2',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/webfonts/fa-regular-400.woff2'
 ];
 
 self.addEventListener('install', (event) => {

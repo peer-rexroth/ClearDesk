@@ -5,7 +5,7 @@
 
 A single-file task manager PWA. Everything — HTML, CSS, and JS — lives in
 `mydesk.html` (~3,200 lines). There is no build step, no bundler, no
-dependencies beyond a CDN Font Awesome link. Edit the file directly.
+dependencies (no CDN either: icons are inline CSS). Edit the file directly.
 
 ## Running it
 
@@ -782,7 +782,7 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 
 ## Conventions from this project's history
 
-- Font Awesome 6.5 (`fa-solid`/`fa-regular`) via CDN, used throughout.
+- Icons: no icon font. The markup keeps Font Awesome class names (`fa-solid fa-trash`, also dynamic ones like `fa-${p.icon}`), and a generated CSS block at the top of `<style>` draws each name as a masked outline SVG (24 grid, 1.7 stroke, `currentColor`), ~115 names (the `MENU_SVG` ones plus the rest). A name with no rule renders nothing. To add an icon, add a `.fa-NAME { --fa: url(...) }` rule there. Sizes come from `font-size` as before.
 - New buttons should get `this.blur()` in their `onclick` (or rely on the
   global click listener that blurs any clicked `<button>`) so a lingering
   focus ring doesn't reappear on the next keypress.
