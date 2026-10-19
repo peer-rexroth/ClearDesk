@@ -590,6 +590,46 @@ test('tables pasted from outside get the width a new table of that column count 
     '<p>x</p><table style="width:35%"><tr><td>a</td></tr></table><p>y</p><table style="width:44%"><tr><td>a</td><td>b</td></tr></table>', 'each table is sized on its own');
 });
 
+const linkSpans = txt=>JSON.stringify(noteLinkMatches(txt).map(m=>m.kind + ':' + txt.slice(m.start, m.end) + ' -> ' + m.href));
+const linkWant = (...x)=>JSON.stringify(x);
+
+test('noteLinkMatches finds web addresses, trims sentence punctuation and keeps balanced brackets', function () {
+  assertEqual(linkSpans('see https://example.com/a?b=1.'), linkWant('url:https://example.com/a?b=1 -> https://example.com/a?b=1'));
+  assertEqual(linkSpans('go to www.example.org, now'), linkWant('url:www.example.org -> https://www.example.org'));
+  assertEqual(linkSpans('(https://example.com/x)'), linkWant('url:https://example.com/x -> https://example.com/x'));
+  assertEqual(linkSpans('https://en.wikipedia.org/wiki/Tea_(drink)'), linkWant('url:https://en.wikipedia.org/wiki/Tea_(drink) -> https://en.wikipedia.org/wiki/Tea_(drink)'));
+  assertEqual(linkSpans('visit example.com/path today'), linkWant('url:example.com/path -> https://example.com/path'));
+  assertEqual(linkSpans('no link here, just words. And 3.14 or v1.2.3'), linkWant());
+});
+
+test('noteLinkMatches finds e-mail addresses once, not as a domain too', function () {
+  assertEqual(linkSpans('mail anna.m@example.com or bob@firma.de.'), linkWant('email:anna.m@example.com -> mailto:anna.m@example.com', 'email:bob@firma.de -> mailto:bob@firma.de'));
+  assertEqual(linkSpans('@handle is not an address'), linkWant());
+});
+
+test('noteLinkMatches finds phone numbers but not dates, times or short numbers', function () {
+  assertEqual(linkSpans('call +49 170 1234567 now'), linkWant('phone:+49 170 1234567 -> tel:+491701234567'));
+  assertEqual(linkSpans('call 0170 1234567 now'), linkWant('phone:0170 1234567 -> tel:01701234567'));
+  assertEqual(linkSpans('0041 44 123 45 67'), linkWant('phone:0041 44 123 45 67 -> tel:+41441234567'));
+  assertEqual(linkSpans('(030) 123456-78'), linkWant('phone:(030) 123456-78 -> tel:03012345678'));
+  assertEqual(linkSpans('on 19.10.2026 at 07:30, room 0815, 01.02.2026'), linkWant());
+  assertEqual(linkSpans('order 12345 costs 1.234,56'), linkWant());
+});
+
+test('noteLinkMatches does not link the same text twice and keeps results in order', function () {
+  const m = noteLinkMatches('write a@b.com, call +49 30 123456 or open https://x.io/a@b.com');
+  assertEqual(JSON.stringify(m.map(x=>x.kind)), JSON.stringify(['email', 'phone', 'url']));
+  assertTrue(m.every((x, i)=>i===0 || x.start >= m[i - 1].end));
+});
+
+test('safeNoteHref allows web, mailto and tel links and nothing else', function () {
+  assertEqual(safeNoteHref('tel:+491701234567'), 'tel:+491701234567');
+  assertEqual(safeNoteHref('tel:030 123456'), 'tel:030123456');
+  assertEqual(safeNoteHref('tel:javascript:alert(1)'), '');
+  assertEqual(safeNoteHref('javascript:alert(1)'), '');
+  assertEqual(sanitizeNoteHtml('<a href="tel:+4930123456">x</a>'), '<a href="tel:+4930123456" target="_blank" rel="noopener noreferrer">x</a>');
+});
+
 test('the table menus drop empty groups and put one separator between the rest', function () {
   const sep = '<div class="row-menu-sep"></div>';
   assertEqual(tblMenuJoin([['a', 'b'], [], ['c']]), 'ab' + sep + 'c');
