@@ -590,6 +590,15 @@ test('tables pasted from outside get the width a new table of that column count 
     '<p>x</p><table style="width:35%"><tr><td>a</td></tr></table><p>y</p><table style="width:44%"><tr><td>a</td><td>b</td></tr></table>', 'each table is sized on its own');
 });
 
+test('the table menus drop empty groups and put one separator between the rest', function () {
+  const sep = '<div class="row-menu-sep"></div>';
+  assertEqual(tblMenuJoin([['a', 'b'], [], ['c']]), 'ab' + sep + 'c');
+  assertEqual(tblMenuJoin([[], ['a'], []]), 'a');
+  assertEqual(tblMenuJoin([]), '');
+  assertEqual(tblTick(true).hint.includes('fa-check'), true);
+  assertEqual(tblTick(false).hint, '');
+});
+
 test('new tables are sized to their column count, up to the full width', function () {
   assertEqual(noteTableWidthFor(1), 35);
   assertEqual(noteTableWidthFor(2), 44);

@@ -1054,10 +1054,7 @@
   .note-row-title { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .note-row-sub { display: flex; gap: 8px; min-width: 0; font-size: 12px; color: var(--text-3); }
   .note-row-date { flex-shrink: 0; color: var(--text-2); }
-  .note-row-snippet { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .note-row-folder { font-size: 11px; color: var(--text-3); }
-  .note-row-folder i { margin-right: 3px; }
-  .note-row.selected :is(.note-row-sub, .note-row-date, .note-row-folder) { color: rgba(255,255,255,.82); }
+  .note-row.selected :is(.note-row-sub, .note-row-date) { color: rgba(255,255,255,.82); }
   .notes-editor-pane { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
   .notes-empty { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-3); font-size: 14px; }
   .notes-empty i { font-size: 30px; opacity: .5; }
@@ -1305,7 +1302,8 @@
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
-  .tbl-grip.tbl { width: 15px; height: 15px; border-radius: 5px; font-size: 8px; }
+  .tbl-grip.tbl { width: 14px; height: 14px; border-radius: 5px; font-size: 8px; }
+  .tbl-grip.tbl:not(.sel) { color: var(--text-3); }   /* the one handle drawn as a shape rather than dots: kept light so it does not outweigh the others */
   .tbl-grip.row:not(.sel) { width: 14px; height: 32px; }
   .tbl-grip:hover { background: var(--cap-hover); color: var(--text); }
   .tbl-grip.sel { background: var(--sel-bg, var(--blue-text)); border-color: var(--sel-bg, var(--blue-text)); color: #fff; }
@@ -5233,12 +5231,11 @@ function renderNotesList(vis){
     return;
   }
   list.innerHTML = vis.map(n=>{
-    const sel = n.id===selectedNoteId, fol = folderById(n.folderId);
+    const sel = n.id===selectedNoteId;
     return `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
       <div class="note-row-title">${esc(n.title || 'New note')}${n.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
-      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span><span class="note-row-snippet">${esc(noteSnippet(n) || 'No additional text')}</span></div>
-      ${fol && (searching || noteFolderFilter==='all' || folderChildren(noteFolderFilter).length) ? `<div class="note-row-folder"><i class="fa-regular fa-folder"></i> ${esc(folderPath(fol))}</div>` : ''}
-    </div>`;
+      <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span></div>
+    </div>`;   // a row is just the title and its timestamp: no text snippet, no folder line
   }).join('');
 }
 function updateNoteMeta(n){
@@ -5688,19 +5685,33 @@ const tblInsIcon = k=>`<svg class="tbl-ins" viewBox="0 0 20 20" fill="none" aria
 // Header row = every cell of the first row is a <th>; header column = the first cell of every row below the first is a <th> (needs 2+ rows).
 const tblHeadRow = table=>!!(table.rows[0] && [...table.rows[0].cells].every(x=>x.tagName==='TH'));
 const tblHeadCol = table=>table.rows.length>1 && [...table.rows].slice(1).every(row=>row.cells[0] && row.cells[0].tagName==='TH');
+// The four table menus (toolbar menu, row grip, column grip, whole-table grip) share one grammar and one item builder, so they look and read alike:
+//   Insert (row above/below, column left/right)  |  Header toggle(s)  |  [Cut / Copy]  |  Delete (the selection first, then Delete table)
+// A state (header on) is a ✓ at the right; delete items are red; icons are the same everywhere (minus for a row/column, outline trash can for the table).
+const tblMenuSep = '<div class="row-menu-sep"></div>';
+const tblMenuJoin = groups=>groups.filter(g=>g.length).map(g=>g.join('')).join(tblMenuSep);
+const tblTick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
+// Header row / column icon: a rounded frame (half strength) whose first row / column is filled in solid, as a header looks in the table. Same size, colour and
+// class as the insert icons, so the table menus read as one set.
+const tblHeaderIcon = kind=>`<svg class="tbl-ins" viewBox="0 0 20 20" fill="none" aria-hidden="true">`
+  + (kind==='row'
+    ? `<rect x="2.5" y="3" width="15" height="14" rx="2.6" stroke="currentColor" stroke-width="1.5" opacity=".6"/><path d="M3.2 6.2a2.4 2.4 0 0 1 2.4-2.4h8.8a2.4 2.4 0 0 1 2.4 2.4V8H3.2Z" fill="currentColor"/>`
+    : `<rect x="3" y="2.5" width="14" height="15" rx="2.6" stroke="currentColor" stroke-width="1.5" opacity=".6"/><path d="M6.2 16.8A2.4 2.4 0 0 1 3.8 14.4V5.6a2.4 2.4 0 0 1 2.4-2.4H8v13.6Z" fill="currentColor"/>`)
+  + `</svg>`;
+const TBL_ICON = { del:'fa-solid fa-minus', delTable:'fa-regular fa-trash-can', cut:'fa-solid fa-scissors', copy:'fa-regular fa-copy', even:'fa-solid fa-arrows-left-right' };
 function noteTableMenuHtml(){
+  const whole = tblWholeSelected();
+  if(whole) return tblTableMenuHtml(whole);                      // the whole table is selected (corner grip): the same options as its right-click menu
   const cell = noteSelectedCell();
   if(!cell) return noteTablePickerHtml(noteTablePicker);
-  const { table, r: cr, c: cc } = noteCellPos(cell), hasHead = tblHeadRow(table), hasHeadCol = tblHeadCol(table);
-  const o = (op, icon, label, cur)=>menuOpt(`noteTableEdit('${op}')`, {icon}, label, cur);
-  const ins = (op, key, label)=>menuOpt(`noteTableEdit('${op}')`, {svg: tblInsIcon(key)}, label);
-  const danger = h=>h.replace('row-menu-item menu-opt', 'row-menu-item menu-opt danger');
-  const sep = '<div class="row-menu-sep"></div>';
-  return [
-    ins('rowBefore','rowAbove','Insert row above'), ins('rowAfter','rowBelow','Insert row below'), ins('colBefore','colLeft','Insert column left'), ins('colAfter','colRight','Insert column right'), sep,
-    ...(cr===0 ? [o('header','heading','Header row', hasHead)] : []), ...(cc===0 ? [o('headerCol','heading','Header column', hasHeadCol)] : []), ...(cr===0 || cc===0 ? [sep] : []),
-    danger(o('delRow','minus','Delete row')), danger(o('delCol','minus','Delete column')), danger(o('delTable','trash','Delete table'))
-  ].join('');
+  const { table, r: cr, c: cc } = noteCellPos(cell), item = rowMenuItem, run = op=>`noteTableEdit('${op}')`;
+  return tblMenuJoin([
+    [item(tblInsIcon('rowAbove'), 'Insert row above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert row below', run('rowAfter')),
+     item(tblInsIcon('colLeft'), 'Insert column left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert column right', run('colAfter'))],
+    [...(cr===0 ? [item(tblHeaderIcon('row'), 'Header row', run('header'), tblTick(tblHeadRow(table)))] : []),                 // header toggles only where they apply: first row / first column
+     ...(cc===0 && table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header column', run('headerCol'), tblTick(tblHeadCol(table)))] : [])],
+    [item(TBL_ICON.del, 'Delete row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete column', run('delCol'), {danger:true}), item(TBL_ICON.delTable, 'Delete table', run('delTable'), {danger:true})]
+  ]);
 }
 function toggleNoteTableMenu(){
   const m = document.getElementById('noteTableMenu'); if(!m) return;
@@ -5708,6 +5719,7 @@ function toggleNoteTableMenu(){
   closeNoteTableMenu(); closeNoteListMenu();
   if(wasOpen) return;
   noteTablePicker = { r: 0, c: 0, rows: 8, cols: 8 };
+  const whole = tblWholeSelected(); if(whole) tblMenuRef = { table: whole, r: 0, c: 0 };     // what tblTableRun acts on
   m.innerHTML = noteTableMenuHtml();
   m.classList.add('open');
 }
@@ -5753,7 +5765,7 @@ function tblHandlesShow(table){
   let html = '';
   const whole = tblWhole===table && tblWholeValid(table);
   if(whole) html += `<div class="tbl-sel" style="left:${p(left)}px;top:${p(top)}px;width:${p(w)}px;height:${p(h)}px"></div>`;
-  html += `<div class="tbl-grip tbl${whole ? ' sel' : ''}" style="left:${p(left - 20)}px;top:${p(top - 18)}px" role="button" aria-label="Select table" title="Select table · right-click for its options" onmousedown="event.preventDefault()" onclick="tblSelectTable(event)" oncontextmenu="tblTableContext(event)"><i class="fa-solid fa-up-down-left-right"></i></div>`;
+  html += `<div class="tbl-grip tbl${whole ? ' sel' : ''}" style="left:${p(left - 20)}px;top:${p(top - 18)}px" role="button" aria-label="Select table" title="Select table · right-click for its options" onmousedown="event.preventDefault()" onclick="tblSelectTable(event)" oncontextmenu="tblTableContext(event)"><svg viewBox="0 0 10 10" width="9" height="9" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round"><rect x="1" y="1" width="8" height="8" rx="1.6"/><path d="M5 1V9M1 5H9"/></svg></div>`;   // a tiny 2x2 table glyph: says "table", does not suggest the table can be dragged
   const cell = noteSelectedCell(), mine = cell && !noteIsLocked(noteEditorId) && cell.parentNode.closest('table')===table ? cell : null;
   if(mine){
     const ci = mine.cellIndex, ri = [...table.rows].indexOf(mine.parentNode);
@@ -5860,18 +5872,14 @@ function tblColResizeDown(e, i){
 function tblColsEven(e){ e.stopPropagation(); const t = tblHandlesTable; if(!t || noteIsLocked(noteEditorId) || !t.querySelector('colgroup')) return; const cell = noteSelectedCell(); tblHandlesHide(); tblCommitColWidths(t, null, cell ? noteCellPos(cell) : null); }
 function tblPlus(e, op, r, c){ e.stopPropagation(); if(tblHandlesTable) noteTableEdit(op, { table: tblHandlesTable, r, c }); }
 function tblGripMenuHtml(kind, sel, table){
-  const a = sel.a, b = sel.b, n = b - a + 1, item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
-  const noun = kind==='col' ? 'column' : 'row', nounN = n>1 ? `${n} ${noun}s` : noun;
-  const before = kind==='col' ? 'left' : 'above', after = kind==='col' ? 'right' : 'below';
-  const head = table ? tblHeadRow(table) : false, headCol = table ? tblHeadCol(table) : false, tick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
-  // Grouped by scope: add, then the selection's own delete, then the table-level items (header toggle, delete table) last.
-  return [
-    item(tblInsIcon(kind==='col' ? 'colLeft' : 'rowAbove'), `Insert ${nounN} ${before}`, `tblGripRun('${kind==='col' ? 'colBefore' : 'rowBefore'}')`), item(tblInsIcon(kind==='col' ? 'colRight' : 'rowBelow'), `Insert ${nounN} ${after}`, `tblGripRun('${kind==='col' ? 'colAfter' : 'rowAfter'}')`), sep,
-    item('fa-solid fa-minus', `Delete ${nounN}`, `tblGripRun('${kind==='col' ? 'delCol' : 'delRow'}')`, {danger:true}), sep,
-    ...(kind==='row' && a===0 ? [item('fa-solid fa-heading', 'Header row', `tblGripRun('header')`, tick(head))] : []),   // the header toggles only appear on the first row / first column
-    ...(kind==='col' && a===0 ? [item('fa-solid fa-heading', 'Header column', `tblGripRun('headerCol')`, tick(headCol))] : []),
-    item('fa-regular fa-trash-can', 'Delete table', `tblGripRun('delTable')`, {danger:true})
-  ].join('');
+  const a = sel.a, b = sel.b, n = b - a + 1, item = rowMenuItem, col = kind==='col', run = op=>`tblGripRun('${op}')`;
+  const noun = col ? 'column' : 'row', nounN = n>1 ? `${n} ${noun}s` : noun;
+  return tblMenuJoin([
+    [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), `Insert ${nounN} ${col ? 'left' : 'above'}`, run(col ? 'colBefore' : 'rowBefore')),
+     item(tblInsIcon(col ? 'colRight' : 'rowBelow'), `Insert ${nounN} ${col ? 'right' : 'below'}`, run(col ? 'colAfter' : 'rowAfter'))],
+    a===0 && table ? [col ? item(tblHeaderIcon('col'), 'Header column', run('headerCol'), tblTick(tblHeadCol(table))) : item(tblHeaderIcon('row'), 'Header row', run('header'), tblTick(tblHeadRow(table)))] : [],   // only on the first row / column
+    [item(TBL_ICON.del, `Delete ${nounN}`, run(col ? 'delCol' : 'delRow'), {danger:true}), item(TBL_ICON.delTable, 'Delete table', run('delTable'), {danger:true})]
+  ]);
 }
 // Open the menu of the selected column(s)/row(s) at a position (the pointer, for a right-click).
 function tblShowMenuAt(x, y, measureEl){
@@ -5917,6 +5925,8 @@ function tblWholeValid(table){
   const r = sel.getRangeAt(0), t = document.createRange(); t.selectNode(table);
   return r.compareBoundaryPoints(Range.START_TO_START, t)===0 && r.compareBoundaryPoints(Range.END_TO_END, t)===0;
 }
+// The table that is currently selected as a whole (corner grip), or null.
+function tblWholeSelected(){ return tblWhole && !noteIsLocked(noteEditorId) && tblWholeValid(tblWhole) ? tblWhole : null; }
 function tblSelectTable(e){
   e.preventDefault(); e.stopPropagation();
   const table = tblHandlesTable; if(!table || noteIsLocked(noteEditorId)) return;
@@ -5929,16 +5939,14 @@ function tblTableContext(e){
   tblShowTableMenuAt(e.clientX, e.clientY, e.currentTarget);
 }
 function tblTableMenuHtml(table){
-  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>', tick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
-  return [
-    item('fa-solid fa-heading', 'Header row', `tblTableRun('header')`, tick(tblHeadRow(table))),
-    table.rows.length>1 ? item('fa-solid fa-heading', 'Header column', `tblTableRun('headerCol')`, tick(tblHeadCol(table))) : '',
-    table.querySelector('colgroup') ? item('fa-solid fa-arrows-left-right', 'Distribute columns evenly', `tblTableRun('even')`) : '',
-    sep,
-    item('fa-solid fa-scissors', 'Cut', `tblTableRun('cut')`), item('fa-regular fa-copy', 'Copy', `tblTableRun('copy')`),
-    sep,
-    item('fa-regular fa-trash-can', 'Delete table', `tblTableRun('delTable')`, {danger:true})
-  ].join('');
+  const item = rowMenuItem, run = op=>`tblTableRun('${op}')`;
+  return tblMenuJoin([
+    [item(tblHeaderIcon('row'), 'Header row', run('header'), tblTick(tblHeadRow(table))),
+     ...(table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header column', run('headerCol'), tblTick(tblHeadCol(table)))] : []),
+     ...(table.querySelector('colgroup') ? [item(TBL_ICON.even, 'Distribute columns evenly', run('even'))] : [])],
+    [item(TBL_ICON.cut, 'Cut', run('cut')), item(TBL_ICON.copy, 'Copy', run('copy'))],
+    [item(TBL_ICON.delTable, 'Delete table', run('delTable'), {danger:true})]
+  ]);
 }
 function tblShowTableMenuAt(x, y, measureEl){
   const table = tblWhole, menu = document.getElementById('rowMenu'); if(!table || !menu) return;
@@ -5949,7 +5957,7 @@ function tblShowTableMenuAt(x, y, measureEl){
   placeRowMenu(menu, x, y, measureEl);
 }
 function tblTableRun(op){
-  const ref = tblMenuRef; closeRowMenu();
+  const ref = tblMenuRef; closeRowMenu(); closeNoteTableMenu();
   const table = ref && ref.table; if(!table || !table.isConnected) return;
   if(op==='header' || op==='headerCol' || op==='delTable'){ tblWhole = null; noteTableEdit(op, ref); return; }
   if(op==='even'){ tblWhole = null; tblCommitColWidths(table, null, null); return; }
@@ -6029,7 +6037,7 @@ function updateNoteToolbarState(){
   const set = (cmd, on)=>{ const b = document.querySelector(`.note-toolbar [data-cmd="${cmd}"]`); if(b) b.classList.toggle('active', !!on); };
   ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, document.queryCommandState(c)));
   const ul = noteClosest(sel.anchorNode, 'UL'), ol = noteClosest(sel.anchorNode, 'OL');
-  set('table', !!noteSelectedCell()); set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
+  set('table', !!noteSelectedCell() || !!tblWholeSelected()); set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
   const style = document.getElementById('noteStyleSelect'); if(style) style.value = /^h[1-3]$/.test(v) ? v : 'p';
 }
