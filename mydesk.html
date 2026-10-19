@@ -1115,15 +1115,24 @@
   .note-body ul[data-ls="emdash"] { list-style-type: "\2014\00a0\00a0"; }
   .note-body ol[data-ls="alpha"] { list-style-type: lower-alpha; }
   .note-body ol[data-ls="roman"] { list-style-type: lower-roman; }
-  /* sub-numbering: Tab in a numbered list nests an <ol> directly inside the <ol>; its items read 1.1. / a.1. / i.1. (and 1.1.1. a level down).
-     "nt" counts the top level (its own marker stays native), "ns" counts the nested levels, joined with counters(). */
-  .note-body ol:not(ol > ol) { counter-reset: nt; }
-  .note-body ol:not(ol > ol) > li { counter-increment: nt; }
-  .note-body ol > ol { counter-reset: ns; }
-  .note-body ol > ol > li { counter-increment: ns; list-style: none; position: relative; }
-  .note-body ol > ol > li::before { content: counter(nt) "." counters(ns, ".") "."; position: absolute; right: 100%; margin-right: .5em; white-space: nowrap; }
-  .note-body ol[data-ls="alpha"] ol > li::before { content: counter(nt, lower-alpha) "." counters(ns, ".") "."; }
-  .note-body ol[data-ls="roman"] ol > li::before { content: counter(nt, lower-roman) "." counters(ns, ".") "."; }
+  /* Nested numbered lists (Tab in a list nests an <ol> directly inside the <ol>) follow the Word / Google Docs outline: each level takes the next
+     style, 1. -> a. -> i. -> 1. ..., or a. -> i. -> 1. and i. -> 1. -> a. when the top level was started as letters / roman. A nested list the
+     user styled explicitly (data-ls) keeps its own style. noteListKind() mirrors this cycle in JS. */
+  .note-body ol:not([data-ls]):not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]),
+  .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) { list-style-type: decimal; }
+  .note-body ol:not([data-ls]):not(ol > ol) > ol:not([data-ls]),
+  .note-body ol:not([data-ls]):not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) { list-style-type: lower-alpha; }
+  .note-body ol:not([data-ls]):not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol:not([data-ls]):not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]),
+  .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
+  .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) { list-style-type: lower-roman; }
   .pop-glyph { flex: none; width: 22px; margin-right: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; color: var(--text-2); }
   .pop-glyph.sym { font-size: 19px; font-weight: 700; }   /* the bullet marks are tiny characters: scaled up to the visual weight of "1." "a." "i." */
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
@@ -5436,13 +5445,19 @@ function noteListsInSelection(){
   if(!body || !sel || !sel.rangeCount) return [];
   const r = sel.getRangeAt(0), out = new Set();
   if(!r.collapsed) body.querySelectorAll('ul, ol').forEach(l=>{ if(r.intersectsNode(l)) out.add(l); });   // a bare caret only counts the lists around it: intersectsNode also matches a list that merely ends where the caret sits, which turned a neighbouring bullet list into numbers
-  [sel.anchorNode, sel.focusNode].forEach(n=>{ for(let x = n; x && x!==body; x = x.parentNode){ if(x.nodeType===1 && (x.tagName==='UL' || x.tagName==='OL')) out.add(x); } });
+  [sel.anchorNode, sel.focusNode].forEach(n=>{ for(let x = n; x && x!==body; x = x.parentNode){ if(x.nodeType===1 && (x.tagName==='UL' || x.tagName==='OL')){ out.add(x); if(r.collapsed) break; } } });   // a bare caret: the innermost list only, so restyling a sub-list leaves its parent alone
   return [...out];
 }
 // The list button's main click re-applies the last bullet style picked from the menu (per-device); numbered styles don't change it.
 let noteBulletKind = 'disc';
 try{ const k = localStorage.getItem('mytasks_note_bullet'); if(k==='disc' || NOTE_UL_STYLES.includes(k)) noteBulletKind = k; }catch(_){}
-const noteListKind = l=>l.getAttribute('data-ls') || (l.tagName==='OL' ? 'decimal' : 'disc');
+const NOTE_OL_NEXT = {decimal:'alpha', alpha:'roman', roman:'decimal'};   // the outline cycle (also in the CSS above)
+function noteListKind(l){
+  const ls = l.getAttribute('data-ls');
+  if(ls) return ls;
+  if(l.tagName!=='OL') return 'disc';
+  return l.parentNode && l.parentNode.tagName==='OL' ? NOTE_OL_NEXT[noteListKind(l.parentNode)] : 'decimal';
+}
 function noteCurrentListStyle(){
   const ls = noteListsInSelection().filter(l=>!l.classList.contains('cl'));
   if(!ls.length) return null;
