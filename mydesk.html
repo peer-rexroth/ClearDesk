@@ -1763,7 +1763,7 @@
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em> and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
-          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
+          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
@@ -6261,12 +6261,49 @@ function tblGripContext(e, kind, i){
 // The selection is remembered at mousedown, because the right-click itself moves the caret and would end it.
 let tblSelAtMouseDown = null;
 function noteBodyMouseDown(e){ tblSelAtMouseDown = e.button===2 && tblSel ? { kind: tblSel.kind, a: tblSel.a, b: tblSel.b } : null; tblWholeAtMouseDown = e.button===2 && tblWhole && tblWholeValid(tblWhole) ? tblWhole : null; }
+// ---- right-click on a link ----
+// Open / copy / edit / remove, worded for what the link is (web address, e-mail address, phone number). Edit and Remove change the note, so a locked note only
+// gets the first two. Everywhere else in the text the browser's own menu stays (spelling and so on).
+let noteLinkMenuEl = null;
+function noteLinkMenuHtml(a){
+  const href = safeNoteHref(a.getAttribute('href')), item = rowMenuItem, mail = /^mailto:/i.test(href), tel = /^tel:/i.test(href);
+  const open = mail ? ['fa-regular fa-envelope', 'New Message'] : tel ? ['fa-solid fa-phone', 'Call'] : ['fa-solid fa-arrow-up-right-from-square', 'Open Link'];
+  const copy = mail ? 'Copy Address' : tel ? 'Copy Number' : 'Copy Link';
+  const groups = [[item(open[0], open[1], `noteLinkMenuRun('open')`), item('fa-regular fa-copy', copy, `noteLinkMenuRun('copy')`)]];
+  if(!noteIsLocked(noteEditorId)) groups.push([item('fa-solid fa-pen', 'Edit Link…', `noteLinkMenuRun('edit')`), item('fa-solid fa-link-slash', 'Remove Link', `noteLinkMenuRun('remove')`, {danger:true})]);
+  return tblMenuJoin(groups);
+}
+function showNoteLinkMenu(a, x, y){
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu(); closeNoteLinkBar(false);
+  noteLinkMenuEl = a; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = noteLinkMenuHtml(a);
+  placeRowMenu(menu, x, y, document.getElementById('noteBody'));
+}
+function noteLinkMenuRun(op){
+  const a = noteLinkMenuEl; closeRowMenu(); noteLinkMenuEl = null;
+  if(!a || !a.isConnected) return;
+  const href = safeNoteHref(a.getAttribute('href'));
+  if(op==='open'){ noteOpenHref(href); return; }
+  if(op==='copy'){
+    const txt = /^mailto:/i.test(href) ? href.slice(7) : /^tel:/i.test(href) ? a.textContent : href;      // the address / the number as written / the web address
+    noteWriteClipboard(esc(txt), txt).then(ok=>showToast(ok ? 'Copied' : 'Could not use the clipboard here', !ok));
+    return;
+  }
+  if(noteIsLocked(noteEditorId)) return;
+  const body = document.getElementById('noteBody'), sel = window.getSelection(), r = document.createRange();
+  body.focus();
+  if(op==='edit'){ r.selectNodeContents(a); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); openNoteLinkBar(); return; }   // the popover edits the link the caret is in
+  if(op==='remove'){ r.selectNodeContents(a); sel.removeAllRanges(); sel.addRange(r); document.execCommand('unlink', false); onNoteInput(); }
+}
 function onNoteContextMenu(e){
   const whole = tblWholeAtMouseDown; tblWholeAtMouseDown = null;
   if(whole && whole.isConnected && e.target && e.target.closest && e.target.closest('table')===whole){      // right-click on the selected table: its options
     e.preventDefault(); tblSel = null; tblWhole = whole; tblSelectRange(whole); tblHandlesShow(whole);
     tblShowTableMenuAt(e.clientX, e.clientY, e.target); return;
   }
+  const link = e.target && e.target.closest ? e.target.closest('#noteBody a') : null;                          // right-click on a link: its own small menu
+  if(link && safeNoteHref(link.getAttribute('href'))){ tblSelAtMouseDown = null; e.preventDefault(); showNoteLinkMenu(link, e.clientX, e.clientY); return; }
   const pending = tblSelAtMouseDown; tblSelAtMouseDown = null;
   if(!pending || !tblHandlesTable) return;
   const cell = e.target && e.target.closest ? e.target.closest('td, th') : null;
