@@ -733,6 +733,7 @@ const ICONS = {
   .row-menu-sub:focus-within > .row-menu-flyout { display: flex; }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: 14px; font-family: var(--font); border: 1px solid var(--border-2); border-radius: 6px; padding: 5px 8px; background: var(--bg-2); color: var(--text); }
   .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
+  .cell-pop.fixed { position: fixed; }   /* on a board card: placed by openCellPop against the window so the column's scroll area cannot clip it */
   /* the Due cell is the last column (and a card's due pill sits at the card's right edge): a menu wider than the cell must grow
      leftwards, or it runs under the scroll container's edge and is clipped */
   .task-cell.due .cell-pop, .board-card-top .cell-host .cell-pop { left: auto; right: 0; }
@@ -4809,6 +4810,9 @@ function isoAddDays(iso, n){
 }
 function isoWeekday(iso){ const [y,m,d] = iso.split('-').map(Number); return new Date(y,m-1,d).getDay(); }
 function closeCellPop(){ const el = document.getElementById('cellPop'); if(el && el.remove) el.remove(); }
+// A popover placed against the window (board cards) does not follow its card, so scrolling the board or resizing closes it.
+window.addEventListener('scroll', e=>{ const el = document.getElementById('cellPop'); if(el && el.classList && el.classList.contains('fixed') && !el.contains(e.target)) closeCellPop(); }, true);
+window.addEventListener('resize', ()=>{ const el = document.getElementById('cellPop'); if(el && el.classList && el.classList.contains('fixed')) closeCellPop(); });
 // Native-menu rows: a tick column (current value), a colour dot, plain text.
 const PRIORITY_DOT = { high:'var(--red-text)', medium:'var(--amber-text)', low:'var(--teal-text)' };
 const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var(--green-text)' };
@@ -4849,6 +4853,18 @@ function openCellPop(e, id, field){
   pop.onclick = ev=>ev.stopPropagation();
   pop.innerHTML = cellPopOptionsHtml(t, field);
   host.appendChild(pop);
+  // On a board card the popover would be clipped by the column's scroll area (the first card has no room above it), so it is placed against the window instead.
+  if(host.closest && host.closest('.board-col-body') && host.getBoundingClientRect){
+    const h = host.getBoundingClientRect(), k = h.width && host.offsetWidth ? h.width / host.offsetWidth : 1;
+    if(h.width){
+      pop.classList.add('fixed');
+      const pw = pop.offsetWidth, ph = pop.offsetHeight, vw = window.innerWidth / k, vh = window.innerHeight / k;
+      let left = h.left / k, top = h.bottom / k + 6;
+      if(top + ph > vh - 8) top = Math.max(8, h.top / k - 6 - ph);
+      if(left + pw > vw - 16) left = Math.max(8, vw - pw - 16);
+      pop.style.cssText += `;left:${left}px;top:${top}px;right:auto;bottom:auto`;
+    }
+  }
 }
 function pickCell(e, id, field, value){
   if(e && e.stopPropagation) e.stopPropagation();
