@@ -1293,7 +1293,7 @@
   .notes-list-resizer:focus { outline: none; }
   @media (max-width: 800px) { .notes-list-resizer { display: none; } }   /* the narrow layout keeps its fixed 220px list */
   /* the ⋯ button at the right of the editor bar: same round filled button as compose; amber while the note is locked */
-  html[data-scheme="glass"] .note-toolbar .note-more-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
+  html[data-scheme="glass"] .note-toolbar .note-more-btn, html[data-scheme="glass"] .note-toolbar .note-lock-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
   html[data-scheme="glass"] .note-toolbar .note-more-btn.on { background: var(--amber-bg); color: var(--amber-text); }
   /* keep the editor bar on ONE row in a narrower pane: the folder dropdown (also in the ⋯ menu's "Move to") steps aside, then the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
@@ -1531,7 +1531,8 @@
           </div>
                     <span class="note-toolbar-grow"></span>
           <select id="noteFolderSelect" class="note-select" aria-label="Folder" title="Move to folder" onchange="moveNote(noteEditorId, this.value)"></select>
-          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: lock, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+          <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><i class="fa-solid fa-lock-open"></i></button>
+          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
         </div>
         <div class="note-linkbar" id="noteLinkBar" hidden>
           <i class="fa-solid fa-link"></i>
@@ -1748,7 +1749,7 @@
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
-          <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the <strong>⋯</strong> menu at the right of a note's toolbar has <em>Lock</em>: a locked note is read-only (the ⋯ turns amber while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
+          <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
           <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
@@ -4713,7 +4714,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', [mod,'⇧ C']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -5066,6 +5067,139 @@ function uniqueNoteTitle(base){
   while(taken.has(t)) t = `${base} (copy ${i++})`;
   return t.slice(0,200);
 }
+// ---- copy a whole note (for pasting into Mail, Pages, Slack ...) ----
+// Puts two versions on the clipboard at once: rich HTML (the title as a heading, then the body, with inline styling so it survives a mail client:
+// light colours, bordered tables, checklists as ☐/☑ lines, nested lists as proper <li><ul>) and plain text (lists as "- " / "1." / "a.", tables as
+// "cell | cell" rows, links as "text (url)"). The note's own markup (data-ls, column widths, theme colours) is not copied.
+const noteCopyAlpha = n=>{ let t = ''; while(n>0){ n--; t = String.fromCharCode(97 + n % 26) + t; n = Math.floor(n / 26); } return t; };
+const noteCopyRoman = n=>{ const m = [[10,'x'],[9,'ix'],[5,'v'],[4,'iv'],[1,'i']]; let t = ''; m.forEach(([v, c])=>{ while(n>=v){ t += c; n -= v; } }); return t; };
+const noteCopyMarker = (kind, n)=>kind==='alpha' ? noteCopyAlpha(n) + '.' : kind==='roman' ? noteCopyRoman(n) + '.' : n + '.';
+const noteCopyIsList = n=>n.nodeType===1 && (n.tagName==='UL' || n.tagName==='OL');
+function noteCopyInline(n){                                    // text of an inline run: links as "text (url)", <br> as a newline
+  if(n.nodeType===3) return n.nodeValue;
+  if(n.nodeType!==1) return '';
+  if(n.tagName==='BR') return '\n';
+  const inner = [...n.childNodes].map(noteCopyInline).join('');
+  if(n.tagName==='A'){ const h = n.getAttribute('href') || ''; return h && h!==inner.trim() ? `${inner} (${h})` : inner; }
+  return inner;
+}
+function noteToPlainText(root){
+  const lines = [];
+  const blank = ()=>{ if(lines.length && lines[lines.length - 1]!=='') lines.push(''); };
+  const walk = (parent, indent)=>{
+    let buf = '';
+    const flush = ()=>{ const t = buf.replace(/[ \t\r\n]+/g, ' ').trim(); if(t) lines.push(indent + t); buf = ''; };
+    [...parent.childNodes].forEach(n=>{
+      if(n.nodeType===3){ buf += n.nodeValue; return; }
+      if(n.nodeType!==1) return;
+      const tag = n.tagName;
+      if(tag==='BR'){ if(buf.trim()) flush(); else lines.push(''); return; }
+      if(tag==='UL' || tag==='OL'){ flush(); blank(); list(n, indent); blank(); return; }
+      if(tag==='TABLE'){ flush(); blank(); [...n.rows].forEach(row=>lines.push(indent + [...row.cells].map(c=>noteCopyInline(c).replace(/\s+/g, ' ').trim()).join(' | '))); blank(); return; }
+      if(tag==='HR'){ flush(); lines.push(indent + '---'); return; }
+      if(tag==='PRE'){ flush(); n.textContent.split('\n').forEach(l=>lines.push(indent + l)); return; }
+      if(tag==='BLOCKQUOTE'){ flush(); const at = lines.length; walk(n, indent); for(let i = at; i<lines.length; i++) if(lines[i]) lines[i] = indent + '> ' + lines[i].slice(indent.length); return; }
+      if(/^(P|DIV|H1|H2|H3)$/.test(tag)){ flush(); const head = /^H/.test(tag); if(head) blank(); const at = lines.length; walk(n, indent); if(head && lines.length>at) blank(); return; }
+      buf += noteCopyInline(n);                                  // an inline element in the middle of a line
+    });
+    flush();
+  };
+  const list = (ul, indent)=>{
+    const ol = ul.tagName==='OL', cl = ul.classList.contains('cl'), kind = noteListKind(ul);
+    let i = 0;
+    [...ul.childNodes].forEach(li=>{
+      if(noteCopyIsList(li)){ list(li, indent + '  '); return; }  // Chrome nests a sub-list directly inside the list
+      if(li.nodeType!==1 || li.tagName!=='LI') return;
+      const own = [...li.childNodes].filter(c=>!noteCopyIsList(c)).map(noteCopyInline).join('').replace(/[ \t\r\n]+/g, ' ').trim();
+      i++;
+      const mark = cl ? (li.getAttribute('data-done')==='1' ? '☑' : '☐') : ol ? noteCopyMarker(kind, i) : (kind==='dot' ? '•' : '-');
+      lines.push(`${indent}${mark} ${own}`.trimEnd());
+      [...li.childNodes].filter(noteCopyIsList).forEach(sub=>list(sub, indent + '  '));
+    });
+  };
+  walk(root, '');
+  while(lines.length && lines[lines.length - 1]==='') lines.pop();
+  while(lines.length && lines[0]==='') lines.shift();
+  return lines.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+function noteToMailHtml(root){
+  const CELL = 'border:1px solid #c8c8cc;padding:4px 8px;vertical-align:top;text-align:left';
+  const listType = l=>({ decimal:'decimal', alpha:'lower-alpha', roman:'lower-roman', square:'square', dot:'disc', dash:'disc', emdash:'disc', disc:'disc' })[noteListKind(l)] || 'disc';
+  const kids = n=>[...n.childNodes].map(rich).join('');
+  const rich = n=>{
+    if(n.nodeType===3) return esc(n.nodeValue);
+    if(n.nodeType!==1) return '';
+    const t = n.tagName;
+    switch(t){
+      case 'B': case 'STRONG': case 'I': case 'EM': case 'U': case 'S': case 'STRIKE': return `<${t.toLowerCase()}>${kids(n)}</${t.toLowerCase()}>`;
+      case 'BR': return '<br>';
+      case 'HR': return '<hr style="border:0;border-top:1px solid #c8c8cc;margin:12px 0">';
+      case 'A': { const h = n.getAttribute('href') || ''; return h ? `<a href="${esc(h)}">${kids(n)}</a>` : kids(n); }
+      case 'P': case 'DIV': return `<div style="margin:0 0 6px">${kids(n) || '<br>'}</div>`;
+      case 'H1': return `<div style="font-size:20px;font-weight:700;margin:12px 0 6px">${kids(n)}</div>`;
+      case 'H2': return `<div style="font-size:17px;font-weight:700;margin:10px 0 4px">${kids(n)}</div>`;
+      case 'H3': return `<div style="font-size:15px;font-weight:700;margin:8px 0 4px">${kids(n)}</div>`;
+      case 'BLOCKQUOTE': return `<blockquote style="margin:6px 0;padding-left:12px;border-left:3px solid #c8c8cc;color:#555">${kids(n)}</blockquote>`;
+      case 'PRE': return `<pre style="font-family:Menlo,monospace;font-size:13px;background:#f4f4f6;padding:8px 10px;border-radius:6px;white-space:pre-wrap">${esc(n.textContent)}</pre>`;
+      case 'CODE': return `<code style="font-family:Menlo,monospace;font-size:.9em;background:#f4f4f6;padding:1px 4px;border-radius:3px">${kids(n)}</code>`;
+      case 'UL': case 'OL': {
+        const cl = n.classList.contains('cl'), tag = t.toLowerCase();
+        const style = cl ? 'list-style:none;margin:4px 0;padding-left:2px' : `list-style-type:${listType(n)};margin:4px 0;padding-left:24px`;
+        const items = [...n.childNodes].map(li=>{
+          if(noteCopyIsList(li)) return `<li style="list-style:none;margin:0;padding:0">${rich(li)}</li>`;   // a sub-list sitting directly in the list goes inside its own <li>
+          if(li.nodeType!==1 || li.tagName!=='LI') return '';
+          const box = cl ? (li.getAttribute('data-done')==='1' ? '☑ ' : '☐ ') : '';
+          return `<li style="margin:2px 0">${box}${kids(li)}</li>`;
+        }).join('');
+        return `<${tag} style="${style}">${items}</${tag}>`;
+      }
+      case 'TABLE': {
+        const wm = /width\s*:\s*([\d.]+)%/.exec(n.getAttribute('style') || '');
+        return `<table style="border-collapse:collapse;margin:8px 0;${wm ? `width:${wm[1]}%` : 'width:100%'}">${kids(n)}</table>`;
+      }
+      case 'COLGROUP': return `<colgroup>${kids(n)}</colgroup>`;
+      case 'COL': { const wm = /width\s*:\s*([\d.]+)%/.exec(n.getAttribute('style') || ''); return wm ? `<col style="width:${wm[1]}%">` : '<col>'; }
+      case 'THEAD': case 'TBODY': return `<${t.toLowerCase()}>${kids(n)}</${t.toLowerCase()}>`;
+      case 'TR': return `<tr>${kids(n)}</tr>`;
+      case 'TH': return `<th style="${CELL};background:#f2f2f4;font-weight:600">${kids(n)}</th>`;
+      case 'TD': return `<td style="${CELL}">${kids(n)}</td>`;
+      default: return kids(n);
+    }
+  };
+  return kids(root);
+}
+function noteCopyContent(n){
+  const holder = document.createElement('div');
+  holder.innerHTML = sanitizeNoteHtml(n.body);                      // the same cleaned markup the editor holds
+  const title = (n.title || '').trim();
+  const plain = [title, noteToPlainText(holder)].filter(Boolean).join('\n\n');
+  const html = `<div style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#1d1d1f">`
+    + (title ? `<div style="font-size:22px;font-weight:700;margin:0 0 10px">${esc(title)}</div>` : '') + noteToMailHtml(holder) + `</div>`;
+  return { html, plain };
+}
+function noteWriteClipboard(html, plain){
+  const legacy = ()=>{                                              // no async clipboard (e.g. a file:// page): a copy event on a selected scratch field
+    const ta = document.createElement('textarea'); ta.value = plain; ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0';
+    document.body.appendChild(ta); ta.select();
+    const h = e=>{ e.clipboardData.setData('text/html', html); e.clipboardData.setData('text/plain', plain); e.preventDefault(); };
+    document.addEventListener('copy', h, { once: true });
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(_){}
+    document.removeEventListener('copy', h); ta.remove();
+    return ok;
+  };
+  if(navigator.clipboard && navigator.clipboard.write && window.ClipboardItem){
+    return navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([plain], { type: 'text/plain' }) })])
+      .then(()=>true, ()=>legacy());
+  }
+  return Promise.resolve(legacy());
+}
+function copyNote(id){
+  const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
+  if(n.id===noteEditorId) flushNoteEdit();                          // what is on screen, not the last autosave
+  const { html, plain } = noteCopyContent(notes.find(x=>x.id===n.id));
+  if(!plain){ showToast('Nothing to copy: the note is empty'); return; }
+  noteWriteClipboard(html, plain).then(ok=>showToast(ok ? 'Note copied: paste it into Mail or any editor' : 'Could not use the clipboard here', !ok));
+}
 function cloneNote(id){
   const src = notes.find(n=>n.id===id); if(!src) return;
   flushNoteEdit();
@@ -5085,12 +5219,13 @@ function cloneNote(id){
 
 // ---- right-click menus ----
 let noteMenuId = null, folderMenuId = null;
-function noteMenuHtml(id){
+function noteMenuHtml(id, opts){
   const n = notes.find(x=>x.id===id); if(!n) return '';
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
   const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {icon:'folder', indent:!!f.parentId}, f.name, f.id===n.folderId)).join('');
   return [
-    item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`),
+    ...(opts && opts.noLock ? [] : [item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`)]),   // the toolbar has its own lock button
+    item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`),
     item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
     sep,
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', `class="row-menu-item sub-parent"${n.locked ? ' disabled' : ''}`),
@@ -5111,6 +5246,7 @@ function noteMenuRun(kind, value){
   const id = noteMenuId; closeRowMenu();
   if(!id) return;
   if(kind==='lock') toggleNoteLock(id);
+  else if(kind==='copy') copyNote(id);
   else if(kind==='clone') cloneNote(id);
   else if(kind==='move') moveNote(id, value);
   else if(kind==='delete') deleteNote(id);
@@ -5269,8 +5405,12 @@ function renderNoteEditor(){
   ed?.classList.toggle('locked', locked);
   updateNoteToolbarState();                         // the table strip hides on a locked note
   body.contentEditable = locked ? 'false' : 'true'; title.readOnly = locked;
-  const more = document.getElementById('noteMoreBtn');
-  if(more){ more.classList.toggle('on', locked); more.title = locked ? 'More: this note is locked' : 'More: lock, clone, move, delete'; }
+  const lockBtn = document.getElementById('noteLockBtn');                          // the lock toggle in the toolbar: amber and closed while the note is locked
+  if(lockBtn){
+    lockBtn.classList.toggle('on', locked); lockBtn.setAttribute('aria-pressed', String(locked));
+    lockBtn.title = locked ? 'Unlock note' : 'Lock note'; lockBtn.setAttribute('aria-label', lockBtn.title);
+    lockBtn.innerHTML = locked ? '<i class="fa-solid fa-lock"></i>' : '<i class="fa-solid fa-lock-open"></i>';
+  }
   updateNoteMeta(n);
 }
 function renderNotes(){
@@ -6007,7 +6147,7 @@ function openNoteMoreMenu(e){
   const menu = document.getElementById('rowMenu'), id = noteEditorId; if(!menu || !id) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   noteMenuId = id; folderMenuId = null;
-  menu.innerHTML = noteMenuHtml(id);
+  menu.innerHTML = noteMenuHtml(id, {noLock:true});
   const r = e.currentTarget.getBoundingClientRect();
   placeRowMenu(menu, r.right - 220, r.bottom + 6, e.currentTarget);
 }
@@ -6279,6 +6419,7 @@ function handleNotesKeys(e){
   if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
   if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
+  if((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && e.key.toLowerCase()==='c' && selectedNoteId){ e.preventDefault(); copyNote(selectedNoteId); return; }   // the whole note, for pasting into Mail
   if(!onList || typing) return;
   const vis = visibleNotes(), i = vis.findIndex(n=>n.id===selectedNoteId);
   if(e.key==='ArrowDown' || e.key==='ArrowUp'){
