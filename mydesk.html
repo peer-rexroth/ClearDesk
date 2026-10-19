@@ -200,7 +200,7 @@
   .btn-sm { font-size: 12px; padding: 4px 10px; }
   .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 12px; padding: 3px 5px; border-radius: 5px; }
   .subtask-toggle { display: inline-block; flex-shrink: 0; font-size: 10px; padding: 2px 4px; width: 16px; box-sizing: border-box; }
-  .icon-btn:hover { background: var(--bg-3); color: var(--text); }
+  .icon-btn:hover { background: var(--hover); color: var(--text); }
   .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: var(--radius); cursor: pointer; font-size: 13px; }
   .proj-select-row:hover { background: var(--bg-2); }
   .proj-select-check { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
@@ -211,13 +211,13 @@
   /* split button */
   .split-btn { display: inline-flex; position: relative; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: visible; }
   .split-btn-main { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: var(--bg-2); color: var(--text); font-size: 12px; font-family: var(--font); border: none; border-radius: var(--radius) 0 0 var(--radius); cursor: pointer; white-space: nowrap; }
-  .split-btn-main:hover { background: var(--bg-3); }
+  .split-btn-main:hover { background: var(--hover); }
   .split-btn-chevron { display: flex; align-items: center; padding: 5px 7px; background: var(--bg-2); color: var(--text-3); font-size: 9px; font-family: var(--font); border: none; border-left: 0.5px solid var(--border); border-radius: 0 var(--radius) var(--radius) 0; cursor: pointer; }
-  .split-btn-chevron:hover { background: var(--bg-3); color: var(--text); }
+  .split-btn-chevron:hover { background: var(--hover); color: var(--text); }
   .split-btn-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); box-shadow: 0 6px 18px rgba(0,0,0,.14); min-width: 210px; z-index: 300; overflow: hidden; }
   .split-btn-menu.open { display: block; }
   .split-btn-menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 13px; cursor: pointer; color: var(--text); }
-  .split-btn-menu-item:hover { background: var(--bg-3); }
+  .split-btn-menu-item:hover { background: var(--hover); }
   .split-btn-menu-item + .split-btn-menu-item { border-top: 0.5px solid var(--border); }
   .split-btn-menu-icon { flex-shrink: 0; width: 14px; margin-top: 1px; color: var(--text-2); font-size: 12px; }
   .split-btn-menu-label { font-size: 12px; font-weight: 500; }
@@ -254,7 +254,7 @@
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
-  .project-row.drop-into { background: color-mix(in srgb, var(--accent) 24%, transparent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+  .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
   .note-row.dragging { opacity: .4; }
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
   .project-row.settle { animation: rowSettle .22s ease-out; }
@@ -400,13 +400,13 @@
   .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity .1s ease; }
   /* the capsule is --bg-3, the same as .icon-btn:hover, so a hovered button used to vanish into it: give it a visible disc */
   .row-actions .icon-btn { border-radius: 999px; padding: 4px 6px; }
-  .row-actions .icon-btn:hover, .subtask-toggle:hover, .sub-step-toggle:hover { background: color-mix(in srgb, var(--text) 14%, transparent); color: var(--text); }
+  .row-actions .icon-btn:hover, .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); color: var(--text); }
   /* the expand/collapse chevrons sit on a row that is itself grey on hover, so the plain --bg-3 icon-button hover vanished into it */
   /* centre the glyph in its disc: the old box was 16px wide with 4px side padding (8px content) around a 13px icon, so the
      chevron sat 2.5px right of centre and only looked off once the hover disc made the box visible */
   .subtask-toggle, .sub-step-toggle { border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; }
   /* chevrons are small (16px), so the disc is grown with a ring and made stronger than the other icon buttons' */
-  .subtask-toggle:hover, .sub-step-toggle:hover { background: color-mix(in srgb, var(--text) 20%, transparent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 20%, transparent); }
+  .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 20%, transparent); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: rgba(255,255,255,.5); box-shadow: 0 0 0 3px rgba(255,255,255,.3); }
 
   .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
@@ -458,7 +458,7 @@
 
   .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
   .swatch { width: 32px; height: 32px; border-radius: var(--radius); cursor: pointer; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 14px; }
-  .swatch:hover { background: var(--bg-3); color: var(--text); }
+  .swatch:hover { background: var(--hover); color: var(--text); }
   .swatch.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
   .weekday-picker { display: flex; gap: 5px; }
   .weekday-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); font-size: 12px; font-weight: 600; cursor: pointer; font-family: var(--font); }
@@ -501,7 +501,7 @@
   .sync-list { background: color-mix(in srgb, var(--text) 4%, transparent); border-radius: 12px; padding: 0 6px; display: flex; flex-direction: column; }
   .sync-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 8px; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: default; border-radius: 8px; }
   .sync-row:not(:last-child) { border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent); border-radius: 0; }
-  .sync-row:hover { background: color-mix(in srgb, var(--text) 6%, transparent); }
+  .sync-row:hover { background: var(--hover); }
   .sync-row:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -1px; }
   .sync-ico { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text-2); font-size: 14px; }
   .sync-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
@@ -522,17 +522,17 @@
   .about-feedback a { color: var(--blue-text); text-decoration: none; font-weight: 500; font-size: 13px; }
   .about-feedback a:hover { text-decoration: underline; }
   .about-fine { font-size: 11px; color: var(--text-3); margin-top: 22px; text-wrap: balance; }
-  .help-close:hover { background: color-mix(in srgb, var(--text) 16%, transparent); color: var(--text); }
+  .help-close:hover { background: var(--pressed); color: var(--text); }
   .help-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px 12px; overflow-y: auto; }
   .help-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: default; }
   .help-nav button i { width: 16px; text-align: center; font-size: 14px; color: var(--text-3); flex-shrink: 0; }
-  .help-nav button:hover { background: color-mix(in srgb, var(--text) 7%, transparent); }
+  .help-nav button:hover { background: var(--hover); }
   .help-nav button.active { background: var(--sel-bg); color: var(--on-accent); }   /* the same solid accent as a selected row */
   .help-nav button.active i { color: var(--on-accent); }
   .help-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .help-toolbar { display: flex; align-items: center; gap: 12px; padding: 16px 26px 6px; flex-shrink: 0; }
   .hdr-link { display: inline-flex; align-items: center; gap: 6px; border: 0; background: color-mix(in srgb, var(--text) 7%, transparent); padding: 5px 12px; border-radius: 999px; font: inherit; font-size: 12px; color: var(--text-2); cursor: default; }
-  .hdr-link:hover { background: color-mix(in srgb, var(--text) 13%, transparent); color: var(--text); }
+  .hdr-link:hover { background: var(--pressed); color: var(--text); }
   .help-toolbar h3 { font-size: 20px; font-weight: 700; margin-right: auto; letter-spacing: -0.01em; }
   .help-panes { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
   .help-pane { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 26px 26px; display: flex; flex-direction: column; gap: 18px; }
@@ -686,7 +686,7 @@
      the pill brightens and gets a soft pill-shaped halo (brightness works on every
      badge colour, light and dark). An empty cell (just the dash) gets a small pill. */
   .task-cell.editable:hover .badge:not(.cell-pop .badge), .cell-host.editable:hover .badge:not(.cell-pop .badge) { filter: brightness(1.14); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 10%, transparent); }
-  .task-cell.editable:hover .task-cell-empty { background: var(--bg-3); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
+  .task-cell.editable:hover .task-cell-empty { background: var(--hover); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
   .cell-host { display: inline-flex; }
   .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: var(--submenu-w); display: flex; flex-direction: column; gap: 1px; padding: 5px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
   .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: 6px; background: transparent; color: var(--text); font-size: 14px; font-family: var(--font); cursor: pointer; text-align: left; }
@@ -798,7 +798,7 @@
   .row-menu-label { padding: 6px 10px 2px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
   .row-menu-chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 6px 6px; }
   .row-menu-chip { padding: 3px 6px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; font-family: var(--font); cursor: pointer; }
-  .row-menu-chip:hover { background: var(--bg-3); }
+  .row-menu-chip:hover { background: var(--hover); }
   .row-menu-chip.current { border-color: var(--border-2); background: var(--bg-2); }
   .row-menu-chip i { color: var(--text-3); font-size: 12px; }
 
@@ -900,7 +900,7 @@
 
   /* pill controls with a springy press */
   html[data-scheme="glass"] .btn { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
-  html[data-scheme="glass"] .btn:hover { background: color-mix(in srgb, var(--text) 7%, var(--bg-3)); }   /* hover darkens the fill; no growing shadow */
+  html[data-scheme="glass"] .btn:hover { background: var(--hover); }   /* hover darkens the fill; no growing shadow */
   html[data-scheme="glass"] .btn:active, html[data-scheme="glass"] .view-switch-btn:active, html[data-scheme="glass"] .f-chip:active { transform: scale(.94); }
   html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: var(--on-accent); border-color: transparent; box-shadow: none; }   /* a flat accent fill, no coloured glow */
   html[data-scheme="glass"] .btn-primary:hover { background: var(--glass-accent); filter: brightness(1.06); opacity: 1; }
@@ -986,7 +986,7 @@
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --accent: #2f6fde; --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2f6fde; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1026,13 +1026,13 @@
   .main-subtitle { font-size: 12px; color: var(--text-3); line-height: 1.3; margin-top: 1px; }
   .tool-group { display: inline-flex; align-items: center; gap: 1px; padding: 2px; border: 1px solid var(--border-2); border-radius: 999px; background: var(--bg); }
   .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 9px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: 14px; cursor: pointer; transition: background .12s ease, opacity .12s ease; }
-  .tool-btn:hover:not(:disabled) { background: var(--bg-3); }
+  .tool-btn:hover:not(:disabled) { background: var(--hover); }
   /* the board's fold-all button is a .btn: at rest it is --bg-3 and the Glass .btn hover turns it near-white, so hovering it
      barely changed anything. Darken it instead, like the other toolbar controls do against their own surface. */
   /* the list header's fold-all button wears the same capsule as the board toolbar's (#collapseAllBtnBoard, a .btn) */
   html[data-scheme="glass"] .task-list-header > .subtask-toggle { width: 36px; height: 28px; padding: 0; margin: 0 0 0 -4px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text); background: var(--bg-3); border: 1px solid var(--glass-edge); border-radius: 999px; box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px rgba(40,50,110,.10); }
-  html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: color-mix(in srgb, var(--text) 13%, var(--bg-3)); box-shadow: none; }
-  html[data-scheme="glass"] #collapseAllBtnBoard:hover { background: color-mix(in srgb, var(--text) 13%, var(--bg-3)); box-shadow: none; }
+  html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: var(--pressed); box-shadow: none; }
+  html[data-scheme="glass"] #collapseAllBtnBoard:hover { background: var(--pressed); box-shadow: none; }
   .tool-btn:disabled { opacity: .35; cursor: default; }
   .tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
   .tool-sep { width: 1px; height: 16px; margin: 0 3px; background: var(--border-2); }
@@ -1186,7 +1186,7 @@
   .note-editor.locked .note-fmt { opacity: .4; pointer-events: none; }
   .note-editor.locked .note-body { cursor: default; }
   .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--text-3); cursor: pointer; font-size: 9px; }
-  .project-row .folder-twisty:hover { background: var(--bg-3); color: var(--text); }
+  .project-row .folder-twisty:hover { background: var(--hover); color: var(--text); }
   .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
   .project-row.sub-folder { padding-left: 44px; }
   .note-row-lock { font-size: 10px; color: var(--text-3); margin-left: 4px; }
