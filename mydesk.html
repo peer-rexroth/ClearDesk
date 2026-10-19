@@ -1094,6 +1094,8 @@
   .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
   .note-title::placeholder { color: var(--text-3); }
   .note-meta { margin-bottom: 14px; font-size: 12px; color: var(--text-3); }
+  .note-meta-locked { color: var(--amber-text); white-space: nowrap; }   /* the one fact that changes what you can do, so it is the one that stands out */
+  .note-meta-locked i { font-size: 10px; margin-right: 2px; }
   .note-body { min-height: 50vh; outline: none; font-size: 15px; line-height: 1.65; color: var(--text); overflow-wrap: anywhere; }
   .note-body.is-empty::before { content: attr(data-placeholder); color: var(--text-3); pointer-events: none; position: absolute; }
   .note-body > :first-child { margin-top: 0; }
@@ -1295,9 +1297,8 @@
   /* the ⋯ button at the right of the editor bar: same round filled button as compose; amber while the note is locked */
   html[data-scheme="glass"] .note-toolbar .note-more-btn, html[data-scheme="glass"] .note-toolbar .note-lock-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
   html[data-scheme="glass"] .note-toolbar .note-more-btn.on { background: var(--amber-bg); color: var(--amber-text); }
-  /* keep the editor bar on ONE row in a narrower pane: the folder dropdown (also in the ⋯ menu's "Move to") steps aside, then the bar tightens */
+  /* keep the editor bar on ONE row in a narrower pane: the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
-  @container notepane (max-width: 880px) { .note-toolbar #noteFolderSelect { display: none; } }
   @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: 6px; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
@@ -1530,7 +1531,6 @@
             <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
           </div>
                     <span class="note-toolbar-grow"></span>
-          <select id="noteFolderSelect" class="note-select" aria-label="Folder" title="Move to folder" onchange="moveNote(noteEditorId, this.value)"></select>
           <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><i class="fa-solid fa-lock-open"></i></button>
           <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
         </div>
@@ -3125,9 +3125,17 @@ function placeRowMenu(menu, x, y, measureEl){
   const vw = window.innerWidth / k, vh = window.innerHeight / k;
   let left = x / k, top = y / k;
   const w = menu.offsetWidth, h = menu.offsetHeight;
-  if(left + w > vw - 8) left = Math.max(8, vw - w - 8);
+  if(left + w > vw - 16) left = Math.max(8, vw - w - 16);                       // 16px clear of the window edge (a classic scroll bar is up to 15px wide)
   if(top + h > vh - 8) top = Math.max(8, vh - h - 8);
   menu.style.left = left + 'px'; menu.style.top = top + 'px';
+  // Safety net: the maths above can be off (UI-size zoom, a scroll bar, a window narrower than the layout), so look at where the menu really
+  // landed and pull it back inside the visible window, clear of the right edge / scroll bar.
+  const cw = document.documentElement.clientWidth, ch = document.documentElement.clientHeight, rc = menu.getBoundingClientRect ? menu.getBoundingClientRect() : null, gap = 16;
+  if(!rc || !(cw>0) || !(ch>0) || !(rc.width>0)) return;                       // no real layout (the headless test DOM): nothing to correct
+  let dx = 0, dy = 0;
+  if(rc.right > cw - gap) dx = (cw - gap) - rc.right; if(rc.left + dx < 8) dx = 8 - rc.left;
+  if(rc.bottom > ch - 8) dy = (ch - 8) - rc.bottom; if(rc.top + dy < 8) dy = 8 - rc.top;
+  if(dx || dy){ menu.style.left = (left + dx / k) + 'px'; menu.style.top = (top + dy / k) + 'px'; }
 }
 function showRowMenu(id, x, y, measureEl){
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
@@ -5228,9 +5236,9 @@ function noteMenuHtml(id, opts){
     item('fa-regular fa-clipboard', 'Copy note', `noteMenuRun('copy')`),
     item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
     sep,
-    rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', `class="row-menu-item sub-parent"${n.locked ? ' disabled' : ''}`),
+    (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace('<i class="fa-solid fa-chevron-right"></i>', 'Unlock first') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
-    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint:'Del', off:!!n.locked})
+    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock first' : 'Del', off:!!n.locked})
   ].join('');
 }
 function openNoteMenu(e, id){
@@ -5377,7 +5385,7 @@ function renderNotesList(vis){
 function updateNoteMeta(n){
   const el = document.getElementById('noteMeta'); if(!el || !n) return;
   const fol = folderById(n.folderId);
-  el.textContent = `Edited ${new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})}${fol ? ' · ' + folderPath(fol) : ''}${n.locked ? ' · Locked' : ''}`;
+  el.innerHTML = `Edited ${esc(new Date(n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''}`;
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
@@ -5399,8 +5407,6 @@ function renderNoteEditor(){
     if(!noteIsLocked(n.id)) noteEnsureTrailingLine(body);
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
-  const sel = document.getElementById('noteFolderSelect');
-  if(sel){ sel.innerHTML = orderedFolders().map(f=>`<option value="${f.id}"${f.id===n.folderId?' selected':''}>${f.parentId ? '\u00a0\u00a0\u00a0' : ''}${esc(f.name)}</option>`).join(''); sel.disabled = !!n.locked; }
   const locked = !!n.locked;
   ed?.classList.toggle('locked', locked);
   updateNoteToolbarState();                         // the table strip hides on a locked note
@@ -6148,8 +6154,10 @@ function openNoteMoreMenu(e){
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   noteMenuId = id; folderMenuId = null;
   menu.innerHTML = noteMenuHtml(id, {noLock:true});
-  const r = e.currentTarget.getBoundingClientRect();
-  placeRowMenu(menu, r.right - 220, r.bottom + 6, e.currentTarget);
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  menu.classList.add('open');                                                    // to measure its real width (it is not a fixed 220px: the hint text and the text size change it)
+  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
+  placeRowMenu(menu, r.right - menu.offsetWidth * k, r.bottom + 6, btn);          // the menu's right edge lines up with the button's, clear of the window edge and the scroll bar
 }
 window.addEventListener('resize', ()=>{ tblHandlesRefresh(); tblChromeSync(); });
 function noteChecklist(){
