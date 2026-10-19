@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mydesk-cache-v5';
+const CACHE_NAME = 'mydesk-cache-v6';
 const APP_SHELL = [
   'mydesk.html',
   'manifest.json',
@@ -44,9 +44,12 @@ self.addEventListener('fetch', (event) => {
   // Page navigations: prefer a fresh copy, fall back to cache when offline.
   if (req.mode === 'navigate') {
     event.respondWith(
-      fetch(req)
+      // no-cache: always revalidate with the server — the plain dev server sends no cache headers, so Chrome's HTTP cache
+      // would otherwise keep handing back an old mydesk.html after an edit.
+      fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, res.clone()));
+          const copy = res.clone();   // clone before returning: cloning later races the page reading the body
+          caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           return res;
         })
         .catch(() => caches.match(req).then((cached) => cached || caches.match('mydesk.html')))

@@ -246,6 +246,7 @@ test('renaming a folder offers Undo that restores the old name', function () {
 
 test('sanitizeNoteHtml keeps known list styles and drops unknown ones', function () {
   assertEqual(sanitizeNoteHtml('<ul data-ls="dash"><li>a</li></ul>'), '<ul data-ls="dash"><li>a</li></ul>');
+  assertEqual(sanitizeNoteHtml('<ul data-ls="dot"><li>a</li></ul>'), '<ul data-ls="dot"><li>a</li></ul>');
   assertEqual(sanitizeNoteHtml('<ul data-ls="square"><li>a</li></ul>'), '<ul data-ls="square"><li>a</li></ul>');
   assertEqual(sanitizeNoteHtml('<ul data-ls="emdash"><li>a</li></ul>'), '<ul data-ls="emdash"><li>a</li></ul>');
   assertEqual(sanitizeNoteHtml('<ul data-ls="circle"><li>a</li></ul>'), '<ul><li>a</li></ul>', 'circle is no longer offered');
