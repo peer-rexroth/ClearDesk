@@ -286,7 +286,7 @@ const ICONS = {
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
   .main-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 4px; }
   .main-title { font-size: 21px; font-weight: 700; letter-spacing: -0.01em; }
-  .main-toolbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .main-toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .toolbar-filter-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; }
   .main-toolbar select { font-size: 12px; border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 5px 8px; background: var(--bg); color: var(--text); font-family: var(--font); }
 
@@ -1445,7 +1445,7 @@ const ICONS = {
      No box: an empty circle where a checkbox will be, muted placeholder text, a hairline under it that turns accent while typing,
      and a quiet pop-up button for the project on the right. */
   html[data-scheme="glass"] .quickadd { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; margin: 10px 20px 0; padding: 0; gap: 8px; }
-  .quickadd .qa-plus { flex: none; margin-left: 12px; font-size: 13px; color: var(--text-3); transition: color .12s ease; }   /* the "+" sits at the row's left edge, as it always did */
+  .quickadd .qa-plus { flex: none; margin-left: 12px; font-size: var(--ico-16); color: var(--text-3); transition: color .12s ease; }   /* the "+" sits at the row's left edge, as it always did */
   html[data-scheme="glass"] .quickadd input { padding: 11px 10px 11px 0; font-size: 14px; }
   .quickadd input::placeholder { color: var(--text-3); }
   html[data-scheme="glass"] .quickadd:has(#quickAddInput:focus) { border-bottom-color: var(--sel-bg); box-shadow: none; }
@@ -1502,6 +1502,15 @@ const ICONS = {
   .tbl-grip.row.sel { width: 22px; border-radius: 6px 0 0 6px; }
   .tbl-sel { position: absolute; box-sizing: border-box; border: 2px solid var(--accent); pointer-events: none !important; border-radius: 2px; }
   .tbl-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; background: var(--accent); border: 2px solid var(--edit, var(--on-accent)); box-sizing: border-box; cursor: col-resize; touch-action: none; z-index: 3; }
+
+  /* ── Icon scale for icons that follow their button's text size ──────────────────
+     Font-icons are drawn at 12 / 14 / 16 / 18 (see --ico-*). Rules above set the explicit ones; these pin the rest so a button's text size never decides the icon size. */
+  .sync-banner i, .nav-item i, .btn i, .btn-sm i, .btn-icon i, .subtask-toggle i, .help-close i, .hdr-link i, .note-trash-bar i { font-size: var(--ico-16); }
+  .badge i { font-size: var(--ico-14); }
+  .th-arrow { font-size: var(--ico-12); }
+  .quickadd i, .toast i { font-size: var(--ico-16); }
+  .board-col-title .picon { font-size: var(--ico-16); }
+  .view-switch-btn i, .note-sort-btn i, html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .btn i { font-size: var(--ico-18); }
 </style>
 </head>
 <body>
@@ -1656,7 +1665,6 @@ const ICONS = {
           </div>
         </div>
         <button class="btn btn-icon btn-sm" id="filterClearBtn" style="display:none" onclick="clearFilters()" title="Clear all filters"><i class="fa-solid fa-xmark"></i></button>
-        <div class="topbar-divider"></div>
         <div class="view-switch" id="viewSwitch">
           <button class="view-switch-btn" data-view="list" onclick="setViewMode('list')" title="List view"><i class="fa-solid fa-list"></i></button>
           <button class="view-switch-btn" data-view="board" onclick="setViewMode('board')" title="Board view"><i class="fa-solid fa-table-columns"></i></button>
@@ -2812,7 +2820,7 @@ function renderList(){
       dueCell = `<span class="badge badge-due ${overdue?'overdue':isToday?'today':''}"><i class="fa-regular fa-calendar"></i> ${fmtDate(t.dueDate)}</span>`;
     }
     if(t.repeat && t.repeat!=='none'){
-      dueCell += `<i class="fa-solid fa-repeat" style="color:var(--text-3);font-size:11px;margin-left:5px" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
+      dueCell += `<i class="fa-solid fa-repeat" style="color:var(--text-3);font-size:var(--ico-14);margin-left:5px" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
     }
     return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
       <div class="task-check-cell">
