@@ -1075,10 +1075,18 @@
   .project-row.sub-folder { padding-left: 44px; }
   .note-row-lock { font-size: 10px; color: var(--text-3); margin-left: 4px; }
   .note-row.selected .note-row-lock { color: inherit; opacity: .8; }
-  .note-linkbar { display: flex; align-items: center; gap: 8px; margin: 0 24px 6px; padding: 6px 10px; border-radius: 999px; background: color-mix(in srgb, var(--text) 5%, transparent); }
-  .note-linkbar[hidden] { display: none; }
-  .note-linkbar i { color: var(--text-3); font-size: 12px; }
-  .note-linkbar input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; outline: none; box-shadow: none !important; }
+  /* the link popover (Apple style): a small grouped form under the Link button: Text and Link rows, one Done button, Remove Link when editing */
+  .note-link-pop { display: none; position: fixed; z-index: 410; width: 320px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 8px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--glass-r-menu, 14px); box-shadow: var(--shadow); }
+  .note-link-pop.open { display: block; }
+  .nlp-list { border-radius: 10px; background: color-mix(in srgb, var(--text) 5%, transparent); }
+  .nlp-row { display: flex; align-items: center; gap: 10px; padding: 7px 12px; cursor: text; }
+  .nlp-row + .nlp-row { border-top: 1px solid var(--border); }
+  .nlp-row span { flex: none; width: 34px; font-size: 12px; color: var(--text-3); }
+  .nlp-row input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 13px; outline: none; box-shadow: none !important; padding: 2px 0; }
+  .nlp-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+  .nlp-actions .nlp-remove { color: #d92d20; border-color: transparent; background: transparent; padding-left: 6px; padding-right: 6px; }
+  .nlp-actions .nlp-remove[hidden] { display: none; }
+  .nlp-actions .btn-primary { margin-left: auto; }
   .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 24px 56px; }
   .note-doc { width: 100%; max-width: var(--note-max-w, 900px); position: relative; }   /* the note area stops growing at 900px (left-aligned in the pane): lines and tables stay readable on an ultrawide screen */
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
@@ -1318,6 +1326,16 @@
 
 <div class="sync-banner" id="syncBanner" role="status"></div>
 <div class="row-menu" id="rowMenu" role="menu"></div>
+<div class="note-link-pop" id="noteLinkPop" role="dialog" aria-label="Link">
+  <div class="nlp-list">
+    <label class="nlp-row"><span>Text</span><input type="text" id="noteLinkText" placeholder="Text to show" aria-label="Text to show" autocomplete="off" onkeydown="onNoteLinkKey(event)"></label>
+    <label class="nlp-row"><span>Link</span><input type="text" id="noteLinkInput" placeholder="Paste or type a link" aria-label="Link address" autocomplete="off" onkeydown="onNoteLinkKey(event)"></label>
+  </div>
+  <div class="nlp-actions">
+    <button type="button" class="btn btn-sm nlp-remove" id="noteLinkRemove" onclick="removeNoteLink()">Remove Link</button>
+    <button type="button" class="btn btn-primary btn-sm" onclick="applyNoteLink()">Done</button>
+  </div>
+</div>
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
@@ -1527,18 +1545,12 @@
               <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
               <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
             </div>
-            <button type="button" class="tool-btn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
+            <button type="button" class="tool-btn" id="noteLinkBtn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link" aria-haspopup="dialog"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
             <button type="button" class="tool-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
           </div>
                     <span class="note-toolbar-grow"></span>
           <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><i class="fa-solid fa-lock-open"></i></button>
           <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
-        </div>
-        <div class="note-linkbar" id="noteLinkBar" hidden>
-          <i class="fa-solid fa-link"></i>
-          <input type="text" id="noteLinkInput" placeholder="Paste or type a link" aria-label="Link address" autocomplete="off" onkeydown="onNoteLinkKey(event)">
-          <button type="button" class="btn btn-sm" onclick="applyNoteLink()">Apply</button>
-          <button type="button" class="btn btn-sm" onclick="closeNoteLinkBar()">Cancel</button>
         </div>
         <div class="note-scroll">
           <div class="note-doc" onmousemove="tblHandlesMove(event)" onmouseleave="tblHandlesLeave()">
@@ -6508,35 +6520,61 @@ function onNoteDrop(e){
   noteInsertClean(dt.getData('text/html'), dt.getData('text/plain'));
   onNoteInput();
 }
-// ---- the link bar (the selection is lost when the field takes focus, so it is remembered and put back) ----
+// ---- the link popover (the selection is lost when a field takes focus, so it is remembered and put back) ----
+let noteLinkEditing = null;                                      // the existing <a> being edited (if any)
 function openNoteLinkBar(){
-  const bar = document.getElementById('noteLinkBar'), input = document.getElementById('noteLinkInput');
+  const pop = document.getElementById('noteLinkPop'), input = document.getElementById('noteLinkInput'), text = document.getElementById('noteLinkText'), btn = document.getElementById('noteLinkBtn');
+  if(!pop || !btn || noteIsLocked(noteEditorId)) return;
   const sel = window.getSelection();
   noteSavedRange = sel && sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null;
   const a = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'A') : null;
+  noteLinkEditing = a;                                           // caret or selection inside a link: the popover edits that link
+  text.value = a ? a.textContent : (sel && sel.rangeCount && !sel.isCollapsed ? sel.toString() : '');
   input.value = a ? (a.getAttribute('href') || '') : '';
-  bar.hidden = false; input.focus(); input.select();
+  document.getElementById('noteLinkRemove').hidden = !a;
+  closeRowMenu(); closeNoteTableMenu(); closeNoteListMenu();
+  const r = btn.getBoundingClientRect();
+  placeRowMenu(pop, r.left, r.bottom + 6, btn);                  // under the Link button, kept inside the window
+  const first = text.value ? input : text;                       // the text is known: ask for the address; otherwise ask for the text first
+  first.focus(); first.select();
 }
-function closeNoteLinkBar(){ const bar = document.getElementById('noteLinkBar'); if(bar) bar.hidden = true; noteFocusBody(); }
+function closeNoteLinkBar(refocus){
+  const pop = document.getElementById('noteLinkPop'); if(pop) pop.classList.remove('open');
+  noteLinkEditing = null;
+  if(refocus!==false){ noteFocusBody(); if(noteSavedRange){ const s = window.getSelection(); s.removeAllRanges(); s.addRange(noteSavedRange); } }
+}
 function applyNoteLink(){
-  const input = document.getElementById('noteLinkInput');
-  let v = (input.value || '').trim();
-  const body = document.getElementById('noteBody');
+  const input = document.getElementById('noteLinkInput'), textInput = document.getElementById('noteLinkText');
+  const raw = (input.value || '').trim(); let v = raw;
+  const shown = (textInput.value || '').trim();
+  const body = document.getElementById('noteBody'), editing = noteLinkEditing && noteLinkEditing.isConnected ? noteLinkEditing : null;
+  if(!v && !editing){ closeNoteLinkBar(); return; }               // nothing to link, nothing to remove
   body.focus();
-  if(noteSavedRange){ const s = window.getSelection(); s.removeAllRanges(); s.addRange(noteSavedRange); }
+  const s = window.getSelection();
+  if(editing){ const r = document.createRange(); r.selectNodeContents(editing); s.removeAllRanges(); s.addRange(r); }          // edit the whole link
+  else if(noteSavedRange){ s.removeAllRanges(); s.addRange(noteSavedRange); }
   if(!v){ document.execCommand('unlink', false); }
   else {
-    if(!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'mailto:' + v : 'https://' + v;
+    if(!/^[a-z][a-z0-9+.-]*:/i.test(v)) v = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'mailto:' + v : /^[+\d][\d\s().-]{5,}$/.test(v) ? 'tel:' + v.replace(/[^\d+]/g, '') : 'https://' + v;
     const href = safeNoteHref(v);
     if(href){
-      const s = window.getSelection();
-      if(s && s.isCollapsed) document.execCommand('insertHTML', false, `<a href="${esc(href)}">${esc(v)}</a>`);
-      else document.execCommand('createLink', false, href);
+      const cur = window.getSelection(), selText = cur && !cur.isCollapsed ? cur.toString() : '';
+      const display = shown || selText || raw;                    // the name you typed; else the selected text; else the address as typed
+      if(selText && display===selText) document.execCommand('createLink', false, href);   // same text: keep its formatting, just add / change the link
+      else document.execCommand('insertHTML', false, `<a href="${esc(href)}">${esc(display)}</a>`);
+      noteCaretOutsideLink();
     }
   }
-  document.getElementById('noteLinkBar').hidden = true;
+  noteLinkEditing = null;
+  document.getElementById('noteLinkPop').classList.remove('open');
   onNoteInput();
 }
+function removeNoteLink(){ document.getElementById('noteLinkInput').value = ''; applyNoteLink(); }
+// a click anywhere outside the popover dismisses it (Apple popovers do), keeping the selection where it was
+document.addEventListener('mousedown', e=>{
+  const pop = document.getElementById('noteLinkPop');
+  if(pop && pop.classList.contains('open') && !pop.contains(e.target) && !(e.target.closest && e.target.closest('#noteLinkBtn'))) closeNoteLinkBar(false);
+});
 function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
 document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); } });
 window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); });
