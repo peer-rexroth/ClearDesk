@@ -155,7 +155,7 @@ const ICONS = {
   /* Icons: Font Awesome class names stay in the markup; each name is drawn as a masked outline SVG. The drawings live once in the ICONS registry
      (the head script, which also writes the per-name .fa-NAME { --fa: url(...) } rules before first paint) and are shared with the right-click menus (MENU_SVG). */
   .fa-solid, .fa-regular { display: inline-block; width: 1em; height: 1em; vertical-align: -.125em; flex-shrink: 0; font-style: normal; line-height: 1; }
-  .fa-solid, .fa-regular { -webkit-mask: var(--fa) center / 126% no-repeat; mask: var(--fa) center / 126% no-repeat; background-color: currentColor; }
+  .fa-solid, .fa-regular { -webkit-mask: var(--fa) center / calc(var(--ico-k) * 100%) no-repeat; mask: var(--fa) center / calc(var(--ico-k) * 100%) no-repeat; background-color: currentColor; }
   .fa-solid:not([class*=' fa-']), .fa-regular:not([class*=' fa-']) { background: none; }
   :root {
     --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -211,7 +211,7 @@ const ICONS = {
   .btn-danger:hover { opacity: 0.85; background: var(--red-text); }
   .btn-icon { padding: 6px 9px; }
   .btn-sm { font-size: 12px; padding: 4px 10px; }
-  .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 12px; padding: 3px 5px; border-radius: 5px; }
+  .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: var(--ico-16); padding: 3px 5px; border-radius: 5px; }
   .subtask-toggle { display: inline-block; flex-shrink: 0; font-size: 10px; padding: 2px 4px; width: 16px; box-sizing: border-box; }
   .icon-btn:hover { background: var(--hover); color: var(--text); }
   .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: var(--radius); cursor: pointer; font-size: 13px; }
@@ -225,14 +225,14 @@ const ICONS = {
   .split-btn { display: inline-flex; position: relative; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: visible; }
   .split-btn-main { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: var(--bg-2); color: var(--text); font-size: 12px; font-family: var(--font); border: none; border-radius: var(--radius) 0 0 var(--radius); cursor: pointer; white-space: nowrap; }
   .split-btn-main:hover { background: var(--hover); }
-  .split-btn-chevron { display: flex; align-items: center; padding: 5px 7px; background: var(--bg-2); color: var(--text-3); font-size: 9px; font-family: var(--font); border: none; border-left: 0.5px solid var(--border); border-radius: 0 var(--radius) var(--radius) 0; cursor: pointer; }
+  .split-btn-chevron { display: flex; align-items: center; padding: 5px 7px; background: var(--bg-2); color: var(--text-3); font-size: var(--ico-12); font-family: var(--font); border: none; border-left: 0.5px solid var(--border); border-radius: 0 var(--radius) var(--radius) 0; cursor: pointer; }
   .split-btn-chevron:hover { background: var(--hover); color: var(--text); }
   .split-btn-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--elev-2); min-width: 210px; z-index: 300; overflow: hidden; }
   .split-btn-menu.open { display: block; }
   .split-btn-menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 13px; cursor: pointer; color: var(--text); }
   .split-btn-menu-item:hover { background: var(--hover); }
   .split-btn-menu-item + .split-btn-menu-item { border-top: 0.5px solid var(--border); }
-  .split-btn-menu-icon { flex-shrink: 0; width: 14px; margin-top: 1px; color: var(--text-2); font-size: 12px; }
+  .split-btn-menu-icon { flex-shrink: 0; width: 14px; margin-top: 1px; color: var(--text-2); font-size: var(--ico-16); }
   .split-btn-menu-label { font-size: 12px; font-weight: 500; }
   .split-btn-menu-desc { font-size: 11px; color: var(--text-3); margin-top: 1px; }
 
@@ -244,7 +244,7 @@ const ICONS = {
   .sidebar-search { padding: 10px 12px; border-bottom: 0.5px solid var(--border); position: relative; }
   .sidebar-search input { width: 100%; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 7px 10px 7px 30px; font-size: 13px; color: var(--text); outline: none; font-family: var(--font); }
   .sidebar-search input:focus { border-color: var(--border-2); }
-  .sidebar-search .search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: 13px; pointer-events: none; }
+  .sidebar-search .search-icon { position: absolute; left: 22px; top: 50%; transform: translateY(-50%); color: var(--text-3); font-size: var(--ico-16); pointer-events: none; }
 
   .sidebar-section { padding: 10px 12px; border-bottom: 0.5px solid var(--border); }
   .sidebar-section.grow { flex: 1; overflow-y: auto; }
@@ -271,7 +271,7 @@ const ICONS = {
   .note-row.dragging { opacity: .4; }
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
   .project-row.settle { animation: rowSettle .22s ease-out; }
-  .project-row .picon { width: 14px; text-align: center; font-size: 12px; color: var(--text-3); flex-shrink: 0; }
+  .project-row .picon { width: 14px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex-shrink: 0; }
   .project-row .pname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* while the action capsule is showing, the name gives up the room it needs, so a long name ends in "…" before the capsule instead of running under it */
   .project-row:is(:hover, :focus-within) .pname { margin-right: 76px; }
@@ -318,13 +318,13 @@ const ICONS = {
   .board-card-tagstrips .tagstrip { height: 4px; width: 26px; border-radius: 2px; flex-shrink: 0; }
   .board-card-top { display: flex; align-items: flex-start; gap: 8px; }
   .board-card-top .badge-due { flex-shrink: 0; }
-  .board-card-priority-icon { color: var(--red-text); font-size: 11px; flex-shrink: 0; margin-top: 2px; }
+  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-14); flex-shrink: 0; margin-top: 2px; }
   .board-card-title { font-size: 13px; font-weight: 600; flex: 1; word-break: break-word; }
   .board-card.done .board-card-title { text-decoration: line-through; color: var(--text-3); }
   .board-card-meta { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 
   .quickadd { display: flex; align-items: center; gap: 8px; margin: 12px 20px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 2px; }
-  .quickadd i { color: var(--text-3); margin-left: 10px; font-size: 13px; }
+  .quickadd i { color: var(--text-3); margin-left: 10px; font-size: var(--ico-16); }
   .quickadd input { flex: 1; border: none; padding: 9px 10px; font-size: 14px; background: transparent; color: var(--text); outline: none; font-family: var(--font); }
 
   .bulk-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--purple-bg); border: 0.5px solid var(--purple-text); border-width: 0; border-radius: var(--radius); margin: 0 20px; padding: 0 10px; max-height: 0; opacity: 0; overflow: hidden; transition: max-height .18s ease, opacity .15s ease, padding .18s ease, margin .18s ease, border-width .18s ease; }
@@ -404,7 +404,7 @@ const ICONS = {
   .badge-due.overdue { background: var(--red-bg); color: var(--red-text); }
   .badge-due.today { background: var(--amber-bg); color: var(--amber-text); }
   .badge-project { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--text-2); white-space: nowrap; }
-  .badge-project .picon { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+  .badge-project .picon { font-size: var(--ico-14); color: var(--text-3); flex-shrink: 0; }
   /* Row actions are an overlay inside the Task cell, not a grid column (after
      Milestone): a small capsule at the cell's right end, shown on the row you last
      clicked, on hover and when focus is inside the row. Invisible rows take no
@@ -508,7 +508,7 @@ const ICONS = {
   .newfile-error { color: var(--red-text, var(--danger)); font-size: 13px; line-height: 1.4; margin-top: -6px; }
   .newfile-error:empty { display: none; }
   .sync-head { display: flex; align-items: center; gap: 14px; }
-  .sync-head-icon { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue-bg); color: var(--blue-text); font-size: 16px; }
+  .sync-head-icon { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue-bg); color: var(--blue-text); font-size: var(--ico-16); }
   .sync-head h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.01em; }
   .sync-head p { margin-top: 1px; font-size: 13px; color: var(--text-3); line-height: 1.4; }
   .sync-list { background: color-mix(in srgb, var(--text) 4%, transparent); border-radius: 12px; padding: 0 6px; display: flex; flex-direction: column; }
@@ -516,13 +516,13 @@ const ICONS = {
   .sync-row:not(:last-child) { border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent); border-radius: 0; }
   .sync-row:hover { background: var(--hover); }
   .sync-row:focus-visible { outline: 3px solid var(--focus-ring); outline-offset: -1px; }
-  .sync-ico { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text-2); font-size: 14px; }
+  .sync-ico { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 8%, transparent); color: var(--text-2); font-size: var(--ico-16); }
   .sync-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
   .sync-text strong { font-size: 14px; font-weight: 600; }
   .sync-text span { font-size: 13px; color: var(--text-2); }
-  .sync-chev { font-size: 11px; color: var(--text-3); flex-shrink: 0; }
+  .sync-chev { font-size: var(--ico-14); color: var(--text-3); flex-shrink: 0; }
   .sync-note { align-items: flex-start; gap: 10px; padding: 0 4px; font-size: 13px; line-height: 1.55; color: var(--text-2); }
-  .sync-note i { margin-top: 3px; font-size: 13px; color: var(--amber-text); flex-shrink: 0; }
+  .sync-note i { margin-top: 3px; font-size: var(--ico-16); color: var(--amber-text); flex-shrink: 0; }
   .sync-note strong { color: var(--text); font-weight: 600; }
   .about-modal { width: 320px; padding: 40px 28px 26px; gap: 0; align-items: center; text-align: center; position: relative; }
   .about-close { position: absolute; top: 14px; left: 14px; }
@@ -538,7 +538,7 @@ const ICONS = {
   .help-close:hover { background: var(--pressed); color: var(--text); }
   .help-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px 12px; overflow-y: auto; }
   .help-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: 8px; background: transparent; color: var(--text); font: inherit; font-size: 13px; font-weight: 500; text-align: left; cursor: default; }
-  .help-nav button i { width: 16px; text-align: center; font-size: 14px; color: var(--text-3); flex-shrink: 0; }
+  .help-nav button i { width: 16px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex-shrink: 0; }
   .help-nav button:hover { background: var(--hover); }
   .help-nav button.active { background: var(--sel-bg); color: var(--on-accent); }   /* the same solid accent as a selected row */
   .help-nav button.active i { color: var(--on-accent); }
@@ -553,17 +553,17 @@ const ICONS = {
   .help-search-bar { flex: none; padding: 4px 12px 8px; }
   /* a capsule field with a magnifier and a soft tint, like Mail's search field (the shape every toolbar control uses) */
   .help-search-field { position: relative; }
-  .help-search-field i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 12px; color: var(--text-3); pointer-events: none; }
+  .help-search-field i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: var(--ico-16); color: var(--text-3); pointer-events: none; }
   .help-search-bar input { width: 100%; padding: 7px 14px 7px 34px; border: 0; border-radius: 999px; background: color-mix(in srgb, var(--text) 7%, transparent); color: var(--text); font: inherit; font-size: 13px; }
   .help-search-bar input::placeholder { color: var(--text-3); }
   .help-pane:focus-visible { outline: none; }   /* focusable only so the arrow keys and Page Up/Down scroll it */
   .help-row mark { background: color-mix(in srgb, var(--sel-bg) 28%, transparent); color: inherit; border-radius: 3px; padding: 0 1px; }
   .help-jump { border: 0; background: none; padding: 0; font: inherit; text-transform: inherit; letter-spacing: inherit; color: var(--sel-bg); cursor: pointer; }
-  .help-jump i { font-size: 9px; margin-left: 3px; }
+  .help-jump i { font-size: var(--ico-12); margin-left: 3px; }
   .help-section { display: flex; flex-direction: column; gap: 8px; }
   .help-section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
   .help-row { display: flex; gap: 12px; align-items: flex-start; font-size: 13px; line-height: 1.6; color: var(--text-2); }
-  .help-row > i { flex: 0 0 18px; margin-top: 3px; text-align: center; font-size: 14px; color: var(--text-3); width: auto; }
+  .help-row > i { flex: 0 0 18px; margin-top: 3px; text-align: center; font-size: var(--ico-16); color: var(--text-3); width: auto; }
   .help-row strong, .help-row em { color: var(--text); }
   .help-row strong { font-weight: 600; }
   .help-row em { font-style: normal; }
@@ -644,13 +644,13 @@ const ICONS = {
   .btn-sm { font-size: 13px; padding: 6px 11px; }
   .btn-icon { padding: 6px 10px; }
   .btn:hover { box-shadow: var(--shadow); }
-  .icon-btn { font-size: 14px; }
+  .icon-btn { font-size: var(--ico-16); }
   .sidebar { border-right-width: 1px; }
   .sidebar-search input { font-size: 14px; border-width: 1px; padding: 8px 10px 8px 32px; }
   .sidebar-section-label, .toolbar-filter-label, .task-list-header, .field label { font-size: 12px; }
   .nav-item, .project-row { font-size: 14px; padding-top: 8px; padding-bottom: 8px; }
   .nav-item .count, .project-row .count, .f-chip { font-size: 12px; }
-  .project-row .picon { font-size: 13px; }
+  .project-row .picon { font-size: var(--ico-16); }
   .sidebar-footer { font-size: 12px; border-top-width: 1px; }
   .main-toolbar { padding: 14px 20px 12px; border-bottom: 1px solid var(--border); background: var(--bg); margin-bottom: 12px; }
   .main-title { font-size: 22px; }
@@ -710,7 +710,7 @@ const ICONS = {
   .row-menu-item .pop-check i, .row-menu-item .pop-icon { width: auto; color: inherit; }
   .current > .pop-check { visibility: visible; }
   .pop-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: none; }
-  .pop-icon { width: 16px; margin-right: 8px; text-align: center; font-size: 13px; color: var(--text-3); flex: none; }
+  .pop-icon { width: 16px; margin-right: 8px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex: none; }
   .row-menu-item .pop-icon { width: 16px; color: var(--text-3); }
   .cell-pop-opt:hover .pop-dot, .row-menu-item:hover .pop-dot { box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--on-accent) 85%, transparent); }
   .cell-pop-opt:hover .pop-icon, .row-menu-item:hover:not(:disabled) i, .row-menu-item:hover .pop-icon, .row-menu-item:hover .row-menu-hint { color: var(--on-accent); }
@@ -722,7 +722,7 @@ const ICONS = {
   .row-menu-sub:hover > .row-menu-flyout, .row-menu-sub.open > .row-menu-flyout { display: flex; }
   .row-menu-sub:hover > .sub-parent, .row-menu-sub.open > .sub-parent { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .row-menu-sub:hover > .sub-parent i, .row-menu-sub.open > .sub-parent i, .row-menu-sub:hover > .sub-parent .row-menu-hint { color: var(--on-accent); }
-  .sub-parent .row-menu-hint i { font-size: 10px; width: auto; }
+  .sub-parent .row-menu-hint i { font-size: var(--ico-12); width: auto; }
   /* Due rows never show a tick, so they drop the tick column and the text starts at the row's own padding; the date field spans the
      same inner width as a row (a field is just a wide row), with the toolbar menu inset like the other menus */
   .no-tick .pop-check { display: none; }
@@ -766,7 +766,7 @@ const ICONS = {
 
   .sidebar-section-actions { display: inline-flex; gap: 2px; }
   .tags-section .sidebar-section-label { cursor: pointer; margin-bottom: 7px; }
-  .tags-chevron { font-size: 10px; transition: transform .15s; }
+  .tags-chevron { font-size: var(--ico-12); transition: transform .15s; }
   .tags-section.collapsed .tags-chevron { transform: rotate(-90deg); }
   .tags-section.collapsed .filter-chips { display: none; }
   .tags-section.collapsed .sidebar-section-label { margin-bottom: 0; }
@@ -813,11 +813,11 @@ const ICONS = {
   .row-menu-chip { padding: 3px 6px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: var(--text); font-size: 13px; font-family: var(--font); cursor: pointer; }
   .row-menu-chip:hover { background: var(--hover); }
   .row-menu-chip.current { border-color: var(--border-2); background: var(--bg-2); }
-  .row-menu-chip i { color: var(--text-3); font-size: 12px; }
+  .row-menu-chip i { color: var(--text-3); font-size: var(--ico-16); }
 
   .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 11px; border: 1px solid var(--purple-text); border-radius: 14px; background: transparent; color: var(--purple-text); font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; }
   .sel-chip:hover { background: var(--purple-bg); }
-  .sel-chip i { font-size: 11px; opacity: .8; }
+  .sel-chip i { font-size: var(--ico-14); opacity: .8; }
 
   /* ── Glass (Apple "Liquid Glass" / Mail-style) — the app's only look ─────────
      Modelled on Apple Mail: the CHROME is glass and the CONTENT is flat. The
@@ -999,7 +999,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.82); --sel-text-3: rgba(255,255,255,.72); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2f6fde; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.82); --sel-text-3: rgba(255,255,255,.72); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2f6fde; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1198,7 +1198,7 @@ const ICONS = {
   .tool-btn.on:hover:not(:disabled) { background: var(--amber-bg); opacity: .85; }
   .note-editor.locked .note-fmt { opacity: .4; pointer-events: none; }
   .note-editor.locked .note-body { cursor: default; }
-  .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--text-3); cursor: pointer; font-size: 9px; }
+  .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: 4px; background: transparent; color: var(--text-3); cursor: pointer; font-size: var(--ico-12); }
   .project-row .folder-twisty:hover { background: var(--hover); color: var(--text); }
   .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
   .project-row.sub-folder { padding-left: 44px; }
@@ -1269,7 +1269,7 @@ const ICONS = {
     body > *:not(#notePrintArea) { display: none !important; }
     #notePrintArea { display: block !important; padding: 0; }
   }
-  .note-section i { margin-right: 5px; font-size: 10px; }
+  .note-section i { margin-right: 5px; font-size: var(--ico-12); }
   .note-section { padding: 10px 12px 4px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
   .notes-list-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 4px 6px; padding: 8px 10px; border-radius: 10px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, transparent); }
   .note-trash-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 8px 12px; border-radius: 10px; font-size: 12px; color: var(--text-2); background: color-mix(in srgb, var(--red-text) 10%, transparent); }
@@ -1279,7 +1279,7 @@ const ICONS = {
   .note-editor.trashed #noteLockBtn { display: none; }
   .note-meta { margin-bottom: 14px; font-size: 12px; color: var(--text-3); }
   .note-meta-locked { color: var(--amber-text); white-space: nowrap; }   /* the one fact that changes what you can do, so it is the one that stands out */
-  .note-meta-locked i { font-size: 10px; margin-right: 2px; }
+  .note-meta-locked i { font-size: var(--ico-12); margin-right: 2px; }
   .note-body { min-height: 50vh; outline: none; font-size: 15px; line-height: 1.65; color: var(--text); overflow-wrap: anywhere; }
   .note-body.is-empty::before { content: attr(data-placeholder); color: var(--text-3); pointer-events: none; position: absolute; }
   .note-body > :first-child { margin-top: 0; }
@@ -1379,7 +1379,7 @@ const ICONS = {
   .sb-float { display: none; position: absolute; top: 9px; left: 12px; z-index: 70; align-items: center; gap: 8px; }
   html.sidebar-collapsed .sb-float { display: flex; }
   #fileSyncMini .file-chip { padding: 6px 9px; font-size: 0; }      /* icon only while the sidebar is hidden; its tooltip still says Linked / Link file */
-  #fileSyncMini .file-chip i { font-size: 13px; }
+  #fileSyncMini .file-chip i { font-size: var(--ico-16); }
   html.sidebar-collapsed .main-toolbar, html.sidebar-collapsed .notes-list-head { padding-left: 104px !important; }
   /* one baseline: every column's bar is 52px with a hairline under it */
   .main-toolbar { min-height: 52px; box-sizing: border-box; padding: 0 20px !important; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
@@ -1402,6 +1402,7 @@ const ICONS = {
   html[data-scheme="glass"] .main-toolbar, html[data-scheme="glass"] .note-toolbar, html[data-scheme="glass"] .notes-list-head { background: var(--bar-bg); }
   html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools, .sb-head) .tool-group { border: 0; background: var(--cap-fill); height: var(--bar-ctl-h); padding: 3px; gap: 2px; box-sizing: border-box; }
   html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn { height: 30px; min-width: 34px; font-size: 16px; color: var(--text-2); }
+  html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn > i { font-size: var(--ico-18); }   /* toolbar icons: 18, the same drawn size as the .tb-ico2 SVGs */
   html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn:hover:not(:disabled) { background: var(--cap-hover); color: var(--text); }
   html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn:is(.active, .on) { background: var(--cap-on); color: var(--text); }
   html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .tool-btn.on { background: var(--amber-bg); color: var(--amber-text); }
