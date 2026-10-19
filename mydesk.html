@@ -1746,7 +1746,7 @@
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em> and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
-          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> are recognised and linked: after a short pause while you write, and when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
+          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
@@ -4824,7 +4824,7 @@ function safeNoteHref(v){
 // ---- recognising links, e-mail addresses and phone numbers in plain text ----
 // noteLinkMatches(text) -> [{start, end, href, kind}] sorted by position, kind 'url' | 'email' | 'phone'. A URL wins over an e-mail address, which wins over a bare
 // domain, which wins over a phone number, so nothing is linked twice. Phone numbers must start with + / 00 / a national 0, have 7-15 digits, and are not
-// a date (19.10.2026, 01/02/26). The editor links matches as you write (after a short pause) and when a note opens; see noteAutoLinkTyping.
+// a date (19.10.2026, 01/02/26). The editor links a web / e-mail address at the space after it, everything on a line when you leave it (Enter, or the caret moving to another line), and when a note opens; see noteAutoLinkLine.
 const NOTE_TLDS = 'com|org|net|de|ch|at|eu|io|co|uk|us|fr|nl|it|es|edu|gov|info|biz|app|dev|ai|me|tv|be|se|no|dk|pl|cz|ru|jp|cn|in|au|ca';
 function noteLinkMatches(text){
   const found = [], t = String(text || '');
@@ -5689,10 +5689,10 @@ function noteCaretAtTextIndex(idx){
   }
   return false;
 }
-// Linking in the editor. When a note opens its text is linked in place (no undo history yet, and the note is not marked as edited). While you
-// write, a short pause after the last keystroke links what is complete: it goes through execCommand('createLink') so Undo takes it back, skips
-// the word the caret is still in, and puts the caret back by its text position. Text inside links, <pre> and <code> is left alone.
-let noteAutoLinkTimer = null;
+// Linking in the editor. When a note opens, its text is linked in place (no undo history yet, and the note is not marked as edited). While you write,
+// a line is linked when you LEAVE it: Enter, or the caret moving to another line (a pause mid-line could catch a phone number half typed). It goes
+// through execCommand('createLink') so Undo takes it back, and puts the caret back by its text position. Text inside links, <pre> and <code> is left alone.
+let noteCaretLine = null;
 function noteAutoLinkTargets(body){
   const out = [];
   if(!body || typeof document.createTreeWalker!=='function') return out;
@@ -5714,22 +5714,60 @@ function noteAutoLinkDom(body){
     after.parentNode.insertBefore(a, after); node.nextSibling && node.nextSibling!==a && node.parentNode.removeChild(node.nextSibling);
   }
 }
-function scheduleNoteAutoLink(){ if(typeof setTimeout==='function'){ clearTimeout(noteAutoLinkTimer); noteAutoLinkTimer = setTimeout(noteAutoLinkTyping, 900); } }
-function noteAutoLinkTyping(){
+const NOTE_LINE_TAGS = /^(P|DIV|LI|H1|H2|H3|TD|TH|BLOCKQUOTE|PRE)$/;
+function noteLineOf(node){
+  const body = document.getElementById('noteBody');
+  let n = node && node.nodeType===3 ? node.parentNode : node;
+  while(n && n!==body){ if(n.nodeType===1 && NOTE_LINE_TAGS.test(n.tagName)) return n; n = n.parentNode; }
+  return body;
+}
+// Link every complete match inside one line. A match the caret is strictly inside is left for later (Enter in the middle of an address would cut it).
+function noteAutoLinkLine(line){
   const body = document.getElementById('noteBody'), sel = window.getSelection ? window.getSelection() : null;
-  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || document.activeElement!==body || noteIsLocked(noteEditorId)) return;
-  const r0 = document.createRange(); r0.setStart(body, 0); r0.setEnd(sel.anchorNode, sel.anchorOffset); const idx = r0.toString().length;   // the caret as a text position
+  if(!body || !line || !line.isConnected || !sel || !sel.rangeCount || document.activeElement!==body || noteIsLocked(noteEditorId)) return;
+  const inBody = sel.anchorNode && body.contains(sel.anchorNode);
+  let idx = -1;
+  if(inBody && sel.isCollapsed){ const r0 = document.createRange(); r0.setStart(body, 0); r0.setEnd(sel.anchorNode, sel.anchorOffset); idx = r0.toString().length; }
+  else if(inBody) return;                                           // a real selection: do not disturb it
   let did = false, lastKey = '';
   for(let guard = 0; guard<30; guard++){
     // Chrome re-creates text nodes while it applies a command, so no node is kept between rounds: scan again, link the LAST candidate, repeat.
-    const t = noteAutoLinkTargets(body).filter(x=>!(idx >= x.gStart && idx <= x.gEnd)).pop();      // not the word the caret is still in
+    const t = noteAutoLinkTargets(body).filter(x=>line.contains(x.node) && !(idx > x.gStart && idx < x.gEnd)).pop();
     if(!t) break;
     const key = t.gStart + t.href; if(key===lastKey) break; lastKey = key;                          // a command that changed nothing must not loop
     const r = document.createRange(); r.setStart(t.node, t.start); r.setEnd(t.node, t.end);
     sel.removeAllRanges(); sel.addRange(r);
     document.execCommand('createLink', false, t.href); did = true;
   }
-  if(did) noteCaretAtTextIndex(idx);
+  if(did && idx>=0){ noteCaretAtTextIndex(idx); noteCaretOutsideLink(); }
+}
+function noteCaretOutsideLink(){                                    // never leave the caret inside the link it just made: what is typed next is not part of it
+  const q = window.getSelection(), a = q.anchorNode, el = a && (a.nodeType===3 ? a.parentNode : a), link = el && el.closest ? el.closest('a') : null;
+  if(link && q.isCollapsed){ const r = document.createRange(); r.setStartAfter(link); r.collapse(true); q.removeAllRanges(); q.addRange(r); }
+}
+// A web or e-mail address is linked the moment you type the space after it (as Word, Google Docs and Notes do); trailing sentence punctuation ("see www.x.org.")
+// does not count against it. Phone numbers are NOT linked here: they contain spaces, so a space does not say they are finished: they wait for the line to be left.
+function noteAutoLinkAtSpace(e){
+  if(e.key!==' ' || e.metaKey || e.ctrlKey || e.altKey || e.isComposing) return;
+  const body = document.getElementById('noteBody'), sel = window.getSelection ? window.getSelection() : null;
+  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || noteIsLocked(noteEditorId)) return;
+  const node = sel.anchorNode, off = sel.anchorOffset;
+  if(!node || node.nodeType!==3 || !body.contains(node) || (node.parentNode.closest && node.parentNode.closest('a, pre, code'))) return;
+  const m = noteLinkMatches(node.nodeValue).filter(x=>(x.kind==='url' || x.kind==='email') && off >= x.end && /^[.,;:!?)\]}'"\u00bb\u201d]*$/.test(node.nodeValue.slice(x.end, off))).pop();
+  if(!m) return;
+  const r0 = document.createRange(); r0.setStart(body, 0); r0.setEnd(node, off); const idx = r0.toString().length;
+  const r = document.createRange(); r.setStart(node, m.start); r.setEnd(node, m.end);
+  sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('createLink', false, m.href);
+  noteCaretAtTextIndex(idx); noteCaretOutsideLink();
+}
+// The caret moved to another line: the line it came from is finished.
+function noteLeaveLineCheck(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection ? window.getSelection() : null;
+  if(!body || !sel || !sel.rangeCount || !body.contains(sel.anchorNode)){ return; }
+  const cur = noteLineOf(sel.anchorNode), prev = noteCaretLine;
+  noteCaretLine = cur;
+  if(prev && prev!==cur && prev.isConnected && body.contains(prev) && typeof setTimeout==='function') setTimeout(()=>noteAutoLinkLine(prev), 0);
 }
 function noteOpenHref(h){ if(/^(mailto|tel):/i.test(h)) window.location.href = h; else window.open(h, '_blank', 'noopener'); }
 function noteListStyle(kind){
@@ -6276,7 +6314,6 @@ function onNoteInput(e){
   }
   noteEditCount++;
   noteEnsureTrailingLine(body);
-  scheduleNoteAutoLink();
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
   updateNoteToolbarState();                            // keeps the Undo / Redo buttons in step, including after ⌘Z and ⇧⌘Z
@@ -6402,6 +6439,8 @@ function noteBackspaceAfterTable(e){
   return true;
 }
 function onNoteKeydown(e){
+  noteAutoLinkAtSpace(e);                                                      // a web / e-mail address is linked as the space after it is typed
+  if(e.key==='Enter' && !e.isComposing && !e.metaKey && !e.ctrlKey){ const sel = window.getSelection(); if(sel && sel.rangeCount) noteAutoLinkLine(noteLineOf(sel.anchorNode)); }   // finish the line (link its addresses) before Enter splits it
   if(noteTablePickerKey(e)) return;
   if(noteTableExitDown(e)) return;
   if(noteBackspaceAfterTable(e)) return;
@@ -6499,7 +6538,7 @@ function applyNoteLink(){
   onNoteInput();
 }
 function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
-document.addEventListener('selectionchange', ()=>{ if(appMode==='notes') updateNoteToolbarState(); });
+document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); } });
 window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); });
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') flushNoteEdit(); });
 
