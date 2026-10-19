@@ -1115,6 +1115,15 @@
   .note-body ul[data-ls="emdash"] { list-style-type: "\2014\00a0\00a0"; }
   .note-body ol[data-ls="alpha"] { list-style-type: lower-alpha; }
   .note-body ol[data-ls="roman"] { list-style-type: lower-roman; }
+  /* sub-numbering: Tab in a numbered list nests an <ol> directly inside the <ol>; its items read 1.1. / a.1. / i.1. (and 1.1.1. a level down).
+     "nt" counts the top level (its own marker stays native), "ns" counts the nested levels, joined with counters(). */
+  .note-body ol:not(ol > ol) { counter-reset: nt; }
+  .note-body ol:not(ol > ol) > li { counter-increment: nt; }
+  .note-body ol > ol { counter-reset: ns; }
+  .note-body ol > ol > li { counter-increment: ns; list-style: none; position: relative; }
+  .note-body ol > ol > li::before { content: counter(nt) "." counters(ns, ".") "."; position: absolute; right: 100%; margin-right: .5em; white-space: nowrap; }
+  .note-body ol[data-ls="alpha"] ol > li::before { content: counter(nt, lower-alpha) "." counters(ns, ".") "."; }
+  .note-body ol[data-ls="roman"] ol > li::before { content: counter(nt, lower-roman) "." counters(ns, ".") "."; }
   .pop-glyph { flex: none; width: 22px; margin-right: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; color: var(--text-2); }
   .pop-glyph.sym { font-size: 19px; font-weight: 700; }   /* the bullet marks are tiny characters: scaled up to the visual weight of "1." "a." "i." */
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
@@ -5876,7 +5885,7 @@ function noteTableArrow(e){
   sel.removeAllRanges(); sel.addRange(pos);
   return true;
 }
-// Typing "- " / "* " (or "1. ") at the start of a plain line turns it into a bulleted (or numbered) list, like Word. Bullets use the last-used style.
+// Typing "- " / "* " (or "1. ", "a. ", "i. ") at the start of a plain line turns it into a bulleted (or numbered/lettered/roman) list, like Word. Bullets use the last-used style.
 function noteAutoBullet(e){
   if(e.key!==' ' || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey || e.isComposing) return false;
   const body = document.getElementById('noteBody'), sel = window.getSelection();
@@ -5884,13 +5893,17 @@ function noteAutoBullet(e){
   if(noteClosest(sel.anchorNode, 'LI') || noteClosest(sel.anchorNode, 'TD') || noteClosest(sel.anchorNode, 'TH') || noteClosest(sel.anchorNode, 'PRE')) return false;
   const n = sel.anchorNode;
   if(n.nodeType!==3) return false;
-  const marker = n.textContent.slice(0, sel.anchorOffset), numbered = /^\d{1,3}[.)]$/.test(marker);
-  if(marker!=='-' && marker!=='*' && !numbered) return false;
+  const marker = n.textContent.slice(0, sel.anchorOffset);
+  let kind = null;                                                  // numbered style this marker asks for; null = bullet
+  if(/^\d{1,3}[.)]$/.test(marker)) kind = 'decimal';
+  else if(/^(i|ii|iii|iv)[.)]$/.test(marker)) kind = 'roman';        // "i." is roman, as in Word; other single letters are alphabetic
+  else if(/^[a-z][.)]$/.test(marker)) kind = 'alpha';
+  else if(marker!=='-' && marker!=='*') return false;
   const prev = n.previousSibling;                                   // the marker must be the first thing on its line
   if(prev && prev.nodeName!=='BR') return false;
   e.preventDefault();
   for(let i = 0; i<marker.length; i++) document.execCommand('delete', false);   // remove the marker (keeps native undo)
-  noteListStyle(numbered ? 'decimal' : noteBulletKind);
+  noteListStyle(kind || noteBulletKind);
   return true;
 }
 function onNoteKeydown(e){
