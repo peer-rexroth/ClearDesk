@@ -1137,6 +1137,10 @@
   .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]),
   .note-body ol[data-ls="alpha"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]),
   .note-body ol[data-ls="roman"]:not(ol > ol) > ol:not([data-ls]) > ol:not([data-ls]) > ol:not([data-ls]) { list-style-type: lower-roman; }
+  .pop-svg { flex: none; width: 22px; margin-right: 6px; display: flex; justify-content: center; color: var(--text-2); }
+  .pop-svg svg, .row-menu-item svg.tbl-ins { width: 16px; height: 16px; }
+  .row-menu-item svg.tbl-ins { flex: none; margin: 0 0 0 0; color: var(--text-3); }
+  .row-menu-item:hover:not(:disabled) .pop-svg, .row-menu-item:hover:not(:disabled) svg.tbl-ins { color: #fff; }
   .pop-glyph { flex: none; width: 22px; margin-right: 6px; text-align: center; font-size: 14px; font-weight: 700; line-height: 1; color: var(--text-2); }
   .pop-glyph.sym { font-size: 19px; font-weight: 700; }   /* the bullet marks are tiny characters: scaled up to the visual weight of "1." "a." "i." */
   .row-menu-item:hover:not(:disabled) .pop-glyph { color: #fff; }
@@ -1149,6 +1153,7 @@
   .note-toolbar .tool-split .list-caret { min-width: 0 !important; width: auto; padding: 0 9px 0 2px; color: var(--text-3); }
   .note-list-menu .pop-check { width: 14px; }
   .note-list-menu .pop-label { white-space: nowrap; }
+  .note-table-menu:not(:has(.tbl-picker)) .pop-label { white-space: nowrap; }   /* "Insert column right" must not wrap */
   .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0 .8em; }
   .note-body > table:first-child { margin-top: 24px; }
   .note-body th, .note-body td { border: 1px solid var(--border-2); padding: 6px 10px; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
@@ -3082,7 +3087,7 @@ function toggleRowSub(e, btn){
 }
 function closeRowMenu(){ document.getElementById('rowMenu')?.classList.remove('open'); if(typeof tblSel!=='undefined' && tblSel){ tblSel = null; if(typeof tblHandlesRefresh==='function') tblHandlesRefresh(); } }
 // The two building blocks of the right-click menus (tasks and notes): a plain row, and a row that opens a flyout of options.
-const rowMenuItem = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}"><i class="${icon}"></i><span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+const rowMenuItem = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}">${icon.startsWith('<svg') ? icon : `<i class="${icon}"></i>`}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
 const rowMenuSub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)"><i class="${icon}"></i><span>${text}</span><span class="row-menu-hint"><i class="fa-solid fa-chevron-right"></i></span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
 function rowMenuHtml(ids){
   const n = ids.length;
@@ -4574,7 +4579,7 @@ const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var
 // One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
 // tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
 function popOptInner(lead, label){
-  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
+  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg" aria-hidden="true">${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
 function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
@@ -4709,7 +4714,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -5257,6 +5262,7 @@ function renderNoteEditor(){
       if(had) fresh.focus();
     }
     title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
+    if(!noteIsLocked(n.id)) noteEnsureTrailingLine(body);
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
   }
   const sel = document.getElementById('noteFolderSelect');
@@ -5623,10 +5629,10 @@ function noteTableEdit(op, ref){
     return;
   }
   if(op==='rowBefore' || op==='rowAfter'){
-    const anchor = clone.rows[op==='rowBefore' ? rowLo : rowHi];
+    const anchor = clone.rows[op==='rowBefore' ? rowLo : rowHi], headCol = tblHeadCol(clone);   // a header column keeps its header cell in the new rows
     for(let k=0; k<nRows; k++){
       const tr = document.createElement('tr');
-      for(let i=0; i<colsN; i++) tr.appendChild(mk('td'));
+      for(let i=0; i<colsN; i++) tr.appendChild(mk(i===0 && headCol ? 'th' : 'td'));
       if(op==='rowBefore') anchor.before(tr); else anchor.after(tr);
     }
     focusR = op==='rowBefore' ? rowLo : rowHi + 1;
@@ -5644,8 +5650,12 @@ function noteTableEdit(op, ref){
   else if(op==='delRow'){ for(let k=rowHi; k>=rowLo; k--) clone.deleteRow(k); focusR = Math.min(rowLo, rowsN - nRows - 1); }
   else if(op==='delCol'){ [...clone.rows].forEach(row=>{ for(let k=colHi; k>=colLo; k--) if(row.cells[k]) row.deleteCell(k); }); focusC = Math.min(colLo, colsN - nCols - 1); }
   else if(op==='header'){
-    const first = [...clone.rows[0].cells], allTh = first.every(x=>x.tagName==='TH');
-    first.forEach(x=>swap(x, allTh ? 'td' : 'th'));
+    const first = [...clone.rows[0].cells], allTh = first.every(x=>x.tagName==='TH'), keepFirst = tblHeadCol(clone);   // with a header column, the corner cell stays a header
+    first.forEach((x, i)=>{ if(allTh){ if(!(i===0 && keepFirst)) swap(x, 'td'); } else if(x.tagName!=='TH') swap(x, 'th'); });
+  }
+  else if(op==='headerCol'){
+    const on = !tblHeadCol(clone), headRow = tblHeadRow(clone);
+    [...clone.rows].forEach((row, i)=>{ const x = row.cells[0]; if(!x) return; const want = (on || (i===0 && headRow)) ? 'TH' : 'TD'; if(x.tagName!==want) swap(x, want.toLowerCase()); });
   }
   if(op==='colBefore' || op==='colAfter' || op==='delCol') tblColgroupAfterColOp(clone, op, colLo, colHi, colsN);
   range.selectNode(table); sel.removeAllRanges(); sel.addRange(range);
@@ -5665,16 +5675,29 @@ function noteTableInsert(rows, cols){
   if(fresh) noteCaretIn(fresh.rows[0].cells[0]);
   onNoteInput(); updateNoteToolbarState();
 }
+// Icons for the four "insert" commands: a line for the edge you insert next to and an arrow pointing to where the new row / column goes.
+// Monochrome (currentColor, the line fainter) so they follow the menu's grey text and turn white on the blue hover row.
+const TBL_INS_PATHS = {
+  rowAbove: ['M3.5 15.5H16.5', 'M10 11.5V3.5M6.6 6.9L10 3.5L13.4 6.9'],
+  rowBelow: ['M3.5 4.5H16.5',  'M10 8.5V16.5M6.6 13.1L10 16.5L13.4 13.1'],
+  colLeft:  ['M15.5 3.5V16.5', 'M11.5 10H3.5M6.9 6.6L3.5 10L6.9 13.4'],
+  colRight: ['M4.5 3.5V16.5',  'M8.5 10H16.5M13.1 6.6L16.5 10L13.1 13.4'],
+};
+const tblInsIcon = k=>`<svg class="tbl-ins" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="${TBL_INS_PATHS[k][0]}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".5"/><path d="${TBL_INS_PATHS[k][1]}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+// Header row = every cell of the first row is a <th>; header column = the first cell of every row below the first is a <th> (needs 2+ rows).
+const tblHeadRow = table=>!!(table.rows[0] && [...table.rows[0].cells].every(x=>x.tagName==='TH'));
+const tblHeadCol = table=>table.rows.length>1 && [...table.rows].slice(1).every(row=>row.cells[0] && row.cells[0].tagName==='TH');
 function noteTableMenuHtml(){
   const cell = noteSelectedCell();
   if(!cell) return noteTablePickerHtml(noteTablePicker);
-  const { table } = noteCellPos(cell), hasHead = [...table.rows[0].cells].every(x=>x.tagName==='TH');
+  const { table, r: cr, c: cc } = noteCellPos(cell), hasHead = tblHeadRow(table), hasHeadCol = tblHeadCol(table);
   const o = (op, icon, label, cur)=>menuOpt(`noteTableEdit('${op}')`, {icon}, label, cur);
+  const ins = (op, key, label)=>menuOpt(`noteTableEdit('${op}')`, {svg: tblInsIcon(key)}, label);
   const danger = h=>h.replace('row-menu-item menu-opt', 'row-menu-item menu-opt danger');
   const sep = '<div class="row-menu-sep"></div>';
   return [
-    o('rowBefore','arrow-up','Row above'), o('rowAfter','arrow-down','Row below'), o('colBefore','arrow-left','Column left'), o('colAfter','arrow-right','Column right'), sep,
-    o('header','heading','Header row', hasHead), sep,
+    ins('rowBefore','rowAbove','Insert row above'), ins('rowAfter','rowBelow','Insert row below'), ins('colBefore','colLeft','Insert column left'), ins('colAfter','colRight','Insert column right'), sep,
+    ...(cr===0 ? [o('header','heading','Header row', hasHead)] : []), ...(cc===0 ? [o('headerCol','heading','Header column', hasHeadCol)] : []), ...(cr===0 || cc===0 ? [sep] : []),
     danger(o('delRow','minus','Delete row')), danger(o('delCol','minus','Delete column')), danger(o('delTable','trash','Delete table'))
   ].join('');
 }
@@ -5833,13 +5856,15 @@ function tblPlus(e, op, r, c){ e.stopPropagation(); if(tblHandlesTable) noteTabl
 function tblGripMenuHtml(kind, sel, table){
   const a = sel.a, b = sel.b, n = b - a + 1, item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
   const noun = kind==='col' ? 'column' : 'row', nounN = n>1 ? `${n} ${noun}s` : noun;
-  const before = kind==='col' ? 'before' : 'above', after = kind==='col' ? 'after' : 'below';
-  const head = table && table.rows[0] ? [...table.rows[0].cells].every(x=>x.tagName==='TH') : false;
+  const before = kind==='col' ? 'left' : 'above', after = kind==='col' ? 'right' : 'below';
+  const head = table ? tblHeadRow(table) : false, headCol = table ? tblHeadCol(table) : false, tick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
   // Grouped by scope: add, then the selection's own delete, then the table-level items (header toggle, delete table) last.
   return [
-    item('fa-solid fa-plus', `Add ${nounN} ${before}`, `tblGripRun('${kind==='col' ? 'colBefore' : 'rowBefore'}')`), item('fa-solid fa-plus', `Add ${nounN} ${after}`, `tblGripRun('${kind==='col' ? 'colAfter' : 'rowAfter'}')`), sep,
+    item(tblInsIcon(kind==='col' ? 'colLeft' : 'rowAbove'), `Insert ${nounN} ${before}`, `tblGripRun('${kind==='col' ? 'colBefore' : 'rowBefore'}')`), item(tblInsIcon(kind==='col' ? 'colRight' : 'rowBelow'), `Insert ${nounN} ${after}`, `tblGripRun('${kind==='col' ? 'colAfter' : 'rowAfter'}')`), sep,
     item('fa-solid fa-minus', `Delete ${nounN}`, `tblGripRun('${kind==='col' ? 'delCol' : 'delRow'}')`, {danger:true}), sep,
-    item('fa-solid fa-heading', 'Header row', `tblGripRun('header')`, {hint: head ? '<i class="fa-solid fa-check"></i>' : ''}), item('fa-regular fa-trash-can', 'Delete table', `tblGripRun('delTable')`, {danger:true})
+    ...(kind==='row' && a===0 ? [item('fa-solid fa-heading', 'Header row', `tblGripRun('header')`, tick(head))] : []),   // the header toggles only appear on the first row / first column
+    ...(kind==='col' && a===0 ? [item('fa-solid fa-heading', 'Header column', `tblGripRun('headerCol')`, tick(headCol))] : []),
+    item('fa-regular fa-trash-can', 'Delete table', `tblGripRun('delTable')`, {danger:true})
   ].join('');
 }
 // Open the menu of the selected column(s)/row(s) at a position (the pointer, for a right-click).
@@ -5951,6 +5976,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   noteEditCount++;
+  noteEnsureTrailingLine(body);
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
   updateNoteToolbarState();                            // keeps the Undo / Redo buttons in step, including after ⌘Z and ⇧⌘Z
@@ -6018,6 +6044,31 @@ function noteAutoBullet(e){
   noteListStyle(kind || noteBulletKind);
   return true;
 }
+// A table that is the last thing in a note has nothing below it to click or arrow into (a full-width table leaves no room beside it either), so
+// the note always keeps an empty line after a trailing table: added when a note loads and after every edit (paste, drop, deleting the line).
+function noteEnsureTrailingLine(body){
+  if(!body) return;
+  let last = body.lastChild;
+  while(last && last.nodeType===3 && !last.nodeValue.trim()) last = last.previousSibling;
+  if(last && last.nodeType===1 && last.tagName==='TABLE'){ const p = document.createElement('p'); p.innerHTML = '<br>'; body.appendChild(p); }
+}
+// Cmd/Ctrl+Enter inside a table: move to the line below it, making an empty one first when the table is followed by nothing or by another table.
+function noteTableExitDown(e){
+  if(e.key!=='Enter' || !(e.metaKey || e.ctrlKey) || e.shiftKey || e.altKey || e.isComposing) return false;
+  const cell = noteSelectedCell(); if(!cell || noteIsLocked(noteEditorId)) return false;
+  e.preventDefault();
+  const table = cell.closest('table'), sel = window.getSelection();
+  let next = table.nextSibling;
+  while(next && next.nodeType===3 && !next.nodeValue.trim()) next = next.nextSibling;
+  if(!next || (next.nodeType===1 && next.tagName==='TABLE')){
+    const r = document.createRange(); r.setStartAfter(table); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+    document.execCommand('insertHTML', false, '<p><br></p>');                            // an editing command, so Undo takes it back
+    next = table.nextElementSibling;
+  }
+  if(next){ const r = document.createRange(); r.selectNodeContents(next); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); }
+  onNoteInput(); updateNoteToolbarState();
+  return true;
+}
 // Backspace on an empty line right below a table: Chrome's key handling refuses to step back over the table, so the line could only be deleted by
 // selecting it first. Run the delete command ourselves (one undoable edit) and put the caret at the end of the table's last cell. The last line of the note stays:
 // it is the only way to click or type below a table.
@@ -6052,6 +6103,7 @@ function noteBackspaceAfterTable(e){
 }
 function onNoteKeydown(e){
   if(noteTablePickerKey(e)) return;
+  if(noteTableExitDown(e)) return;
   if(noteBackspaceAfterTable(e)) return;
   if(noteAutoBullet(e)) return;
   if(noteTableArrow(e)) return;
