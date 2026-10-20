@@ -289,3 +289,9 @@ test('the prompts list can be ordered like the notes list: title (default), date
   var h = promptSortMenuHtml(); assertIncludes(h, 'Date Edited'); assertIncludes(h, 'Date Created'); assertIncludes(h, 'Oldest First');
   setPromptSort('edited');
 });
+
+test('the Prompts columns can be resized: widths are clamped, and the default removes the setting', function () {
+  assertEqual(promptsListW.set(50, false), 200); assertEqual(promptsListW.set(5000, false), 600); assertEqual(promptsListW.set(333, false), 333);
+  assertEqual(promptsInspW.set(100, false), 260); assertEqual(promptsInspW.set(900, false), 560); assertEqual(promptsInspW.set(500, false, 420), 420, 'a narrow pane caps it');
+  assertEqual(promptsListW.set(300, true), 300); assertEqual(promptsInspW.set(340, true), 340);
+});

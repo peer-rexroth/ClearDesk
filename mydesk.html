@@ -1175,7 +1175,7 @@ const ICONS = {
   html[data-mode="notes"] .main, html[data-mode="notes"] .drawer { display: none !important; }
   .notes-main { display: none; flex: 1; min-width: 0; overflow: hidden; background: var(--bg); }
   html[data-mode="notes"] #notesMain { display: flex; }
-  .notes-list-pane { width: var(--notes-list-w, 300px); flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); }
+  .notes-list-pane { width: var(--list-w, var(--notes-list-w, 300px)); flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); }
   .notes-list-head { display: flex; align-items: center; gap: 10px; padding: 16px 14px 4px 20px; }
   .notes-list-head h2 { flex: 1; min-width: 0; font-size: var(--fs-22); font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .notes-list-sub { padding: 0 20px 8px; min-height: 22px; font-size: var(--fs-12); color: var(--text-3); }
@@ -1594,16 +1594,22 @@ const ICONS = {
   html.task-trash #trashTools { display: inline-flex; }
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
   .pr-split > .note-scroll { flex: 1; min-width: 0; }
-  .pr-inspector { flex: none; width: 340px; overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width .24s ease, border-color .24s ease; }
-  .pr-insp-inner { width: 340px; height: 100%; overflow-y: auto; padding: 16px 18px 40px; box-sizing: border-box; transition: opacity .18s ease; }
+  #promptsMain { --list-w: var(--prompts-list-w, 300px); }   /* Prompts keeps its own list width (Notes keeps its own) */
+  .pr-inspector { position: relative; flex: none; width: var(--prompts-insp-w, 340px); max-width: max(260px, calc(100% - 380px)); overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width .24s ease, border-color .24s ease; }
+  .pr-insp-inner { width: var(--prompts-insp-w, 340px); max-width: 100%; height: 100%; overflow-y: auto; padding: 16px 18px 40px; box-sizing: border-box; transition: opacity .18s ease; }
   .pr-split.insp-closed .pr-inspector { width: 0; border-left-color: transparent; }
+  .pr-insp-grip { position: absolute; top: 0; bottom: 0; left: 0; width: 9px; z-index: 5; cursor: col-resize; }
+  .pr-insp-grip::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .pr-insp-grip:hover::after, .pr-insp-grip:focus-visible::after { opacity: .7; }
+  .pr-insp-grip:focus { outline: none; }
+  .pr-split.insp-closed .pr-insp-grip { display: none; }
   /* The editor pane has a container query like Notes' bar: with less than ~740px the Variables panel floats over the editor instead of squeezing it,
      and the toolbar gives way in steps (insert buttons become one menu, then the Copy label goes, then Favorite and Lock step aside into the ⋯ menu). */
   .pr-insert-menu { display: none; }
   .pr-menu-chev { margin-left: 4px; opacity: .7; }
   @container notepane (max-width: 739px) {
     .pr-split { position: relative; }
-    .pr-inspector { position: absolute; top: 0; right: 0; bottom: 0; z-index: 6; width: min(340px, 100%); box-shadow: var(--elev-2); }
+    .pr-inspector { position: absolute; top: 0; right: 0; bottom: 0; z-index: 6; width: min(var(--prompts-insp-w, 340px), 100%); max-width: 100%; box-shadow: var(--elev-2); }
     .pr-split.insp-closed .pr-inspector { width: 0; box-shadow: none; }
     .pr-insp-inner { width: 100%; }
   }
@@ -1611,7 +1617,7 @@ const ICONS = {
   @container notepane (max-width: 560px) { .pr-copy-label { display: none; } #pCopyBtn { padding-left: 10px; padding-right: 10px; } }
   @container notepane (max-width: 450px) { #pFavBtn, #pLockBtn, #pEditor .note-toolbar .tool-group:has([aria-label="Undo"]) { display: none; } }
   @container notepane (max-width: 330px) { .pr-insert-menu { display: none; } }
-  @media (min-width: 801px) and (max-width: 1000px) { .notes-list-pane { width: min(var(--notes-list-w, 300px), 240px); } }   /* a window this narrow gives the editor the room */
+  @media (min-width: 801px) and (max-width: 1000px) { .notes-list-pane { width: min(var(--list-w, var(--notes-list-w, 300px)), 240px); } }   /* a window this narrow gives the editor the room */
   .pr-split.insp-closed .pr-insp-inner { opacity: 0; pointer-events: none; }
   .pr-insp-head { font-size: var(--fs-17); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
   .pr-insp-sub { font-size: var(--fs-12); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
@@ -2022,6 +2028,7 @@ const ICONS = {
       </div>
       <div id="pList" role="listbox" aria-label="Prompts"></div>
     </div>
+    <div class="notes-list-resizer" id="promptsListResizer" role="separator" aria-orientation="vertical" aria-label="Resize the prompts list" aria-valuemin="200" aria-valuemax="600" tabindex="0" title="Drag to resize (double-click to reset)"></div>
     <div class="notes-editor-pane">
       <div class="note-toolbar note-empty-bar" id="pEmptyBar">
         <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
@@ -2060,7 +2067,7 @@ const ICONS = {
               <div class="pr-tpl" id="pTpl"><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
             </div>
           </div>
-          <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-inner" id="pInspector"></div></aside>
+          <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-grip" id="prInspResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Variables panel" aria-valuemin="260" aria-valuemax="560" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="pr-insp-inner" id="pInspector"></div></aside>
         </div>
       </div>
     </div>
@@ -2586,6 +2593,60 @@ function setNotesListWidth(v, save){
     else if(e.key==='Home' || e.key==='Enter'){ e.preventDefault(); setNotesListWidth(NOTES_LIST_W_DEFAULT, true); }
   });
 })();
+// Resizable columns in Prompts, like the Notes list: drag the edge, double-click or Home to reset, arrow keys to nudge (Shift for bigger steps). Per device.
+// col = { key, cssVar, def, min, max, bar }; the width lives in a CSS variable on <html> (removed at the default).
+function makeColumnWidth(col){
+  let w = col.def;
+  const api = {
+    get: ()=>w,
+    set(v, save, max){
+      w = Math.max(col.min, Math.min(max || col.max, Math.round(v)));
+      const st = document.documentElement.style;
+      if(st && st.setProperty){ if(w===col.def) st.removeProperty(col.cssVar); else st.setProperty(col.cssVar, w + 'px'); }
+      const b = document.getElementById(col.bar); if(b) b.setAttribute('aria-valuenow', String(w));
+      if(save){ try{ if(w===col.def) localStorage.removeItem(col.key); else localStorage.setItem(col.key, String(w)); }catch(_){} }
+      return w;
+    }
+  };
+  try{ const v = parseInt(localStorage.getItem(col.key), 10); if(Number.isFinite(v)) api.set(v, false); }catch(_){}
+  return api;
+}
+function wireColumnResizer(col, api, widthFromPointer, growKey){
+  const bar = document.getElementById(col.bar); if(!bar || !bar.addEventListener) return;
+  bar.setAttribute('aria-valuenow', String(api.get()));
+  bar.addEventListener('pointerdown', e=>{
+    if(e.button!==0) return;
+    e.preventDefault();
+    const ctx = widthFromPointer.start();                              // measured once: the UI-size zoom means viewport px != CSS px
+    document.documentElement.classList.add('nl-resizing');
+    try{ bar.setPointerCapture(e.pointerId); }catch(_){}
+    const move = ev=>api.set(widthFromPointer.width(ev, ctx), false, ctx.max);
+    const up = ev=>{
+      bar.removeEventListener('pointermove', move); bar.removeEventListener('pointerup', up); bar.removeEventListener('pointercancel', up);
+      document.documentElement.classList.remove('nl-resizing');
+      api.set(widthFromPointer.width(ev, ctx), true, ctx.max);
+    };
+    bar.addEventListener('pointermove', move); bar.addEventListener('pointerup', up); bar.addEventListener('pointercancel', up);
+  });
+  bar.addEventListener('dblclick', ()=>api.set(col.def, true));
+  bar.addEventListener('keydown', e=>{
+    const step = e.shiftKey ? 48 : 16, shrinkKey = growKey==='ArrowRight' ? 'ArrowLeft' : 'ArrowRight';
+    if(e.key===growKey){ e.preventDefault(); api.set(api.get() + step, true); }
+    else if(e.key===shrinkKey){ e.preventDefault(); api.set(api.get() - step, true); }
+    else if(e.key==='Home' || e.key==='Enter'){ e.preventDefault(); api.set(col.def, true); }
+  });
+}
+const PROMPTS_LIST_COL = { key: 'mydesk_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
+const PROMPTS_INSP_COL = { key: 'mydesk_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
+const promptsListW = makeColumnWidth(PROMPTS_LIST_COL), promptsInspW = makeColumnWidth(PROMPTS_INSP_COL);
+wireColumnResizer(PROMPTS_LIST_COL, promptsListW, {
+  start(){ const pane = document.querySelector('#promptsMain .notes-list-pane'), rect = pane.getBoundingClientRect(); return { left: rect.left, k: pane.offsetWidth ? rect.width / pane.offsetWidth : 1 }; },
+  width(ev, c){ return (ev.clientX - c.left) / c.k; }
+}, 'ArrowRight');
+wireColumnResizer(PROMPTS_INSP_COL, promptsInspW, {
+  start(){ const split = document.getElementById('prSplit'), rect = split.getBoundingClientRect(), k = split.offsetWidth ? rect.width / split.offsetWidth : 1; return { right: rect.right, k, max: Math.max(PROMPTS_INSP_COL.min, Math.min(PROMPTS_INSP_COL.max, rect.width / k - 380)) }; },   // the template keeps at least 380px
+  width(ev, c){ return (c.right - ev.clientX) / c.k; }
+}, 'ArrowLeft');
 const UI_SCALE_KEY = 'mytasks_uiscale';
 // Four stops: Small, Medium (the default), Large and Extra Large. (Small and Extra Large were taken out once and are back, on request:
 // the text-size scale needs room both ways.) A stored value that is not exactly a stop snaps to the nearest one.
