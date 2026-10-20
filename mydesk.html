@@ -167,6 +167,8 @@ const ICONS = {
      only respond to color-scheme. Without this, the picker icon defaults
      to a dark glyph that's nearly invisible against the dark input
      background. */
+  select { color-scheme: light; }                                  /* the list a native <select> opens follows the app's theme in every browser */
+  html[data-theme="dark"] select { color-scheme: dark; }
   input[type="date"] { color-scheme: light; }
   html[data-theme="dark"] input[type="date"] { color-scheme: dark; }
 
@@ -203,7 +205,7 @@ const ICONS = {
   .lib-dropdown { position: relative; display: inline-flex; }
 
   /* buttons */
-  .btn { font-size: var(--fs-13); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 6px 14px; background: transparent; color: var(--text); cursor: pointer; font-family: var(--font); display: inline-flex; align-items: center; gap: 6px; transition: background 0.1s; white-space: nowrap; }
+  .btn { font-size: var(--fs-13); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 6px 14px; background: transparent; color: var(--text); cursor: default; font-family: var(--font); display: inline-flex; align-items: center; gap: 6px; transition: background 0.1s; white-space: nowrap; }
   .btn:hover { background: var(--bg-2); }
   .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
   .btn-primary:hover { opacity: 0.85; background: var(--text); }
@@ -211,10 +213,10 @@ const ICONS = {
   .btn-danger:hover { opacity: 0.85; background: var(--red-text); }
   .btn-icon { padding: 6px 8px; }
   .btn-sm { font-size: var(--fs-12); padding: 4px 10px; }
-  .icon-btn { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: var(--ico-16); padding: 4px 6px; border-radius: var(--r-xs); }
+  .icon-btn { background: none; border: none; cursor: default; color: var(--text-3); font-size: var(--ico-16); padding: 4px 6px; border-radius: var(--r-xs); }
   .subtask-toggle { display: inline-block; flex-shrink: 0; font-size: 10px; padding: 2px 4px; width: 16px; box-sizing: border-box; }
   .icon-btn:hover { background: var(--hover); color: var(--text); }
-  .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: var(--radius); cursor: pointer; font-size: var(--fs-13); }
+  .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: var(--radius); cursor: default; font-size: var(--fs-13); }
   .proj-select-row:hover { background: var(--bg-2); }
   .proj-select-check { width: 17px; height: 17px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
   .proj-select-check.checked { background: var(--accent); border-color: var(--accent); }
@@ -223,13 +225,13 @@ const ICONS = {
 
   /* split button */
   .split-btn { display: inline-flex; position: relative; border: 0.5px solid var(--border); border-radius: var(--radius); overflow: visible; }
-  .split-btn-main { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-2); color: var(--text); font-size: var(--fs-12); font-family: var(--font); border: none; border-radius: var(--radius) 0 0 var(--radius); cursor: pointer; white-space: nowrap; }
+  .split-btn-main { display: flex; align-items: center; gap: 6px; padding: 6px 10px; background: var(--bg-2); color: var(--text); font-size: var(--fs-12); font-family: var(--font); border: none; border-radius: var(--radius) 0 0 var(--radius); cursor: default; white-space: nowrap; }
   .split-btn-main:hover { background: var(--hover); }
-  .split-btn-chevron { display: flex; align-items: center; padding: 6px 8px; background: var(--bg-2); color: var(--text-3); font-size: var(--ico-12); font-family: var(--font); border: none; border-left: 0.5px solid var(--border); border-radius: 0 var(--radius) var(--radius) 0; cursor: pointer; }
+  .split-btn-chevron { display: flex; align-items: center; padding: 6px 8px; background: var(--bg-2); color: var(--text-3); font-size: var(--ico-12); font-family: var(--font); border: none; border-left: 0.5px solid var(--border); border-radius: 0 var(--radius) var(--radius) 0; cursor: default; }
   .split-btn-chevron:hover { background: var(--hover); color: var(--text); }
   .split-btn-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); box-shadow: var(--elev-2); min-width: 210px; z-index: 300; overflow: hidden; }
   .split-btn-menu.open { display: block; }
-  .split-btn-menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; cursor: pointer; color: var(--text); }
+  .split-btn-menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; cursor: default; color: var(--text); }
   .split-btn-menu-item:hover { background: var(--hover); }
   .split-btn-menu-item + .split-btn-menu-item { border-top: 0.5px solid var(--border); }
   .split-btn-menu-icon { flex-shrink: 0; width: 14px; margin-top: 1px; color: var(--text-2); font-size: var(--ico-16); }
@@ -250,17 +252,17 @@ const ICONS = {
   .sidebar-section.grow { flex: 1; overflow-y: auto; }
   .sidebar-section-label { font-size: var(--fs-11); font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; }
 
-  .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px; border-radius: var(--radius); cursor: pointer; font-size: var(--fs-13); font-weight: 500; }
+  .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px; border-radius: var(--radius); cursor: default; font-size: var(--fs-13); font-weight: 500; }
   .nav-item:hover { background: var(--bg-2); }
   .nav-item.active { background: var(--bg-2); }
   .nav-item .count { font-size: var(--fs-11); color: var(--text-3); font-weight: 500; }
 
   .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-  .f-chip { font-size: var(--fs-11); font-weight: 500; padding: 4px 8px; border-radius: 999px; cursor: pointer; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: all 0.1s; user-select: none; }
+  .f-chip { font-size: var(--fs-11); font-weight: 500; padding: 4px 8px; border-radius: 999px; cursor: default; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: all 0.1s; user-select: none; }
   .f-chip:hover { border-color: var(--border-2); color: var(--text); }
   .f-chip.active { background: var(--bg-3); color: var(--text); }   /* same weight as the pills; the fill alone says "on" (a bold label and an outline said it twice) */
 
-  .project-row { position: relative; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius); cursor: pointer; font-size: var(--fs-13); }
+  .project-row { position: relative; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--radius); cursor: default; font-size: var(--fs-13); }
   .project-row:hover { background: var(--bg-2); }
   .project-row:is(:hover, :focus-within) .project-actions { opacity: 1; pointer-events: auto; }
   .project-row.active { background: var(--bg-2); font-weight: 600; }
@@ -291,7 +293,7 @@ const ICONS = {
   .main-toolbar select { font-size: var(--fs-12); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 6px 8px; background: var(--bg); color: var(--text); font-family: var(--font); }
 
   .view-switch { display: inline-flex; border: 0.5px solid var(--border-2); border-radius: var(--radius); overflow: hidden; }
-  .view-switch-btn { padding: 6px 10px; background: var(--bg); border: none; color: var(--text-3); cursor: pointer; font-size: var(--fs-12); }
+  .view-switch-btn { padding: 6px 10px; background: var(--bg); border: none; color: var(--text-3); cursor: default; font-size: var(--fs-12); }
   .view-switch-btn:hover { color: var(--text); background: var(--bg-2); }
   .view-switch-btn + .view-switch-btn { border-left: 0.5px solid var(--border-2); }
   .view-switch-btn.active { background: var(--bg-3); color: var(--text); }
@@ -308,9 +310,9 @@ const ICONS = {
   .board-col-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .board-col-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 40px; }
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
-  .show-more-row { text-align: center; color: var(--text-2); font-size: var(--fs-12); font-weight: 500; padding: 8px; cursor: pointer; border-radius: var(--radius); }
+  .show-more-row { text-align: center; color: var(--text-2); font-size: var(--fs-12); font-weight: 500; padding: 8px; cursor: default; border-radius: var(--radius); }
   .show-more-row:hover { background: var(--bg-2); color: var(--text); }
-  .board-card { background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: pointer; display: flex; flex-direction: column; gap: 8px; }
+  .board-card { background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: default; display: flex; flex-direction: column; gap: 8px; }
   .board-card:hover { border-color: var(--border-2); }
   .board-card.dragging { opacity: .4; }
   .board-card:is(.kbd-selected, .bulk-selected) { border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
@@ -337,7 +339,7 @@ const ICONS = {
   .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 152px 88px 108px 112px; min-width: 816px; }   /* Due = widest date seen across 22 locales (pt-BR "28 de mar." 108px, with chevron) + a little */   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: var(--fs-11); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
-  .task-row { display: grid; grid-template-areas: "check title project priority status due" ". sub sub sub sub sub"; column-gap: 10px; row-gap: 2px; align-items: center; padding: 4px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: pointer; }
+  .task-row { display: grid; grid-template-areas: "check title project priority status due" ". sub sub sub sub sub"; column-gap: 10px; row-gap: 2px; align-items: center; padding: 4px 10px; margin-bottom: 2px; border-radius: var(--radius); border: 0.5px solid transparent; cursor: default; }
   .task-row:hover { background: var(--bg); border-color: var(--border); }
   .task-row:hover .row-actions { opacity: 1; }
   .task-row.kbd-selected { background: var(--bg); border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
@@ -346,7 +348,7 @@ const ICONS = {
   .task-row.done .task-title { text-decoration: line-through; color: var(--text-3); }
 
   .task-check-cell { grid-area: check; display: flex; align-items: center; gap: 2px; }
-  .task-checkbox { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
+  .task-checkbox { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
   .task-checkbox:hover { border-color: var(--green-text); }
   .task-checkbox.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 3px var(--green-bg); }
   .task-checkbox i { font-size: 10px; color: var(--on-accent); opacity: 0; transition: opacity .1s; }
@@ -372,7 +374,7 @@ const ICONS = {
   #taskList .task-subtask-row .subtask-toggle { position: absolute; left: -21px; top: 50%; transform: translateY(-50%); }
   .sub-hierarchy-btn { opacity: 0; flex-shrink: 0; font-size: 10px; padding: 2px 4px; }
   .task-subtask-row:hover .sub-hierarchy-btn { opacity: 1; }
-  .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color .15s, border-color .15s; }
+  .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color .15s, border-color .15s; }
   .task-subtask-row .mini-check:hover { border-color: var(--green-text); }
   .task-subtask-row .mini-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
   .task-subtask-row .mini-check i { font-size: 7px; color: var(--on-accent); opacity: 0; }
@@ -455,7 +457,7 @@ const ICONS = {
   .subtask-row.drag-over-bottom, .task-subtask-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
   .subtask-row .sub-drag-handle { width: 10px; text-align: center; font-size: var(--fs-11); color: var(--text-3); flex-shrink: 0; cursor: grab; opacity: 0; }
   .subtask-row:hover .sub-drag-handle { opacity: 1; }
-  .subtask-row .sub-check { width: 16px; height: 16px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
+  .subtask-row .sub-check { width: 16px; height: 16px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
   .subtask-row .sub-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
   .subtask-row .sub-check i { font-size: 8px; color: var(--on-accent); opacity: 0; }
   .subtask-row .sub-check.checked i { opacity: 1; }
@@ -470,11 +472,11 @@ const ICONS = {
   .add-row input { flex: 1; border: 0.5px dashed var(--border-2); border-radius: var(--radius); padding: 6px 8px; font-size: var(--fs-13); background: transparent; color: var(--text); outline: none; font-family: var(--font); }
 
   .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
-  .swatch { width: 32px; height: 32px; border-radius: var(--radius); cursor: pointer; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+  .swatch { width: 32px; height: 32px; border-radius: var(--radius); cursor: default; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); display: flex; align-items: center; justify-content: center; font-size: 14px; }
   .swatch:hover { background: var(--hover); color: var(--text); }
   .swatch.selected { background: var(--text); color: var(--bg); border-color: var(--text); }
   .weekday-picker { display: flex; gap: 6px; }
-  .weekday-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); font-size: var(--fs-12); font-weight: 600; cursor: pointer; font-family: var(--font); }
+  .weekday-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-2); background: var(--bg-2); color: var(--text-2); font-size: var(--fs-12); font-weight: 600; cursor: default; font-family: var(--font); }
   .weekday-btn:hover { border-color: var(--blue-border); }
   .weekday-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
@@ -489,7 +491,7 @@ const ICONS = {
   .modal input:focus { border-color: var(--border-2); }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
   .import-options { display: flex; flex-direction: column; gap: 8px; }
-  .import-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--radius); cursor: pointer; transition: background 0.1s; }
+  .import-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--radius); cursor: default; transition: background 0.1s; }
   .import-option:hover { background: var(--bg-2); }
   .import-option-text strong { display: block; font-size: var(--fs-13); font-weight: 500; }
   .import-option-text span { font-size: var(--fs-12); color: var(--text-2); }
@@ -605,7 +607,7 @@ const ICONS = {
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: var(--radius); font-size: var(--fs-13); font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: all 0.25s ease; z-index: 300; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.error { background: var(--red-text); }
-  .toast-undo { background: none; border: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; padding: 0; margin-left: 2px; }
+  .toast-undo { background: none; border: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: default; padding: 0; margin-left: 2px; }
 
   [data-tooltip] { position: relative; }
   [data-tooltip]::after {
@@ -692,7 +694,7 @@ const ICONS = {
 
   /* ── UX pass: inline cell editing, quick-add preview, sync banner,
      filter popover, appearance menu, collapsible tags ─────────────────── */
-  .task-cell.editable, .cell-host.editable { position: relative; cursor: pointer; border-radius: var(--radius); }
+  .task-cell.editable, .cell-host.editable { position: relative; cursor: default; border-radius: var(--radius); }
   /* Hovering an editable cell reacts on its pill only, never on the whole cell box:
      the pill brightens and gets a soft pill-shaped halo (brightness works on every
      badge colour, light and dark). An empty cell (just the dash) gets a small pill. */
@@ -700,7 +702,7 @@ const ICONS = {
   .task-cell.editable:hover .task-cell-empty { background: var(--hover); border-radius: 999px; box-shadow: 0 0 0 4px var(--bg-3); }
   .cell-host { display: inline-flex; }
   .cell-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 60; min-width: var(--submenu-w); display: flex; flex-direction: column; gap: 1px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); cursor: default; }
-  .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: var(--r-s); background: transparent; color: var(--text); font-size: var(--fs-14); font-family: var(--font); cursor: pointer; text-align: left; }
+  .cell-pop-opt { display: flex; align-items: center; padding: 6px 8px; border: none; border-radius: var(--r-s); background: transparent; color: var(--text); font-size: var(--fs-14); font-family: var(--font); cursor: default; text-align: left; }
   .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
   /* shared menu-row anatomy: tick column, dot or icon, text (cell popovers, row menu, toolbar menus) */
   .cell-pop-opt:hover, .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
@@ -736,7 +738,7 @@ const ICONS = {
      leftwards, or it runs under the scroll container's edge and is clipped */
   .task-cell.due .cell-pop, .board-card-top .cell-host .cell-pop { left: auto; right: 0; }
 
-  .quickadd-project { flex-shrink: 0; margin-right: 8px; max-width: 150px; font-size: var(--fs-13); font-family: var(--font); color: var(--text-2); background: var(--bg-3); border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; cursor: pointer; }
+  .quickadd-project { flex-shrink: 0; margin-right: 8px; max-width: 150px; font-size: var(--fs-13); font-family: var(--font); color: var(--text-2); background: var(--bg-3); border: 1px solid var(--border); border-radius: 999px; padding: 6px 10px; cursor: default; }
   html[data-scheme="glass"] .quickadd-project { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px var(--glass-lift-1); }
   .quickadd-project:disabled { opacity: .6; cursor: default; }
   .quickadd-preview { display: none; align-items: center; gap: 6px; flex-wrap: wrap; padding: 8px 24px 8px; font-size: var(--fs-13); color: var(--text-2); }
@@ -764,7 +766,7 @@ const ICONS = {
   .ui-scale-panel .view-switch-btn { white-space: nowrap; }
 
   .sidebar-section-actions { display: inline-flex; gap: 2px; }
-  .tags-section .sidebar-section-label { cursor: pointer; margin-bottom: 7px; }
+  .tags-section .sidebar-section-label { cursor: default; margin-bottom: 7px; }
   .tags-chevron { font-size: var(--ico-12); transition: transform .15s; }
   .tags-section.collapsed .tags-chevron { transform: rotate(-90deg); }
   .tags-section.collapsed .filter-chips { display: none; }
@@ -799,7 +801,7 @@ const ICONS = {
 
   .row-menu { display: none; position: fixed; z-index: 400; min-width: 230px; max-width: 300px; padding: 6px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--radius); box-shadow: var(--shadow); }   /* no overflow clipping: the submenu flyouts hang outside it */
   .row-menu.open { display: block; }
-  .row-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: none; border-radius: var(--r-s); background: transparent; color: var(--text); font-size: var(--fs-14); font-family: var(--font); text-align: left; cursor: pointer; }
+  .row-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: none; border-radius: var(--r-s); background: transparent; color: var(--text); font-size: var(--fs-14); font-family: var(--font); text-align: left; cursor: default; }
   .row-menu-item i { width: 16px; text-align: center; color: var(--text-3); }
   .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .row-menu-item:disabled { opacity: .45; cursor: default; }
@@ -809,12 +811,12 @@ const ICONS = {
   .row-menu-sep { height: 1px; background: var(--border); margin: 6px 2px; }
   .row-menu-label { padding: 6px 10px 2px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text-3); }
   .row-menu-chips { display: flex; flex-wrap: wrap; gap: 4px; padding: 2px 6px 6px; }
-  .row-menu-chip { padding: 4px 6px; border: 1px solid transparent; border-radius: var(--r-s); background: transparent; color: var(--text); font-size: var(--fs-13); font-family: var(--font); cursor: pointer; }
+  .row-menu-chip { padding: 4px 6px; border: 1px solid transparent; border-radius: var(--r-s); background: transparent; color: var(--text); font-size: var(--fs-13); font-family: var(--font); cursor: default; }
   .row-menu-chip:hover { background: var(--hover); }
   .row-menu-chip.current { border-color: var(--border-2); background: var(--bg-2); }
   .row-menu-chip i { color: var(--text-3); font-size: var(--ico-16); }
 
-  .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 1px solid var(--purple-text); border-radius: var(--r-xl); background: transparent; color: var(--purple-text); font-size: var(--fs-13); font-weight: 600; font-family: var(--font); cursor: pointer; }
+  .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 1px solid var(--purple-text); border-radius: var(--r-xl); background: transparent; color: var(--purple-text); font-size: var(--fs-13); font-weight: 600; font-family: var(--font); cursor: default; }
   .sel-chip:hover { background: var(--purple-bg); }
   .sel-chip i { font-size: var(--ico-14); opacity: .8; }
 
@@ -983,7 +985,7 @@ const ICONS = {
     html.sidebar-collapsed .sidebar { width: min(300px, 86vw); transform: translateX(-100%); box-shadow: none; }
     .sidebar { transition: transform .2s ease; }
   }
-  .th-sort { display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; border-radius: var(--r-s); }
+  .th-sort { display: flex; align-items: center; gap: 6px; cursor: default; user-select: none; border-radius: var(--r-s); }
   .th-sort:hover { color: var(--text); }
   .th-arrow { font-size: 9px; opacity: 0; transition: opacity .12s ease; }
   .th-sort:hover .th-arrow { opacity: .4; }
@@ -1038,7 +1040,7 @@ const ICONS = {
   .main-title-wrap { display: flex; flex-direction: column; min-width: 0; }
   .main-subtitle { font-size: var(--fs-12); color: var(--text-3); line-height: 1.3; margin-top: 1px; }
   .tool-group { display: inline-flex; align-items: center; gap: 1px; padding: 2px; border: 1px solid var(--border-2); border-radius: 999px; background: var(--bg); }
-  .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: var(--fs-14); cursor: pointer; transition: background .12s ease, opacity .12s ease; }
+  .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: var(--fs-14); cursor: default; transition: background .12s ease, opacity .12s ease; }
   .tool-btn:hover:not(:disabled) { background: var(--hover); }
   /* the board's fold-all button is a .btn: at rest it is --bg-3 and the Glass .btn hover turns it near-white, so hovering it
      barely changed anything. Darken it instead, like the other toolbar controls do against their own surface. */
@@ -1198,7 +1200,7 @@ const ICONS = {
   .tool-btn.on:hover:not(:disabled) { background: var(--amber-bg); opacity: .85; }
   .note-editor.locked .note-fmt { opacity: .4; pointer-events: none; }
   .note-editor.locked .note-body { cursor: default; }
-  .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: var(--r-xs); background: transparent; color: var(--text-3); cursor: pointer; font-size: var(--ico-12); }
+  .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: var(--r-xs); background: transparent; color: var(--text-3); cursor: default; font-size: var(--ico-12); }
   .project-row .folder-twisty:hover { background: var(--hover); color: var(--text); }
   .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
   .project-row.sub-folder { padding-left: 44px; }
@@ -1225,7 +1227,7 @@ const ICONS = {
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
   .note-editor.locked .tbl-handles { display: none; }
-  .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 6px; cursor: pointer; transition: background .12s ease, color .12s ease, border-color .12s ease; }
+  .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 6px; cursor: default; transition: background .12s ease, color .12s ease, border-color .12s ease; }
   .tbl-colrs { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; z-index: 1; }
   .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: var(--r-xs); background: var(--accent); opacity: 0; transition: opacity .12s ease; }
   .tbl-colrs:hover::after, .tbl-colrs.active::after { opacity: .75; }
@@ -1253,12 +1255,12 @@ const ICONS = {
   .note-color-menu { width: max-content; min-width: 0 !important; padding: 8px 10px 10px; }
   .nc-label { margin: 4px 2px 5px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-3); }
   .nc-row { display: flex; gap: 6px; }
-  .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg-2); font: 700 13px/1 var(--font); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+  .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg-2); font: 700 13px/1 var(--font); cursor: default; display: inline-flex; align-items: center; justify-content: center; }
   .nc-sw:hover { box-shadow: 0 0 0 2px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: rgba(255, 214, 10, .45); color: inherit; }
   /* the copy button on a code block: a small Apple-style material chip in its top right corner, shown while the pointer is over the block */
-  .note-code-copy { position: absolute; z-index: 3; width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 1px solid var(--border-2); background: var(--glass-strong, var(--bg-2)); color: var(--text-2); font-size: var(--fs-12); cursor: pointer; box-shadow: var(--elev-1); transition: background .12s ease, color .12s ease; }
+  .note-code-copy { position: absolute; z-index: 3; width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 1px solid var(--border-2); background: var(--glass-strong, var(--bg-2)); color: var(--text-2); font-size: var(--fs-12); cursor: default; box-shadow: var(--elev-1); transition: background .12s ease, color .12s ease; }
   .note-code-copy .tb-ico2 { width: 14px; height: 14px; }
   .note-code-copy[hidden] { display: none; }
   .note-code-copy:hover { background: var(--cap-hover, var(--bg-3)); color: var(--text); }
@@ -1336,7 +1338,7 @@ const ICONS = {
   .note-toolbar .tool-split:has(.active) { background: var(--cap-on, var(--bg-3)); }
   html[data-scheme] .note-toolbar .tool-split .tool-btn, html[data-scheme] .note-toolbar .tool-split .tool-btn:hover:not(:disabled), html[data-scheme] .note-toolbar .tool-split .tool-btn:is(.active, .on) { background: transparent; }
   .note-toolbar .tool-split .list-main { min-width: 0 !important; padding: 0 4px 0 10px; }
-  .note-toolbar .tool-split .list-caret { min-width: 0 !important; width: auto; padding: 0 8px 0 2px; color: var(--text-3); }
+  .note-toolbar .tool-split .list-caret { min-width: 0 !important; width: auto; padding: 0 10px 0 4px; color: var(--text-3); }   /* 22px wide: the split button's arrow is a target of its own (HIG minimum 20) */
   .note-list-menu .pop-check { width: 14px; }
   .note-list-menu .pop-label { white-space: nowrap; }
   .note-table-menu:not(:has(.tbl-picker)) .pop-label { white-space: nowrap; }   /* "Insert column right" must not wrap */
@@ -1347,7 +1349,7 @@ const ICONS = {
   .note-table-menu:has(.tbl-picker) { min-width: 0; }
   .tbl-picker { padding: 8px 8px 6px; user-select: none; }
   .tbl-picker-grid { display: grid; gap: 4px; }
-  .tbl-cell { width: 16px; height: 16px; box-sizing: border-box; border: 1px solid var(--border-2); border-radius: var(--r-xs); background: var(--bg); cursor: pointer; }
+  .tbl-cell { width: 16px; height: 16px; box-sizing: border-box; border: 1px solid var(--border-2); border-radius: var(--r-xs); background: var(--bg); cursor: default; }
   .tbl-cell.on { background: var(--accent); border-color: var(--accent); }
   .tbl-picker-label { margin-top: 7px; text-align: center; font-size: var(--fs-12); color: var(--text-2); white-space: nowrap; }
   .note-body td:empty::after, .note-body th:empty::after { content: "\200b"; }
@@ -1437,7 +1439,7 @@ const ICONS = {
   /* Notes toolbar icons share the Tasks toolbar's weight: thin outline glyphs (stroke drawn at the size of Font Awesome's regular style) and plain-text B / I / U / S */
   .tb-ico2 { width: 18px; height: 18px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .tb-txt { font-family: var(--font); font-size: var(--fs-15); line-height: 1; font-weight: 600; }
-  .tb-i { font-style: italic; font-weight: 500; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; }
+  .tb-i { font-style: italic; font-weight: 500; font-family: var(--font); font-size: 16px; }   /* the system font's italic, like the B and U beside it (no serif) */
   .tb-u { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 2px; }
   .tb-s { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 
@@ -1451,7 +1453,7 @@ const ICONS = {
   html[data-scheme="glass"] .quickadd:has(#quickAddInput:focus) { border-bottom-color: var(--sel-bg); box-shadow: none; }
   .quickadd:has(#quickAddInput:focus) .qa-plus { color: var(--sel-bg); }
   .qa-wrap { position: relative; flex: none; margin-right: 2px; }
-  .qa-popup { display: inline-flex; align-items: center; gap: 8px; height: 28px; max-width: 190px; padding: 0 8px 0 12px; border: 0; border-radius: var(--r-s); background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text-2); font: 500 13px var(--font); cursor: pointer; white-space: nowrap; }
+  .qa-popup { display: inline-flex; align-items: center; gap: 8px; height: 28px; max-width: 190px; padding: 0 8px 0 12px; border: 0; border-radius: var(--r-s); background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text-2); font: 500 13px var(--font); cursor: default; white-space: nowrap; }
   .qa-popup:hover:not(:disabled) { background: var(--cap-hover, rgba(120,120,128,.22)); color: var(--text); }
   .qa-popup:disabled { opacity: .55; cursor: default; }
   .qa-popup #qaProjectName { overflow: hidden; text-overflow: ellipsis; }
@@ -1491,7 +1493,7 @@ const ICONS = {
   @container notepane (max-width: 720px) { .note-toolbar { gap: 4px; padding-left: 8px !important; padding-right: 8px !important; } .note-toolbar #noteStyleSelect { max-width: 66px; padding-right: 18px; } .note-toolbar .note-new-btn { min-width: 32px; } .note-toolbar .tool-group:has(#noteUndoBtn) { display: none; } }   /* Undo / Redo step aside in a narrow pane (⌘Z still works) */   /* the rarest button steps aside so the bar stays on one row */
   @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
-  .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: var(--r-s); background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: pointer; }
+  .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: var(--r-s); background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: 9px; cursor: default; }
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
   .tbl-grip.tbl { width: 14px; height: 14px; border-radius: var(--r-xs); font-size: 8px; }
   .tbl-grip.tbl:not(.sel) { color: var(--text-3); }   /* the one handle drawn as a shape rather than dots: kept light so it does not outweigh the others */
@@ -1527,6 +1529,14 @@ const ICONS = {
   .task-checkbox, .task-subtask-row .mini-check, .drawer .subtask-row .sub-check, .subtask-row .sub-check { position: relative; }
   .task-checkbox::before { content: ""; position: absolute; inset: -5px; }
   .task-subtask-row .mini-check::before, .subtask-row .sub-check::before { content: ""; position: absolute; inset: -6px; }
+
+  /* Cursors (HIG): the arrow for buttons and controls, the hand only for links (note links, the Help topic jumps). */
+  .note-body a, .help-jump, a[href] { cursor: pointer; }
+
+  /* Small controls keep their look but get a click area of at least 20×20 (macOS minimum): an invisible ::before grows each one by a few px. */
+  .icon-btn.subtask-toggle, .sub-hierarchy-btn, .sub-step-toggle, .th-sort, .tags-section .sidebar-section-label { position: relative; }
+  .icon-btn.subtask-toggle::before, .sub-hierarchy-btn::before, .sub-step-toggle::before { content: ""; position: absolute; inset: -3px; }
+  .th-sort::before, .tags-section .sidebar-section-label::before { content: ""; position: absolute; inset: -3px 0; }
 </style>
 </head>
 <body>
@@ -4995,7 +5005,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Table options (rows, columns, header) at the caret', ['Shift','F10']], ['Next cell, adding a row after the last one', ['Tab']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -7122,6 +7132,11 @@ function onNoteKeydown(e){
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='z' && toastUndoAction && noteEditCount===0){ e.preventDefault(); triggerToastUndo(); return; }
   if(e.key==='Escape' && document.querySelector('#noteTableMenu.open, #noteListMenu.open')){ e.preventDefault(); closeNoteTableMenu(); closeNoteListMenu(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase()==='k'){ e.preventDefault(); openNoteLinkBar(); return; }
+  if((e.key==='ContextMenu' || (e.shiftKey && e.key==='F10')) && noteSelectedCell() && !noteIsLocked(noteEditorId)){      // the keyboard way to the table's options (the grips and "+" show only under the pointer)
+    e.preventDefault(); toggleNoteTableMenu();
+    document.querySelector('#noteTableMenu .row-menu-item')?.focus();
+    return;
+  }
   if(e.key==='Tab'){
     const sel = window.getSelection();
     const cell = noteSelectedCell();
