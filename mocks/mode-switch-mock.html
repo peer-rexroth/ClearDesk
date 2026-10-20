@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="MyDesk">
+<meta name="apple-mobile-web-app-title" content="Workbench">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1e1e1c" media="(prefers-color-scheme: dark)">
-<title>MyDesk</title>
+<title>Workbench</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
@@ -2403,7 +2403,7 @@ html.mk-compact .sb-head .mode-switch .view-switch-btn { flex: none; width: 40px
   <div class="modal about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <button type="button" class="help-close about-close" aria-label="Close" title="Close (Esc)" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button>
     <img class="about-icon" src="icons/icon-192.png" alt="" width="88" height="88">
-    <h3 class="about-name" id="aboutTitle">MyDesk</h3>
+    <h3 class="about-name" id="aboutTitle">Workbench</h3>
     <div class="about-tag">A local-first task and notes manager</div>
     <div class="about-credits">Created by <strong>Peer Rexroth</strong></div>
     <div class="about-feedback">Feedback &amp; suggestions welcome<br><a href="mailto:peer.rexroth@db.com">peer.rexroth@db.com</a></div>
@@ -2493,7 +2493,7 @@ html.mk-compact .sb-head .mode-switch .view-switch-btn { flex: none; width: 40px
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="dataFilesTitle">
     <div class="sync-head">
       <span class="sync-head-icon"><i class="fa-solid fa-folder-open"></i></span>
-      <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one MyDesk file</p></div>
+      <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one Workbench file</p></div>
     </div>
     <div class="sync-list" id="dataFilesList" role="group" aria-label="Data files"></div>
     <div class="modal-actions"><button type="button" class="btn" onclick="closeDataFilesModal()">Cancel</button></div>
@@ -6101,7 +6101,7 @@ function noteExportPrint(id){
   if(!area){ area = document.createElement('div'); area.id = 'notePrintArea'; document.body.appendChild(area); }
   area.innerHTML = noteCopyContent(notes.find(x=>x.id===n.id)).html;
   document.title = noteFileName(n, '').replace(/ $/, '');                                       // the PDF's suggested file name
-  const done = ()=>{ area.innerHTML = ''; document.title = 'MyDesk'; window.removeEventListener('afterprint', done); };
+  const done = ()=>{ area.innerHTML = ''; document.title = 'Workbench'; window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
   window.print();
 }
@@ -9471,7 +9471,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
+  downloadBackup(projects, tasks, `workbench-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 function handleFileImport(event){
@@ -9483,7 +9483,7 @@ function handleFileImport(event){
       if(!data.tasks || !data.projects) throw new Error('bad');
       pendingImportData = data;
       document.getElementById('importModalBg').classList.add('open');
-    }catch(err){ showToast('Invalid MyDesk file', true); }
+    }catch(err){ showToast('Invalid Workbench file', true); }
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -9563,7 +9563,7 @@ function mergeData(data, opts){
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
+    downloadBackup(projects, tasks, `workbench-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
     trashedTasks = pendingImportData.trashedTasks || []; purgedTaskIds = [];
@@ -9671,7 +9671,7 @@ async function pickDataFolder(){
     return null;
   }
 }
-// The folder's .json files that hold MyDesk data (a tasks and a projects array), newest first.
+// The folder's .json files that hold Workbench data (a tasks and a projects array), newest first.
 async function listDataFiles(dir){
   const out = [];
   for await (const [name, h] of dir.entries()){
@@ -9689,7 +9689,7 @@ async function createNewLinkedFile(){
   const dir = await pickDataFolder(); if(!dir) return;
   pendingNewFileDir = dir;
   document.getElementById('newFileFolder').textContent = `In ${dir.name}. Daily backups go in its Backup subfolder.`;
-  const inp = document.getElementById('newFileName'); inp.value = 'mydesk-data';
+  const inp = document.getElementById('newFileName'); inp.value = 'workbench-data';
   document.getElementById('newFileError').textContent = '';
   document.getElementById('newFileModalBg').classList.add('open');
   setTimeout(()=>{ inp.focus(); inp.select(); }, 30);
@@ -9722,7 +9722,7 @@ async function linkFile(){
   const dir = await pickDataFolder(); if(!dir) return;
   try{
     const files = await listDataFiles(dir);
-    if(!files.length){ showToast('No MyDesk data file in that folder. Use "Create new file" instead.', true); return; }
+    if(!files.length){ showToast('No Workbench data file in that folder. Use "Create new file" instead.', true); return; }
     if(files.length===1){ await finishLink(dir, files[0].handle); return; }
     pendingDataFiles = { dir, files };
     document.getElementById('dataFilesFolder').textContent = `${dir.name}: ${files.length} data files`;
@@ -9856,7 +9856,7 @@ let lastFileBackupDay = null;
 const _fsGetK = k => _fsIdb('readonly',  (s,r,j)=>{ const q=s.get(k);   q.onsuccess=()=>r(q.result); q.onerror=()=>j(q.error); });
 const _fsPutK = (k,h) => _fsIdb('readwrite', (s,r,j)=>{ const q=s.put(h,k); q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
 const _fsDelK = k => _fsIdb('readwrite', (s,r,j)=>{ const q=s.delete(k);   q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
-function fileBackupName(day){ const base = fileHandle ? fileHandle.name.replace(/\.json$/i, '') : 'mydesk-data'; return `${base}-${day}.json`; }
+function fileBackupName(day){ const base = fileHandle ? fileHandle.name.replace(/\.json$/i, '') : 'workbench-data'; return `${base}-${day}.json`; }
 function fileBackupDue(){ return !!dirHandle && lastFileBackupDay !== todayStr(); }
 async function fileBackupIfDue(){
   if(!fileBackupDue() || backupRunning) return false;
@@ -9949,7 +9949,7 @@ render();
 initFileSync();
 
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
-  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('mydesk: service worker registration failed — offline support unavailable', e)); });
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('workbench: service worker registration failed — offline support unavailable', e)); });
 }
 </script>
 
