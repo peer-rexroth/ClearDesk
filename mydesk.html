@@ -7186,8 +7186,39 @@ function noteSizeNewTables(html){
     return wd<100 ? `<table style="width:${wd}%">${inner}</table>` : m;
   });
 }
+// An empty block (a blank line from another app: <div></div>, <p></p>, <div> </div>) has no height, so the blank line would vanish; give it a <br>.
+function noteFillEmptyBlocks(html){
+  return String(html || '').replace(/<(div|p)>(?:\s|&nbsp;)*<\/\1>/gi, '<$1><br></$1>');
+}
+// Code copied from an editor or a chat (VS Code, Copilot …) often arrives as ONE element in a monospace font or with white-space:pre, holding a <div> per
+// line (a blank line is <div><br></div> or just an empty <div>). Returns that code as plain text, blank lines and indentation intact, or null when the
+// clipboard is not such a block (a <pre> already keeps its newlines and takes the normal path).
+function noteCodeTextFromHtml(html){
+  if(!html || typeof DOMParser==='undefined') return null;
+  let doc; try{ doc = new DOMParser().parseFromString(html, 'text/html'); }catch(_){ return null; }
+  const kids = [...(doc.body ? doc.body.childNodes : [])].filter(n=>n.nodeType===1 || (n.nodeType===3 && n.nodeValue.trim()));
+  if(kids.length!==1 || kids[0].nodeType!==1) return null;
+  const root = kids[0], st = (root.getAttribute('style') || '').toLowerCase();
+  if(!/^(DIV|P)$/.test(root.tagName) || !(/white-space:\s*pre/.test(st) || /font-family:[^;]*(mono|menlo|consolas|courier)/.test(st))) return null;
+  let out = '';
+  const walk = n=>{
+    if(n.nodeType===3){ out += n.nodeValue.replace(/\u00a0/g, ' '); return; }
+    if(n.nodeType!==1) return;
+    if(n.tagName==='BR'){ out += '\n'; return; }
+    const block = /^(DIV|P|LI|TR)$/.test(n.tagName);
+    if(block && out && !out.endsWith('\n')) out += '\n';
+    const start = out.length;
+    n.childNodes.forEach(walk);
+    if(block){ if(out.length===start) out += '\n'; else if(!out.endsWith('\n')) out += '\n'; }   // an empty block is an empty line
+  };
+  root.childNodes.forEach(walk);
+  out = out.replace(/\n$/, '');
+  return out.trim() && out.includes('\n') ? out : null;   // a single line stays inline text
+}
 function noteInsertClean(html, text){
-  if(html) document.execCommand('insertHTML', false, noteSizeNewTables(sanitizeNoteHtml(html)));
+  const code = noteCodeTextFromHtml(html);
+  if(code!==null) document.execCommand('insertHTML', false, '<pre><code>' + esc(code) + '</code></pre>');
+  else if(html) document.execCommand('insertHTML', false, noteSizeNewTables(noteFillEmptyBlocks(sanitizeNoteHtml(html))));
   else document.execCommand('insertText', false, text || '');
 }
 function onNotePaste(e){

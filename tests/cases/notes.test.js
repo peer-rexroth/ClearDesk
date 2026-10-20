@@ -897,3 +897,11 @@ test('dropping a dragged note on a folder moves it; locked notes and the same fo
   assertEqual(notes[0].folderId, 'f2'); assertEqual(draggedNoteId, null);
   draggedNoteId = 'b'; assertFalse(noteDropOk('f2')); draggedNoteId = null;
 });
+
+// ---- pasting from other apps keeps blank lines ----
+test('noteFillEmptyBlocks gives an empty block a <br> so the blank line keeps its height', function () {
+  assertEqual(noteFillEmptyBlocks('<div>a</div><div></div><div>b</div>'), '<div>a</div><div><br></div><div>b</div>');
+  assertEqual(noteFillEmptyBlocks('<p>a</p><p> </p><p>&nbsp;</p><p>b</p>'), '<p>a</p><p><br></p><p><br></p><p>b</p>');
+  assertEqual(noteFillEmptyBlocks('<div>text</div><td></td>'), '<div>text</div><td></td>', 'only div and p, and only when empty');
+  assertEqual(noteFillEmptyBlocks(''), '');
+});
