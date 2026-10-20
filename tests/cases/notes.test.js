@@ -344,7 +344,7 @@ test('cloneNote copies the body, folder and lock under a unique "(copy)" title',
   const c = notes.find(n => n.id !== 'c1');
   assertEqual(c.title, 'Plan (copy)');
   assertEqual(c.body, '<p>hi</p>');
-  assertEqual(c.locked, true, 'the lock state is copied, like PromptLab');
+  assertEqual(c.locked, true, 'the lock state is copied');
   assertEqual(selectedNoteId, c.id, 'the clone is opened');
   cloneNote('c1');
   assertTrue(notes.some(n => n.title === 'Plan (copy 2)'), 'a second clone gets a number');

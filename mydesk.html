@@ -505,7 +505,7 @@ const ICONS = {
   .help-side-top { padding: 14px 14px 6px; flex-shrink: 0; }
   .help-close { width: 28px; height: 28px; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text-2); font-size: var(--fs-12); cursor: default; }
   /* About: a centred, button-less panel like macOS's "About" window — the app icon, its name, a line of credit, and the same round close control as Help */
-  /* Link/Create dialog — shared with PromptLab: a grouped list of choices (the Help dialog's idiom), then a quiet notice */
+  /* Link/Create dialog: a grouped list of choices (the Help dialog's idiom), then a quiet notice */
   .sync-modal { width: 420px; gap: 16px; }
   .newfile-field { position: relative; margin: 0; }
   .newfile-field input { width: 100%; padding-right: 58px; }
@@ -2404,7 +2404,7 @@ const ICONS = {
   </div>
 </div>
 
-<!-- File sync onboarding modal: one grouped list of choices, then a quiet notice (the Help dialog's list idiom; same dialog as PromptLab's) -->
+<!-- File sync onboarding modal: one grouped list of choices, then a quiet notice (the Help dialog's list idiom) -->
 <div class="modal-bg" id="fileSyncModalBg" onclick="if(event.target===this) closeFileSyncModal()">
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
     <div class="sync-head">
