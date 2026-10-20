@@ -1,4 +1,4 @@
-// Prompts mode: the template language (detect + build), data integrity, merge, the PromptLab import, lists, and the delete / restore / folder flows.
+// Prompts mode: the template language (detect + build), data integrity, merge, lists, and the delete / restore / folder flows.
 
 function pmk(over) {
   const now = Date.now();
@@ -32,15 +32,15 @@ test('promptHighlight tints placeholders, escapes the text and leaves escaped pl
   assertIncludes(h, '\\{{d}}'); assertFalse(h.includes('ph-opt">{{d}}'));
 });
 
-test('normalizePrompts repairs the data: ids, fields, folders, variables, legacy fields, one-level folders', function () {
-  prompts = [{ id: 'a b', name: 5, template: 'x {{v}}', folderId: 'gone', vars: { v: { type: 'option', options: ['A', 'B'], selected: 'A' }, stale: { type: 'text', value: 'x' } }, presets: [{ name: 'ok', values: {} }, { bad: 1 }], versions: [1], catId: 'c' }, null];
+test('normalizePrompts repairs the data: ids, fields, folders, variables, one-level folders', function () {
+  prompts = [{ id: 'a b', name: 5, template: 'x {{v}}', folderId: 'gone', vars: { v: { type: 'option', options: ['A', 'B'], selected: 'A' }, stale: { type: 'text', value: 'x' } }, presets: [{ name: 'ok', values: {} }, { bad: 1 }]}, null];
   promptFolders = [{ id: 'f1', name: 'Top' }, { id: 'f2', name: 'Sub', parentId: 'f1' }, { id: 'f3', name: 'Deep', parentId: 'f2' }, { id: 'f4', name: 'Self', parentId: 'f4' }];
   normalizePrompts();
   assertEqual(prompts.length, 1);
   const p = prompts[0];
   assertTrue(isSafeId(p.id)); assertEqual(p.name, '5'); assertEqual(p.folderId, '');
   assertDeepEqual(Object.keys(p.vars), ['v'], 'variables follow the template');
-  assertEqual(p.presets.length, 1); assertFalse('versions' in p); assertFalse('catId' in p);
+  assertEqual(p.presets.length, 1);
   assertEqual(promptFolders.find(f => f.id === 'f2').parentId, 'f1');
   assertFalse('parentId' in promptFolders.find(f => f.id === 'f3'), 'no subfolder of a subfolder');
   assertFalse('parentId' in promptFolders.find(f => f.id === 'f4'), 'no folder inside itself');
@@ -69,24 +69,6 @@ test('mergePromptsData: the newer edit wins, tombstones keep a deleted prompt de
   assertFalse(deletedPromptIds.some(t => t.id === 'gone'));
   mergePromptsData({ deletedPromptIds: [{ id: 'p2', deletedAt: 999 }] }, true);
   assertTrue(deletedPromptIds.some(t => t.id === 'p2'), 'incoming tombstones are merged in');
-});
-
-test('importPromptLabLibrary turns categories into folders, drops the version history, keeps favorites, locks and presets, and is repeatable', function () {
-  pfresh();
-  const lib = { version: 4, categories: [{ id: 'c1', name: 'Analysis', color: 'blue' }], prompts: [
-    { id: 7, name: 'Tree', catId: 'c1', favorite: true, locked: true, template: 'A {{x}}', vars: { x: { type: 'option', options: ['1'], selected: '1' } }, presets: [{ name: 'P', values: { x: '1' } }], versions: [{ ts: 1, template: 'old' }], lastEdited: 12345 },
-    { id: 8, name: 'Loose', catId: 'nope', template: 'B' }, { id: 9, name: 'Bad' }] };
-  const r = importPromptLabLibrary(lib);
-  assertEqual(r.added, 2); assertEqual(r.folders, 1);
-  assertEqual(promptFolders.length, 1); assertEqual(promptFolders[0].name, 'Analysis');
-  const t = prompts.find(p => p.name === 'Tree');
-  assertEqual(t.folderId, promptFolders[0].id); assertTrue(t.favorite); assertTrue(t.locked); assertEqual(t.updatedAt, 12345);
-  assertEqual(t.presets.length, 1); assertFalse('versions' in t);
-  assertEqual(prompts.find(p => p.name === 'Loose').folderId, '');
-  assertEqual(importPromptLabLibrary(lib).added, 0, 'importing the same file again adds nothing');
-  assertEqual(promptFolders.length, 1);
-  assertEqual(importPromptLabLibrary({ nothing: 1 }), null, 'a file that is not a library is refused');
-  assertEqual(importPromptLabLibrary([{ id: 1, name: 'Bare', template: 'x' }]).added, 1, 'a bare array of prompts (the old format) works too');
 });
 
 test('visiblePrompts: folders include their subfolders, Favorites, Recently Deleted and a search through every folder, sorted by name', function () {

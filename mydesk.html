@@ -1736,7 +1736,6 @@ const ICONS = {
   </div>
 </div>
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
-<input type="file" id="promptLabInput" accept=".json" style="display:none" onchange="handlePromptLabImport(event)">
 
 <div class="layout">
 <!-- Collapsed sidebar: a floating toggle plus a small mirror of the file-sync status (so "Link file / Linked" is never hidden) -->
@@ -1856,10 +1855,6 @@ const ICONS = {
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
-        </div>
-        <div class="split-btn-menu-item" onclick="document.getElementById('promptLabInput').click();closeLibMenu()">
-          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Import PromptLab Library…</div><div class="split-btn-menu-desc">Add prompts from a PromptLab export</div></div>
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
@@ -2331,7 +2326,6 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
-          <div class="help-row"><i class="fa-solid fa-upload"></i><span><strong>From PromptLab</strong>: <em>Import PromptLab Library…</em> in the <strong>Data</strong> menu at the bottom of the sidebar reads a PromptLab export (<code>.json</code>). Its categories become folders; favorites, locks and presets come along, version history does not. Importing the same file twice changes nothing.</span></div>
           </div>
         </div>
       </div>
@@ -6512,8 +6506,7 @@ function deleteNoteFolder(id){
 // ───────────────────────── Prompts: the third mode (reusable prompt templates with variables) ─────────────────────────
 // A prompt is a template with three kinds of placeholders — {{choice}} (one of several options), [[checklist]] (any number of items,
 // copied as a bullet list) and ((text)) (typed each time). Copying fills the placeholders in. Prompts live in folders (one level of
-// subfolders, like Notes), can be favourites or locked, and are deleted into Recently Deleted. Ported from PromptLab without its
-// version history and categories.
+// subfolders, like Notes), can be favourites or locked, and are deleted into Recently Deleted.
 const PROMPT_TRASH_DAYS = 30;
 const PROMPT_FOLDER_KEY = 'mydesk_prompts_folder', PROMPT_COLLAPSED_KEY = 'mydesk_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'mydesk_prompts_inspector';
 let promptFolderFilter = 'all', promptSearchQuery = '', selectedPromptId = null, promptEditorId = null, promptSaveTimer = null;
@@ -6639,7 +6632,6 @@ function normalizePrompts(){
     if(!p.createdAt) p.createdAt = Date.now();
     if(!Number.isFinite(p.updatedAt)) p.updatedAt = p.createdAt;
     if(!Number.isFinite(p.deletedAt)) delete p.deletedAt;
-    delete p.versions; delete p.catId;                              // PromptLab's version history and categories do not exist here
   });
   const cut = Date.now() - PROMPT_TRASH_DAYS * 86400000;           // Recently Deleted keeps a prompt for 30 days, then it is really gone (and tombstoned)
   prompts = prompts.filter(p=>{ if(Number.isFinite(p.deletedAt) && p.deletedAt < cut){ tombstone(deletedPromptIds, p.id); return false; } return true; });
@@ -6682,45 +6674,6 @@ function mergePromptsData(data, respectTombstones){
   });
   return { added, updated };
 }
-// A PromptLab library (.json, version 4: categories + prompts) becomes folders + prompts. Categories turn into folders, versions are dropped, ids are kept,
-// so importing the same file twice changes nothing.
-function importPromptLabLibrary(data){
-  const cats = Array.isArray(data && data.categories) ? data.categories : [], list = Array.isArray(data) ? data : (Array.isArray(data && data.prompts) ? data.prompts : null);
-  if(!list) return null;
-  const folderOf = {};
-  cats.forEach(c=>{
-    if(!c || typeof c.name!=='string' || !c.id) return;
-    let f = promptFolders.find(x=>!x.parentId && x.name.toLowerCase()===c.name.toLowerCase());
-    if(!f){ f = { id: genId(), name: c.name.slice(0,40), updatedAt: Date.now() }; promptFolders.push(f); }
-    folderOf[c.id] = f.id;
-  });
-  let added = 0;
-  list.forEach(src=>{
-    if(!src || typeof src.template!=='string') return;
-    const id = isSafeId(String(src.id)) ? 'pl' + String(src.id) : genId();
-    if(prompts.some(p=>p.id===id)) return;
-    const stamp = Number.isFinite(src.lastEdited) ? src.lastEdited : Date.now();
-    prompts.push({ id, name: String(src.name || 'Untitled prompt'), folderId: folderOf[src.catId] || '', favorite: src.favorite===true, locked: src.locked===true,
-      template: src.template, vars: src.vars || {}, presets: src.presets || [], createdAt: stamp, updatedAt: stamp });
-    untombstone(deletedPromptIds, id); added++;
-  });
-  normalizePrompts();
-  return { added, folders: Object.keys(folderOf).length };
-}
-function handlePromptLabImport(ev){
-  const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
-  if(!file) return;
-  const r = new FileReader();
-  r.onload = ()=>{
-    let data; try{ data = JSON.parse(r.result); }catch(_){ showToast('That file is not a PromptLab library', true); return; }
-    const res = importPromptLabLibrary(data);
-    if(!res){ showToast('That file is not a PromptLab library', true); return; }
-    save(); render();
-    showToast(res.added ? `Imported ${res.added} prompt${res.added===1?'':'s'}${res.folders ? ` in ${res.folders} folder${res.folders===1?'':'s'}` : ''}` : 'Nothing new to import');
-  };
-  r.readAsText(file);
-}
-
 // ---- lists ----
 function visiblePrompts(){
   const q = promptSearchQuery.trim().toLowerCase(), words = q ? q.split(/\s+/).filter(Boolean) : [];
@@ -6811,7 +6764,7 @@ function renderPromptEditor(){
     if(empty){
       empty.style.display = '';
       const none = !prompts.some(x=>!promptTrashed(x)) && promptFolderFilter!=='trash';
-      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="document.getElementById('promptLabInput').click()">Import PromptLab Library…</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
+      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
     }
     if(bar) bar.style.display = ''; return;
   }
