@@ -708,8 +708,9 @@ const ICONS = {
   .cell-pop { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); color: var(--ink); }
   /* shared menu-row anatomy: tick column, dot or icon, text (cell popovers, row menu, toolbar menus) */
   .cell-pop-opt:hover, .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
-  .pop-check, .row-menu-item .pop-check { width: 18px; font-size: 11px; visibility: hidden; flex: none; text-align: left; }
-  .row-menu-item .pop-check i, .row-menu-item .pop-icon { width: auto; color: inherit; }
+  .pop-check, .row-menu-item .pop-check { width: 22px; font-size: 9px; visibility: hidden; flex: none; text-align: left; padding-left: 1px; }   /* a light ✓ about the height of a capital, with a clear gap before the label (as in a macOS menu) */
+  .row-menu-item .pop-check i, .row-menu-item .pop-icon { color: inherit; }
+  .row-menu-item .pop-icon { width: auto; }
   .current > .pop-check { visibility: visible; }
   .pop-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: none; }
   .pop-icon { width: 16px; margin-right: 8px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex: none; }
@@ -1178,7 +1179,7 @@ const ICONS = {
   .notes-list-head { display: flex; align-items: center; gap: 10px; padding: 16px 14px 4px 20px; }
   .notes-list-head h2 { flex: 1; min-width: 0; font-size: var(--fs-22); font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .notes-list-sub { padding: 0 20px 8px; min-height: 22px; font-size: var(--fs-12); color: var(--text-3); }
-  #notesList { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 10px 16px; }
+  #notesList, #pList { flex: 1; min-height: 0; overflow-y: auto; padding: 2px 10px 16px; }
   .notes-list-empty { padding: 28px 12px; text-align: center; font-size: var(--fs-13); color: var(--text-3); }
   .note-row { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: var(--r-m); cursor: default; }
   .note-row:hover:not(.selected) { background: var(--bg-2); }
@@ -1395,7 +1396,7 @@ const ICONS = {
   .nl-titles .notes-list-sub { padding: 0 !important; min-height: 0 !important; font-size: var(--fs-12); }
   .note-toolbar { min-height: 52px; box-sizing: border-box; padding: 8px var(--gutter) 8px !important; gap: 6px; border-bottom: 1px solid var(--border); }   /* 8 + the 36px controls + 7 + the 1px hairline = the 52px every column bar has */
   .note-scroll { padding-top: 18px !important; }
-  .notes-list-pane #notesList { padding-top: 6px; }
+  .notes-list-pane :is(#notesList, #pList) { padding-top: 6px; }
   @media (max-width: 800px) { .note-toolbar { padding-left: 14px !important; padding-right: 14px !important; } }
 
   /* ── Bar controls like Apple Notes ─────────────────────────────────────────
@@ -1576,6 +1577,8 @@ const ICONS = {
   .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
+  .pr-tpl textarea { border-radius: inherit; }
+  .pr-tpl textarea:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
   .ph-opt { background: var(--blue-bg); color: var(--blue-text); }
@@ -1583,11 +1586,32 @@ const ICONS = {
   .ph-txt { background: var(--amber-bg); color: var(--amber-text); }
   .pr-tb-mono { font-family: var(--mono); font-weight: 600; font-size: var(--fs-14); letter-spacing: -.02em; }
   /* the variables inspector */
+  /* Recently Deleted (Tasks): replaces the list, board, quick-add and the selection tools while it is open */
+  .task-trash-list { display: none; flex: 1; min-height: 0; overflow-y: auto; padding: 6px 10px 16px; }
+  html.task-trash .task-trash-list { display: block; }
+  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, .bulk-bar, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, #sortSelect, #collapseAllBtnBoard) { display: none !important; }
+  #trashTools { display: none; }
+  html.task-trash #trashTools { display: inline-flex; }
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
   .pr-split > .note-scroll { flex: 1; min-width: 0; }
   .pr-inspector { flex: none; width: 340px; overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width .24s ease, border-color .24s ease; }
   .pr-insp-inner { width: 340px; height: 100%; overflow-y: auto; padding: 16px 18px 40px; box-sizing: border-box; transition: opacity .18s ease; }
   .pr-split.insp-closed .pr-inspector { width: 0; border-left-color: transparent; }
+  /* The editor pane has a container query like Notes' bar: with less than ~740px the Variables panel floats over the editor instead of squeezing it,
+     and the toolbar gives way in steps (insert buttons become one menu, then the Copy label goes, then Favorite and Lock step aside into the ⋯ menu). */
+  .pr-insert-menu { display: none; }
+  .pr-menu-chev { margin-left: 4px; opacity: .7; }
+  @container notepane (max-width: 739px) {
+    .pr-split { position: relative; }
+    .pr-inspector { position: absolute; top: 0; right: 0; bottom: 0; z-index: 6; width: min(340px, 100%); box-shadow: var(--elev-2); }
+    .pr-split.insp-closed .pr-inspector { width: 0; box-shadow: none; }
+    .pr-insp-inner { width: 100%; }
+  }
+  @container notepane (max-width: 860px) { .pr-insert-group { display: none; } .pr-insert-menu { display: inline-flex; } }
+  @container notepane (max-width: 560px) { .pr-copy-label { display: none; } #pCopyBtn { padding-left: 10px; padding-right: 10px; } }
+  @container notepane (max-width: 450px) { #pFavBtn, #pLockBtn, #pEditor .note-toolbar .tool-group:has([aria-label="Undo"]) { display: none; } }
+  @container notepane (max-width: 330px) { .pr-insert-menu { display: none; } }
+  @media (min-width: 801px) and (max-width: 1000px) { .notes-list-pane { width: min(var(--notes-list-w, 300px), 240px); } }   /* a window this narrow gives the editor the room */
   .pr-split.insp-closed .pr-insp-inner { opacity: 0; pointer-events: none; }
   .pr-insp-head { font-size: var(--fs-17); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
   .pr-insp-sub { font-size: var(--fs-12); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
@@ -1624,6 +1648,7 @@ const ICONS = {
   .pr-pill-wrap.has-x .pr-pill, .pr-chip-wrap.has-x .pr-chip { flex: 0 1 auto; }
   .pr-var-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
   .pr-vars { margin-top: 10px; }
+  .pr-insp-foot { margin-top: 18px; padding-top: 12px; border-top: 1px solid var(--border); }
   .pr-var { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px solid var(--border); align-items: stretch; }
   .pr-var-name { align-self: flex-start; font-family: var(--mono); font-size: var(--fs-12); padding: 3px 8px; }
   .pr-pills { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -1811,6 +1836,12 @@ const ICONS = {
       <div class="filter-chips" id="tagChips"></div>
     </div>
     </div>
+    <div class="sidebar-section task-trash-nav">
+      <div class="nav-item" id="taskTrashNav" role="button" tabindex="0" aria-pressed="false" onclick="setTaskTrashFilter()">
+        <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
+        <span class="count" id="taskTrashCount"></span>
+      </div>
+    </div>
     <div class="sb-tools" id="sbTools">
     <span id="fileSyncIndicator"></span>
     <div class="topbar-divider"></div>
@@ -1825,6 +1856,10 @@ const ICONS = {
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
+        </div>
+        <div class="split-btn-menu-item" onclick="document.getElementById('promptLabInput').click();closeLibMenu()">
+          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Import PromptLab Library…</div><div class="split-btn-menu-desc">Add prompts from a PromptLab export</div></div>
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
@@ -1863,6 +1898,10 @@ const ICONS = {
           <span class="tool-sep"></span>
           <button type="button" class="tool-btn" id="toolDup" onclick="toolbarAct('duplicate')" title="Duplicate" disabled><i class="fa-regular fa-clone"></i></button>
           <button type="button" class="tool-btn tool-danger" id="toolDel" onclick="toolbarAct('delete')" title="Delete" disabled><i class="fa-regular fa-trash-can"></i></button>
+        </div>
+        <div class="tool-group" id="trashTools" role="toolbar" aria-label="Actions for the selected deleted task">
+          <button type="button" class="tool-btn" id="trashRestoreBtn" onclick="restoreTask(trashSelectedId)" title="Restore" aria-label="Restore" disabled><i class="fa-solid fa-rotate-left"></i></button>
+          <button type="button" class="tool-btn tool-danger" id="trashDeleteBtn" onclick="permanentDeleteTask(trashSelectedId)" title="Delete Permanently" aria-label="Delete Permanently" disabled><i class="fa-regular fa-trash-can"></i></button>
         </div>
         <div class="lib-dropdown" id="filterDropdown">
           <button class="btn btn-sm" id="filterBtn" onclick="event.stopPropagation();toggleFilterMenu()" title="Filter by status and priority"><i class="fa-solid fa-filter"></i> Filter <span class="filter-count" id="filterCount"></span></button>
@@ -1911,6 +1950,7 @@ const ICONS = {
       <div id="taskList"></div>
     </div>
     <div class="board" id="board" style="display:none"></div>
+    <div class="task-trash-list" id="taskTrash" aria-label="Recently Deleted tasks"></div>
   </div>
   <div class="drawer" id="drawer"></div>
   <div class="notes-main" id="notesMain">
@@ -1983,7 +2023,7 @@ const ICONS = {
     <div class="notes-list-pane">
       <div class="notes-list-head">
         <div class="nl-titles"><h2 id="pListTitle">All Prompts</h2><div class="notes-list-sub" id="pListSub"></div></div>
-        <button type="button" class="btn note-sort-btn" onclick="openPromptListMenu(event)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+        <button type="button" class="btn note-sort-btn" onclick="openPromptListMenu(event)" title="Sort prompts" aria-label="Sort prompts" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
       </div>
       <div id="pList" role="listbox" aria-label="Prompts"></div>
     </div>
@@ -1999,17 +2039,20 @@ const ICONS = {
             <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
             <button type="button" class="tool-btn" onclick="promptUndo('redo')" title="Redo (⇧⌘Z)" aria-label="Redo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg></button>
           </div>
-          <div class="tool-group note-fmt" role="group" aria-label="Insert a variable">
+          <div class="tool-group note-fmt pr-insert-group" role="group" aria-label="Insert a variable">
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('option')" title="Insert a choice variable: {{name}}" aria-label="Insert a choice variable"><span class="tb-txt pr-tb-mono">{{ }}</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('instruction')" title="Insert a checklist variable: [[name]]" aria-label="Insert a checklist variable"><span class="tb-txt pr-tb-mono">[[ ]]</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('text')" title="Insert a text variable: ((name))" aria-label="Insert a text variable"><span class="tb-txt pr-tb-mono">(( ))</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="openPromptGlobalInsertMenu(event)" title="Insert a global variable: {{@name}}" aria-label="Insert a global variable" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{@}}</span></button>
           </div>
+          <div class="tool-group note-fmt pr-insert-menu" role="group" aria-label="Insert a variable">
+            <button type="button" class="tool-btn" onclick="openPromptInsertMenu(event)" title="Insert a variable" aria-label="Insert a variable" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{ }}</span><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
+          </div>
           <span class="note-toolbar-grow"></span>
           <button type="button" class="btn note-more-btn" id="pFavBtn" onclick="togglePromptFavorite()" title="Add to Favorites" aria-label="Favorite" aria-pressed="false"><i class="fa-solid fa-star"></i></button>
           <button type="button" class="btn note-more-btn note-lock-btn" id="pLockBtn" onclick="togglePromptLock()" title="Lock" aria-label="Lock" aria-pressed="false"></button>
           <button type="button" class="btn note-more-btn" id="pMoreBtn" onclick="openPromptMenu(event, promptEditorId)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
-          <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)"><i class="fa-solid fa-copy"></i> Copy Prompt</button>
+          <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)" aria-label="Copy Prompt"><i class="fa-solid fa-copy"></i><span class="pr-copy-label"> Copy Prompt</span></button>
           <button type="button" class="btn note-more-btn" id="pInspToggle" onclick="togglePromptInspector()" title="Hide Variables (⌥⌘I)" aria-label="Hide Variables" aria-pressed="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.7" y="2.7" width="12.6" height="10.6" rx="2.4"/><path d="M10 2.9v10.2"/></svg></button>
         </div>
         <div class="pr-split" id="prSplit">
@@ -2168,6 +2211,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-hand-pointer"></i><span><strong>Click a pill</strong> to change it where it is: Priority, Status and Due on a list row; Status and Due on a board card. A small menu opens with a tick on the current value. On the selected (blue) row the pills show a chevron, like a pop-up button.</span></div>
           <div class="help-row"><i class="fa-regular fa-calendar-plus"></i><span>A card or row <strong>without a due date</strong> shows a dash (list) or a dashed calendar chip on hover (board) — click it to set one.</span></div>
+          <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a task moves it to <em>Recently Deleted</em> at the bottom of the sidebar, as in Notes and Prompts, and keeps it for 30 days. Open it there to <em>Restore</em> a task or <em>Delete Permanently…</em>. The toast right after deleting has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Action buttons</strong> — Duplicate, Delete and ⋯ (plus Skip for repeating tasks) — appear at the right of a task’s line when you hover it or select it, on rows and on cards.</span></div>
           </div>
         </div>
@@ -2284,10 +2328,10 @@ const ICONS = {
           <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the switch beside the app name. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
-          <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Global Variables…</em> in the list's <strong>⋯</strong> menu); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
+          <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
-          <div class="help-row"><i class="fa-solid fa-upload"></i><span><strong>From PromptLab</strong>: <em>Import PromptLab Library…</em> in the list's <strong>⋯</strong> menu reads a PromptLab export (<code>.json</code>). Its categories become folders; favorites, locks and presets come along, version history does not. Importing the same file twice changes nothing.</span></div>
+          <div class="help-row"><i class="fa-solid fa-upload"></i><span><strong>From PromptLab</strong>: <em>Import PromptLab Library…</em> in the <strong>Data</strong> menu at the bottom of the sidebar reads a PromptLab export (<code>.json</code>). Its categories become folders; favorites, locks and presets come along, version history does not. Importing the same file twice changes nothing.</span></div>
           </div>
         </div>
       </div>
@@ -2611,6 +2655,7 @@ const TAGS = [
   {id:'someday',     label:'someday',    color:'teal'}
 ];
 const COMPLETED_RETENTION_DAYS = 90;
+const TASK_TRASH_DAYS = 30;
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let projects = [], tasks = [];
@@ -2621,6 +2666,7 @@ let projects = [], tasks = [];
 // (an old linked file, another device) gets treated as new and silently
 // resurrects it. See mergeData() for how these gate re-adding an id.
 let deletedTaskIds = [], deletedProjectIds = [];
+let trashedTasks = [], purgedTaskIds = [];      // Recently Deleted (Tasks): deleted tasks wait here for TASK_TRASH_DAYS; purgedTaskIds are the tombstones of ones removed for good
 // Notes (see the Notes section below): folders and notes ride in the same data blob; their tombstones work like the tasks'.
 let notes = [], noteFolders = [], deletedNoteIds = [], deletedNoteFolderIds = [];
 let prompts = [], promptFolders = [], deletedPromptIds = [], deletedPromptFolderIds = [], promptGlobals = [], deletedPromptGlobalIds = [];   // the Prompts mode (see the Prompts section)
@@ -2648,7 +2694,7 @@ let showAllCompletedList = false;
 let expandedCompletedProjects = new Set();
 let draggedItem = null;
 let filterProjectId = null, filterStatus = STATUSES.map(s=>s.id), filterPriority = PRIORITIES.map(p=>p.id), filterTags = [];
-let myDayFilter = false, thisWeekFilter = false, overdueFilter = false;
+let myDayFilter = false, thisWeekFilter = false, overdueFilter = false, trashFilter = false;
 // Projects excluded from the merged "All Tasks" list AND from board view's
 // columns (but not My Day/This Week/Overdue, and not while a project filter
 // is active in list view — see taskMatchesFilters()). An exclusion list
@@ -2700,7 +2746,9 @@ function defaultTasks(){
 
 // ── Persistence ───────────────────────────────────────────────────────────────
 function normalizeData(){
-  tasks.forEach(t=>{
+  if(!Array.isArray(trashedTasks)) trashedTasks = [];
+  trashedTasks = trashedTasks.filter(t=>t && typeof t==='object');
+  tasks.concat(trashedTasks).forEach(t=>{
     if(!isSafeId(t.id)) t.id=genId();
     if(!t.subtasks) t.subtasks=[];
     t.subtasks.forEach(s=>{
@@ -2738,6 +2786,19 @@ function normalizeData(){
   if(!Array.isArray(deletedTaskIds)) deletedTaskIds=[];
   if(!Array.isArray(deletedProjectIds)) deletedProjectIds=[];
   deletedTaskIds = deletedTaskIds.filter(x=>x && x.id);
+  if(!Array.isArray(purgedTaskIds)) purgedTaskIds = [];
+  purgedTaskIds = purgedTaskIds.filter(x=>x && x.id);
+  {                                                       // Recently Deleted: one copy per id, nothing that was removed for good, and nothing older than TASK_TRASH_DAYS
+    const live = new Set(tasks.map(t=>t.id)), seen = new Set(), cutoff = Date.now() - TASK_TRASH_DAYS*24*60*60*1000;
+    trashedTasks = trashedTasks.filter(t=>{
+      if(typeof t.deletedAt!=='number') t.deletedAt = t.updatedAt || Date.now();
+      if(live.has(t.id) || seen.has(t.id) || purgedTaskIds.some(x=>x.id===t.id)) return false;
+      seen.add(t.id);
+      if(t.deletedAt < cutoff){ tombstone(purgedTaskIds, t.id); return false; }
+      return true;
+    });
+    tasks.forEach(t=>{ if('deletedAt' in t) delete t.deletedAt; });
+  }
   deletedProjectIds = deletedProjectIds.filter(x=>x && x.id);
   if(!Array.isArray(allTasksHiddenProjectIds)) allTasksHiddenProjectIds=[];
   allTasksHiddenProjectIds = allTasksHiddenProjectIds.filter(id=>projects.some(p=>p.id===id));
@@ -2752,6 +2813,7 @@ function load(){
       projects = d.projects || defaultProjects();
       tasks = d.tasks || defaultTasks();
       deletedTaskIds = d.deletedTaskIds || [];
+      trashedTasks = d.trashedTasks || []; purgedTaskIds = d.purgedTaskIds || [];
       deletedProjectIds = d.deletedProjectIds || [];
       notes = d.notes || []; noteFolders = d.noteFolders || [];
       deletedNoteIds = d.deletedNoteIds || []; deletedNoteFolderIds = d.deletedNoteFolderIds || [];
@@ -2769,13 +2831,14 @@ function load(){
   }catch(e){
     projects = defaultProjects();
     tasks = defaultTasks();
+    trashedTasks = []; purgedTaskIds = [];
     notes = []; noteFolders = []; deletedNoteIds = []; deletedNoteFolderIds = []; normalizeNotes();
     prompts = []; promptFolders = []; deletedPromptIds = []; deletedPromptFolderIds = []; promptGlobals = []; deletedPromptGlobalIds = []; normalizePrompts();
   }
 }
 // Everything that is saved to localStorage and to the linked file. (Per-device choices — theme, mode, sidebar — are not in it.)
 function dataPayload(){
-  return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
+  return { projects, tasks, deletedTaskIds, deletedProjectIds, trashedTasks, purgedTaskIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
 let storageFullWarned = false;
 let dirHandle = null, backupRunning = false;     // the linked data file's folder (daily file backup), see "Daily file backup"
@@ -2936,6 +2999,8 @@ function render(){
   if(appMode==='notes'){ renderNotes(); return; }
   if(appMode==='prompts'){ renderPrompts(); return; }
   renderSidebar();
+  document.documentElement.classList.toggle('task-trash', trashFilter);
+  if(trashFilter){ renderTaskTrash(); renderDrawer(); renderBulkBar(); return; }
   if(viewMode==='board'){ renderBoard(); } else { renderList(); }
   renderDrawer();
   renderBulkBar();
@@ -2968,7 +3033,9 @@ function setNavActive(id, active){
   el.setAttribute('aria-pressed', active ? 'true' : 'false');
 }
 function renderSidebar(){
-  setNavActive('allTasksNav', !filterProjectId && !myDayFilter && !thisWeekFilter && !overdueFilter);
+  setNavActive('allTasksNav', !filterProjectId && !myDayFilter && !thisWeekFilter && !overdueFilter && !trashFilter);
+  setNavActive('taskTrashNav', trashFilter);
+  const ttc = document.getElementById('taskTrashCount'); if(ttc) ttc.textContent = trashedTasks.length || '';
   document.getElementById('allTasksCount').textContent = tasks.filter(t=>t.status!=='done' && !allTasksHiddenProjectIds.includes(t.projectId)).length;
 
   setNavActive('myDayNav', myDayFilter);
@@ -3021,7 +3088,7 @@ function renderSidebar(){
   const total = tasks.length, done = tasks.filter(t=>t.status==='done').length;
   document.getElementById('sidebarFooter').textContent = `${total} task${total===1?'':'s'} · ${done} done`;
 
-  document.getElementById('mainTitle').textContent = myDayFilter ? 'My Day' : thisWeekFilter ? 'This Week' : overdueFilter ? 'Overdue' : (filterProjectId ? (projById(filterProjectId)?.name || 'All Tasks') : 'All Tasks');
+  document.getElementById('mainTitle').textContent = trashFilter ? 'Recently Deleted' : myDayFilter ? 'My Day' : thisWeekFilter ? 'This Week' : overdueFilter ? 'Overdue' : (filterProjectId ? (projById(filterProjectId)?.name || 'All Tasks') : 'All Tasks');
   document.getElementById('sortSelect').value = sortBy.replace(':desc','');
   renderSortHeaders();
   renderQuickAddProject();
@@ -3540,6 +3607,7 @@ function viewCounts(){
   return { total: list.length, open: open.length, overdue: open.filter(isOverdue).length, done: list.length - open.length };
 }
 function mainSubtitleText(){
+  if(trashFilter){ const k = trashedTasks.length; return k ? `${k} task${k===1?'':'s'}` : 'Empty'; }
   const c = viewCounts(), n = selectionIds().length;
   if(!c.total) return 'No tasks';
   const parts = [`${c.open} open`];
@@ -3812,28 +3880,32 @@ function bulkSetRepeat(repeat, idsArg){
     save(); render();
   });
 }
+// Delete moves tasks to Recently Deleted (like notes and prompts); the toast's Undo and the Recently Deleted view both bring them back.
+function trashTasks(ids){
+  const removed = [];
+  ids.forEach(id=>{ const idx = tasks.findIndex(t=>t.id===id); if(idx!==-1) removed.push({idx, task:tasks[idx]}); });
+  if(!removed.length) return;
+  removed.slice().sort((a,b)=>b.idx-a.idx).forEach(r=>tasks.splice(r.idx,1));
+  const now = Date.now();
+  removed.forEach(r=>{ r.task.deletedAt = now; r.task.updatedAt = now; trashedTasks.push(r.task); tombstone(deletedTaskIds, r.task.id); });
+  if(activeTaskId && ids.includes(activeTaskId)) activeTaskId=null;
+  if(kbdSelectedTaskId && ids.includes(kbdSelectedTaskId)) kbdSelectedTaskId=null;
+  ids.forEach(id=>selectedTaskIds.delete(id));
+  save(); render();
+  const n = removed.length;
+  showToast(n===1 ? 'Task moved to Recently Deleted' : `${n} tasks moved to Recently Deleted`, false, ()=>{
+    removed.forEach(r=>{ untombstone(deletedTaskIds, r.task.id); delete r.task.deletedAt; r.task.updatedAt = Date.now(); });
+    trashedTasks = trashedTasks.filter(x=>!removed.some(r=>r.task===x));
+    removed.slice().sort((a,b)=>a.idx-b.idx).forEach(r=>tasks.splice(Math.min(r.idx,tasks.length),0,r.task));
+    save(); render();
+    showToast(n===1 ? 'Task restored' : 'Tasks restored');
+  });
+}
 function bulkDelete(idsArg){
   const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   if(!ids.length) return;
-  {                                                             // no alert: the toast's Undo brings them back
-      const removed = [];
-      ids.forEach(id=>{
-        const idx = tasks.findIndex(t=>t.id===id);
-        if(idx!==-1) removed.push({idx, task:tasks[idx]});
-      });
-      removed.slice().sort((a,b)=>b.idx-a.idx).forEach(r=>tasks.splice(r.idx,1));
-      removed.forEach(r=>tombstone(deletedTaskIds, r.task.id));
-      if(activeTaskId && ids.includes(activeTaskId)) activeTaskId=null;
-      if(kbdSelectedTaskId && ids.includes(kbdSelectedTaskId)) kbdSelectedTaskId=null;
-      selectedTaskIds.clear();
-      save(); render();
-      showToast(`${removed.length} task${removed.length===1?'':'s'} deleted`, false, ()=>{
-        removed.forEach(r=>untombstone(deletedTaskIds, r.task.id));
-        removed.slice().sort((a,b)=>a.idx-b.idx).forEach(r=>tasks.splice(Math.min(r.idx,tasks.length),0,r.task));
-        save(); render();
-        showToast('Tasks restored');
-      });
-  }
+  selectedTaskIds.clear();
+  trashTasks(ids);
 }
 
 function renderDrawer(){
@@ -4309,26 +4381,70 @@ function updateTaskFieldLive(id, field, value){
 }
 
 function deleteTask(id){
-  {                                                             // no alert: the toast's Undo brings it back
-      const doDelete = ()=>{
-        const idx = tasks.findIndex(t=>t.id===id);
-        if(idx===-1) return;
-        const [removed] = tasks.splice(idx,1);
-        tombstone(deletedTaskIds, id);
-        if(activeTaskId===id) activeTaskId=null;
-        if(kbdSelectedTaskId===id) kbdSelectedTaskId=null;
-        save(); render();
-        showToast('Task deleted', false, ()=>{
-          untombstone(deletedTaskIds, id);
-          tasks.splice(idx,0,removed);
-          save(); render();
-          showToast('Task restored');
-        });
-      };
-      const rowEl = document.querySelector(`.task-row[data-id="${id}"]`);
-      if(rowEl){ rowEl.classList.add('row-exit'); setTimeout(doDelete, 150); }
-      else doDelete();
+  const rowEl = document.querySelector(`.task-row[data-id="${id}"]`);
+  if(rowEl){ rowEl.classList.add('row-exit'); setTimeout(()=>trashTasks([id]), 150); }
+  else trashTasks([id]);
+}
+
+// ── Recently Deleted (Tasks) ─────────────────────────────────────────────────
+function taskTrashed(t){ return !!(t && typeof t.deletedAt==='number'); }
+function setTaskTrashFilter(){ clearSpecialViews(); trashFilter = true; trashSelectedId = null; filterProjectId = null; activeTaskId = null; kbdSelectedTaskId = null; selectedTaskIds.clear(); render(); }
+function visibleTrashedTasks(){
+  const q = (searchQuery||'').trim().toLowerCase();
+  return trashedTasks.filter(t=>!q || (t.title||'').toLowerCase().includes(q)).sort((a,b)=>(b.deletedAt||0)-(a.deletedAt||0));
+}
+function restoreTask(id){
+  const t = trashedTasks.find(x=>x.id===id); if(!t) return;
+  trashedTasks = trashedTasks.filter(x=>x!==t);
+  delete t.deletedAt; t.updatedAt = Date.now();
+  if(!projById(t.projectId)) t.projectId = 'proj-inbox';
+  untombstone(deletedTaskIds, id); tasks.push(t);
+  save(); render(); showToast('Task restored');
+}
+function permanentDeleteTask(id){
+  if(!trashedTasks.some(x=>x.id===id)) return;
+  openConfirmModal({ title: 'Delete this task permanently?', body: 'It will be removed for good. This cannot be undone.', confirmLabel: 'Delete', action: ()=>{
+    trashedTasks = trashedTasks.filter(x=>x.id!==id); tombstone(purgedTaskIds, id); save(); render();
+  }});
+}
+function emptyTaskTrash(){
+  const n = trashedTasks.length; if(!n) return;
+  openConfirmModal({ title: `Delete ${n} task${n===1?'':'s'} permanently?`, body: 'They will be removed for good. This cannot be undone.', confirmLabel: 'Delete All', action: ()=>{
+    trashedTasks.forEach(t=>tombstone(purgedTaskIds, t.id)); trashedTasks = []; save(); render();
+  }});
+}
+function trashDaysLeft(t){ return Math.max(0, Math.ceil(((t.deletedAt||0) + TASK_TRASH_DAYS*24*60*60*1000 - Date.now()) / (24*60*60*1000))); }
+let trashSelectedId = null;
+function selectTrashTask(id){ trashSelectedId = id; renderTaskTrash(); }
+function renderTaskTrash(){
+  const el = document.getElementById('taskTrash'); if(!el) return;
+  const list = visibleTrashedTasks();
+  if(trashSelectedId && !list.some(t=>t.id===trashSelectedId)) trashSelectedId = null;
+  ['trashRestoreBtn','trashDeleteBtn'].forEach(id=>{ const b = document.getElementById(id); if(b) b.disabled = !trashSelectedId; });
+  if(!list.length){
+    el.innerHTML = `<div class="notes-list-empty">${trashedTasks.length ? 'No deleted tasks match your search.' : 'No deleted tasks.'}</div>`;
+    return;
   }
+  const banner = `<div class="notes-list-banner"><span>Deleted tasks are removed after ${TASK_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyTaskTrash()">Delete All</button></div>`;
+  el.innerHTML = banner + list.map(t=>{
+    const sel = t.id===trashSelectedId, proj = projById(t.projectId), d = trashDaysLeft(t);
+    return `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="0" data-id="${t.id}" onclick="selectTrashTask('${t.id}')" onkeydown="trashRowKey(event,'${t.id}')" oncontextmenu="openTaskTrashMenu(event,'${t.id}')">
+      <div class="note-row-title">${esc(t.title || 'Untitled')}</div>
+      <div class="note-row-sub"><span class="note-row-date pr-sub">${esc(proj ? proj.name : 'Inbox')} · deleted ${esc(new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}))} · ${d} day${d===1?'':'s'} left</span></div>
+    </div>`;
+  }).join('');
+}
+function trashRowKey(e, id){
+  if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectTrashTask(id); }
+  else if(e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); permanentDeleteTask(id); }
+}
+function openTaskTrashMenu(e, id){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  menu.innerHTML = rowMenuItem('fa-solid fa-rotate-left', 'Restore', `closeRowMenu();restoreTask('${id}')`) + '<div class="row-menu-sep"></div>' + rowMenuItem('fa-solid fa-trash', 'Delete Permanently', `closeRowMenu();permanentDeleteTask('${id}')`, { danger: true });
+  menu.classList.add('open');
+  placeRowMenu(menu, e.clientX, e.clientY);
 }
 
 function duplicateTask(id){
@@ -5110,7 +5226,7 @@ const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var
 // One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
 // tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
 function popOptInner(lead, label){
-  const l = !lead ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg" aria-hidden="true"${lead.indent ? ' style="margin-left:14px"' : ''}>${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
+  const l = !lead || lead.none ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg" aria-hidden="true"${lead.indent ? ' style="margin-left:14px"' : ''}>${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
 function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
@@ -5172,7 +5288,7 @@ function clearFilters(){
 }
 function toggleFilterMenu(){ document.getElementById('filterMenu')?.classList.toggle('open'); }
 function closeFilterMenu(){ document.getElementById('filterMenu')?.classList.remove('open'); }
-function clearSpecialViews(){ myDayFilter = false; thisWeekFilter = false; overdueFilter = false; }
+function clearSpecialViews(){ myDayFilter = false; thisWeekFilter = false; overdueFilter = false; trashFilter = false; }
 function setProjectFilter(id){ filterProjectId = id; clearSpecialViews(); save(); render(); }
 function setMyDayFilter(){ clearSpecialViews(); myDayFilter = true; filterProjectId = null; save(); render(); }
 function setThisWeekFilter(){ clearSpecialViews(); thisWeekFilter = true; filterProjectId = null; save(); render(); }
@@ -6047,11 +6163,11 @@ function setNoteSort(key, dir){
   closeRowMenu(); renderNotesList();
 }
 function noteSortMenuHtml(){
-  const o = (fn, icon, label, cur)=>menuOpt(fn, {icon}, label, cur), sep = '<div class="row-menu-sep"></div>';
+  const o = (fn, icon, label, cur)=>menuOpt(fn, {none: true}, label, cur), sep = '<div class="row-menu-sep"></div>';
   const isTitle = noteSortKey==='title';
-  return o(`setNoteSort('edited')`, 'pen', 'Date edited', noteSortKey==='edited') + o(`setNoteSort('created')`, 'calendar-plus', 'Date created', noteSortKey==='created') + o(`setNoteSort('title')`, 'font', 'Title', isTitle) + sep
-    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'asc' : 'desc'}')`, 'arrow-down', isTitle ? 'A to Z' : 'Newest first', noteSortDir===(isTitle ? 'asc' : 'desc'))
-    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest first', noteSortDir===(isTitle ? 'desc' : 'asc'));
+  return o(`setNoteSort('edited')`, 'pen', 'Date Edited', noteSortKey==='edited') + o(`setNoteSort('created')`, 'calendar-plus', 'Date Created', noteSortKey==='created') + o(`setNoteSort('title')`, 'font', 'Title', isTitle) + sep
+    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'asc' : 'desc'}')`, 'arrow-down', isTitle ? 'A to Z' : 'Newest First', noteSortDir===(isTitle ? 'asc' : 'desc'))
+    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest First', noteSortDir===(isTitle ? 'desc' : 'asc'));
 }
 function openNoteSortMenu(e){
   e.preventDefault(); e.stopPropagation();
@@ -6409,6 +6525,29 @@ try{ const f = localStorage.getItem(PROMPT_FOLDER_KEY); if(f) promptFolderFilter
 
 const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
 const promptFolderById = id=>promptFolders.find(f=>f.id===id);
+// The order of the prompts list: the same three keys and the same menu as Notes (per device). Date edited, newest first, is the default (as in Notes).
+const PROMPT_SORT_KEY = 'mydesk_prompts_sort';
+let promptSortKey = 'edited', promptSortDir = 'desc';
+try{ const sv = JSON.parse(localStorage.getItem(PROMPT_SORT_KEY) || 'null'); if(sv && ['edited','created','title'].includes(sv.key) && ['asc','desc'].includes(sv.dir)){ promptSortKey = sv.key; promptSortDir = sv.dir; } }catch(_){}
+function promptSorter(){
+  const dir = promptSortDir==='asc' ? 1 : -1;
+  return (a, b)=>{
+    const cmp = promptSortKey==='title' ? promptTitle(a).localeCompare(promptTitle(b), undefined, {sensitivity:'base'})
+      : promptSortKey==='created' ? (a.createdAt || 0) - (b.createdAt || 0) : (a.updatedAt || 0) - (b.updatedAt || 0);
+    return cmp * dir || ((b.updatedAt || 0) - (a.updatedAt || 0));
+  };
+}
+function setPromptSort(key, dir){
+  promptSortKey = key; promptSortDir = dir || (key==='title' ? 'asc' : 'desc');
+  try{ localStorage.setItem(PROMPT_SORT_KEY, JSON.stringify({key: promptSortKey, dir: promptSortDir})); }catch(_){}
+  closeRowMenu(); renderPromptsList();
+}
+function promptSortMenuHtml(){
+  const o = (fn, icon, label, cur)=>menuOpt(fn, {none: true}, label, cur), isTitle = promptSortKey==='title';
+  return o(`setPromptSort('edited')`, 'pen', 'Date Edited', promptSortKey==='edited') + o(`setPromptSort('created')`, 'calendar-plus', 'Date Created', promptSortKey==='created') + o(`setPromptSort('title')`, 'font', 'Title', isTitle) + '<div class="row-menu-sep"></div>'
+    + o(`setPromptSort('${promptSortKey}','${isTitle ? 'asc' : 'desc'}')`, 'arrow-down', isTitle ? 'A to Z' : 'Newest First', promptSortDir===(isTitle ? 'asc' : 'desc'))
+    + o(`setPromptSort('${promptSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest First', promptSortDir===(isTitle ? 'desc' : 'asc'));
+}
 const byNameCI = (a, b)=>String(a.name).localeCompare(String(b.name), undefined, {sensitivity:'base'});
 const topPromptFolders = ()=>promptFolders.filter(f=>!f.parentId).sort(byNameCI);
 const promptFolderKids = id=>promptFolders.filter(f=>f.parentId===id).sort(byNameCI);
@@ -6592,7 +6731,7 @@ function visiblePrompts(){
     if(promptFolderFilter==='all' || inTrash) return true;
     if(promptFolderFilter==='favorites') return p.favorite;
     return p.folderId===promptFolderFilter || (promptFolderById(p.folderId) || {}).parentId===promptFolderFilter;
-  }).sort(byNameCI);
+  }).sort(inTrash ? (a, b)=>(b.deletedAt || 0) - (a.deletedAt || 0) : promptSorter());
 }
 const promptTitle = p=>p.name.trim() || 'Untitled prompt';
 const promptPreviewLine = p=>{ const t = (p.template || '').replace(/\s+/g, ' ').trim(); return t || 'Empty template'; };
@@ -6737,7 +6876,7 @@ function renderPromptInspector(p){
   let html = `<div class="pr-insp-head"><span>Variables</span><span class="pr-insp-tools"><span class="pr-insp-sub">${entries.length} in this prompt</span><button type="button" class="icon-btn" title="Global Variables…" aria-label="Global Variables" onclick="openPromptGlobalsModal()"><i class="fa-solid fa-globe"></i></button></span></div>`;
   if(!entries.length){
     html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time, and <span class="ph ph-glob">{{@global}}</span> takes its options from the Global Variables list. The buttons above insert one.</div>`;
-    document.getElementById('pInspector').innerHTML = html; return;
+    host.innerHTML = html + promptInspectorFoot(); return;
   }
   const hasPickable = entries.some(([, v])=>v.type!=='text');
   if(hasPickable){
@@ -6774,8 +6913,10 @@ function renderPromptInspector(p){
     html += `</div>`;
   });
   html += `</div>`;
-  host.innerHTML = html;
+  host.innerHTML = html + promptInspectorFoot();
 }
+// The way in to the shared variables from the panel: a visible text link (the globe button above it is the shortcut).
+const promptInspectorFoot = ()=>`<div class="pr-insp-foot"><button type="button" class="pr-g-link" onclick="openPromptGlobalsModal()">Manage Global Variables…</button></div>`;
 const promptVarOf = el=>{ const p = prompts.find(x=>x.id===promptEditorId), row = el.closest('.pr-var'); return p && row ? { p, key: row.dataset.v, v: p.vars[row.dataset.v] } : null; };
 // A double-click (to rename) must not change what is chosen: the first click saves the choices as they were, and the second click of the pair puts them back.
 let promptClickSnap = null;
@@ -6973,9 +7114,17 @@ function togglePromptInspector(force, remember){
   const b = document.getElementById('pInspToggle');
   if(b){ b.setAttribute('aria-pressed', String(!closed)); b.title = (closed ? 'Show' : 'Hide') + ' Variables (⌥⌘I)'; b.setAttribute('aria-label', (closed ? 'Show' : 'Hide') + ' Variables'); }
 }
+// While the panel floats over the editor (a narrow window) it is a transient view: a click on the template or Esc puts it away (not remembered as a choice).
+const promptInspectorFloats = ()=>{ const a = document.getElementById('prInspector'); return !!a && getComputedStyle(a).position==='absolute'; };
+document.addEventListener('mousedown', e=>{
+  const split = document.getElementById('prSplit');
+  if(appMode!=='prompts' || !split || split.classList.contains('insp-closed') || !promptInspectorFloats()) return;
+  if(e.target.closest && e.target.closest('#prInspector, #pInspToggle, .row-menu, .modal-bg')) return;
+  if(e.target.closest && e.target.closest('.note-scroll')) togglePromptInspector(false, false);
+});
 function applyPromptInspectorState(){
   let v = null; try{ v = localStorage.getItem(PROMPT_INSPECTOR_KEY); }catch(_){}
-  togglePromptInspector(v===null ? (window.innerWidth || 1400) >= 1300 : v==='1', false);
+  togglePromptInspector(v===null ? (window.innerWidth || 1400) >= 1400 : v==='1', false);
 }
 // Insert a placeholder at the caret ({{ }}, [[ ]] or (( )) — a selected word becomes its name; otherwise a new unique name that is left selected to type over).
 function insertPromptVar(kind){
@@ -7192,7 +7341,7 @@ function openPromptListMenu(e){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = rowMenuItem('fa-solid fa-globe', 'Global Variables…', `closeRowMenu();openPromptGlobalsModal()`) + '<div class="row-menu-sep"></div>' + rowMenuItem('fa-solid fa-upload', 'Import PromptLab Library…', `closeRowMenu();document.getElementById('promptLabInput').click()`);
+  menu.innerHTML = promptSortMenuHtml();
   const btn = e.currentTarget, r = btn.getBoundingClientRect();
   menu.classList.add('open');
   const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
@@ -8501,6 +8650,20 @@ function pickPromptGlobal(btn, i, ev){
   touchPrompt(p); save(); refreshPromptSelection(p);
 }
 // The "{{@ }}" toolbar button: a menu of the global variables to insert, and the way into the dialog.
+// One "Insert a variable" menu for a narrow toolbar: the three kinds, then the global variables.
+function openPromptInsertMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  const off = !!(p.locked || promptTrashed(p)), run = k=>`closeRowMenu();insertPromptVar('${k}')`;
+  const globals = promptGlobals.slice().sort(byNameCI).map(g=>rowMenuItem('', esc(g.name), `promptInsertGlobal('${g.id}')`, { off }));
+  menu.innerHTML = rowMenuItem('', 'Choice', run('option'), { off }) + rowMenuItem('', 'Checklist', run('instruction'), { off }) + rowMenuItem('', 'Text', run('text'), { off })
+    + '<div class="row-menu-sep"></div>' + (globals.length ? globals.join('') : '') + rowMenuItem('', 'Manage Global Variables…', `closeRowMenu();openPromptGlobalsModal()`);
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  menu.classList.add('open');
+  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+}
 function openPromptGlobalInsertMenu(e){
   e.preventDefault(); e.stopPropagation();
   const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
@@ -8663,6 +8826,7 @@ function globalValueKey(e, i){
 function handlePromptsKeys(e){
   if(document.querySelector('.modal-bg.open')) return;
   const el = document.activeElement, typing = isTypingTarget(el);
+  if(e.key==='Escape' && promptInspectorFloats() && !document.getElementById('prSplit').classList.contains('insp-closed') && !document.getElementById('rowMenu').classList.contains('open')){ e.preventDefault(); togglePromptInspector(false, false); return; }
   if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); togglePromptInspector(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key==='Enter' && selectedPromptId){ e.preventDefault(); copyPrompt(selectedPromptId); return; }
   if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
@@ -9163,7 +9327,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals});
+  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 function handleFileImport(event){
@@ -9206,6 +9370,12 @@ function mergeData(data, opts){
     if(!existing) deletedTaskIds.push({id:dt.id, deletedAt:dt.deletedAt||Date.now()});
     else if((dt.deletedAt||0) > existing.deletedAt) existing.deletedAt = dt.deletedAt;
   });
+  (data.purgedTaskIds||[]).forEach(dt=>{                                   // removed for good elsewhere: gone from Recently Deleted here too
+    const existing = purgedTaskIds.find(x=>x.id===dt.id);
+    if(!existing) purgedTaskIds.push({id:dt.id, deletedAt:dt.deletedAt||Date.now()});
+    else if((dt.deletedAt||0) > existing.deletedAt) existing.deletedAt = dt.deletedAt;
+    if(respectTombstones) trashedTasks = trashedTasks.filter(x=>x.id!==dt.id);
+  });
   (data.projects||[]).forEach(ip=>{
     if(projects.find(p=>p.id===ip.id || p.name.toLowerCase()===ip.name.toLowerCase())) return;
     if(respectTombstones && deletedProjectIds.some(x=>x.id===ip.id)) return;
@@ -9218,10 +9388,28 @@ function mergeData(data, opts){
       if((it.updatedAt||0) > (existing.updatedAt||0)){ Object.assign(existing, it); updated++; }
       return;
     }
+    const tr = trashedTasks.find(x=>x.id===it.id);
+    if(tr){                                                    // it sits in Recently Deleted here: an edit made after the delete (a restore elsewhere) brings it back
+      if(!respectTombstones || (it.updatedAt||0) > (tr.deletedAt||0)){ trashedTasks = trashedTasks.filter(x=>x!==tr); untombstone(deletedTaskIds, it.id); delete it.deletedAt; tasks.push(it); updated++; }
+      return;
+    }
     const tomb = deletedTaskIds.find(x=>x.id===it.id);
     if(respectTombstones && tomb && tomb.deletedAt >= (it.updatedAt||0)) return; // stays deleted — the incoming copy is stale
     if(tomb) untombstone(deletedTaskIds, it.id); // incoming edit is newer than our deletion (or tombstones are being ignored) — let it back in
     tasks.push(it); added++;
+  });
+  (data.trashedTasks||[]).forEach(it=>{                                    // tasks deleted on another device
+    if(!it || !it.id) return;
+    if(respectTombstones && purgedTaskIds.some(x=>x.id===it.id)) return;
+    if(!respectTombstones) untombstone(purgedTaskIds, it.id);
+    const tr = trashedTasks.find(x=>x.id===it.id);
+    if(tr){ if((it.updatedAt||0) > (tr.updatedAt||0)) Object.assign(tr, it); return; }
+    const live = tasks.find(t=>t.id===it.id);
+    if(live){
+      if((it.deletedAt||0) < (live.updatedAt||0)) return;      // edited here after it was deleted there: the edit wins
+      tasks = tasks.filter(t=>t!==live);
+    }
+    trashedTasks.push(it); added++;
   });
   const nm = mergeNotesData(data, respectTombstones); added += nm.added; updated += nm.updated;
   const pm = mergePromptsData(data, respectTombstones); added += pm.added; updated += pm.updated;
@@ -9231,9 +9419,10 @@ function mergeData(data, opts){
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals});
+    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
+    trashedTasks = pendingImportData.trashedTasks || []; purgedTaskIds = [];
     // an older export has no notes: leave yours alone rather than wiping them
     if(Array.isArray(pendingImportData.notes)){ notes = pendingImportData.notes; noteFolders = pendingImportData.noteFolders || []; }
     if(Array.isArray(pendingImportData.prompts)){ prompts = pendingImportData.prompts; promptFolders = pendingImportData.promptFolders || []; promptGlobals = pendingImportData.promptGlobals || []; }
@@ -9302,7 +9491,7 @@ async function fileSyncWrite(data){
           const {added, updated} = mergeData(externalData);
           if(added || updated){
             normalizeData();
-            payload = { ...data, projects, tasks, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds };
+            payload = { ...data, projects, tasks, trashedTasks, purgedTaskIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
             render();
             showToast(`Synced changes from another tab/device (${added} added, ${updated} updated)`);

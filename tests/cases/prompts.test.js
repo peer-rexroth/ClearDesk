@@ -91,6 +91,7 @@ test('importPromptLabLibrary turns categories into folders, drops the version hi
 
 test('visiblePrompts: folders include their subfolders, Favorites, Recently Deleted and a search through every folder, sorted by name', function () {
   pfresh();
+  setPromptSort('title');
   promptFolders = [{ id: 'f1', name: 'Top', updatedAt: 1 }, { id: 'f2', name: 'Sub', parentId: 'f1', updatedAt: 1 }];
   prompts = [pmk({ id: 'a', name: 'Zed', folderId: 'f2', favorite: true }), pmk({ id: 'b', name: 'Alpha', folderId: 'f1', template: 'finds the needle' }), pmk({ id: 'c', name: 'Loose' }), pmk({ id: 'd', name: 'Gone', deletedAt: 5 })];
   assertDeepEqual(visiblePrompts().map(p => p.id), ['b', 'c', 'a'], 'All Prompts: alphabetical, without the deleted one');
@@ -293,4 +294,16 @@ test('globals are in the saved data and survive a load', function () {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
   pgfresh(); load();
   assertEqual(promptGlobals.length, 1); assertEqual(promptGlobals[0].name, 'Language');
+});
+
+test('the prompts list can be ordered like the notes list: title (default), date edited or date created, either way round', function () {
+  pfresh();
+  prompts = [pmk({ id: 'b', name: 'Beta', createdAt: 100, updatedAt: 300 }), pmk({ id: 'a', name: 'alpha', createdAt: 200, updatedAt: 100 }), pmk({ id: 'c', name: 'Gamma', createdAt: 300, updatedAt: 200 })];
+  var ids = function () { return visiblePrompts().map(function (p) { return p.id; }); };
+  setPromptSort('title'); assertDeepEqual(ids(), ['a', 'b', 'c']);
+  setPromptSort('title', 'desc'); assertDeepEqual(ids(), ['c', 'b', 'a']);
+  setPromptSort('edited'); assertDeepEqual(ids(), ['b', 'c', 'a'], 'newest edited first');
+  setPromptSort('created', 'asc'); assertDeepEqual(ids(), ['b', 'a', 'c'], 'oldest created first');
+  var h = promptSortMenuHtml(); assertIncludes(h, 'Date Edited'); assertIncludes(h, 'Date Created'); assertIncludes(h, 'Oldest First');
+  setPromptSort('edited');
 });

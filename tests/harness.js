@@ -148,7 +148,7 @@ async function run(argv) {
 ;function resetState(){
   projects = defaultProjects();
   tasks = defaultTasks();
-  deletedTaskIds = []; deletedProjectIds = []; allTasksHiddenProjectIds = [];
+  deletedTaskIds = []; deletedProjectIds = []; allTasksHiddenProjectIds = []; trashedTasks = []; purgedTaskIds = []; trashFilter = false;
   activeTaskId = null; kbdSelectedTaskId = null; renamingTaskId = null;
   renamingSubtask = null; renamingSubSubtask = null; renamingSubSubSubtask = null;
   selectedTaskIds = new Set(); lastClickedTaskId = null;

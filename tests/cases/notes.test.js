@@ -821,10 +821,10 @@ test('equal sort values fall back to the newest edit first, and the sort choice 
 
 test('the sort menu ticks the current key and direction, and names the direction to suit the key', function () {
   let h = noteSortMenuHtml();
-  assertIncludes(h, 'Newest first'); assertIncludes(h, 'Oldest first'); assertNotIncludes(h, 'A to Z');
+  assertIncludes(h, 'Newest First'); assertIncludes(h, 'Oldest First'); assertNotIncludes(h, 'A to Z');
   setNoteSort('title');
   h = noteSortMenuHtml();
-  assertIncludes(h, 'A to Z'); assertIncludes(h, 'Z to A'); assertNotIncludes(h, 'Newest first');
+  assertIncludes(h, 'A to Z'); assertIncludes(h, 'Z to A'); assertNotIncludes(h, 'Newest First');
 });
 
 test('the notes list width is clamped between 200px and 600px, and 300px is the default it resets to', function () {
