@@ -214,3 +214,14 @@ test('renaming a variable rewrites its placeholders in the template (not escaped
   assertIncludes(renamePromptVar(p, 't', '{}'), 'empty');
   assertEqual(renamePromptVar(p, 't', 'a(b)'), null); assertTrue('ab' in p.vars, 'brackets are stripped from a name');
 });
+
+test('a double-click (the second click of a pair) puts the choices back as they were, so renaming by double-click never changes them', function () {
+  pfresh();
+  const p = pmk({ id: 'x', template: '{{s}} [[e]] ((t))', vars: { s: { type: 'option', options: ['S', 'M'], selected: 'M' }, e: { type: 'instruction', options: ['A'], selected: ['A'] }, t: { type: 'text', value: 'keep' } } });
+  prompts = [p]; promptEditorId = 'x';
+  const host = { closest: () => ({ dataset: { v: 's' } }) };
+  pickPromptOption(host, 0, { detail: 1 }); assertEqual(p.vars.s.selected, 'S', 'the first click chooses');
+  pickPromptOption(host, 0, { detail: 2 }); assertEqual(p.vars.s.selected, 'M', 'the second click of a double-click restores the choice');
+  assertDeepEqual(p.vars.e.selected, ['A']); assertEqual(p.vars.t.value, 'keep');
+  pickPromptOption(host, 0, { detail: 2 }); assertEqual(p.vars.s.selected, 'S', 'a lone "second" click with nothing to restore is an ordinary click');
+});

@@ -1610,6 +1610,13 @@ const ICONS = {
   .pr-chip-x:hover, .pr-pill-x:hover { opacity: 1 !important; background: color-mix(in srgb, currentColor 18%, transparent); }
   .pr-chip-input, .pr-add-input { border: 1px solid var(--border-2); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: var(--fs-12); background: var(--bg); color: var(--text); width: 150px; }
   .pr-add-input { font-size: var(--fs-13); }
+  /* long names stay inside the panel: a pill, chip or variable name shortens with an ellipsis (its full text is in the tooltip) */
+  .pr-insp-inner { overflow-x: hidden; }
+  .pr-pills, .pr-presets { min-width: 0; }
+  .pr-pill-wrap, .pr-chip-wrap { max-width: 100%; min-width: 0; }
+  .pr-pill, .pr-chip { max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pr-pill-wrap.has-x .pr-pill, .pr-chip-wrap.has-x .pr-chip { flex: 0 1 auto; }
+  .pr-var-name { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; box-sizing: border-box; }
   .pr-vars { margin-top: 10px; }
   .pr-var { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px solid var(--border); align-items: stretch; }
   .pr-var-name { align-self: flex-start; font-family: var(--mono); font-size: var(--fs-12); padding: 3px 8px; }
@@ -6673,8 +6680,8 @@ function renderPromptInspector(p){
     (p.presets || []).forEach((ps, i)=>{
       const on = promptPresetMatches(p, ps);
       html += locked
-        ? `<button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})">${esc(ps.name)}</button>`
-        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}" title="Double-click to rename" ondblclick="startPromptRename(this,'preset',${i})" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
+        ? `<button type="button" class="pr-chip${on ? ' on' : ''}" title="${esc(ps.name)}" onclick="applyPromptPreset(${i},event)">${esc(ps.name)}</button>`
+        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}" title="${esc(ps.name)} — double-click to rename" ondblclick="startPromptRename(this,'preset',${i})" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i},event)" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
     });
     if(!locked) html += promptPresetDraft
       ? `<input type="text" class="pr-chip-input" id="pPresetInput" placeholder="Preset name" maxlength="60" aria-label="Preset name" onkeydown="promptPresetKey(event)" onblur="promptPresetKey({key:'Enter'})">`
@@ -6685,14 +6692,14 @@ function renderPromptInspector(p){
   entries.forEach(([k, v])=>{
     html += `<div class="pr-var" data-v="${esc(k)}">` + (locked
       ? `<span class="pr-var-name ph ${kindClass(v.type)}">${esc(k)}</span>`
-      : `<span class="pr-var-name ph ${kindClass(v.type)}" role="button" tabindex="0" title="Double-click to rename (the placeholder in the template is renamed too)" ondblclick="startPromptRename(this,'var',0)" oncontextmenu="openPromptItemMenu(event,'var',0)" onkeydown="promptItemKey(event,'var',0)">${esc(k)}</span>`);
+      : `<span class="pr-var-name ph ${kindClass(v.type)}" role="button" tabindex="0" title="${esc(k)} — double-click to rename (the placeholder in the template is renamed too)" ondblclick="startPromptRename(this,'var',0)" oncontextmenu="openPromptItemMenu(event,'var',0)" onkeydown="promptItemKey(event,'var',0)">${esc(k)}</span>`);
     if(v.type==='option'){
       html += `<div class="pr-pills">` + (v.options || []).map((o, i)=>{ const on = v.selected===o; return locked
-          ? `<button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})">${esc(o)}</button>`
-          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}" title="Double-click to rename" ondblclick="startPromptRename(this,'option',${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
+          ? `<button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" title="${esc(o)}" onclick="pickPromptOption(this,${i},event)">${esc(o)}</button>`
+          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}" title="${esc(o)} — double-click to rename" ondblclick="startPromptRename(this,'option',${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i},event)" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-pill add" title="Add an option" aria-label="Add an option" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i></button>`) + `</div>`;
     } else if(v.type==='instruction'){
-      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i})"${locked ? '' : ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
+      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i},event)"${locked ? '' : ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-add-item" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i> Add item</button>`) + `</div>`;
     } else {
       html += `<input type="text" class="pr-textfield" value="${esc(v.value || '')}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>`;
@@ -6703,16 +6710,41 @@ function renderPromptInspector(p){
   host.innerHTML = html;
 }
 const promptVarOf = el=>{ const p = prompts.find(x=>x.id===promptEditorId), row = el.closest('.pr-var'); return p && row ? { p, key: row.dataset.v, v: p.vars[row.dataset.v] } : null; };
-function pickPromptOption(btn, i){
-  const c = promptVarOf(btn); if(!c || promptTrashed(c.p) || !c.v) return;
-  const o = c.v.options[i]; c.v.selected = c.v.selected===o ? '' : o;
-  touchPrompt(c.p); save(); renderPromptInspector(c.p);
+// A double-click (to rename) must not change what is chosen: the first click saves the choices as they were, and the second click of the pair puts them back.
+let promptClickSnap = null;
+const promptSnapshot = p=>JSON.stringify(Object.entries(p.vars || {}).map(([k, v])=>[k, v.type==='text' ? v.value : v.selected]));
+function promptDoubleClickRestore(p, ev){
+  if(!ev || !(ev.detail>=2) || !promptClickSnap || promptClickSnap.id!==p.id || Date.now() - promptClickSnap.t > 900) return false;
+  JSON.parse(promptClickSnap.s).forEach(([k, val])=>{ const v = p.vars[k]; if(!v) return; if(v.type==='text') v.value = val; else v.selected = val; });
+  promptClickSnap = null; touchPrompt(p); save(); refreshPromptSelection(p); return true;
 }
-function togglePromptItem(el, i){
+function promptRememberClick(p, ev){ if(!ev || ev.detail<2) promptClickSnap = { id: p.id, s: promptSnapshot(p), t: Date.now() }; }
+function pickPromptOption(btn, i, ev){
+  const c = promptVarOf(btn); if(!c || promptTrashed(c.p) || !c.v) return;
+  if(promptDoubleClickRestore(c.p, ev)) return; promptRememberClick(c.p, ev);
+  const o = c.v.options[i]; c.v.selected = c.v.selected===o ? '' : o;
+  touchPrompt(c.p); save(); refreshPromptSelection(c.p);
+}
+// Choosing updates the panel IN PLACE (classes only): rebuilding it would replace the pill under the pointer between the two clicks of a double-click, and the browser
+// would never see a double-click (so renaming would not work).
+function refreshPromptSelection(p){
+  const host = document.getElementById('pInspector'); if(!host || !p) return;
+  const rows = [...host.querySelectorAll('.pr-var')];
+  Object.entries(p.vars || {}).forEach(([k, v])=>{
+    const row = rows.find(r=>r.dataset.v===k); if(!row) return;
+    if(v.type==='option') row.querySelectorAll('.pr-pill:not(.add)').forEach((b, i)=>{ const on = v.selected!=='' && v.options[i]===v.selected; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); const w = b.closest('.pr-pill-wrap'); if(w) w.classList.toggle('on', on); });
+    else if(v.type==='instruction') row.querySelectorAll('.pr-check').forEach((c, i)=>{ const on = (v.selected || []).includes(v.options[i]); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); });
+    else { const f = row.querySelector('.pr-textfield'); if(f && f.value!==(v.value || '') && document.activeElement!==f) f.value = v.value || ''; }
+  });
+  const chips = [...host.querySelectorAll('.pr-presets .pr-chip:not(.add)')];
+  chips.forEach((b, j)=>{ const on = promptPresetMatches(p, j===0 ? null : (p.presets || [])[j - 1]); b.classList.toggle('on', on); const w = b.closest('.pr-chip-wrap'); if(w) w.classList.toggle('on', on); });
+}
+function togglePromptItem(el, i, ev){
   const c = promptVarOf(el); if(!c || promptTrashed(c.p) || !c.v) return;
+  if(promptDoubleClickRestore(c.p, ev)) return; promptRememberClick(c.p, ev);
   const o = c.v.options[i], sel = c.v.selected || [];
   c.v.selected = sel.includes(o) ? sel.filter(x=>x!==o) : [...sel, o];
-  touchPrompt(c.p); save(); renderPromptInspector(c.p);
+  touchPrompt(c.p); save(); refreshPromptSelection(c.p);
 }
 function setPromptText(input){
   const c = promptVarOf(input); if(!c || !c.v) return;
@@ -6832,14 +6864,15 @@ function promptPresetMatches(p, preset){
   if(pk.length!==keys.length) return false;
   return pk.every(k=>{ const v = p.vars[k], val = preset.values[k]; if(v.type==='option') return v.selected===val; const a = v.selected || [], b = Array.isArray(val) ? val : []; return a.length===b.length && a.every(x=>b.includes(x)); });
 }
-function applyPromptPreset(i){
+function applyPromptPreset(i, ev){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || promptTrashed(p)) return;
+  if(promptDoubleClickRestore(p, ev)) return; promptRememberClick(p, ev);
   if(i<0){ Object.values(p.vars).forEach(v=>{ if(v.type==='option') v.selected = ''; else if(v.type==='instruction') v.selected = []; else v.value = ''; }); }
   else {
     const ps = (p.presets || [])[i]; if(!ps) return;
     Object.entries(ps.values || {}).forEach(([k, val])=>{ const v = p.vars[k]; if(!v) return; if(v.type==='option') v.selected = typeof val==='string' && v.options.includes(val) ? val : ''; else if(v.type==='instruction') v.selected = Array.isArray(val) ? val.filter(x=>v.options.includes(x)) : []; });
   }
-  touchPrompt(p); save(); renderPromptInspector(p);
+  touchPrompt(p); save(); refreshPromptSelection(p);
 }
 function startPromptPresetSave(){ promptPresetDraft = true; const p = prompts.find(x=>x.id===promptEditorId); if(p) renderPromptInspector(p); const el = document.getElementById('pPresetInput'); if(el) el.focus(); }
 function promptPresetKey(e){
