@@ -584,3 +584,16 @@ test('projectMenuHtml offers New Task Here and Edit for every project, and Delet
   assertIncludes(b, 'New Task Here'); assertIncludes(b, 'Edit'); assertIncludes(b, 'Delete');
   assertEqual(projectMenuHtml('nope'), '');
 });
+
+test('undoable deletes do not ask: the item goes and the toast offers Undo; errors are announced as alerts', function () {
+  tasks = [{ id: 'q1', title: 'x', projectId: 'proj-inbox', status: 'todo', priority: 'medium', tags: [], subtasks: [] }];
+  modalTarget = null; toastUndoAction = null;
+  deleteTask('q1');
+  assertEqual(tasks.length, 0, 'deleted without a dialog'); assertEqual(modalTarget, null);
+  assertTrue(typeof toastUndoAction === 'function', 'Undo is offered');
+  toastUndoAction(); assertEqual(tasks.length, 1);
+  showToast('Something failed', true);
+  assertEqual(document.getElementById('toast').getAttribute('role'), 'alert');
+  showToast('Saved');
+  assertEqual(document.getElementById('toast').getAttribute('role'), 'status');
+});

@@ -11,7 +11,6 @@
 test('deleteTask records a tombstone, and undo clears it again', function () {
   tasks = [{ id: 't1', title: 'Welcome to mydesk', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [] }];
   deleteTask('t1');
-  modalTarget.action();
   assertTrue(deletedTaskIds.some(x => x.id === 't1'), 'deleting should tombstone the id');
   triggerToastUndo();
   assertFalse(deletedTaskIds.some(x => x.id === 't1'), 'undoing the delete should clear the tombstone');
@@ -25,7 +24,6 @@ test('bulkDelete tombstones every removed id, and undo clears them all', functio
   ];
   selectedTaskIds = new Set(['t1', 't2']);
   bulkDelete();
-  modalTarget.action();
   assertTrue(deletedTaskIds.some(x => x.id === 't1') && deletedTaskIds.some(x => x.id === 't2'));
   triggerToastUndo();
   assertEqual(deletedTaskIds.length, 0);
@@ -34,7 +32,6 @@ test('bulkDelete tombstones every removed id, and undo clears them all', functio
 
 test('deleteProject records a tombstone, and undo clears it again', function () {
   deleteProject('proj-work');
-  modalTarget.action();
   assertTrue(deletedProjectIds.some(x => x.id === 'proj-work'));
   triggerToastUndo();
   assertFalse(deletedProjectIds.some(x => x.id === 'proj-work'));
@@ -103,7 +100,6 @@ test('mergeData with respectTombstones:false brings back a tombstoned project', 
 test('applyImport merge mode brings back a task previously deleted in this browser', function () {
   tasks = [{ id: 't1', title: 'Old friend', projectId: 'proj-inbox', status: 'todo', priority: 'medium', updatedAt: 1000, subtasks: [], tags: [] }];
   deleteTask('t1'); // tombstoned with deletedAt = now, well after updatedAt: 1000
-  modalTarget.action();
   pendingImportData = {
     projects: defaultProjects(),
     tasks: [{ id: 't1', title: 'Old friend', projectId: 'proj-inbox', updatedAt: 1000, subtasks: [] }]

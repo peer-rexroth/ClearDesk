@@ -160,8 +160,7 @@ test('folders: creating through the dialog, deleting moves prompts out, and the 
   assertEqual(promptFolders.length, 1); assertEqual(promptFolders[0].name, 'Ideas'); assertEqual(promptFolderFilter, promptFolders[0].id);
   const fid = promptFolders[0].id;
   prompts = [pmk({ id: 'a', folderId: fid })];
-  deletePromptFolder(fid);                                          // opens the confirmation; run its action
-  modalTarget.action();
+  deletePromptFolder(fid);                                         
   assertEqual(promptFolders.length, 0); assertEqual(prompts[0].folderId, '');
   assertTrue(deletedPromptFolderIds.some(t => t.id === fid)); assertEqual(promptFolderFilter, 'all');
 });

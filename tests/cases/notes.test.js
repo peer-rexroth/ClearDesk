@@ -153,7 +153,7 @@ test('deleting a folder moves its notes to Notes, and undo puts everything back'
   noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true }, { id: 'f2', name: 'Work' }];
   notes = [ntNote({ id: 'a', folderId: 'f2' }), ntNote({ id: 'b', folderId: NOTES_DEFAULT_FOLDER })];
   noteFolderFilter = 'f2';
-  deleteNoteFolder('f2'); confirmModalAction();
+  deleteNoteFolder('f2');
   assertEqual(noteFolders.length, 1); assertEqual(notes[0].folderId, NOTES_DEFAULT_FOLDER); assertEqual(noteFolderFilter, 'all');
   toastUndoAction();
   assertEqual(noteFolders.length, 2); assertEqual(notes.find(function (n) { return n.id === 'a'; }).folderId, 'f2');
@@ -359,11 +359,11 @@ test('cloning offers Undo that removes the clone and tombstones it', function ()
   assertTrue(deletedNoteIds.some(d => d.id === cloneId));
 });
 
-test('the note right-click menu offers lock, clone, move and delete (and disables the last two when locked)', function () {
+test('the note right-click menu offers lock, duplicate, move and delete (and disables the last two when locked)', function () {
   noteFolders.push({ id: 'f-work', name: 'Work' });
   notes = [ntNote({ id: 'rm1', title: 'X' })];
   let h = noteMenuHtml('rm1');
-  assertIncludes(h, 'Lock'); assertIncludes(h, 'Clone'); assertIncludes(h, 'Move to'); assertIncludes(h, 'Work'); assertIncludes(h, 'Delete');
+  assertIncludes(h, 'Lock'); assertIncludes(h, 'Duplicate'); assertIncludes(h, 'Move to'); assertIncludes(h, 'Work'); assertIncludes(h, 'Delete');
   assertNotIncludes(h, 'disabled');
   notes[0].locked = true;
   h = noteMenuHtml('rm1');
@@ -467,7 +467,6 @@ test('deleting a folder deletes its subfolders, moves all their notes to Notes, 
   ntTree();
   notes = [ntNote({ id: 'a', folderId: 'f-work' }), ntNote({ id: 'b', folderId: 'f-q1' }), ntNote({ id: 'c', folderId: 'f-home' })];
   deleteNoteFolder('f-work');
-  confirmModalAction();                               // accept the confirm dialog
   assertDeepEqual(noteFolders.map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-home']);
   assertEqual(notes.find(n => n.id === 'a').folderId, NOTES_DEFAULT_FOLDER);
   assertEqual(notes.find(n => n.id === 'b').folderId, NOTES_DEFAULT_FOLDER);

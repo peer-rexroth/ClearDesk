@@ -1608,7 +1608,10 @@ const ICONS = {
   .pr-pill-wrap.has-x.on { background: var(--accent); color: var(--on-accent); }
   .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: 999px 0 0 999px; }
   .pr-chip-wrap.has-x .pr-chip { padding-left: 12px; }
-  .pr-pill-x, .pr-chip-x { flex: none; width: 18px; height: 18px; margin-right: 6px; padding: 0; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: inherit; font-size: var(--ico-12); opacity: 0; cursor: default; }
+  .pr-pill-x::before, .pr-chip-x::before, .tbl-plus::before, .tbl-grip.tbl::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
+  .tbl-plus::before { inset: -4px; }
+  .tbl-grip.tbl::before { inset: -3px; }
+  .pr-pill-x, .pr-chip-x { position: relative; flex: none; width: 18px; height: 18px; margin-right: 6px; padding: 0; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: inherit; font-size: var(--ico-12); opacity: 0; cursor: default; }
   .pr-chip-wrap.has-x:hover .pr-chip-x, .pr-chip-wrap.has-x:focus-within .pr-chip-x, .pr-pill-wrap.has-x:hover .pr-pill-x, .pr-pill-wrap.has-x:focus-within .pr-pill-x { opacity: .7; }
   .pr-chip-x:hover, .pr-pill-x:hover { opacity: 1 !important; background: color-mix(in srgb, currentColor 18%, transparent); }
   .pr-chip-input, .pr-add-input { border: 1px solid var(--border-2); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: var(--fs-12); background: var(--bg); color: var(--text); width: 150px; }
@@ -1960,7 +1963,7 @@ const ICONS = {
           </div>
                     <span class="note-toolbar-grow"></span>
           <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg></button>
-          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, clone, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
+          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
         </div>
         <div class="note-scroll">
           <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyMove(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyLeave()">
@@ -2257,8 +2260,8 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
-          <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
-          <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
+          <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Duplicate, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
           <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
           </div>
         </div>
@@ -2425,7 +2428,7 @@ const ICONS = {
   </div>
 </div>
 
-<div class="toast" id="toast"><i class="fa-solid fa-check" id="toastIcon"></i><span id="toastMsg"></span><button class="toast-undo" id="toastUndoBtn" style="display:none" onclick="triggerToastUndo()">Undo</button></div>
+<div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"><i class="fa-solid fa-check" id="toastIcon"></i><span id="toastMsg"></span><button class="toast-undo" id="toastUndoBtn" style="display:none" onclick="triggerToastUndo()">Undo</button></div>
 
 <script>
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -3812,10 +3815,7 @@ function bulkSetRepeat(repeat, idsArg){
 function bulkDelete(idsArg){
   const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   if(!ids.length) return;
-  openConfirmModal({
-    title: `Delete ${ids.length} task${ids.length===1?'':'s'}?`,
-    body: 'You can undo this from the toast right after deleting.',
-    action: ()=>{
+  {                                                             // no alert: the toast's Undo brings them back
       const removed = [];
       ids.forEach(id=>{
         const idx = tasks.findIndex(t=>t.id===id);
@@ -3833,8 +3833,7 @@ function bulkDelete(idsArg){
         save(); render();
         showToast('Tasks restored');
       });
-    }
-  });
+  }
 }
 
 function renderDrawer(){
@@ -4310,10 +4309,7 @@ function updateTaskFieldLive(id, field, value){
 }
 
 function deleteTask(id){
-  openConfirmModal({
-    title: 'Delete task?',
-    body: 'You can undo this from the toast right after deleting.',
-    action: ()=>{
+  {                                                             // no alert: the toast's Undo brings it back
       const doDelete = ()=>{
         const idx = tasks.findIndex(t=>t.id===id);
         if(idx===-1) return;
@@ -4332,8 +4328,7 @@ function deleteTask(id){
       const rowEl = document.querySelector(`.task-row[data-id="${id}"]`);
       if(rowEl){ rowEl.classList.add('row-exit'); setTimeout(doDelete, 150); }
       else doDelete();
-    }
-  });
+  }
 }
 
 function duplicateTask(id){
@@ -4754,14 +4749,7 @@ function deleteProject(id){
   const projTasks = tasks.filter(t=>t.projectId===id);
   const activeCount = projTasks.filter(t=>t.status!=='done').length;
   const doneCount = projTasks.length - activeCount;
-  const bodyParts = [];
-  if(activeCount>0) bodyParts.push(`${activeCount} active task${activeCount===1?'':'s'} will move to Inbox for triage`);
-  if(doneCount>0) bodyParts.push(`${doneCount} completed task${doneCount===1?'':'s'} will stay done, out of Inbox's view`);
-  const body = (bodyParts.length ? bodyParts.join('; ') + '. ' : '') + 'You can undo this from the toast right after deleting.';
-  openConfirmModal({
-    title: `Delete "${p.name}"?`,
-    body,
-    action: ()=>{
+  {                                                             // no alert: the toast says where the tasks went and offers Undo
       const idx = projects.findIndex(x=>x.id===id);
       if(idx===-1) return;
       const [removed] = projects.splice(idx,1);
@@ -4776,15 +4764,14 @@ function deleteProject(id){
       });
       if(filterProjectId===id) filterProjectId=null;
       save(); render();
-      showToast('Project deleted', false, ()=>{
+      showToast(activeCount>0 ? `Project deleted · ${activeCount} task${activeCount===1?'':'s'} moved to Inbox` : 'Project deleted', false, ()=>{
         untombstone(deletedProjectIds, id);
         projects.splice(idx,0,removed);
         movedTaskIds.forEach(tid=>{ const t=tasks.find(x=>x.id===tid); if(t){ t.projectId=id; t.updatedAt=Date.now(); } });
         save(); render();
         showToast('Project restored');
       });
-    }
-  });
+  }
 }
 
 // ── Project reordering ───────────────────────────────────────────────────────
@@ -5285,7 +5272,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Table options (rows, columns, header) at the caret', ['Shift','F10']], ['Next cell, adding a row after the last one', ['Tab']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or duplicate (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Table options (rows, columns, header) at the caret', ['Shift','F10']], ['Next cell, adding a row after the last one', ['Tab']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-clone', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
       ['Copy the finished prompt', [mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']], ['Undo / redo typing in the template', [mod,'Z / ⇧ Z']], ['Focus search', ['/']] ] },
@@ -5935,11 +5922,11 @@ function cloneNote(id){
   if(!noteInFilter(clone)) noteFolderFilter = 'all';
   selectedNoteId = clone.id; noteEditorId = null;
   save(); render();
-  showToast('Note cloned', false, ()=>{
+  showToast('Note duplicated', false, ()=>{
     const i = notes.findIndex(n=>n.id===clone.id); if(i===-1) return;
     notes.splice(i, 1); tombstone(deletedNoteIds, clone.id);
     if(selectedNoteId===clone.id) selectedNoteId = src.id;
-    noteEditorId = null; save(); render(); showToast('Clone removed');
+    noteEditorId = null; save(); render(); showToast('Duplicate removed');
   });
 }
 
@@ -5959,7 +5946,7 @@ function noteMenuHtml(id, opts){
     sep,
     item('fa-regular fa-clipboard', 'Copy Note', `noteMenuRun('copy')`),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
-    item('fa-regular fa-clone', 'Clone', `noteMenuRun('clone')`),
+    item('fa-regular fa-clone', 'Duplicate', `noteMenuRun('clone')`),
     sep,
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
@@ -6386,13 +6373,7 @@ function deleteNoteFolder(id){
   const f = folderById(id); if(!f || f.locked) return;
   const kids = folderChildren(id), gone = new Set([id, ...kids.map(k=>k.id)]);
   const count = notes.filter(n=>gone.has(n.folderId)).length;
-  const bits = [];
-  if(kids.length) bits.push(`Its ${kids.length} subfolder${kids.length===1?'':'s'} will be deleted too. `);
-  if(count) bits.push(`${count} note${count===1?'':'s'} will move to Notes. `);
-  openConfirmModal({
-    title: `Delete "${f.name}"?`,
-    body: bits.join('') + 'You can undo this from the toast right after deleting.',
-    action: ()=>{
+  {                                                             // no alert: the toast offers Undo
       if(!folderById(id)) return;
       flushNoteEdit();
       const removed = [];
@@ -6409,8 +6390,7 @@ function deleteNoteFolder(id){
         moved.forEach(([nid, fid])=>{ const n = notes.find(x=>x.id===nid); if(n){ n.folderId = fid; n.updatedAt = Date.now(); } });
         noteEditorId = null; save(); render(); showToast('Folder restored');
       });
-    }
-  });
+  }
 }
 
 // ───────────────────────── Prompts: the third mode (reusable prompt templates with variables) ─────────────────────────
@@ -7048,7 +7028,7 @@ function clonePrompt(id){
   flushPromptEdit();
   const now = Date.now(), c = JSON.parse(JSON.stringify(p));
   Object.assign(c, { id: genId(), name: (p.name.trim() || 'Untitled prompt') + ' copy', favorite: false, locked: false, createdAt: now, updatedAt: now }); delete c.deletedAt;
-  prompts.push(c); selectedPromptId = c.id; promptEditorId = null; save(); render(); showToast('Prompt cloned');
+  prompts.push(c); selectedPromptId = c.id; promptEditorId = null; save(); render(); showToast('Prompt duplicated');
 }
 function movePrompt(id, folderId){
   const p = prompts.find(x=>x.id===id); if(!p || p.locked || promptTrashed(p)) return;
@@ -7137,10 +7117,8 @@ function savePromptFolderModal(){
 }
 function deletePromptFolder(id){
   const f = promptFolderById(id); if(!f) return;
-  const kids = promptFolderKids(id), gone = new Set([id, ...kids.map(k=>k.id)]), count = prompts.filter(p=>gone.has(p.folderId)).length, bits = [];
-  if(kids.length) bits.push(`Its ${kids.length} subfolder${kids.length===1 ? '' : 's'} will be deleted too. `);
-  if(count) bits.push(`${count} prompt${count===1 ? '' : 's'} will move out of the folder (they stay in All Prompts). `);
-  openConfirmModal({ title: `Delete "${f.name}"?`, body: bits.join('') + 'You can undo this from the toast right after deleting.', action: ()=>{
+  const kids = promptFolderKids(id), gone = new Set([id, ...kids.map(k=>k.id)]), count = prompts.filter(p=>gone.has(p.folderId)).length;
+  {                                                             // no alert: the toast offers Undo
     if(!promptFolderById(id)) return;
     flushPromptEdit();
     const removed = []; promptFolders.forEach((x, i)=>{ if(gone.has(x.id)) removed.push({ f: x, i }); });
@@ -7153,7 +7131,7 @@ function deletePromptFolder(id){
       moved.forEach(([pid, fid])=>{ const p = prompts.find(x=>x.id===pid); if(p){ p.folderId = fid; p.updatedAt = Date.now(); } });
       promptEditorId = null; save(); render(); showToast('Folder restored');
     });
-  }});
+  }
 }
 
 // ---- right-click menus ----
@@ -7167,7 +7145,7 @@ function promptMenuHtml(id){
     item('fa-regular fa-star', p.favorite ? 'Remove from Favorites' : 'Add to Favorites', `promptMenuRun('favorite')`),
     item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
     sep,
-    item('fa-regular fa-clone', 'Clone', `promptMenuRun('clone')`),
+    item('fa-regular fa-clone', 'Duplicate', `promptMenuRun('clone')`),
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
     sep,
     item('fa-solid fa-trash', 'Delete', `promptMenuRun('delete')`, {danger:true, off:p.locked, hint: p.locked ? 'Unlock First' : '⌫'})
@@ -8259,7 +8237,7 @@ function onNoteKeydown(e){
   if(noteBackspaceAfterTable(e)) return;
   if(noteAutoBullet(e)) return;
   if(noteTableArrow(e)) return;
-  // ⌘Z in the note undoes typing. With nothing left to undo there, it falls through to the toast's Undo (a just-made clone, delete or move).
+  // ⌘Z in the note undoes typing. With nothing left to undo there, it falls through to the toast's Undo (a just-made duplicate, delete or move).
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='z' && toastUndoAction && noteEditCount===0){ e.preventDefault(); triggerToastUndo(); return; }
   if(e.key==='Escape' && document.querySelector('#noteTableMenu.open, #noteListMenu.open')){ e.preventDefault(); closeNoteTableMenu(); closeNoteListMenu(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase()==='k'){ e.preventDefault(); openNoteLinkBar(); return; }
@@ -8591,9 +8569,9 @@ function removePromptGlobal(){
   const gone = ()=>{
     promptGlobals = promptGlobals.filter(x=>x.id!==g.id); tombstone(deletedPromptGlobalIds, g.id);
     globalsSel = ''; save(); openPromptGlobalsModal();
-    showToast(`Global variable “${g.name}” deleted`, false, ()=>{ untombstone(deletedPromptGlobalIds, g.id); g.updatedAt = Date.now(); promptGlobals.push(g); save(); const p = prompts.find(x=>x.id===promptEditorId); if(p) renderPromptInspector(p); showToast('Global variable restored'); });
+    showToast(`Global variable “${g.name}” deleted${n ? ` · ${n} prompt${n===1 ? ' keeps' : 's keep'} the placeholder` : ''}`, false, ()=>{ untombstone(deletedPromptGlobalIds, g.id); g.updatedAt = Date.now(); promptGlobals.push(g); save(); const p = prompts.find(x=>x.id===promptEditorId); if(p) renderPromptInspector(p); showToast('Global variable restored'); });
   };
-  openConfirmModal({ title: `Delete “${g.name}”?`, body: n ? `${n} prompt${n===1 ? ' uses' : 's use'} it. They keep the placeholder in their template, but it will have no values until you create the variable again. You can undo this from the toast right after deleting.` : 'This global variable is not used in any prompt. You can undo this from the toast right after deleting.', confirmLabel: 'Delete', action: gone });
+  gone();                                                       // no alert: the toast offers Undo
 }
 // Renaming a global renames its placeholder in every prompt (and keeps each prompt's choice and presets).
 function commitGlobalName(){
@@ -9151,9 +9129,24 @@ function showToast(msg, isError=false, undoAction=null){
   toastUndoAction = undoAction;
   document.getElementById('toastUndoBtn').style.display = undoAction ? 'inline' : 'none';
   t.classList.add('show');
-  clearTimeout(toastHideTimer);
-  toastHideTimer = setTimeout(()=>{ t.classList.remove('show'); toastUndoAction = null; }, undoAction ? 6000 : 2400);
+  t.setAttribute('role', isError ? 'alert' : 'status');            // an error is announced at once, the rest politely
+  toastHoldMs = undoAction ? 6000 : 2400;
+  armToastTimer();
 }
+// The toast stays while the pointer is over it or focus is inside it, and the countdown starts again when they leave.
+let toastHoldMs = 2400;
+function armToastTimer(){
+  const t = document.getElementById('toast');
+  clearTimeout(toastHideTimer);
+  toastHideTimer = setTimeout(()=>{ t.classList.remove('show'); toastUndoAction = null; }, toastHoldMs);
+}
+(function(){
+  const t = document.getElementById('toast'); if(!t || !t.addEventListener) return;
+  const hold = ()=>clearTimeout(toastHideTimer);
+  const release = ()=>{ if(t.classList.contains('show') && !t.matches(':hover') && !t.contains(document.activeElement)) armToastTimer(); };
+  t.addEventListener('mouseenter', hold); t.addEventListener('mouseleave', release);
+  t.addEventListener('focusin', hold); t.addEventListener('focusout', ()=>setTimeout(release, 0));
+})();
 function triggerToastUndo(){
   if(toastUndoAction) toastUndoAction();
   toastUndoAction = null;
