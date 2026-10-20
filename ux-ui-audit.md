@@ -256,3 +256,5 @@ Type: **I** = Inconsistency, **H** = HIG deviation, **B** = Both. Base URL: `htt
 **Update 2:** F-22 (no serif font), F-30 (arrow cursor on controls, hand only for links), F-21 (small controls have 20px+ hit areas), F-38 (Shift+F10 / Menu key opens the table options with the caret in a cell) and F-37 (closed selects are one custom look; the opened list is the native pop-up menu, themed through `color-scheme`) are done.
 
 **Update 3:** F-18 (the Light/Dark override now sits behind a *Match System* switch, on by default) and F-23 (four text sizes: 90 / 100 / 115 / 130%) are done.
+
+**Update 4:** F-34 — one `--gutter` (20px) now sets the left margin of the Tasks toolbar, quick-add, rows and board and of the Notes toolbar and editor (it was 14, 18, 20 and 24px). The note width cap (900px) and the full-width task list are unchanged.

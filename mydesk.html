@@ -286,7 +286,7 @@ const ICONS = {
 
   /* main */
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
-  .main-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 4px; }
+  .main-toolbar { display: flex; align-items: center; justify-content: space-between; padding: 14px var(--gutter) 4px; }
   .main-title { font-size: var(--fs-22); font-weight: 700; letter-spacing: -0.01em; }
   .main-toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .toolbar-filter-label { font-size: var(--fs-11); font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; }
@@ -298,7 +298,7 @@ const ICONS = {
   .view-switch-btn + .view-switch-btn { border-left: 0.5px solid var(--border-2); }
   .view-switch-btn.active { background: var(--bg-3); color: var(--text); }
 
-  .board { display: flex; gap: 14px; padding: 4px 20px 20px; overflow-x: auto; flex: 1; align-items: flex-start; }
+  .board { display: flex; gap: 14px; padding: 16px var(--gutter) 20px; overflow-x: auto; flex: 1; align-items: flex-start; }
   .board-col { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); width: 320px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 100%; }
   .board-col.drag-over { border-color: var(--blue-border); box-shadow: inset 0 0 0 1px var(--blue-border); }
   .board-col.dimmed { opacity: 0.45; }
@@ -335,7 +335,7 @@ const ICONS = {
   .bulk-bar select, .bulk-bar input[type=date] { font-size: var(--fs-12); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 6px 8px; background: var(--bg); color: var(--text); font-family: var(--font); }
   .task-row.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
 
-  .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 14px 20px; }
+  .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 calc(var(--gutter) - 10px) 20px; }   /* rows have 10px of their own padding, so their content starts at the gutter */
   .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 152px 88px 108px 112px; min-width: 816px; }   /* Due = widest date seen across 22 locales (pt-BR "28 de mar." 108px, with chevron) + a little */   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: var(--fs-11); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
@@ -1001,7 +1001,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1222,7 +1222,7 @@ const ICONS = {
   html[data-scheme] .note-link-pop .nlp-actions .nlp-remove:hover { background: color-mix(in srgb, var(--red-text) 14%, transparent); }
   .nlp-actions .nlp-remove[hidden] { display: none; }
   .nlp-actions .btn-primary { margin-left: auto; }
-  .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px 24px 56px; }
+  .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px var(--gutter) 56px; }
   .note-doc { width: 100%; max-width: var(--note-max-w, 900px); position: relative; }   /* the note area stops growing at 900px (left-aligned in the pane): lines and tables stay readable on an ultrawide screen */
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
@@ -1389,7 +1389,7 @@ const ICONS = {
   .nl-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; line-height: 1.2; }
   .notes-list-head h2 { flex: none !important; font-size: var(--fs-17) !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .nl-titles .notes-list-sub { padding: 0 !important; min-height: 0 !important; font-size: var(--fs-12); }
-  .note-toolbar { min-height: 52px; box-sizing: border-box; padding: 8px 20px 8px !important; gap: 6px; border-bottom: 1px solid var(--border); }   /* 8 + the 36px controls + 7 + the 1px hairline = the 52px every column bar has */
+  .note-toolbar { min-height: 52px; box-sizing: border-box; padding: 8px var(--gutter) 8px !important; gap: 6px; border-bottom: 1px solid var(--border); }   /* 8 + the 36px controls + 7 + the 1px hairline = the 52px every column bar has */
   .note-scroll { padding-top: 18px !important; }
   .notes-list-pane #notesList { padding-top: 6px; }
   @media (max-width: 800px) { .note-toolbar { padding-left: 14px !important; padding-right: 14px !important; } }
@@ -1435,7 +1435,7 @@ const ICONS = {
   html[data-scheme="glass"] .main-toolbar .main-title-wrap { justify-content: center; line-height: 1.2; }
   html[data-scheme="glass"] .main-toolbar .main-title { font-size: var(--fs-17); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
   html[data-scheme="glass"] .main-toolbar .main-subtitle { font-size: var(--fs-12); line-height: 1.2; margin-top: 0; }
-  html[data-scheme="glass"] .main-toolbar { padding-left: 18px !important; }
+  html[data-scheme="glass"] .main-toolbar { padding-left: var(--gutter) !important; }
   /* Notes toolbar icons share the Tasks toolbar's weight: thin outline glyphs (stroke drawn at the size of Font Awesome's regular style) and plain-text B / I / U / S */
   .tb-ico2 { width: 18px; height: 18px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .tb-txt { font-family: var(--font); font-size: var(--fs-15); line-height: 1; font-weight: 600; }
@@ -1446,7 +1446,7 @@ const ICONS = {
   /* ── Add-a-task is a "ghost row" (after Apple Reminders' new-item line) ───────
      No box: an empty circle where a checkbox will be, muted placeholder text, a hairline under it that turns accent while typing,
      and a quiet pop-up button for the project on the right. */
-  html[data-scheme="glass"] .quickadd { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; margin: 10px 20px 0; padding: 0; gap: 8px; }
+  html[data-scheme="glass"] .quickadd { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; margin: 10px var(--gutter) 0; padding: 0; gap: 8px; }
   .quickadd .qa-plus { flex: none; margin-left: 12px; font-size: var(--ico-16); color: var(--text-3); transition: color .12s ease; }   /* the "+" sits at the row's left edge, as it always did */
   html[data-scheme="glass"] .quickadd input { padding: 12px 10px 12px 0; font-size: var(--fs-14); }
   .quickadd input::placeholder { color: var(--text-3); }
