@@ -187,3 +187,30 @@ test('removePromptOptionAt removes an option or item, clears it from the choice 
   p.locked = true; removePromptOptionAt(p, 's', 0);
   assertDeepEqual(p.vars.s.options, ['S', 'M'], 'a locked prompt keeps its options');
 });
+
+test('renaming: an option keeps its place and choice and updates presets; a duplicate is refused; a preset is renamed', function () {
+  pfresh();
+  const p = pmk({ id: 'x', template: '{{s}} [[e]]', vars: { s: { type: 'option', options: ['S', 'M'], selected: 'M' }, e: { type: 'instruction', options: ['A', 'B'], selected: ['B'] } }, presets: [{ name: 'One', values: { s: 'M', e: ['B'] } }, { name: 'Two', values: {} }] });
+  prompts = [p]; promptEditorId = 'x';
+  assertEqual(renamePromptOption(p, 's', 1, 'Medium'), null);
+  assertDeepEqual(p.vars.s.options, ['S', 'Medium']); assertEqual(p.vars.s.selected, 'Medium'); assertEqual(p.presets[0].values.s, 'Medium');
+  assertIncludes(renamePromptOption(p, 's', 0, 'Medium'), 'already'); assertDeepEqual(p.vars.s.options, ['S', 'Medium']);
+  renamePromptOption(p, 'e', 1, 'Bee');
+  assertDeepEqual(p.vars.e.options, ['A', 'Bee']); assertDeepEqual(p.vars.e.selected, ['Bee']); assertDeepEqual(p.presets[0].values.e, ['Bee']);
+  assertEqual(renamePromptPreset(p, 0, 'Uno'), null); assertEqual(p.presets[0].name, 'Uno');
+  assertIncludes(renamePromptPreset(p, 0, 'Two'), 'already');
+  p.locked = true; renamePromptOption(p, 's', 0, 'Nope'); assertEqual(p.vars.s.options[0], 'S', 'a locked prompt keeps its options');
+});
+
+test('renaming a variable rewrites its placeholders in the template (not escaped ones), keeps its settings and presets, and refuses clashes', function () {
+  pfresh();
+  const p = pmk({ id: 'x', template: 'A {{size}} B {{size}} C [[size]] D \\{{size}} E ((t))', vars: { size: { type: 'option', options: ['S'], selected: 'S' }, t: { type: 'text', value: 'v' } }, presets: [{ name: 'P', values: { size: 'S' } }] });
+  prompts = [p]; promptEditorId = 'x';
+  assertEqual(renamePromptVar(p, 'size', 'shirt size'), null);
+  assertEqual(p.template, 'A {{shirt size}} B {{shirt size}} C [[size]] D \\{{size}} E ((t))', 'only the {{ }} placeholders of that variable, not the escaped one or another kind');
+  assertDeepEqual(Object.keys(p.vars), ['shirt size', 't']); assertEqual(p.vars['shirt size'].selected, 'S');
+  assertDeepEqual(Object.keys(p.presets[0].values), ['shirt size']);
+  assertIncludes(renamePromptVar(p, 't', 'shirt size'), 'already');
+  assertIncludes(renamePromptVar(p, 't', '{}'), 'empty');
+  assertEqual(renamePromptVar(p, 't', 'a(b)'), null); assertTrue('ab' in p.vars, 'brackets are stripped from a name');
+});

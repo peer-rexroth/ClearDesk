@@ -2196,7 +2196,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the switch beside the app name. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
-          <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
+          <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           <div class="help-row"><i class="fa-solid fa-upload"></i><span><strong>From PromptLab</strong>: <em>Import PromptLab Library…</em> in the list's <strong>⋯</strong> menu reads a PromptLab export (<code>.json</code>). Its categories become folders; favorites, locks and presets come along, version history does not. Importing the same file twice changes nothing.</span></div>
@@ -6674,7 +6674,7 @@ function renderPromptInspector(p){
       const on = promptPresetMatches(p, ps);
       html += locked
         ? `<button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})">${esc(ps.name)}</button>`
-        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
+        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}" title="Double-click to rename" ondblclick="startPromptRename(this,'preset',${i})" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
     });
     if(!locked) html += promptPresetDraft
       ? `<input type="text" class="pr-chip-input" id="pPresetInput" placeholder="Preset name" maxlength="60" aria-label="Preset name" onkeydown="promptPresetKey(event)" onblur="promptPresetKey({key:'Enter'})">`
@@ -6683,14 +6683,16 @@ function renderPromptInspector(p){
   }
   html += `<div class="pr-vars">`;
   entries.forEach(([k, v])=>{
-    html += `<div class="pr-var" data-v="${esc(k)}"><span class="pr-var-name ph ${kindClass(v.type)}">${esc(k)}</span>`;
+    html += `<div class="pr-var" data-v="${esc(k)}">` + (locked
+      ? `<span class="pr-var-name ph ${kindClass(v.type)}">${esc(k)}</span>`
+      : `<span class="pr-var-name ph ${kindClass(v.type)}" role="button" tabindex="0" title="Double-click to rename (the placeholder in the template is renamed too)" ondblclick="startPromptRename(this,'var',0)" oncontextmenu="openPromptItemMenu(event,'var',0)" onkeydown="promptItemKey(event,'var',0)">${esc(k)}</span>`);
     if(v.type==='option'){
       html += `<div class="pr-pills">` + (v.options || []).map((o, i)=>{ const on = v.selected===o; return locked
           ? `<button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})">${esc(o)}</button>`
-          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
+          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}" title="Double-click to rename" ondblclick="startPromptRename(this,'option',${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-pill add" title="Add an option" aria-label="Add an option" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i></button>`) + `</div>`;
     } else if(v.type==='instruction'){
-      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
+      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i})"${locked ? '' : ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-add-item" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i> Add item</button>`) + `</div>`;
     } else {
       html += `<input type="text" class="pr-textfield" value="${esc(v.value || '')}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>`;
@@ -6718,9 +6720,11 @@ function setPromptText(input){
 }
 // Removing an option or a checklist item: the × inside it (on hover or focus), Delete / Backspace on the focused one, or Remove in its right-click menu.
 function promptItemKey(e, kind, i){
-  if(e.key!=='Delete' && e.key!=='Backspace') return;
+  if(e.key!=='Delete' && e.key!=='Backspace' && e.key!=='F2') return;
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
   e.preventDefault(); e.stopPropagation();
+  if(e.key==='F2'){ startPromptRename(e.currentTarget.closest('.pr-pill-wrap, .pr-chip-wrap') || e.currentTarget, kind, i); return; }
+  if(kind==='var') return;                                          // a variable is removed by deleting its placeholder from the template
   if(kind==='preset') deletePromptPreset(i); else removePromptOption(e.currentTarget, i);
 }
 let promptItemMenu = null;
@@ -6729,17 +6733,69 @@ function openPromptItemMenu(e, kind, i){
   e.preventDefault(); e.stopPropagation();
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   const row = e.currentTarget.closest('.pr-var');
-  const name = kind==='preset' ? (p.presets[i] || {}).name : (row && p.vars[row.dataset.v] ? p.vars[row.dataset.v].options[i] : '');
+  const name = kind==='preset' ? (p.presets[i] || {}).name : kind==='var' ? (row ? row.dataset.v : '') : (row && p.vars[row.dataset.v] ? p.vars[row.dataset.v].options[i] : '');
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
-  promptItemMenu = { kind, i, key: row ? row.dataset.v : '' }; promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = rowMenuItem('fa-solid fa-trash', `Remove “${esc(String(name).slice(0, 30))}”`, 'promptItemMenuRun()', { danger: true });
+  promptItemMenu = { kind, i, key: row ? row.dataset.v : '', el: e.currentTarget }; promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = rowMenuItem('fa-solid fa-pen', 'Rename', `promptItemMenuRun('rename')`)
+    + (kind==='var' ? '' : '<div class="row-menu-sep"></div>' + rowMenuItem('fa-solid fa-trash', `Remove “${esc(String(name).slice(0, 30))}”`, `promptItemMenuRun('remove')`, { danger: true }));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
-function promptItemMenuRun(){
+function promptItemMenuRun(what){
   const m = promptItemMenu; closeRowMenu(); promptItemMenu = null; if(!m) return;
   const p = prompts.find(x=>x.id===promptEditorId); if(!p) return;
+  if(what==='rename'){ if(m.el && m.el.isConnected) startPromptRename(m.el, m.kind, m.i); return; }
   if(m.kind==='preset') deletePromptPreset(m.i);
   else { const v = p.vars[m.key]; if(v) removePromptOptionAt(p, m.key, m.i); }
+}
+// ---- renaming: double-click (or F2, or Rename in the right-click menu) turns the pill, checklist item, preset or variable name into a field; Return keeps the new name, Esc leaves it ----
+const escapeRegExp = t=>String(t).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function startPromptRename(el, kind, i){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
+  const row = el.closest('.pr-var'), key = row ? row.dataset.v : '', v = key ? p.vars[key] : null;
+  const old = kind==='preset' ? (p.presets[i] || {}).name : kind==='var' ? key : (v ? v.options[i] : '');
+  if(old===undefined || old===null) return;
+  const input = document.createElement('input');
+  input.type = 'text'; input.value = old; input.className = 'pr-add-input pr-rename-input'; input.maxLength = kind==='preset' ? 60 : 200; input.setAttribute('aria-label', 'Rename ' + old);
+  let done = false;
+  const finish = save=>{
+    if(done) return; done = true;
+    if(save && input.value.trim() && input.value.trim()!==old){
+      const err = kind==='preset' ? renamePromptPreset(p, i, input.value.trim()) : kind==='var' ? renamePromptVar(p, key, input.value.trim()) : renamePromptOption(p, key, i, input.value.trim());
+      if(err) showToast(err, true);
+    }
+    renderPromptInspector(p);
+  };
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); finish(true); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); finish(false); } });
+  input.addEventListener('blur', ()=>finish(true));
+  el.replaceWith(input); input.focus(); input.select();
+}
+function renamePromptOption(p, key, i, text){
+  const v = p.vars[key]; if(!v || p.locked || promptTrashed(p)) return null;
+  text = text.slice(0, 200); const old = v.options[i];
+  if(v.options.some((o, j)=>j!==i && o===text)) return `There is already an option named “${text}”`;
+  v.options[i] = text;
+  if(v.type==='option'){ if(v.selected===old) v.selected = text; } else v.selected = (v.selected || []).map(x=>x===old ? text : x);
+  (p.presets || []).forEach(ps=>{ if(ps.values && key in ps.values){ const val = ps.values[key]; if(Array.isArray(val)) ps.values[key] = val.map(x=>x===old ? text : x); else if(val===old) ps.values[key] = text; } });
+  touchPrompt(p); save(); return null;
+}
+function renamePromptPreset(p, i, text){
+  text = text.slice(0, 60);
+  if((p.presets || []).some((x, j)=>j!==i && x.name===text)) return `There is already a preset named “${text}”`;
+  p.presets[i].name = text; touchPrompt(p); save(); return null;
+}
+// Renaming a variable renames its placeholder everywhere in the template, keeps its options and choices, and follows it in the presets.
+function renamePromptVar(p, key, text){
+  text = text.replace(/[{}\[\]()]/g, '').trim().slice(0, 60);
+  if(!text) return 'A variable name cannot be empty';
+  if(text!==key && p.vars[text]) return `There is already a variable named “${text}”`;
+  if(text===key) return null;
+  const v = p.vars[key]; if(!v) return null;
+  const pair = v.type==='option' ? ['\\{\\{', '\\}\\}', '{{', '}}'] : v.type==='instruction' ? ['\\[\\[', '\\]\\]', '[[', ']]'] : ['\\(\\(', '\\)\\)', '((', '))'];
+  p.template = p.template.replace(new RegExp('(?<!\\\\)' + pair[0] + escapeRegExp(key) + pair[1], 'g'), pair[2] + text + pair[3]);
+  const vars = {}; Object.keys(p.vars).forEach(k=>{ vars[k===key ? text : k] = p.vars[k]; }); p.vars = vars;
+  (p.presets || []).forEach(ps=>{ if(ps.values && key in ps.values){ ps.values[text] = ps.values[key]; delete ps.values[key]; } });
+  const ta = document.getElementById('pTemplate'); if(ta && promptEditorId===p.id){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template); }
+  touchPrompt(p); save(); updatePromptMeta(p); return null;
 }
 function removePromptOption(btn, i){
   const c = promptVarOf(btn); if(!c) return;
