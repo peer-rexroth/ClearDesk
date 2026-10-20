@@ -44,7 +44,7 @@ Type: **I** inconsistency, **H** HIG deviation, **B** both. Status: **Fixed**, *
 | F-04 | Dialogs | Five dialogs lacked `role="dialog"`, `aria-modal`, a name | B | Medium | modality, alerts | **Fixed.** All 11 labelled; confirmation is an `alertdialog` |
 | F-05 | Dialogs | Three dialogs closed through their own code | I | Low | modality | **Fixed.** One `closeModal(id)`; Esc, backdrop and buttons all use it; focus returns to the opener |
 | F-06 | Dialogs | Contradictory leftover CSS (15→17px title, double shadow) | I | Low | – | **Fixed.** One rule set; the surface comes from the shared Glass rules |
-| F-07 | Dialogs | Centred dialogs instead of sheets | H | Low | sheets | **Limit.** A style choice with little benefit; left as is |
+| F-07 | Dialogs | Centred dialogs instead of sheets | H | Low | sheets | **Limit, kept by decision.** Dialogs stay centred; a style choice with little benefit |
 | F-08 | Dialogs | Destructive confirmation had Delete as the default | H | Medium | alerts | **Fixed.** Cancel is focused, so Return cancels |
 | F-09 | Menus | Tasks sidebar projects had no right-click menu | I | Medium | context-menus | **Fixed.** New Task Here, Edit, Delete (dimmed for the locked Inbox) |
 | F-10 | Menus | Mixed sentence-style and title-style labels | B | Medium | menus | **Fixed.** Title-style everywhere ("Open Details", "Insert Row Above") |
@@ -54,7 +54,7 @@ Type: **I** inconsistency, **H** HIG deviation, **B** both. Status: **Fixed**, *
 | F-14 | Menus | Menu icons mixed Font Awesome and SVG | I | Low | menus | **Fixed.** One shared icon registry draws the icons everywhere |
 | F-15 | Colour | 131 hex and 114 rgba literals in CSS; the same red four times | I | Medium | color, dark-mode | **Fixed.** Tokens for on-accent, danger, overlays, scrims, shadows. Literals remain only in the mail-export HTML (email cannot read variables) and print rules |
 | F-16 | Colour | Four competing accent blues | I | Medium | color | **Partly.** One `--accent` with `--accent-hover`/`--accent-tint`; the primary-button gradient is derived from it. Status dots and the soft focus ring are separate on purpose |
-| F-17 | Colour | Accent does not follow the system accent colour | H | Low | color | **Limit.** Browsers do not expose it reliably |
+| F-17 | Colour | Accent does not follow the system accent colour | H | Low | color | **Limit, kept by decision.** Browsers do not expose it reliably; the accent stays a fixed blue |
 | F-18 | Colour | App-level Light/Dark/Auto overrides the system | H | Low | dark-mode | **Fixed.** "Match System" switch is the default; Light \| Dark always visible, dimmed while following the system |
 | F-19 | Accessibility | `--text-3` was 3.2:1 (light) and 4.2:1 (dark) | H | High | color, accessibility | **Fixed by calculation.** At least 4.5:1 on content surfaces and on selected rows (deeper light accent). Needs a visual check on translucent chrome |
 | F-20 | Typography | 19 font sizes | B | Medium | typography | **Fixed.** Scale 11/12/13/14/15/17/22 as `--fs-*` |
@@ -71,9 +71,9 @@ Type: **I** inconsistency, **H** HIG deviation, **B** both. Status: **Fixed**, *
 | F-31 | Layout | 112 padding values | I | Low | layout | **Fixed.** Spacing scale 2/4/6/8/10/12/14/16/20/24/28/32/40 |
 | F-32 | Shapes | One-off radii | I | Low | layout | **Fixed.** Ladder 4 / 8 / 10 / 12 / 16 plus pill and circle |
 | F-33 | Depth | 35 distinct shadows | I | Low | materials | **Partly.** Three elevation tokens and ink/overlay tokens; about 36 shadow definitions remain, mostly single-use component shadows |
-| F-34 | Layout | Different left margins in Tasks and Notes | I | Low | layout | **Fixed.** One `--gutter` (20px); the task list is capped at 1400px and left-aligned, like the 900px note area |
+| F-34 | Layout | Different left margins in Tasks and Notes | I | Low | layout | **Fixed.** One `--gutter` (20px) sets the left margin of every pane; the note area is capped at 900px, the task list keeps the full width |
 | F-35 | Wording | "Not now" vs Cancel / Done | I | Low | alerts | **Fixed.** "Cancel" |
-| F-36 | Platform | No menu bar | H | Low | menus | **Limit.** The shortcut sheet and the app menus are the substitute |
+| F-36 | Platform | No menu bar | H | Low | menus | **Limit, kept by decision.** The shortcut sheet and the app menus are the substitute; no native wrapper |
 | F-37 | Controls | Native selects look different per browser | I | Low | pop-up-buttons | **Fixed.** Closed control is one custom look; the open list is the system pop-up menu (the HIG pattern), themed with `color-scheme` |
 | F-38 | Accessibility | Table handles only under the pointer | H | Low | accessibility, pointing-devices | **Fixed.** Shift+F10 / Menu key opens the table options at the caret; Tab walks cells and adds a row; ⌘/Ctrl+Enter leaves the table |
 
@@ -94,7 +94,7 @@ Type: **I** inconsistency, **H** HIG deviation, **B** both. Status: **Fixed**, *
 | Spacing (padding and gap) | 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40 (1px hairlines allowed) |
 | Radius | `--r-xs` 4, `--r-s` 8, `--r-m` 10, `--r-l` 12, `--r-xl` 16, pill, circle |
 | Elevation | `--elev-1`, `--elev-2`, `--elev-3`, plus ink and overlay tokens |
-| Gutter | `--gutter` 20px (the left margin of every pane); note text 900px and task list 1400px maximum, both left-aligned |
+| Gutter | `--gutter` 20px (the left margin of every pane); note text 900px maximum, left-aligned; the task list uses the full width |
 
 ### Icons
 One SVG registry (`ICONS`), 24 grid, 2px stroke, drawn in the text colour. Four sizes: 12 (chevrons, tiny marks), 14 (badges, chips), 16 (lists, sidebar, menus, icon buttons), 18 (toolbars). The right-click menus use the same drawings.
@@ -119,7 +119,7 @@ Title-style labels, a 16px icon slot, "…" only where more input follows, no sh
 
 ## 4. Open items and limits
 
-- **F-07, F-17, F-36** are limits of being a web app (sheets, the system accent colour, a menu bar) and are left as they are.
+- **F-07, F-17, F-36** are limits of being a web app (sheets, the system accent colour, a menu bar). They were reviewed and deliberately kept as they are.
 - **F-16, F-28, F-33** are done with a deliberate remainder: status dots and the focus ring keep their own colours; row hovers keep `--bg-2`; about 36 component shadows stay as single-use definitions.
 - **Not remapped on purpose:** the colours and sizes in the mail/clipboard export HTML (`noteToMailHtml`), the print rules, and the glyph sizes inside controls (tick marks, grips, small chevrons).
 
