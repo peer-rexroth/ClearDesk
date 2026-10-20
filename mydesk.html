@@ -1636,6 +1636,15 @@ const ICONS = {
   .pr-chip.add:hover, .pr-pill.add:hover { background: var(--cap-fill); color: var(--text); }
   /* An option or a preset in an unlocked prompt: the pill is a small container with the × inside it, at the trailing edge (space always reserved, so nothing jumps on hover).
      The × shows on hover or focus; the same removal is Delete / Backspace on the focused pill and Remove in its right-click menu. */
+  .pr-chip-wrap, .pr-pill-wrap, .pr-check, .pr-g-val { position: relative; }
+  .pr-chip-wrap.dragging, .pr-pill-wrap.dragging, .pr-check.dragging, .pr-g-val.dragging { opacity: .4; }
+  /* where a dragged option, item or value will land: an accent line before or after the one under the pointer */
+  .pr-pill-wrap.drop-before::before, .pr-pill-wrap.drop-after::after, .pr-chip-wrap.drop-before::before, .pr-chip-wrap.drop-after::after { content: ""; position: absolute; top: 0; bottom: 0; width: 2px; border-radius: 1px; background: var(--accent); }
+  .pr-pill-wrap.drop-before::before, .pr-chip-wrap.drop-before::before { left: -4px; }
+  .pr-pill-wrap.drop-after::after, .pr-chip-wrap.drop-after::after { right: -4px; }
+  .pr-check.drop-before::before, .pr-check.drop-after::after, .pr-g-val.drop-before::before, .pr-g-val.drop-after::after { content: ""; position: absolute; left: 0; right: 0; height: 2px; border-radius: 1px; background: var(--accent); }
+  .pr-check.drop-before::before, .pr-g-val.drop-before::before { top: -1px; }
+  .pr-check.drop-after::after, .pr-g-val.drop-after::after { bottom: -1px; }
   .pr-chip-wrap.has-x, .pr-pill-wrap.has-x { display: inline-flex; align-items: center; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); }
   .pr-chip-wrap.has-x:hover, .pr-pill-wrap.has-x:hover { background: var(--cap-hover); color: var(--text); }
   .pr-chip-wrap.has-x.on { background: var(--accent-tint); color: var(--blue-text); }
@@ -2334,6 +2343,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the switch beside the app name. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
@@ -6904,7 +6914,7 @@ function renderPromptInspector(p){
       const on = promptPresetMatches(p, ps);
       html += locked
         ? `<button type="button" class="pr-chip${on ? ' on' : ''}" title="${esc(ps.name)}" onclick="applyPromptPreset(${i},event)">${esc(ps.name)}</button>`
-        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}" title="${esc(ps.name)} — double-click to rename" ondblclick="startPromptRename(this,'preset',${i})" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i},event)" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
+        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}"${promptReorderAttrs('preset', i)} title="${esc(ps.name)} — double-click to rename" ondblclick="startPromptRename(this,'preset',${i})" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i},event)" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
     });
     if(!locked) html += promptPresetDraft
       ? `<input type="text" class="pr-chip-input" id="pPresetInput" placeholder="Preset name" maxlength="60" aria-label="Preset name" onkeydown="promptPresetKey(event)" onblur="promptPresetKey({key:'Enter'})">`
@@ -6920,10 +6930,10 @@ function renderPromptInspector(p){
     if(v.type==='option'){
       html += `<div class="pr-pills">` + (v.options || []).map((o, i)=>{ const on = v.selected===o; return locked
           ? `<button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" title="${esc(o)}" onclick="pickPromptOption(this,${i},event)">${esc(o)}</button>`
-          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}" title="${esc(o)} — double-click to rename" ondblclick="startPromptRename(this,'option',${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i},event)" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
+          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}"${promptReorderAttrs('pill', i)} title="${esc(o)} — double-click to rename" ondblclick="startPromptRename(this,'option',${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i},event)" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-pill add" title="Add an option" aria-label="Add an option" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i></button>`) + `</div>`;
     } else if(v.type==='instruction'){
-      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i},event)"${locked ? '' : ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
+      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i},event)"${locked ? '' : promptReorderAttrs('check', i) + ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-add-item" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i> Add item</button>`) + `</div>`;
     } else {
       html += `<input type="text" class="pr-textfield" value="${esc(v.value || '')}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>`;
@@ -6978,7 +6988,59 @@ function setPromptText(input){
   c.v.value = input.value.slice(0,5000); touchPrompt(c.p); schedulePromptSave();      // typing what this use needs is allowed even when the prompt is locked
 }
 // Removing an option or a checklist item: the × inside it (on hover or focus), Delete / Backspace on the focused one, or Remove in its right-click menu.
+// ---- reordering the options, checklist items and presets of a variable: drag one, press ⌥← / ⌥→ (⌥↑ / ⌥↓ in a checklist) on it, or use Move in its right-click menu ----
+let promptDrag = null;
+const promptReorderAttrs = (kind, i)=>` draggable="true" ondragstart="promptDragStart(event,'${kind}',${i})" ondragover="promptDragOver(event,'${kind}')" ondragleave="promptDragLeave(event)" ondrop="promptDrop(event,'${kind}',${i})" ondragend="promptDragEnd()"`;
+const promptVarKeyOf = el=>{ const r = el && el.closest ? el.closest('.pr-var') : null; return r ? r.dataset.v : ''; };
+function promptItemList(p, kind, key){ return kind==='preset' ? p.presets : (p.vars[key] || {}).options; }
+function movePromptItem(kind, key, from, to){                      // kind: 'preset' or 'option' (pills and checklist items); to is the final index
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return false;
+  const arr = promptItemList(p, kind, key); if(!arr || from<0 || from>=arr.length) return false;
+  to = Math.max(0, Math.min(arr.length - 1, to)); if(to===from) return false;
+  const [x] = arr.splice(from, 1); arr.splice(to, 0, x);
+  touchPrompt(p); save(); renderPromptInspector(p); return true;
+}
+function focusPromptItem(kind, key, idx){
+  const root = kind==='preset' ? document.querySelector('.pr-presets') : [...document.querySelectorAll('.pr-var')].find(r=>r.dataset.v===key);
+  if(!root) return;
+  const els = root.querySelectorAll(kind==='preset' ? '.pr-chip-wrap' : kind==='check' ? '.pr-check' : '.pr-pill-wrap'), el = els[idx];
+  if(el) (el.matches('.pr-check') ? el : el.querySelector('button')).focus();
+}
+function promptDragStart(e, kind, i){
+  if(e.target.closest && e.target.closest('input')) { e.preventDefault(); return; }
+  promptDrag = { kind, key: promptVarKeyOf(e.currentTarget), from: i };
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-mydesk-pitem', String(i)); }catch(_){}
+  e.currentTarget.classList.add('dragging');
+}
+function promptDropAfter(e, kind){ const r = e.currentTarget.getBoundingClientRect(); return kind==='check' ? e.clientY > r.top + r.height/2 : e.clientX > r.left + r.width/2; }
+function promptDragClear(){ document.querySelectorAll('.drop-before, .drop-after, .dragging').forEach(el=>el.classList.remove('drop-before', 'drop-after', 'dragging')); }
+function promptDragOver(e, kind){
+  if(!promptDrag || promptDrag.kind!==kind || promptVarKeyOf(e.currentTarget)!==promptDrag.key) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  const after = promptDropAfter(e, kind);
+  document.querySelectorAll('.drop-before, .drop-after').forEach(el=>{ if(el!==e.currentTarget) el.classList.remove('drop-before', 'drop-after'); });
+  e.currentTarget.classList.toggle('drop-after', after); e.currentTarget.classList.toggle('drop-before', !after);
+}
+function promptDragLeave(e){ if(!e.currentTarget.contains(e.relatedTarget)) e.currentTarget.classList.remove('drop-before', 'drop-after'); }
+function promptDrop(e, kind, i){
+  const d = promptDrag; if(!d || d.kind!==kind || promptVarKeyOf(e.currentTarget)!==d.key) return;
+  e.preventDefault();
+  let to = i + (promptDropAfter(e, kind) ? 1 : 0); if(d.from < to) to--;
+  promptDragClear(); promptDrag = null;
+  const dk = kind==='preset' ? 'preset' : 'option';
+  if(movePromptItem(dk, d.key, d.from, to)) focusPromptItem(kind, d.key, to);
+}
+function promptDragEnd(){ promptDrag = null; promptDragClear(); }
 function promptItemKey(e, kind, i){
+  if(e.altKey && !e.metaKey && !e.ctrlKey && /^Arrow(Left|Right|Up|Down)$/.test(e.key)){
+    const isCheck = !!(e.currentTarget.closest && e.currentTarget.closest('.pr-check')), horizontal = !isCheck;
+    const dir = horizontal ? (e.key==='ArrowLeft' ? -1 : e.key==='ArrowRight' ? 1 : 0) : (e.key==='ArrowUp' ? -1 : e.key==='ArrowDown' ? 1 : 0);
+    if(!dir || kind==='var') return;
+    e.preventDefault(); e.stopPropagation();
+    const key = promptVarKeyOf(e.currentTarget), dk = kind==='preset' ? 'preset' : 'option';
+    if(movePromptItem(dk, key, i, i + dir)) focusPromptItem(kind==='preset' ? 'preset' : isCheck ? 'check' : 'pill', key, i + dir);
+    return;
+  }
   if(e.key!=='Delete' && e.key!=='Backspace' && e.key!=='F2') return;
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
   e.preventDefault(); e.stopPropagation();
@@ -6995,7 +7057,10 @@ function openPromptItemMenu(e, kind, i){
   const name = kind==='preset' ? (p.presets[i] || {}).name : kind==='var' ? (row ? row.dataset.v : '') : (row && p.vars[row.dataset.v] ? p.vars[row.dataset.v].options[i] : '');
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptItemMenu = { kind, i, key: row ? row.dataset.v : '', el: e.currentTarget }; promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  const arr = kind==='var' ? null : promptItemList(p, kind==='preset' ? 'preset' : 'option', row ? row.dataset.v : ''), isCheck = e.currentTarget.classList.contains('pr-check');
+  const moves = !arr ? '' : [i>0 ? rowMenuItem(isCheck ? 'fa-solid fa-arrow-up' : 'fa-solid fa-arrow-left', isCheck ? 'Move Up' : 'Move Left', `promptItemMenuRun('back')`) : '', i<arr.length - 1 ? rowMenuItem(isCheck ? 'fa-solid fa-arrow-down' : 'fa-solid fa-arrow-right', isCheck ? 'Move Down' : 'Move Right', `promptItemMenuRun('forward')`) : ''].join('');
   menu.innerHTML = rowMenuItem('fa-solid fa-pen', 'Rename', `promptItemMenuRun('rename')`)
+    + (moves ? '<div class="row-menu-sep"></div>' + moves : '')
     + (kind==='var' ? '' : '<div class="row-menu-sep"></div>' + rowMenuItem('fa-solid fa-trash', `Remove “${esc(String(name).slice(0, 30))}”`, `promptItemMenuRun('remove')`, { danger: true }));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
@@ -7003,6 +7068,7 @@ function promptItemMenuRun(what){
   const m = promptItemMenu; closeRowMenu(); promptItemMenu = null; if(!m) return;
   const p = prompts.find(x=>x.id===promptEditorId); if(!p) return;
   if(what==='rename'){ if(m.el && m.el.isConnected) startPromptRename(m.el, m.kind, m.i); return; }
+  if(what==='back' || what==='forward'){ movePromptItem(m.kind==='preset' ? 'preset' : 'option', m.key, m.i, m.i + (what==='back' ? -1 : 1)); return; }
   if(m.kind==='preset') deletePromptPreset(m.i);
   else { const v = p.vars[m.key]; if(v) removePromptOptionAt(p, m.key, m.i); }
 }
@@ -8731,7 +8797,7 @@ function renderGlobalsModal(focusName){
     <input type="text" id="pgName" class="pr-g-name" value="${esc(g.name)}" maxlength="40" spellcheck="false" autocomplete="off" aria-label="Variable name" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=this.defaultValue;event.stopPropagation();this.blur()}" onblur="commitGlobalName()">
     <div class="pr-g-hint">Use it in a template as <code>{{@${esc(g.name)}}}</code>.</div>
     <div class="pr-g-label pr-g-label-values">Values</div>
-    <div class="pr-g-values" id="pgValues" role="listbox" aria-label="Values">${g.options.map((o, i)=>`<div class="pr-g-val${i===globalsValSel ? ' on' : ''}" role="option" aria-selected="${i===globalsValSel}" tabindex="0" data-i="${i}" onclick="selectGlobalValue(${i})" ondblclick="startGlobalValueRename(this,${i})" onkeydown="globalValueKey(event,${i})">${esc(o)}</div>`).join('') || `<div class="pr-g-empty-list">No values yet. Click + to add one.</div>`}</div>`;
+    <div class="pr-g-values" id="pgValues" role="listbox" aria-label="Values">${g.options.map((o, i)=>`<div class="pr-g-val${i===globalsValSel ? ' on' : ''}" role="option" aria-selected="${i===globalsValSel}" tabindex="0" data-i="${i}" onclick="selectGlobalValue(${i})" ondblclick="startGlobalValueRename(this,${i})" onkeydown="globalValueKey(event,${i})" draggable="true" ondragstart="globalDragStart(event,${i})" ondragover="globalDragOver(event)" ondragleave="promptDragLeave(event)" ondrop="globalDrop(event,${i})" ondragend="promptDragEnd()">${esc(o)}</div>`).join('') || `<div class="pr-g-empty-list">No values yet. Click + to add one.</div>`}</div>`;
   const n = promptGlobalUsers(g).length;
   if(foot) foot.textContent = n ? `Used in ${n} prompt${n===1 ? '' : 's'}` : 'Not used in any prompt yet';
   if(focusName){ const el = document.getElementById('pgName'); if(el){ el.focus(); el.select(); } }
@@ -8833,7 +8899,36 @@ function removePromptGlobalValue(i){
   globalsValSel = Math.min(i, g.options.length - 1); save(); renderGlobalsModal();
 }
 function removeSelectedGlobalValue(){ if(globalsValSel>=0) removePromptGlobalValue(globalsValSel); }
+// Values can be dragged into a new order, or moved with ⌥↑ / ⌥↓; the order is the order of the pills in every prompt that uses the variable.
+function moveGlobalValue(from, to){
+  const g = promptGlobalById(globalsSel); if(!g || from<0 || from>=g.options.length) return false;
+  to = Math.max(0, Math.min(g.options.length - 1, to)); if(to===from) return false;
+  const [x] = g.options.splice(from, 1); g.options.splice(to, 0, x); g.updatedAt = Date.now();
+  globalsValSel = to; save(); renderGlobalsModal();
+  const el = document.querySelector(`#pgValues .pr-g-val[data-i="${to}"]`); if(el) el.focus();
+  return true;
+}
+function globalDragStart(e, i){
+  if(e.target.closest && e.target.closest('input')){ e.preventDefault(); return; }
+  promptDrag = { kind: 'gval', key: globalsSel, from: i };
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-mydesk-gval', String(i)); }catch(_){}
+  e.currentTarget.classList.add('dragging');
+}
+function globalDragOver(e){
+  if(!promptDrag || promptDrag.kind!=='gval') return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  const r = e.currentTarget.getBoundingClientRect(), after = e.clientY > r.top + r.height/2;
+  document.querySelectorAll('#pgValues .drop-before, #pgValues .drop-after').forEach(el=>{ if(el!==e.currentTarget) el.classList.remove('drop-before', 'drop-after'); });
+  e.currentTarget.classList.toggle('drop-after', after); e.currentTarget.classList.toggle('drop-before', !after);
+}
+function globalDrop(e, i){
+  const d = promptDrag; if(!d || d.kind!=='gval') return;
+  e.preventDefault();
+  const r = e.currentTarget.getBoundingClientRect(); let to = i + (e.clientY > r.top + r.height/2 ? 1 : 0); if(d.from < to) to--;
+  promptDragClear(); promptDrag = null; moveGlobalValue(d.from, to);
+}
 function globalValueKey(e, i){
+  if(e.altKey && !e.metaKey && !e.ctrlKey && (e.key==='ArrowUp' || e.key==='ArrowDown')){ e.preventDefault(); moveGlobalValue(i, i + (e.key==='ArrowDown' ? 1 : -1)); return; }
   if(e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); removePromptGlobalValue(i); }
   else if(e.key==='Enter' || e.key==='F2'){ e.preventDefault(); startGlobalValueRename(e.currentTarget, i); }
   else if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); const j = Math.max(0, Math.min((promptGlobalById(globalsSel) || { options: [] }).options.length - 1, i + (e.key==='ArrowDown' ? 1 : -1))); selectGlobalValue(j); document.querySelector(`#pgValues .pr-g-val[data-i="${j}"]`)?.focus(); }

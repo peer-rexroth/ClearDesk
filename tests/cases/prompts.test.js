@@ -295,3 +295,22 @@ test('the Prompts columns can be resized: widths are clamped, and the default re
   assertEqual(promptsInspW.set(100, false), 260); assertEqual(promptsInspW.set(900, false), 560); assertEqual(promptsInspW.set(500, false, 420), 420, 'a narrow pane caps it');
   assertEqual(promptsListW.set(300, true), 300); assertEqual(promptsInspW.set(340, true), 340);
 });
+
+test('options, checklist items and presets can be reordered (the choice and the presets stay valid); a locked prompt refuses', function () {
+  pfresh();
+  const p = pmk({ id: 'r', template: '{{c}} [[l]]', vars: { c: { type: 'option', options: ['A', 'B', 'C'], selected: 'B' }, l: { type: 'instruction', options: ['x', 'y', 'z'], selected: ['x', 'z'] } }, presets: [{ name: 'P1', values: { c: 'A' } }, { name: 'P2', values: { c: 'C' } }] });
+  prompts = [p]; promptEditorId = 'r';
+  assertTrue(movePromptItem('option', 'c', 0, 2)); assertDeepEqual(p.vars.c.options, ['B', 'C', 'A']); assertEqual(p.vars.c.selected, 'B');
+  assertTrue(movePromptItem('option', 'l', 2, 0)); assertDeepEqual(p.vars.l.options, ['z', 'x', 'y']);
+  assertEqual(buildPromptFinal(p), 'B • z\n• x', 'the copied checklist follows the new order');
+  assertTrue(movePromptItem('preset', '', 1, 0)); assertDeepEqual(p.presets.map(x => x.name), ['P2', 'P1']);
+  assertFalse(movePromptItem('option', 'c', 0, 0), 'no change'); assertFalse(movePromptItem('option', 'c', 9, 0), 'out of range');
+  p.locked = true; assertFalse(movePromptItem('option', 'c', 0, 1)); assertDeepEqual(p.vars.c.options, ['B', 'C', 'A']);
+});
+
+test('global values can be reordered, and the order is what every prompt shows', function () {
+  pgfresh();
+  const g = { id: 'g1', name: 'Tone', options: ['a', 'b', 'c'], updatedAt: 1 }; promptGlobals = [g]; globalsSel = 'g1';
+  assertTrue(moveGlobalValue(0, 2)); assertDeepEqual(g.options, ['b', 'c', 'a']); assertEqual(globalsValSel, 2); assertTrue(g.updatedAt > 1);
+  assertFalse(moveGlobalValue(1, 1)); assertDeepEqual(promptGlobalOptions('@Tone'), ['b', 'c', 'a']);
+});
