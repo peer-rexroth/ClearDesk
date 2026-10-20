@@ -250,3 +250,5 @@ Type: **I** = Inconsistency, **H** = HIG deviation, **B** = Both. Base URL: `htt
 | F-24, F-25, F-26 | Fixed: Font Awesome removed, icon scale 12 / 14 / 16 / 18, icon buttons labelled |
 | F-29 | Fixed for native selects, help panes and note rows (found by a scripted focus scan of Tasks, the drawer, all modals and Notes); the note title and body keep only the caret by design |
 | Others | Open |
+
+**Update:** F-20 (type scale), F-31 (spacing scale) and F-32 (radius ladder) are applied to the stylesheet: 7 text sizes (`--fs-*`), spacing snapped to a 2/4/6/8/10/12/14/16/20/24/28/32/40 scale, and 5 radius steps (`--r-*`) plus pill and circle. Inline styles in templates were not remapped.
