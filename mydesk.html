@@ -1222,7 +1222,7 @@ const ICONS = {
   html[data-scheme] .note-link-pop .nlp-actions .nlp-remove:hover { background: color-mix(in srgb, var(--red-text) 14%, transparent); }
   .nlp-actions .nlp-remove[hidden] { display: none; }
   .nlp-actions .btn-primary { margin-left: auto; }
-  .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px var(--gutter) 56px; }
+  .note-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 6px var(--gutter) 56px calc(var(--gutter) + 4px); }   /* 4px more on the left: a table's row and select grips hang in that margin and must not touch the pane edge */
   .note-doc { width: 100%; max-width: var(--note-max-w, 900px); position: relative; }   /* the note area stops growing at 900px (left-aligned in the pane): lines and tables stay readable on an ultrawide screen */
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
