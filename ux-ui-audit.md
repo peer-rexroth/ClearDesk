@@ -233,3 +233,20 @@ Type: **I** = Inconsistency, **H** = HIG deviation, **B** = Both. Base URL: `htt
 7. **Modal vs sheet feel (F-07, F-08).** Judge whether dialogs read as alerts or as forms and whether default-focus behaviour feels right.
 8. **Shortcut collisions (F-01, F-02).** Verify ⌘⇧C and the proposed ⌥⌘S in Safari, Chrome and as an installed PWA, which differ in reserved shortcuts.
 9. **Orange note colour (`#c2570c` on white, 4.5:1)** is on the edge; check legibility on tinted note backgrounds.
+
+---
+
+## 6. Resolution status (updated after the fixes)
+
+| ID | Status |
+|---|---|
+| F-01 | Fixed: sidebar toggle is ⌥⌘S / Ctrl+Alt+S; ⌘B / Ctrl+B only toggles it in Tasks, in Notes it is Bold |
+| F-03 | Fixed: `prefers-reduced-motion: reduce` collapses animations and transitions |
+| F-04 | Fixed: all 11 modals have `role="dialog"` (confirm: `alertdialog`), `aria-modal` and an accessible name |
+| F-09 | Fixed: Tasks sidebar projects have a right-click menu (New Task Here, Edit, Delete) |
+| F-10, F-11, F-14 | Fixed: title-style menu labels, ⌫ hint, one icon registry for menus |
+| F-15, F-16, F-28, F-33 | Mostly fixed: colour, accent, hover and elevation tokens; a few one-offs remain |
+| F-19 | Fixed by calculation: `--text-3` ≥ 4.5:1 on the content surfaces and on selected rows; still needs a visual check on translucent Glass chrome |
+| F-24, F-25, F-26 | Fixed: Font Awesome removed, icon scale 12 / 14 / 16 / 18, icon buttons labelled |
+| F-29 | Fixed for native selects, help panes and note rows (found by a scripted focus scan of Tasks, the drawer, all modals and Notes); the note title and body keep only the caret by design |
+| Others | Open |

@@ -481,10 +481,11 @@ const ICONS = {
   /* modal */
   .modal-bg { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, visibility .15s ease; }
   .modal-bg.open { opacity: 1; visibility: visible; pointer-events: auto; }
-  .modal { background: var(--bg); border-radius: var(--radius-lg); border: 0.5px solid var(--border-2); padding: 22px; width: 380px; max-width: 90vw; display: flex; flex-direction: column; gap: 14px; box-shadow: var(--elev-3); }
-  .modal h3 { font-size: 15px; font-weight: 600; }
-  .modal p { font-size: 13px; color: var(--text-2); line-height: 1.6; }
-  .modal input, .modal select { width: 100%; border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 14px; background: var(--bg-2); color: var(--text); outline: none; font-family: var(--font); }
+  /* Dialog: layout and type here; the surface (background, border, radius, shadow, blur) comes from the Glass rules further down, shared with menus and popovers. */
+  .modal { padding: 22px; width: 380px; max-width: 90vw; display: flex; flex-direction: column; gap: 14px; }
+  .modal h3 { font-size: 17px; font-weight: 600; }
+  .modal p { font-size: 14px; color: var(--text-2); line-height: 1.6; }
+  .modal input, .modal select { width: 100%; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; font-size: 15px; background: var(--bg-2); color: var(--text); outline: none; font-family: var(--font); }
   .modal input:focus { border-color: var(--border-2); }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
   .import-options { display: flex; flex-direction: column; gap: 8px; }
@@ -677,12 +678,9 @@ const ICONS = {
   .board-card { border-width: 1px; box-shadow: var(--shadow); }
   .bulk-bar { border-width: 1px; box-shadow: var(--shadow); }
   .bulk-bar .bulk-count, .bulk-bar select, .bulk-bar input[type=date] { font-size: 13px; }
-  .split-btn-menu, .modal { box-shadow: var(--shadow); }
+  .split-btn-menu { box-shadow: var(--shadow); }
   .split-btn-menu-label { font-size: 13px; }
   .split-btn-menu-desc { font-size: 12px; }
-  .modal h3 { font-size: 17px; }
-  .modal p { font-size: 14px; }
-  .modal input, .modal select { font-size: 15px; border-width: 1px; }
   .import-option-text strong { font-size: 14px; }
   .import-option-text span { font-size: 13px; }
   .help-section-title { font-size: 12px; }
@@ -843,7 +841,7 @@ const ICONS = {
      browsers without backdrop-filter) get solid chrome and a flat wallpaper. */
   html[data-scheme="glass"] {
     --bg: rgba(255,255,255,.46); --bg-2: rgba(255,255,255,.30); --bg-3: rgba(255,255,255,.62);
-    --text: #15161b; --text-2: rgba(21,22,27,.68); --text-3: rgba(21,22,27,.48);
+    --text: #15161b; --text-2: rgba(21,22,27,.74); --text-3: rgba(21,22,27,.62);
     --border: rgba(40,44,70,.13); --border-2: rgba(40,44,70,.24);
     --blue-bg: rgba(10,132,255,.16); --blue-text: #0a5fd0; --blue-border: #7ab4ff;
     --teal-bg: rgba(48,176,160,.18); --teal-text: #0b6b5f;
@@ -862,7 +860,7 @@ const ICONS = {
   }
   html[data-scheme="glass"][data-theme="dark"] {
     --bg: rgba(34,36,52,.50); --bg-2: rgba(22,24,36,.40); --bg-3: rgba(255,255,255,.12);
-    --text: #f5f6fa; --text-2: rgba(245,246,250,.70); --text-3: rgba(245,246,250,.46);
+    --text: #f5f6fa; --text-2: rgba(245,246,250,.74); --text-3: rgba(245,246,250,.56);
     --border: rgba(255,255,255,.14); --border-2: rgba(255,255,255,.26);
     --blue-bg: rgba(10,132,255,.26); --blue-text: #8cc2ff; --blue-border: #3a82e0;
     --teal-bg: rgba(48,176,160,.26); --teal-text: #7fe0d0;
@@ -1000,11 +998,11 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.82); --sel-text-3: rgba(255,255,255,.72); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2f6fde; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
-    --text: #fff; --text-2: rgba(255,255,255,.88); --text-3: rgba(255,255,255,.72); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
+    --text: #fff; --text-2: rgba(255,255,255,.94); --text-3: rgba(255,255,255,.85); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
   }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: var(--sel-fill) !important; color: var(--on-accent) !important; }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: var(--sel-line-strong); box-shadow: none; }
@@ -1512,6 +1510,22 @@ const ICONS = {
   .quickadd i, .toast i { font-size: var(--ico-16); }
   .board-col-title .picon { font-size: var(--ico-16); }
   .view-switch-btn i, .note-sort-btn i, html[data-scheme="glass"] :is(.main-toolbar, .note-toolbar, .sb-tools) .btn i { font-size: var(--ico-18); }
+
+  /* Reduced motion: honour the system setting. Animations and transitions collapse to an instant change (state still changes, nothing slides, fades or pops). */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-delay: 0s !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; scroll-behavior: auto !important; }
+  }
+
+  /* Keyboard focus on controls that had none: every native select and the scrollable help panes get the same soft ring as the other fields. */
+  html select:focus-visible { border-color: var(--focus-edge) !important; box-shadow: 0 0 0 3px var(--focus-ring) !important; outline: none; }
+  .help-pane:focus-visible, .about-modal:focus-visible { outline: 2px solid var(--focus-edge); outline-offset: -2px; }
+  .note-row:focus-visible { outline: 2px solid var(--focus-edge); outline-offset: -2px; }
+  .note-row.selected:focus-visible { outline: none; }   /* the blue selection is the indicator; the title and the note body keep just the caret, as a text field does */
+
+  /* Hit targets (macOS minimum 20×20, default 28×28): the check circles keep their look but an invisible ::before grows the clickable area to about 28px. */
+  .task-checkbox, .task-subtask-row .mini-check, .drawer .subtask-row .sub-check, .subtask-row .sub-check { position: relative; }
+  .task-checkbox::before { content: ""; position: absolute; inset: -5px; }
+  .task-subtask-row .mini-check::before, .subtask-row .sub-check::before { content: ""; position: absolute; inset: -6px; }
 </style>
 </head>
 <body>
@@ -1773,11 +1787,11 @@ const ICONS = {
 
 <!-- Confirm modal -->
 <div class="modal-bg" id="confirmModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal">
+  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalBody">
     <h3 id="confirmModalTitle">Delete?</h3>
     <p id="confirmModalBody"></p>
     <div class="modal-actions">
-      <button class="btn" onclick="closeAllModals()">Cancel</button>
+      <button class="btn" id="confirmModalCancel" onclick="closeAllModals()">Cancel</button>
       <button class="btn btn-danger" id="confirmModalBtn" onclick="confirmModalAction()">Delete</button>
     </div>
   </div>
@@ -1785,7 +1799,7 @@ const ICONS = {
 
 <!-- Folder modal -->
 <div class="modal-bg" id="folderModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle">
     <h3 id="folderModalTitle">New Folder</h3>
     <input spellcheck="true" type="text" id="folderNameInput" placeholder="Folder name" maxlength="40" onkeydown="if(event.key==='Enter') saveFolderModal()">
     <div class="field" id="folderParentField" style="margin-top:12px"><label for="folderParentSelect">Location</label><select id="folderParentSelect" aria-label="Location"></select></div>
@@ -1798,7 +1812,7 @@ const ICONS = {
 
 <!-- Project modal -->
 <div class="modal-bg" id="projectModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="projectModalTitle">
     <h3 id="projectModalTitle">New Project</h3>
     <input spellcheck="true" type="text" id="projectNameInput" placeholder="Project name" maxlength="40" onkeydown="if(event.key==='Enter') saveProjectModal()">
     <div class="color-swatches" id="colorSwatches"></div>
@@ -1811,8 +1825,8 @@ const ICONS = {
 
 <!-- Import modal -->
 <div class="modal-bg" id="importModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal">
-    <h3>Import data</h3>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+    <h3 id="importModalTitle">Import data</h3>
     <p>Merge the imported file into your current tasks and projects, or replace everything with the file's contents? Replacing automatically downloads a backup of your current data first.</p>
     <div class="modal-actions">
       <button class="btn" onclick="closeAllModals()">Cancel</button>
@@ -1934,7 +1948,7 @@ const ICONS = {
         <div class="help-section">
           <div class="help-section-title">Sidebar</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-window-maximize"></i><span>The sidebar button at the top of the sidebar (it floats at the top left while the sidebar is hidden), or <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, hides and shows the sidebar. In a narrow window it starts hidden and floats over the list; choosing a project closes it again.</span></div>
+          <div class="help-row"><i class="fa-regular fa-window-maximize"></i><span>The sidebar button at the top of the sidebar (it floats at the top left while the sidebar is hidden), or <kbd>⌥</kbd><kbd>⌘</kbd>+<kbd>S</kbd> (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>S</kbd>), hides and shows the sidebar. In Tasks <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd> does it too; in Notes that is Bold. In a narrow window it starts hidden and floats over the list; choosing a project closes it again.</span></div>
           </div>
         </div>
       </div>
@@ -2040,8 +2054,8 @@ const ICONS = {
 
 <!-- All Tasks projects modal -->
 <div class="modal-bg" id="allTasksProjectsModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" style="width:360px">
-    <h3>Projects shown</h3>
+  <div class="modal" style="width:360px" role="dialog" aria-modal="true" aria-labelledby="allTasksProjectsTitle">
+    <h3 id="allTasksProjectsTitle">Projects shown</h3>
     <p style="font-size:12px;color:var(--text-3);margin-top:-8px">Choose which projects' tasks show up in the All Tasks list and as board columns.</p>
     <div id="allTasksProjectsList" style="display:flex;flex-direction:column;gap:1px;max-height:320px;overflow-y:auto"></div>
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeAllModals()">Done</button></div>
@@ -2097,7 +2111,7 @@ const ICONS = {
       <span>Without a linked file, your tasks are stored in browser storage and <strong>will be lost if you clear browsing data</strong>.</span>
     </div>
     <div class="modal-actions">
-      <button type="button" class="btn" onclick="closeFileSyncModal()">Not now</button>
+      <button type="button" class="btn" onclick="closeFileSyncModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -2148,7 +2162,7 @@ function applySidebarState(){
     if(!b) continue;
     b.setAttribute('aria-expanded', String(!sidebarCollapsed));
     const mac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    b.title = (sidebarCollapsed ? 'Show' : 'Hide') + ' sidebar (' + (mac ? '⌘B' : 'Ctrl+B') + ')';
+    b.title = (sidebarCollapsed ? 'Show' : 'Hide') + ' sidebar (' + (mac ? '⌥⌘S' : 'Ctrl+Alt+S') + ')';
   }
 }
 function toggleSidebar(){
@@ -2699,7 +2713,7 @@ function renderSidebar(){
   }).join('');
 
   document.getElementById('projectList').innerHTML = visibleProjects().map(p=>{
-    return `<div class="project-row ${filterProjectId===p.id?'active':''}" data-id="${p.id}" role="button" tabindex="0" aria-pressed="${filterProjectId===p.id}" onclick="setProjectFilter('${p.id}')" onmouseenter="tipIfTruncated(this)"
+    return `<div class="project-row ${filterProjectId===p.id?'active':''}" data-id="${p.id}" role="button" tabindex="0" aria-pressed="${filterProjectId===p.id}" onclick="setProjectFilter('${p.id}')" oncontextmenu="openProjectMenu(event,'${p.id}')" onmouseenter="tipIfTruncated(this)"
       ${p.locked ? '' : `draggable="true" ondragstart="handleProjectDragStart(event,'${p.id}')" ondragend="handleProjectDragEnd(event)" ondragover="handleProjectDragOver(event,'${p.id}')" ondragleave="handleProjectDragLeave(event)" ondrop="handleProjectDrop(event,'${p.id}')"`}>
       <i class="fa-solid fa-${p.icon||'folder'} picon"></i>
       <span class="pname" data-full="${esc(p.name)}"${p.name.length>20?` data-tooltip="${esc(p.name)}"`:''}>${esc(abbreviateName(p.name))}</span>
@@ -4927,9 +4941,20 @@ function setSearchQuery(v){
 }
 
 // ── Modals ────────────────────────────────────────────────────────────────────
+let modalReturnFocus = null;
+// One way to close a dialog, whichever button, backdrop click or Esc does it: hide it and drop whatever it was holding.
+function closeModal(id){
+  document.getElementById(id)?.classList.remove('open');
+  if(id==='confirmModalBg') modalTarget = null;
+  else if(id==='importModalBg') pendingImportData = null;
+  else if(id==='newFileModalBg') pendingNewFileDir = null;
+  else if(id==='dataFilesModalBg') pendingDataFiles = null;
+}
 function closeAllModals(){
-  document.querySelectorAll('.modal-bg').forEach(el=>el.classList.remove('open'));
+  document.querySelectorAll('.modal-bg').forEach(el=>closeModal(el.id));
   modalTarget = null; pendingImportData = null;
+  if(modalReturnFocus && modalReturnFocus.focus && document.contains(modalReturnFocus)) modalReturnFocus.focus();   // back to where the dialog was opened from
+  modalReturnFocus = null;
 }
 // `confirmLabel` names what the button does (it used to say "Delete" for everything); `danger: false` makes it the plain accent button.
 function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger = true}){
@@ -4938,7 +4963,10 @@ function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger 
   const btn = document.getElementById('confirmModalBtn');
   if(btn){ btn.textContent = confirmLabel; btn.className = danger ? 'btn btn-danger' : 'btn btn-primary'; }
   modalTarget = { action };
+  modalReturnFocus = document.activeElement;
   document.getElementById('confirmModalBg').classList.add('open');
+  // The safe choice is the default: a destructive confirmation focuses Cancel (so Return cancels); a plain confirmation focuses its button.
+  const dflt = document.getElementById(danger ? 'confirmModalCancel' : 'confirmModalBtn'); if(dflt && dflt.focus){ dflt.focus(); if(document.activeElement!==dflt) requestAnimationFrame(()=>dflt.focus()); }
 }
 function confirmModalAction(){
   if(modalTarget && modalTarget.action) modalTarget.action();
@@ -4953,7 +4981,7 @@ function shortcutGroups(){
   const mod = mac ? '⌘' : 'Ctrl', shift = mac ? '⇧' : 'Shift';
   return [
     { id:'nav', label:'Navigation', icon:'fa-solid fa-compass', rows:[
-      ['Focus search', ['/']], ['Focus quick-add', ['N']], ['Show or hide the sidebar', [mod,'B']], ['Navigate tasks', ['↑','↓']],
+      ['Focus search', ['/']], ['Focus quick-add', ['N']], ['Show or hide the sidebar', mac ? ['⌥','⌘','S'] : ['Ctrl','Alt','S']], ['Show or hide the sidebar (Tasks only; in Notes it is Bold)', [mod,'B']], ['Navigate tasks', ['↑','↓']],
       ['Jump from the quick-add field into the list, and back', ['↓','↑']], ['Open selected task', ['↵']] ] },
     { id:'actions', label:'Task actions', icon:'fa-solid fa-list-check', rows:[
       ['Collapse/expand selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Delete selected task', ['Delete']],
@@ -4966,7 +4994,7 @@ function shortcutGroups(){
       ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', [mod,'⇧ C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']] ] },
+      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -5227,6 +5255,12 @@ function reorderFolder(id, targetId, before){
   }
   save(); render();
   return true;
+}
+// Keyboard way to reorder: Option+Up / Option+Down on a focused folder (the same as Move Up / Move Down in its menu, or dragging it).
+function folderRowKey(e, id){
+  if(!e.altKey || e.metaKey || e.ctrlKey || (e.key!=='ArrowUp' && e.key!=='ArrowDown')) return;
+  e.preventDefault(); e.stopPropagation();
+  moveFolderBy(id, e.key==='ArrowUp' ? -1 : 1);
 }
 function moveFolderBy(id, delta){
   const f = folderById(id); if(!f) return;
@@ -5664,8 +5698,33 @@ function folderMenuHtml(id){
   if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `folderMenuRun('newsub')`));
   const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
-  if(!f.locked) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `folderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true}));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
+}
+// Right-click menu of a project in the Tasks sidebar (the Notes folders have one too): the same builder pattern, title-style labels, danger last.
+let projectMenuId = null;
+function projectMenuHtml(id){
+  const p = projById(id); if(!p) return '';
+  const item = rowMenuItem;
+  const parts = [item('fa-solid fa-plus', 'New Task Here', `projectMenuRun('new')`), item('fa-solid fa-pen', 'Edit', `projectMenuRun('edit')`)];
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-trash', 'Delete', `projectMenuRun('delete')`, {danger:true, off:!!p.locked}));
+  return parts.join('');
+}
+function openProjectMenu(e, id){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  projectMenuId = id; folderMenuId = null; noteMenuId = null;
+  menu.innerHTML = projectMenuHtml(id);
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function projectMenuRun(kind){
+  const id = projectMenuId; closeRowMenu();
+  if(!id) return;
+  if(kind==='new'){ setProjectFilter(id); document.getElementById('quickAddInput')?.focus(); }
+  else if(kind==='edit') openProjectModal(id);
+  else if(kind==='delete') deleteProject(id);
 }
 function openFolderMenu(e, id){
   if(document.querySelector('.modal-bg.open')) return;
@@ -5752,7 +5811,7 @@ function renderNotesSidebar(){
     const twisty = sub ? '' : kids.length
       ? `<button type="button" class="folder-twisty" aria-label="${shut?'Expand':'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();toggleFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut?'right':'down'}"></i></button>`
       : '<span class="folder-twisty-gap"></span>';
-    return `<div class="project-row ${noteFolderFilter===f.id?'active':''}${sub?' sub-folder':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')" draggable="true" ondragstart="handleFolderDragStart(event,'${f.id}')" ondragend="handleFolderDragEnd()" ondragover="handleFolderDragOver(event,'${f.id}')" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event,'${f.id}')">
+    return `<div class="project-row ${noteFolderFilter===f.id?'active':''}${sub?' sub-folder':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')" onkeydown="folderRowKey(event,'${f.id}')" draggable="true" ondragstart="handleFolderDragStart(event,'${f.id}')" ondragend="handleFolderDragEnd()" ondragover="handleFolderDragOver(event,'${f.id}')" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event,'${f.id}')">
       ${twisty}<i class="fa-regular fa-folder picon"></i>
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${total(f)}</span>
@@ -7208,7 +7267,7 @@ function handleNotesKeys(e){
   if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='p' && selectedNoteId){ e.preventDefault(); noteExportPrint(selectedNoteId); return; }   // Print / Save as PDF: this note only
-  if((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && e.key.toLowerCase()==='c' && selectedNoteId){ e.preventDefault(); copyNote(selectedNoteId); return; }   // the whole note, for pasting into Mail
+  if(((e.metaKey && e.ctrlKey) || (e.ctrlKey && e.altKey && !e.metaKey)) && !e.shiftKey && e.key.toLowerCase()==='c' && selectedNoteId){ e.preventDefault(); copyNote(selectedNoteId); return; }   // the whole note, for pasting into Mail
   if(!onList || typing) return;
   const vis = visibleNotes(), i = vis.findIndex(n=>n.id===selectedNoteId);
   if(e.key==='ArrowDown' || e.key==='ArrowUp'){
@@ -7308,7 +7367,7 @@ function openFileSyncModal(reconnectHandle){
   }
   document.getElementById('fileSyncModalBg').classList.add('open');
 }
-function closeFileSyncModal(){ document.getElementById('fileSyncModalBg')?.classList.remove('open'); }
+function closeFileSyncModal(){ closeModal('fileSyncModalBg'); }
 function toggleLibMenu(){ updateFileBackupUI(); document.getElementById('libMenu')?.classList.toggle('open'); }
 function closeLibMenu(){ document.getElementById('libMenu')?.classList.remove('open'); }
 // Light/Dark icons: thin outlined sun and crescent moon, drawn in the SF Symbols
@@ -7390,8 +7449,12 @@ function releaseSelectAfterPointerChange(e){
 document.addEventListener('pointerdown', noteInputModality, true);
 document.addEventListener('keydown', noteInputModality, true);
 document.addEventListener('change', releaseSelectAfterPointerChange);
+// Show / hide the sidebar: ⌥⌘S (Ctrl+Alt+S) everywhere, the macOS sidebar shortcut. ⌘B (Ctrl+B) keeps doing it in Tasks, but in Notes it is Bold, so it is left to the editor there.
 function handleSidebarShortcut(e){
-  if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && String(e.key).toLowerCase()==='b'){ e.preventDefault(); toggleSidebar(); }
+  if(!(e.metaKey || e.ctrlKey) || e.shiftKey) return;
+  const key = String(e.key).toLowerCase();
+  if(e.altKey){ if(e.code==='KeyS' || key==='s' || key==='ß'){ e.preventDefault(); toggleSidebar(); } return; }
+  if(key==='b' && appMode!=='notes'){ e.preventDefault(); toggleSidebar(); }
 }
 document.addEventListener('keydown', handleSidebarShortcut);
 document.addEventListener('keydown', e=>{
@@ -7880,7 +7943,7 @@ async function createNewLinkedFile(){
   document.getElementById('newFileModalBg').classList.add('open');
   setTimeout(()=>{ inp.focus(); inp.select(); }, 30);
 }
-function closeNewFileModal(){ document.getElementById('newFileModalBg')?.classList.remove('open'); pendingNewFileDir = null; }
+function closeNewFileModal(){ closeModal('newFileModalBg'); }
 // A plain file name: no path characters, ".json" added when missing.
 function cleanDataFileName(raw){
   let n = String(raw||'').trim().replace(/\.json$/i, '').trim();
@@ -7921,7 +7984,7 @@ async function linkFile(){
     document.getElementById('dataFilesModalBg').classList.add('open');
   }catch(e){ showToast('Could not read that folder', true); }
 }
-function closeDataFilesModal(){ document.getElementById('dataFilesModalBg')?.classList.remove('open'); pendingDataFiles = null; }
+function closeDataFilesModal(){ closeModal('dataFilesModalBg'); }
 function chooseDataFile(i){
   const p = pendingDataFiles; closeDataFilesModal();
   if(p && p.files[i]) finishLink(p.dir, p.files[i].handle);

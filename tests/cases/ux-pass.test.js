@@ -376,8 +376,8 @@ test('toggleSidebar flips the state, the html class, and persists the choice', f
   assertFalse(document.documentElement.classList.contains('sidebar-collapsed'));
   assertEqual(localStorage.getItem('mytasks_sidebar_collapsed'), '0');
 });
-test('Cmd/Ctrl+B toggles the sidebar; other B combos and plain B do not', function () {
-  sidebarCollapsed = false;
+test('Cmd/Ctrl+B toggles the sidebar in Tasks; other B combos and plain B do not', function () {
+  appMode = 'tasks'; sidebarCollapsed = false;
   let prevented = false;
   handleSidebarShortcut({ key: 'b', ctrlKey: true, metaKey: false, shiftKey: false, altKey: false, preventDefault() { prevented = true; } });
   assertTrue(sidebarCollapsed); assertTrue(prevented);
@@ -386,6 +386,16 @@ test('Cmd/Ctrl+B toggles the sidebar; other B combos and plain B do not', functi
   handleSidebarShortcut({ key: 'b', ctrlKey: true, metaKey: false, shiftKey: true, altKey: false, preventDefault() {} });
   assertTrue(sidebarCollapsed, 'Ctrl+Shift+B must not toggle');
   sidebarCollapsed = false; applySidebarState();
+  localStorage.removeItem('mytasks_sidebar_collapsed');
+});
+test('in Notes Cmd/Ctrl+B is left alone (it is Bold) and Alt+Cmd+S toggles the sidebar', function () {
+  appMode = 'notes'; sidebarCollapsed = false;
+  let prevented = false;
+  handleSidebarShortcut({ key: 'b', ctrlKey: false, metaKey: true, shiftKey: false, altKey: false, preventDefault() { prevented = true; } });
+  assertFalse(sidebarCollapsed, 'Cmd+B must not toggle the sidebar in Notes'); assertFalse(prevented, 'and must not be swallowed, so Bold works');
+  handleSidebarShortcut({ key: 'ß', code: 'KeyS', ctrlKey: false, metaKey: true, shiftKey: false, altKey: true, preventDefault() { prevented = true; } });
+  assertTrue(sidebarCollapsed); assertTrue(prevented);
+  appMode = 'tasks'; sidebarCollapsed = false; applySidebarState();
   localStorage.removeItem('mytasks_sidebar_collapsed');
 });
 
@@ -563,4 +573,14 @@ test('the confirm dialog names its action: Delete by default, Unlink / Restore w
   assertEqual(btn.className, 'btn btn-primary');
   openConfirmModal({ title: 'Delete task?', body: 'x', action: function () {} });
   assertEqual(btn.textContent, 'Delete', 'the label resets for the next dialog');
+});
+
+// ── Tasks sidebar project menu (F-09) ────────────────────────────────────────
+test('projectMenuHtml offers New Task Here and Edit for every project, and Delete only for unlocked ones', function () {
+  const locked = projects.find(p => p.locked), free = projects.find(p => !p.locked);
+  const a = projectMenuHtml(locked.id);
+  assertIncludes(a, 'New Task Here'); assertIncludes(a, 'Edit'); assertIncludes(a, 'Delete'); assertIncludes(a.slice(a.indexOf('Delete') - 600, a.indexOf('Delete')), 'disabled', 'the locked Inbox shows Delete dimmed, not hidden');
+  const b = projectMenuHtml(free.id);
+  assertIncludes(b, 'New Task Here'); assertIncludes(b, 'Edit'); assertIncludes(b, 'Delete');
+  assertEqual(projectMenuHtml('nope'), '');
 });
