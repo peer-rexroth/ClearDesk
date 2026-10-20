@@ -225,3 +225,73 @@ test('a double-click (the second click of a pair) puts the choices back as they 
   assertDeepEqual(p.vars.e.selected, ['A']); assertEqual(p.vars.t.value, 'keep');
   pickPromptOption(host, 0, { detail: 2 }); assertEqual(p.vars.s.selected, 'S', 'a lone "second" click with nothing to restore is an ordinary click');
 });
+
+// ---- global variables ({{@name}}) ----
+function pgfresh() { pfresh(); promptGlobals = []; deletedPromptGlobalIds = []; }
+
+test('detectPromptVars: {{@name}} is a global variable (key @name), not a choice; escaped ones are skipped; settings are kept', function () {
+  const v = detectPromptVars('A {{@Lang}} B {{size}} C \\{{@no}} D {{@Lang}}', { '@Lang': { type: 'global', selected: 'DE' } });
+  assertDeepEqual(Object.keys(v), ['@Lang', 'size']);
+  assertEqual(v['@Lang'].type, 'global'); assertEqual(v['@Lang'].selected, 'DE'); assertEqual(v.size.type, 'option');
+});
+
+test('a global variable takes its values from the central list: the final text uses the chosen value while it exists', function () {
+  pgfresh();
+  promptGlobals = [{ id: 'g1', name: 'Language', options: ['English', 'Deutsch'], updatedAt: 1 }];
+  const p = pmk({ template: 'In {{@language}}!', vars: { '@language': { type: 'global', selected: 'Deutsch' } } });   // the name is matched without regard to case
+  assertEqual(buildPromptFinal(p), 'In Deutsch!');
+  promptGlobals[0].options = ['English'];
+  assertEqual(buildPromptFinal(p), 'In !', 'a value that was removed centrally no longer counts');
+  promptGlobals = [];
+  assertEqual(buildPromptFinal(p), 'In !', 'and a missing variable fills in nothing');
+});
+
+test('normalizePromptGlobals repairs names and values and drops duplicates; mergePromptGlobals: newer wins, tombstones respected', function () {
+  pgfresh();
+  promptGlobals = [{ id: 'a b', name: ' {Lang}@ ', options: ['x', 'x', ' ', 'y'] }, { id: 'g2', name: 'lang', options: [] }, null];
+  normalizePromptGlobals();
+  assertEqual(promptGlobals.length, 1); assertTrue(isSafeId(promptGlobals[0].id)); assertEqual(promptGlobals[0].name, 'Lang'); assertDeepEqual(promptGlobals[0].options, ['x', 'y']);
+  promptGlobals = [{ id: 'g1', name: 'Tone', options: ['A'], updatedAt: 100 }];
+  let r = mergePromptGlobals({ promptGlobals: [{ id: 'g1', name: 'Tone', options: ['A', 'B'], updatedAt: 200 }, { id: 'g2', name: 'New', options: [], updatedAt: 5 }] }, true);
+  assertDeepEqual(promptGlobals.find(g => g.id === 'g1').options, ['A', 'B']); assertEqual(r.added, 1); assertEqual(r.updated, 1);
+  deletedPromptGlobalIds = [{ id: 'gone', deletedAt: 500 }];
+  mergePromptGlobals({ promptGlobals: [{ id: 'gone', name: 'Old', options: [], updatedAt: 400 }] }, true);
+  assertFalse(promptGlobals.some(g => g.id === 'gone'), 'a stale copy stays deleted');
+});
+
+test('renaming a global value or the variable itself follows into every prompt (choice, presets, template); removing a value clears it', function () {
+  pgfresh();
+  const g = { id: 'g1', name: 'Language', options: ['English', 'Deutsch'], updatedAt: 1 }; promptGlobals = [g];
+  const p1 = pmk({ id: 'p1', template: 'A {{@Language}} B \\{{@Language}}', vars: { '@Language': { type: 'global', selected: 'Deutsch' } }, presets: [{ name: 'P', values: { '@Language': 'Deutsch' } }] });
+  const p2 = pmk({ id: 'p2', template: 'Nothing here' });
+  prompts = [p1, p2];
+  assertDeepEqual(promptGlobalUsers(g).map(p => p.id), ['p1']);
+  renamePromptGlobalValue(g, 1, 'German');
+  assertEqual(p1.vars['@Language'].selected, 'German'); assertEqual(p1.presets[0].values['@Language'], 'German'); assertDeepEqual(g.options, ['English', 'German']);
+  renamePromptGlobal(g, 'Target');
+  assertEqual(p1.template, 'A {{@Target}} B \\{{@Language}}', 'the placeholder is renamed, an escaped one is left');
+  assertDeepEqual(Object.keys(p1.vars), ['@Target']); assertEqual(p1.vars['@Target'].selected, 'German'); assertDeepEqual(Object.keys(p1.presets[0].values), ['@Target']);
+  globalsSel = 'g1'; removePromptGlobalValue(1);
+  assertEqual(p1.vars['@Target'].selected, ''); assertEqual(p1.presets[0].values['@Target'], ''); assertDeepEqual(g.options, ['English']);
+});
+
+test('presets include a global variable as a choice; Clear empties it; a value that no longer exists is ignored when a preset is applied', function () {
+  pgfresh();
+  promptGlobals = [{ id: 'g1', name: 'Tone', options: ['Formal', 'Direct'], updatedAt: 1 }];
+  const p = pmk({ id: 'x', template: '{{@Tone}}', vars: { '@Tone': { type: 'global', selected: 'Formal' } }, presets: [{ name: 'Gone', values: { '@Tone': 'Poetic' } }, { name: 'Direct', values: { '@Tone': 'Direct' } }] });
+  prompts = [p]; promptEditorId = 'x';
+  applyPromptPreset(1); assertEqual(p.vars['@Tone'].selected, 'Direct');
+  applyPromptPreset(0); assertEqual(p.vars['@Tone'].selected, '', 'a removed value is not applied');
+  applyPromptPreset(1); assertTrue(promptPresetMatches(p, p.presets[1]));
+  applyPromptPreset(-1); assertEqual(p.vars['@Tone'].selected, '');
+});
+
+test('globals are in the saved data and survive a load', function () {
+  pgfresh();
+  promptGlobals = [{ id: 'g1', name: 'Language', options: ['A'], updatedAt: 1 }];
+  const d = dataPayload();
+  assertEqual(d.promptGlobals.length, 1); assertTrue('deletedPromptGlobalIds' in d);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+  pgfresh(); load();
+  assertEqual(promptGlobals.length, 1); assertEqual(promptGlobals[0].name, 'Language');
+});

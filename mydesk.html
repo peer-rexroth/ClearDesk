@@ -75,6 +75,7 @@ const ICONS = {
   "font": "<path d=\"m6 19 6-14 6 14M8.3 14h7.4\"/>",
   "forward-step": "<path d=\"m9 6.5 9 5.5-9 5.5z\"/><path d=\"M5.5 6v12\"/>",
   "graduation-cap": "<path d=\"m2.5 9.5 9.5-5 9.5 5-9.5 5zM6.5 12v4.5c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3V12M21.5 9.5V15\"/>",
+  "globe": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M3.5 12h17M12 3.5c2.3 2.4 3.5 5.2 3.5 8.5S14.3 18.1 12 20.5C9.7 18.1 8.5 15.3 8.5 12S9.7 5.9 12 3.5z\"/>",
   "grip-lines": "<path d=\"M4 9h16M4 15h16\"/>",
   "grip-vertical": "<circle cx=\"9\" cy=\"6\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"6\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9\" cy=\"12\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"12\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"9\" cy=\"18\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"15\" cy=\"18\" r=\"1.4\" fill=\"currentColor\" stroke=\"none\"/>",
   "hand-pointer": "<path d=\"M9 11V5.5a1.6 1.6 0 0 1 3.2 0V11M12.2 10.5a1.5 1.5 0 0 1 3 0v1M15.2 11.5a1.5 1.5 0 0 1 3 0V16a5 5 0 0 1-5 5h-1.5a5 5 0 0 1-4-2L5.5 15.5a1.5 1.5 0 0 1 2.3-1.9L9 15\"/>",
@@ -1596,7 +1597,9 @@ const ICONS = {
   .pr-chip { font-size: var(--fs-12); padding: 4px 12px; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); border: 0; font-family: inherit; font-weight: 500; cursor: default; }
   .pr-chip:hover { background: var(--cap-hover); color: var(--text); }
   .pr-chip.on { background: var(--accent-tint); color: var(--blue-text); }
-  .pr-chip.add { background: transparent; color: var(--text-3); border: 1px dashed var(--border-2); }
+  .pr-chip.add, .pr-pill.add { background: transparent; color: var(--text-3); border: 0; }   /* add controls are quiet, like "Add item" and New Folder: no outline, a faint capsule on hover */
+  .pr-chip.add { display: inline-flex; align-items: center; gap: 4px; padding-left: 8px; }
+  .pr-chip.add:hover, .pr-pill.add:hover { background: var(--cap-fill); color: var(--text); }
   /* An option or a preset in an unlocked prompt: the pill is a small container with the × inside it, at the trailing edge (space always reserved, so nothing jumps on hover).
      The × shows on hover or focus; the same removal is Delete / Backspace on the focused pill and Remove in its right-click menu. */
   .pr-chip-wrap.has-x, .pr-pill-wrap.has-x { display: inline-flex; align-items: center; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); }
@@ -1624,7 +1627,7 @@ const ICONS = {
   .pr-pill { font-size: var(--fs-13); padding: 4px 12px; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); border: 0; font-family: inherit; cursor: default; }
   .pr-pill:hover { background: var(--cap-hover); color: var(--text); }
   .pr-pill.on { background: var(--accent); color: var(--on-accent); }
-  .pr-pill.add { background: transparent; border: 1px dashed var(--border-2); color: var(--text-3); padding: 4px 9px; }
+  .pr-pill.add { padding: 4px 9px; }
   .pr-checks { display: flex; flex-direction: column; }
   .pr-check { display: flex; align-items: center; gap: 10px; padding: 3px 0; font-size: var(--fs-14); color: var(--text); cursor: default; border-radius: var(--r-xs); }
   .pr-check .box { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; flex: none; background: var(--bg); position: relative; }
@@ -1641,6 +1644,50 @@ const ICONS = {
   #pInspToggle[aria-pressed="true"] { background: var(--cap-on); color: var(--text); }
   .btn-copy { display: inline-flex; align-items: center; gap: 6px; }
   .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
+
+  /* ── Global variables ───────────────────────────────────────────────────────────────────────────────────────────────── */
+  .ph-glob { background: var(--purple-bg); color: var(--purple-text); }
+  .pr-var-name .fa-globe { font-size: var(--ico-12); vertical-align: -1px; }
+  .pr-insp-tools { display: inline-flex; align-items: center; gap: 8px; }
+  .pr-g-link { align-self: flex-start; border: 0; background: none; color: var(--text-3); font: inherit; font-size: var(--fs-12); padding: 2px 0; cursor: default; }
+  .pr-g-link:hover { color: var(--text); }
+  .pr-g-missing { font-size: var(--fs-13); color: var(--text-3); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
+  .globals-modal { width: 660px; max-width: 94vw; padding: 0; gap: 0; overflow: hidden; }
+  .pr-g-head { padding: 22px 24px 14px; }
+  .pr-g-head h3 { margin: 0 0 6px; }
+  .pr-g-head p { margin: 0; font-size: var(--fs-13); color: var(--text-2); line-height: 1.5; }
+  .globals-modal code, .pr-g-hint code { font-family: var(--mono); font-size: .92em; background: var(--bg-3); border-radius: var(--r-xs); padding: 1px 5px; }
+  .pr-g-body { display: grid; grid-template-columns: 210px 1fr; height: 330px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .pr-g-side { display: flex; flex-direction: column; min-height: 0; background: var(--bg-2); border-right: 1px solid var(--border); }
+  .pr-g-main { display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+  .pr-g-list { flex: 1; overflow-y: auto; padding: 8px; }
+  .pr-g-row { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--r-s); font-size: var(--fs-14); color: var(--text); cursor: default; }
+  .pr-g-row i { color: var(--text-3); font-size: var(--ico-14); }
+  .pr-g-row-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pr-g-row-count { font-size: var(--fs-12); color: var(--text-3); }
+  .pr-g-row:hover { background: var(--hover); }
+  .pr-g-row.on { background: var(--sel-bg); color: var(--on-accent); }
+  .pr-g-row.on i, .pr-g-row.on .pr-g-row-count { color: var(--sel-text-3); }
+  .pr-g-empty-list { font-size: var(--fs-13); color: var(--text-3); padding: 10px 8px; }
+  .pr-g-detail { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 20px 8px; display: flex; flex-direction: column; }
+  .pr-g-detail-empty { margin: auto; text-align: center; max-width: 280px; color: var(--text-2); font-size: var(--fs-13); line-height: 1.55; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .pr-g-detail-empty > i { font-size: 30px; opacity: .45; }
+  .pr-g-label { font-size: var(--fs-12); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .pr-g-label-values { margin-top: 16px; }
+  .pr-g-name { width: 100%; box-sizing: border-box; border: 1px solid var(--border); border-radius: var(--r-m); padding: 7px 12px; font: inherit; font-size: var(--fs-15); background: var(--bg-2); color: var(--text); }
+  .pr-g-hint { font-size: var(--fs-12); color: var(--text-3); margin-top: 6px; }
+  .pr-g-values { flex: 1; min-height: 80px; overflow-y: auto; border: 1px solid var(--border); border-radius: var(--r-m); background: var(--bg-2); padding: 4px; }
+  .pr-g-val { padding: 5px 10px; border-radius: var(--r-s); font-size: var(--fs-14); color: var(--text); cursor: default; overflow-wrap: anywhere; }
+  .pr-g-val:hover { background: var(--hover); }
+  .pr-g-val.on { background: var(--sel-bg); color: var(--on-accent); }
+  .pr-g-val-input { display: block; width: 100%; box-sizing: border-box; border: 1px solid var(--focus-edge); border-radius: var(--r-s); padding: 4px 9px; font: inherit; font-size: var(--fs-14); background: var(--bg); color: var(--text); box-shadow: 0 0 0 3px var(--focus-ring); outline: none; }
+  /* the add / remove bar under a list, as at the foot of a macOS list: a + and a − */
+  .pr-g-bar { display: flex; border-top: 1px solid var(--border); background: var(--bg-2); flex: none; }
+  .pr-g-bar-btn { width: 32px; height: 26px; border: 0; border-right: 1px solid var(--border); background: transparent; color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; font-size: var(--ico-14); cursor: default; }
+  .pr-g-bar-btn:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+  .pr-g-bar-btn:disabled { opacity: .35; }
+  .pr-g-actions { padding: 12px 20px; align-items: center; justify-content: space-between; }
+  .pr-g-foot { font-size: var(--fs-12); color: var(--text-3); }
 </style>
 </head>
 <body>
@@ -1947,6 +1994,7 @@ const ICONS = {
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('option')" title="Insert a choice variable: {{name}}" aria-label="Insert a choice variable"><span class="tb-txt pr-tb-mono">{{ }}</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('instruction')" title="Insert a checklist variable: [[name]]" aria-label="Insert a checklist variable"><span class="tb-txt pr-tb-mono">[[ ]]</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('text')" title="Insert a text variable: ((name))" aria-label="Insert a text variable"><span class="tb-txt pr-tb-mono">(( ))</span></button>
+            <button type="button" class="tool-btn pr-insert" onclick="openPromptGlobalInsertMenu(event)" title="Insert a global variable: {{@name}}" aria-label="Insert a global variable" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{@}}</span></button>
           </div>
           <div class="tool-group note-fmt" role="group" aria-label="Undo">
             <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
@@ -1976,6 +2024,33 @@ const ICONS = {
   </div>
 </div>
 
+
+<!-- Global variables modal -->
+<div class="modal-bg" id="globalsModalBg" onclick="if(event.target===this) closePromptGlobalsModal()">
+  <div class="modal globals-modal" role="dialog" aria-modal="true" aria-labelledby="globalsTitle">
+    <div class="pr-g-head">
+      <h3 id="globalsTitle">Global Variables</h3>
+      <p>One list of values for every prompt that uses it. Put <code>{{@name}}</code> in a template and the values appear in that prompt automatically.</p>
+    </div>
+    <div class="pr-g-body">
+      <div class="pr-g-side">
+        <div class="pr-g-list" id="pgList" role="listbox" aria-label="Global variables"></div>
+        <div class="pr-g-bar" role="group" aria-label="Add or remove a variable">
+          <button type="button" class="pr-g-bar-btn" onclick="addPromptGlobal()" title="Add a global variable" aria-label="Add a global variable"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" class="pr-g-bar-btn" id="pgRemove" onclick="removePromptGlobal()" title="Delete the selected variable" aria-label="Delete the selected variable"><i class="fa-solid fa-minus"></i></button>
+        </div>
+      </div>
+      <div class="pr-g-main">
+        <div class="pr-g-detail" id="pgDetail"></div>
+        <div class="pr-g-bar" role="group" aria-label="Add or remove a value">
+          <button type="button" class="pr-g-bar-btn" id="pgAddValue" onclick="addGlobalValue()" title="Add a value" aria-label="Add a value"><i class="fa-solid fa-plus"></i></button>
+          <button type="button" class="pr-g-bar-btn" id="pgRemoveValue" onclick="removeSelectedGlobalValue()" title="Delete the selected value" aria-label="Delete the selected value"><i class="fa-solid fa-minus"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions pr-g-actions"><span class="pr-g-foot" id="pgFoot"></span><button class="btn btn-primary" onclick="closePromptGlobalsModal()">Done</button></div>
+  </div>
+</div>
 
 <!-- Confirm modal -->
 <div class="modal-bg" id="confirmModalBg" onclick="if(event.target===this) closeAllModals()">
@@ -2204,6 +2279,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the switch beside the app name. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
+          <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Global Variables…</em> in the list's <strong>⋯</strong> menu); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           <div class="help-row"><i class="fa-solid fa-upload"></i><span><strong>From PromptLab</strong>: <em>Import PromptLab Library…</em> in the list's <strong>⋯</strong> menu reads a PromptLab export (<code>.json</code>). Its categories become folders; favorites, locks and presets come along, version history does not. Importing the same file twice changes nothing.</span></div>
@@ -2542,7 +2618,7 @@ let projects = [], tasks = [];
 let deletedTaskIds = [], deletedProjectIds = [];
 // Notes (see the Notes section below): folders and notes ride in the same data blob; their tombstones work like the tasks'.
 let notes = [], noteFolders = [], deletedNoteIds = [], deletedNoteFolderIds = [];
-let prompts = [], promptFolders = [], deletedPromptIds = [], deletedPromptFolderIds = [];   // the Prompts mode (see the Prompts section)
+let prompts = [], promptFolders = [], deletedPromptIds = [], deletedPromptFolderIds = [], promptGlobals = [], deletedPromptGlobalIds = [];   // the Prompts mode (see the Prompts section)
 let activeTaskId = null;
 let kbdSelectedTaskId = null;
 let renamingTaskId = null;
@@ -2675,6 +2751,7 @@ function load(){
       notes = d.notes || []; noteFolders = d.noteFolders || [];
       deletedNoteIds = d.deletedNoteIds || []; deletedNoteFolderIds = d.deletedNoteFolderIds || [];
       prompts = d.prompts || []; promptFolders = d.promptFolders || []; deletedPromptIds = d.deletedPromptIds || []; deletedPromptFolderIds = d.deletedPromptFolderIds || [];
+      promptGlobals = d.promptGlobals || []; deletedPromptGlobalIds = d.deletedPromptGlobalIds || [];
       allTasksHiddenProjectIds = d.allTasksHiddenProjectIds || [];
       sortBy = d.sortBy || 'smart';
       if(d.viewMode==='board'||d.viewMode==='list'){ viewMode=d.viewMode; localStorage.setItem(VIEW_KEY, viewMode); }
@@ -2688,12 +2765,12 @@ function load(){
     projects = defaultProjects();
     tasks = defaultTasks();
     notes = []; noteFolders = []; deletedNoteIds = []; deletedNoteFolderIds = []; normalizeNotes();
-    prompts = []; promptFolders = []; deletedPromptIds = []; deletedPromptFolderIds = []; normalizePrompts();
+    prompts = []; promptFolders = []; deletedPromptIds = []; deletedPromptFolderIds = []; promptGlobals = []; deletedPromptGlobalIds = []; normalizePrompts();
   }
 }
 // Everything that is saved to localStorage and to the linked file. (Per-device choices — theme, mode, sidebar — are not in it.)
 function dataPayload(){
-  return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
+  return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
 let storageFullWarned = false;
 let dirHandle = null, backupRunning = false;     // the linked data file's folder (daily file backup), see "Daily file backup"
@@ -6361,7 +6438,11 @@ const PROMPT_ESC_RE = /\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g;      //
 function detectPromptVars(template, existing){
   existing = existing || {};
   const result = {}, stripped = String(template || '').replace(PROMPT_ESC_RE, '');
-  [...stripped.matchAll(/\{\{([^}]+)\}\}/g)].map(m=>m[1]).forEach(k=>{
+  [...stripped.matchAll(/\{\{@([^}]+)\}\}/g)].map(m=>globalKey(m[1])).forEach(k=>{
+    if(existing[k] && existing[k].type==='global') result[k] = existing[k];
+    else if(!result[k]) result[k] = { type:'global', selected:'' };
+  });
+  [...stripped.matchAll(/\{\{(?!@)([^}]+)\}\}/g)].map(m=>m[1]).forEach(k=>{
     if(existing[k] && existing[k].type==='option') result[k] = existing[k];
     else if(!result[k]) result[k] = { type:'option', options:['Option 1'], selected:'Option 1' };
   });
@@ -6383,6 +6464,7 @@ function buildPromptFinal(p){
   Object.entries(p.vars || {}).forEach(([k, v])=>{
     if(v.type==='instruction') t = t.split(`[[${k}]]`).join(sortByPromptOptions(Array.isArray(v.selected) ? v.selected : [], v.options || []).map(s=>`• ${s}`).join('\n'));
     else if(v.type==='text') t = t.split(`((${k}))`).join(v.value || '');
+    else if(v.type==='global') t = t.split(`{{${k}}}`).join(promptGlobalChoice(p, k));
     else t = t.split(`{{${k}}}`).join(v.selected || '');
   });
   return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>escaped[+i]);
@@ -6391,7 +6473,7 @@ function buildPromptFinal(p){
 function promptHighlight(template){
   const TOKEN = '\u0001', keep = [];
   let t = esc(String(template || '')).replace(/\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g, m=>{ keep.push(m); return TOKEN + (keep.length - 1) + TOKEN; });
-  t = t.replace(/\{\{([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
+  t = t.replace(/\{\{@([^}]+)\}\}/g, '<span class="ph ph-glob">{{@$1}}</span>').replace(/\{\{(?!@)([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
   return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>keep[+i]) + '\n';
 }
 
@@ -6405,10 +6487,12 @@ function cleanPromptVars(vars){
     if(v.type==='option') out[k] = { type:'option', options:opts, selected:typeof v.selected==='string' ? v.selected : '' };
     else if(v.type==='instruction') out[k] = { type:'instruction', options:opts, selected:Array.isArray(v.selected) ? v.selected.map(String).filter(x=>opts.includes(x)) : [] };
     else if(v.type==='text') out[k] = { type:'text', value:typeof v.value==='string' ? v.value.slice(0,5000) : '' };
+    else if(v.type==='global' && k.startsWith('@')) out[k] = { type:'global', selected:typeof v.selected==='string' ? v.selected.slice(0,200) : '' };
   });
   return out;
 }
 function normalizePrompts(){
+  normalizePromptGlobals();
   if(!Array.isArray(prompts)) prompts = [];
   if(!Array.isArray(promptFolders)) promptFolders = [];
   promptFolders = promptFolders.filter(f=>f && typeof f==='object');
@@ -6667,10 +6751,10 @@ function renderPromptInspector(p){
   const locked = p.locked || promptTrashed(p), entries = Object.entries(p.vars || {});
   promptVarSig = entries.map(([k, v])=>k + ':' + v.type).join('|');
   const dis = locked ? ' disabled' : '';
-  const kindClass = t=>t==='option' ? 'ph-opt' : t==='instruction' ? 'ph-ins' : 'ph-txt';
-  let html = `<div class="pr-insp-head">Variables <span class="pr-insp-sub">${entries.length} in this prompt</span></div>`;
+  const kindClass = t=>t==='option' ? 'ph-opt' : t==='instruction' ? 'ph-ins' : t==='global' ? 'ph-glob' : 'ph-txt';
+  let html = `<div class="pr-insp-head"><span>Variables</span><span class="pr-insp-tools"><span class="pr-insp-sub">${entries.length} in this prompt</span><button type="button" class="icon-btn" title="Global Variables…" aria-label="Global Variables" onclick="openPromptGlobalsModal()"><i class="fa-solid fa-globe"></i></button></span></div>`;
   if(!entries.length){
-    html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time. The buttons above insert one.</div>`;
+    html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time, and <span class="ph ph-glob">{{@global}}</span> takes its options from the Global Variables list. The buttons above insert one.</div>`;
     document.getElementById('pInspector').innerHTML = html; return;
   }
   const hasPickable = entries.some(([, v])=>v.type!=='text');
@@ -6685,11 +6769,12 @@ function renderPromptInspector(p){
     });
     if(!locked) html += promptPresetDraft
       ? `<input type="text" class="pr-chip-input" id="pPresetInput" placeholder="Preset name" maxlength="60" aria-label="Preset name" onkeydown="promptPresetKey(event)" onblur="promptPresetKey({key:'Enter'})">`
-      : `<button type="button" class="pr-chip add" onclick="startPromptPresetSave()">+ Save as Preset</button>`;
+      : `<button type="button" class="pr-chip add" onclick="startPromptPresetSave()"><i class="fa-solid fa-plus"></i> Save as Preset…</button>`;
     html += `</div>`;
   }
   html += `<div class="pr-vars">`;
   entries.forEach(([k, v])=>{
+    if(v.type==='global'){ html += `<div class="pr-var" data-v="${esc(k)}">` + promptGlobalRowHtml(p, k, v, locked) + `</div>`; return; }
     html += `<div class="pr-var" data-v="${esc(k)}">` + (locked
       ? `<span class="pr-var-name ph ${kindClass(v.type)}">${esc(k)}</span>`
       : `<span class="pr-var-name ph ${kindClass(v.type)}" role="button" tabindex="0" title="${esc(k)} — double-click to rename (the placeholder in the template is renamed too)" ondblclick="startPromptRename(this,'var',0)" oncontextmenu="openPromptItemMenu(event,'var',0)" onkeydown="promptItemKey(event,'var',0)">${esc(k)}</span>`);
@@ -6733,6 +6818,7 @@ function refreshPromptSelection(p){
   Object.entries(p.vars || {}).forEach(([k, v])=>{
     const row = rows.find(r=>r.dataset.v===k); if(!row) return;
     if(v.type==='option') row.querySelectorAll('.pr-pill:not(.add)').forEach((b, i)=>{ const on = v.selected!=='' && v.options[i]===v.selected; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); const w = b.closest('.pr-pill-wrap'); if(w) w.classList.toggle('on', on); });
+    else if(v.type==='global'){ const o = promptGlobalOptions(k) || []; row.querySelectorAll('.pr-pill:not(.add)').forEach((b, i)=>{ const on = v.selected!=='' && o[i]===v.selected; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }); }
     else if(v.type==='instruction') row.querySelectorAll('.pr-check').forEach((c, i)=>{ const on = (v.selected || []).includes(v.options[i]); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); });
     else { const f = row.querySelector('.pr-textfield'); if(f && f.value!==(v.value || '') && document.activeElement!==f) f.value = v.value || ''; }
   });
@@ -6859,18 +6945,18 @@ function startPromptAddOption(btn){
 // ---- presets: named sets of the choices and checklists (text variables are never part of one: they are typed for each use) ----
 function promptPresetMatches(p, preset){
   const keys = Object.keys(p.vars || {}).filter(k=>p.vars[k].type!=='text');
-  if(!preset) return keys.length > 0 && keys.every(k=>{ const v = p.vars[k]; return v.type==='option' ? v.selected==='' : !(v.selected && v.selected.length); }) && Object.values(p.vars).filter(v=>v.type==='text').every(v=>!v.value);
+  if(!preset) return keys.length > 0 && keys.every(k=>{ const v = p.vars[k]; return v.type==='instruction' ? !(v.selected && v.selected.length) : v.selected===''; }) && Object.values(p.vars).filter(v=>v.type==='text').every(v=>!v.value);
   const pk = Object.keys(preset.values || {}).filter(k=>p.vars[k] && p.vars[k].type!=='text');
   if(pk.length!==keys.length) return false;
-  return pk.every(k=>{ const v = p.vars[k], val = preset.values[k]; if(v.type==='option') return v.selected===val; const a = v.selected || [], b = Array.isArray(val) ? val : []; return a.length===b.length && a.every(x=>b.includes(x)); });
+  return pk.every(k=>{ const v = p.vars[k], val = preset.values[k]; if(v.type!=='instruction') return v.selected===val; const a = v.selected || [], b = Array.isArray(val) ? val : []; return a.length===b.length && a.every(x=>b.includes(x)); });
 }
 function applyPromptPreset(i, ev){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || promptTrashed(p)) return;
   if(promptDoubleClickRestore(p, ev)) return; promptRememberClick(p, ev);
-  if(i<0){ Object.values(p.vars).forEach(v=>{ if(v.type==='option') v.selected = ''; else if(v.type==='instruction') v.selected = []; else v.value = ''; }); }
+  if(i<0){ Object.values(p.vars).forEach(v=>{ if(v.type==='option' || v.type==='global') v.selected = ''; else if(v.type==='instruction') v.selected = []; else v.value = ''; }); }
   else {
     const ps = (p.presets || [])[i]; if(!ps) return;
-    Object.entries(ps.values || {}).forEach(([k, val])=>{ const v = p.vars[k]; if(!v) return; if(v.type==='option') v.selected = typeof val==='string' && v.options.includes(val) ? val : ''; else if(v.type==='instruction') v.selected = Array.isArray(val) ? val.filter(x=>v.options.includes(x)) : []; });
+    Object.entries(ps.values || {}).forEach(([k, val])=>{ const v = p.vars[k]; if(!v) return; if(v.type==='option') v.selected = typeof val==='string' && v.options.includes(val) ? val : ''; else if(v.type==='global') v.selected = typeof val==='string' && (promptGlobalOptions(k) || []).includes(val) ? val : ''; else if(v.type==='instruction') v.selected = Array.isArray(val) ? val.filter(x=>v.options.includes(x)) : []; });
   }
   touchPrompt(p); save(); refreshPromptSelection(p);
 }
@@ -6884,7 +6970,7 @@ function promptPresetKey(e){
   const name = input.value.trim().slice(0,60);
   if(name){
     const values = {};
-    Object.entries(p.vars).forEach(([k, v])=>{ if(v.type==='option') values[k] = v.selected; else if(v.type==='instruction') values[k] = [...(v.selected || [])]; });
+    Object.entries(p.vars).forEach(([k, v])=>{ if(v.type==='option' || v.type==='global') values[k] = v.selected; else if(v.type==='instruction') values[k] = [...(v.selected || [])]; });
     p.presets = p.presets || []; const at = p.presets.findIndex(x=>x.name===name);
     if(at>=0) p.presets[at].values = values; else p.presets.push({ name, values });
     touchPrompt(p); save(); showToast(`Preset "${name}" saved`);
@@ -7003,7 +7089,7 @@ function emptyPromptTrash(){
 }
 function copyPrompt(id){
   const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p) return;
-  const missing = Object.entries(p.vars || {}).filter(([, v])=>v.type==='option' ? !v.selected : v.type==='text' ? !(v.value || '').trim() : false).map(([k])=>k);
+  const missing = Object.entries(p.vars || {}).filter(([k, v])=>v.type==='option' ? !v.selected : v.type==='global' ? !promptGlobalChoice(p, k) : v.type==='text' ? !(v.value || '').trim() : false).map(([k])=>k);
   Promise.resolve(noteWriteText(buildPromptFinal(p))).then(ok=>{
     if(!ok){ showToast('Could not use the clipboard here', true); return; }
     showToast(missing.length ? `Prompt copied — ${missing.length} variable${missing.length===1 ? '' : 's'} left empty (${missing.slice(0,3).join(', ')}${missing.length>3 ? '…' : ''})` : 'Prompt copied');
@@ -7126,7 +7212,7 @@ function openPromptListMenu(e){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = rowMenuItem('fa-solid fa-upload', 'Import PromptLab Library…', `closeRowMenu();document.getElementById('promptLabInput').click()`);
+  menu.innerHTML = rowMenuItem('fa-solid fa-globe', 'Global Variables…', `closeRowMenu();openPromptGlobalsModal()`) + '<div class="row-menu-sep"></div>' + rowMenuItem('fa-solid fa-upload', 'Import PromptLab Library…', `closeRowMenu();document.getElementById('promptLabInput').click()`);
   const btn = e.currentTarget, r = btn.getBoundingClientRect();
   menu.classList.add('open');
   const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
@@ -8369,6 +8455,230 @@ function handleNotesKeys(e){
   else if((e.key==='Delete' || e.key==='Backspace') && selectedNoteId){ e.preventDefault(); deleteNote(selectedNoteId); }
 }
 
+// ---- global variables: a fourth kind of placeholder, {{@name}}, whose options are kept in ONE place and shared by every prompt that uses it ----
+// A prompt only stores which value it has chosen (vars['@name'] = {type:'global', selected}); the choices themselves come from promptGlobals, so adding, renaming or removing a
+// value in the Global Variables dialog changes every prompt at once, and a new prompt that contains {{@name}} gets the values automatically.
+const GLOBAL_NAME_BAD = /[{}\[\]()@]/g;
+const globalKey = name=>'@' + name;
+const promptGlobalByName = name=>{ const n = String(name || '').trim().toLowerCase(); return n ? promptGlobals.find(g=>g.name.toLowerCase()===n) : null; };
+const promptGlobalOfKey = key=>promptGlobalByName(String(key).slice(1));
+const promptGlobalById = id=>promptGlobals.find(g=>g.id===id);
+function promptGlobalOptions(key){ const g = promptGlobalOfKey(key); return g ? g.options : null; }
+// The prompts (not in Recently Deleted) whose template uses this global.
+function promptGlobalUsers(g){
+  const want = globalKey(g.name).toLowerCase();
+  return prompts.filter(p=>!promptTrashed(p) && Object.keys(p.vars || {}).some(k=>k.toLowerCase()===want));
+}
+function normalizePromptGlobals(){
+  if(!Array.isArray(promptGlobals)) promptGlobals = [];
+  if(!Array.isArray(deletedPromptGlobalIds)) deletedPromptGlobalIds = [];
+  deletedPromptGlobalIds = deletedPromptGlobalIds.filter(x=>x && x.id);
+  const seen = new Set();
+  promptGlobals = promptGlobals.filter(g=>g && typeof g==='object').map(g=>{
+    if(!isSafeId(g.id)) g.id = genId();
+    g.name = String(g.name || '').replace(GLOBAL_NAME_BAD, '').trim().slice(0, 40) || 'Variable';
+    g.options = [...new Set((Array.isArray(g.options) ? g.options : []).map(x=>String(x).trim().slice(0, 200)).filter(Boolean))].slice(0, 200);
+    if(!Number.isFinite(g.updatedAt)) g.updatedAt = 0;
+    return g;
+  }).filter(g=>{ const k = g.name.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; });
+}
+function mergePromptGlobals(data, respectTombstones){
+  let added = 0, updated = 0;
+  (data.deletedPromptGlobalIds || []).forEach(d=>{
+    if(!d || !d.id) return;
+    const ex = deletedPromptGlobalIds.find(x=>x.id===d.id);
+    if(!ex) deletedPromptGlobalIds.push({ id: d.id, deletedAt: d.deletedAt || Date.now() }); else if((d.deletedAt || 0) > ex.deletedAt) ex.deletedAt = d.deletedAt;
+  });
+  (data.promptGlobals || []).forEach(g=>{
+    if(!g || !g.id) return;
+    const ex = promptGlobalById(g.id);
+    if(ex){ if((g.updatedAt || 0) > (ex.updatedAt || 0)){ Object.assign(ex, g); updated++; } return; }
+    const tomb = deletedPromptGlobalIds.find(x=>x.id===g.id);
+    if(respectTombstones && tomb && tomb.deletedAt >= (g.updatedAt || 0)) return;
+    if(tomb) untombstone(deletedPromptGlobalIds, g.id);
+    promptGlobals.push(g); added++;
+  });
+  return { added, updated };
+}
+// Which choice does a prompt have for a global? Only a value that still exists counts.
+const promptGlobalChoice = (p, key)=>{ const o = promptGlobalOptions(key), v = p.vars[key]; return o && v && o.includes(v.selected) ? v.selected : ''; };
+
+// ---- the panel row ----
+function promptGlobalRowHtml(p, key, v, locked){
+  const g = promptGlobalOfKey(key);
+  const head = `<span class="pr-var-name ph ph-glob" role="button" tabindex="0" title="${esc(key)} — a global variable. Double-click to edit its values." ondblclick="openPromptGlobalsModal('${g ? g.id : ''}')" onkeydown="if(event.key==='Enter'){event.preventDefault();openPromptGlobalsModal('${g ? g.id : ''}')}"><i class="fa-solid fa-globe"></i> ${esc(key.slice(1))}</span>`;
+  if(!g) return head + `<div class="pr-g-missing">There is no global variable named “${esc(key.slice(1))}”.<button type="button" class="pr-g-link" onclick="openPromptGlobalsModal('', '${esc(key.slice(1)).replace(/'/g, '')}')">Create it…</button></div>`;
+  const pills = g.options.length
+    ? `<div class="pr-pills">` + g.options.map((o, i)=>`<button type="button" class="pr-pill${v.selected===o ? ' on' : ''}" aria-pressed="${v.selected===o}" title="${esc(o)}" onclick="pickPromptGlobal(this,${i},event)">${esc(o)}</button>`).join('') + `</div>`
+    : `<div class="pr-g-missing">This global variable has no values yet.</div>`;
+  return head + pills + `<button type="button" class="pr-g-link" onclick="openPromptGlobalsModal('${g.id}')">Edit Values…</button>`;
+}
+function pickPromptGlobal(btn, i, ev){
+  const p = prompts.find(x=>x.id===promptEditorId), row = btn.closest('.pr-var'); if(!p || promptTrashed(p) || !row) return;
+  const key = row.dataset.v, v = p.vars[key], opts = promptGlobalOptions(key); if(!v || !opts) return;
+  if(promptDoubleClickRestore(p, ev)) return; promptRememberClick(p, ev);
+  const o = opts[i]; v.selected = v.selected===o ? '' : o;
+  touchPrompt(p); save(); refreshPromptSelection(p);
+}
+// The "{{@ }}" toolbar button: a menu of the global variables to insert, and the way into the dialog.
+function openPromptGlobalInsertMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  const locked = p.locked || promptTrashed(p);
+  const items = promptGlobals.slice().sort(byNameCI).map(g=>rowMenuItem('fa-solid fa-globe', esc(g.name), `promptInsertGlobal('${g.id}')`, { off: locked }));
+  menu.innerHTML = (items.length ? items.join('') + '<div class="row-menu-sep"></div>' : '') + rowMenuItem('fa-solid fa-sliders', 'Manage Global Variables…', `closeRowMenu();openPromptGlobalsModal()`);
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  menu.classList.add('open');
+  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
+  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+}
+function promptInsertGlobal(id){
+  closeRowMenu();
+  const g = promptGlobalById(id), p = prompts.find(x=>x.id===promptEditorId); if(!g || !p || p.locked || promptTrashed(p)) return;
+  const ta = document.getElementById('pTemplate'); ta.focus();
+  document.execCommand('insertText', false, `{{@${g.name}}}`);
+  onPromptTemplateInput();
+}
+
+// ---- the Global Variables dialog: a list of variables on the left, the selected one's name and values on the right ----
+let globalsSel = '', globalsValSel = -1;
+function openPromptGlobalsModal(id, createName){
+  folderModalKind = null;
+  if(createName){ const name = String(createName).replace(GLOBAL_NAME_BAD, '').trim().slice(0, 40); if(name && !promptGlobalByName(name)){ const g = { id: genId(), name, options: [], updatedAt: Date.now() }; promptGlobals.push(g); id = g.id; save(); } }
+  globalsSel = promptGlobalById(id) ? id : (promptGlobalById(globalsSel) ? globalsSel : (promptGlobals.slice().sort(byNameCI)[0] || {}).id || '');
+  globalsValSel = -1;
+  renderGlobalsModal();
+  document.getElementById('globalsModalBg').classList.add('open');
+}
+function closePromptGlobalsModal(){ closeAllModals(); const p = prompts.find(x=>x.id===promptEditorId); if(p) renderPromptInspector(p); renderPromptsList(); }
+function renderGlobalsModal(focusName){
+  const list = document.getElementById('pgList'), detail = document.getElementById('pgDetail'), foot = document.getElementById('pgFoot'); if(!list || !detail) return;
+  const sorted = promptGlobals.slice().sort(byNameCI), g = promptGlobalById(globalsSel);
+  list.innerHTML = sorted.length
+    ? sorted.map(x=>`<div class="pr-g-row${x.id===globalsSel ? ' on' : ''}" role="option" aria-selected="${x.id===globalsSel}" tabindex="0" onclick="selectPromptGlobal('${x.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectPromptGlobal('${x.id}')}"><i class="fa-solid fa-globe"></i><span class="pr-g-row-name">${esc(x.name)}</span><span class="pr-g-row-count">${x.options.length}</span></div>`).join('')
+    : `<div class="pr-g-empty-list">No global variables yet</div>`;
+  const rm = document.getElementById('pgRemove'); if(rm) rm.disabled = !g;
+  const rmv = document.getElementById('pgRemoveValue'), addv = document.getElementById('pgAddValue'); if(rmv) rmv.disabled = !g || globalsValSel<0; if(addv) addv.disabled = !g;
+  if(!g){
+    detail.innerHTML = `<div class="pr-g-detail-empty"><i class="fa-solid fa-globe"></i><div>Global variables keep one list of values for every prompt that uses them.</div><div class="pr-g-hint">Click <strong>+</strong> to make one, then write <code>{{@name}}</code> in a template.</div></div>`;
+    if(foot) foot.textContent = '';
+    return;
+  }
+  detail.innerHTML = `<label class="pr-g-label" for="pgName">Name</label>
+    <input type="text" id="pgName" class="pr-g-name" value="${esc(g.name)}" maxlength="40" spellcheck="false" autocomplete="off" aria-label="Variable name" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=this.defaultValue;event.stopPropagation();this.blur()}" onblur="commitGlobalName()">
+    <div class="pr-g-hint">Use it in a template as <code>{{@${esc(g.name)}}}</code>.</div>
+    <div class="pr-g-label pr-g-label-values">Values</div>
+    <div class="pr-g-values" id="pgValues" role="listbox" aria-label="Values">${g.options.map((o, i)=>`<div class="pr-g-val${i===globalsValSel ? ' on' : ''}" role="option" aria-selected="${i===globalsValSel}" tabindex="0" data-i="${i}" onclick="selectGlobalValue(${i})" ondblclick="startGlobalValueRename(this,${i})" onkeydown="globalValueKey(event,${i})">${esc(o)}</div>`).join('') || `<div class="pr-g-empty-list">No values yet. Click + to add one.</div>`}</div>`;
+  const n = promptGlobalUsers(g).length;
+  if(foot) foot.textContent = n ? `Used in ${n} prompt${n===1 ? '' : 's'}` : 'Not used in any prompt yet';
+  if(focusName){ const el = document.getElementById('pgName'); if(el){ el.focus(); el.select(); } }
+  const open = prompts.find(x=>x.id===promptEditorId); if(open && document.getElementById('prInspector')) renderPromptInspector(open);     // the panel behind the dialog follows every change
+}
+function selectPromptGlobal(id){ globalsSel = id; globalsValSel = -1; renderGlobalsModal(); }
+function selectGlobalValue(i){ globalsValSel = i; document.querySelectorAll('#pgValues .pr-g-val').forEach((el, j)=>{ el.classList.toggle('on', j===i); el.setAttribute('aria-selected', String(j===i)); }); const rmv = document.getElementById('pgRemoveValue'); if(rmv) rmv.disabled = false; }
+function addPromptGlobal(){
+  let name = 'New Variable', n = 1; while(promptGlobalByName(name)) name = `New Variable ${++n}`;
+  const g = { id: genId(), name, options: [], updatedAt: Date.now() };
+  promptGlobals.push(g); globalsSel = g.id; globalsValSel = -1; save(); renderGlobalsModal(true);
+}
+function removePromptGlobal(){
+  const g = promptGlobalById(globalsSel); if(!g) return;
+  const n = promptGlobalUsers(g).length;
+  const gone = ()=>{
+    promptGlobals = promptGlobals.filter(x=>x.id!==g.id); tombstone(deletedPromptGlobalIds, g.id);
+    globalsSel = ''; save(); openPromptGlobalsModal();
+    showToast(`Global variable “${g.name}” deleted`, false, ()=>{ untombstone(deletedPromptGlobalIds, g.id); g.updatedAt = Date.now(); promptGlobals.push(g); save(); const p = prompts.find(x=>x.id===promptEditorId); if(p) renderPromptInspector(p); showToast('Global variable restored'); });
+  };
+  openConfirmModal({ title: `Delete “${g.name}”?`, body: n ? `${n} prompt${n===1 ? ' uses' : 's use'} it. They keep the placeholder in their template, but it will have no values until you create the variable again. You can undo this from the toast right after deleting.` : 'This global variable is not used in any prompt. You can undo this from the toast right after deleting.', confirmLabel: 'Delete', action: gone });
+}
+// Renaming a global renames its placeholder in every prompt (and keeps each prompt's choice and presets).
+function commitGlobalName(){
+  const g = promptGlobalById(globalsSel), el = document.getElementById('pgName'); if(!g || !el) return;
+  const name = el.value.replace(GLOBAL_NAME_BAD, '').trim().slice(0, 40);
+  if(!name || name===g.name){ el.value = g.name; return; }
+  const clash = promptGlobalByName(name); if(clash && clash.id!==g.id){ showToast(`There is already a global variable named “${name}”`, true); el.value = g.name; return; }
+  renamePromptGlobal(g, name);
+  save(); renderGlobalsModal();
+}
+function renamePromptGlobal(g, name){
+  const oldKey = globalKey(g.name).toLowerCase(), newKey = globalKey(name), re = new RegExp('(?<!\\\\)\\{\\{@' + escapeRegExp(g.name) + '\\}\\}', 'gi');
+  prompts.forEach(p=>{
+    const k = Object.keys(p.vars || {}).find(x=>x.toLowerCase()===oldKey); if(!k) return;
+    p.template = p.template.replace(re, `{{@${name}}}`);
+    const vars = {}; Object.keys(p.vars).forEach(x=>{ vars[x===k ? newKey : x] = p.vars[x]; }); p.vars = vars;
+    (p.presets || []).forEach(ps=>{ if(ps.values && k in ps.values){ ps.values[newKey] = ps.values[k]; delete ps.values[k]; } });
+    p.updatedAt = Date.now();
+    if(p.id===promptEditorId){ const ta = document.getElementById('pTemplate'); if(ta){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template); } }
+  });
+  g.name = name; g.updatedAt = Date.now();
+}
+function addGlobalValue(){
+  const g = promptGlobalById(globalsSel), box = document.getElementById('pgValues'); if(!g || !box) return;
+  box.querySelector('.pr-g-empty-list')?.remove();
+  const input = document.createElement('input');
+  input.type = 'text'; input.className = 'pr-g-val-input'; input.maxLength = 200; input.placeholder = 'New value'; input.setAttribute('aria-label', 'New value');
+  box.appendChild(input); box.scrollTop = box.scrollHeight; input.focus();
+  let done = false;
+  const finish = (keepGoing)=>{
+    if(done) return; done = true;
+    const text = input.value.trim().slice(0, 200);
+    if(text && !g.options.includes(text)){ g.options.push(text); g.updatedAt = Date.now(); save(); }
+    else if(text) showToast(`“${text}” is already a value`, true);
+    renderGlobalsModal();
+    if(keepGoing && text) addGlobalValue();
+  };
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); finish(true); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); done = true; renderGlobalsModal(); } });
+  input.addEventListener('blur', ()=>finish(false));
+}
+function startGlobalValueRename(el, i){
+  const g = promptGlobalById(globalsSel); if(!g || g.options[i]===undefined) return;
+  const input = document.createElement('input'); input.type = 'text'; input.className = 'pr-g-val-input'; input.maxLength = 200; input.value = g.options[i]; input.setAttribute('aria-label', 'Rename value');
+  let done = false;
+  const finish = ok=>{
+    if(done) return; done = true;
+    const text = input.value.trim().slice(0, 200), old = g.options[i];
+    if(ok && text && text!==old){
+      if(g.options.some((o, j)=>j!==i && o===text)) showToast(`“${text}” is already a value`, true);
+      else renamePromptGlobalValue(g, i, text);
+    }
+    renderGlobalsModal();
+  };
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); finish(true); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); finish(false); } });
+  input.addEventListener('blur', ()=>finish(true));
+  el.replaceWith(input); input.focus(); input.select();
+}
+// A renamed value follows into every prompt's choice and presets; a removed one is cleared from them.
+function renamePromptGlobalValue(g, i, text){
+  const old = g.options[i], key = globalKey(g.name).toLowerCase();
+  g.options[i] = text; g.updatedAt = Date.now();
+  prompts.forEach(p=>Object.keys(p.vars || {}).forEach(k=>{
+    if(k.toLowerCase()!==key) return;
+    if(p.vars[k].selected===old) p.vars[k].selected = text;
+    (p.presets || []).forEach(ps=>{ if(ps.values && ps.values[k]===old) ps.values[k] = text; });
+  }));
+  save();
+}
+function removePromptGlobalValue(i){
+  const g = promptGlobalById(globalsSel); if(!g || g.options[i]===undefined) return;
+  const old = g.options[i], key = globalKey(g.name).toLowerCase();
+  g.options.splice(i, 1); g.updatedAt = Date.now();
+  prompts.forEach(p=>Object.keys(p.vars || {}).forEach(k=>{
+    if(k.toLowerCase()!==key) return;
+    if(p.vars[k].selected===old) p.vars[k].selected = '';
+    (p.presets || []).forEach(ps=>{ if(ps.values && ps.values[k]===old) ps.values[k] = ''; });
+  }));
+  globalsValSel = Math.min(i, g.options.length - 1); save(); renderGlobalsModal();
+}
+function removeSelectedGlobalValue(){ if(globalsValSel>=0) removePromptGlobalValue(globalsValSel); }
+function globalValueKey(e, i){
+  if(e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); removePromptGlobalValue(i); }
+  else if(e.key==='Enter' || e.key==='F2'){ e.preventDefault(); startGlobalValueRename(e.currentTarget, i); }
+  else if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); const j = Math.max(0, Math.min((promptGlobalById(globalsSel) || { options: [] }).options.length - 1, i + (e.key==='ArrowDown' ? 1 : -1))); selectGlobalValue(j); document.querySelector(`#pgValues .pr-g-val[data-i="${j}"]`)?.focus(); }
+  else if(e.key===' '){ e.preventDefault(); selectGlobalValue(i); }
+}
+
 // ---- keyboard (Prompts: the list side; the template field and the variables have their own) ----
 function handlePromptsKeys(e){
   if(document.querySelector('.modal-bg.open')) return;
@@ -8858,7 +9168,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders});
+  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 function handleFileImport(event){
@@ -8920,17 +9230,18 @@ function mergeData(data, opts){
   });
   const nm = mergeNotesData(data, respectTombstones); added += nm.added; updated += nm.updated;
   const pm = mergePromptsData(data, respectTombstones); added += pm.added; updated += pm.updated;
+  const gm = mergePromptGlobals(data, respectTombstones); added += gm.added; updated += gm.updated;
   return {added, updated};
 }
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders});
+    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
     // an older export has no notes: leave yours alone rather than wiping them
     if(Array.isArray(pendingImportData.notes)){ notes = pendingImportData.notes; noteFolders = pendingImportData.noteFolders || []; }
-    if(Array.isArray(pendingImportData.prompts)){ prompts = pendingImportData.prompts; promptFolders = pendingImportData.promptFolders || []; }
+    if(Array.isArray(pendingImportData.prompts)){ prompts = pendingImportData.prompts; promptFolders = pendingImportData.promptFolders || []; promptGlobals = pendingImportData.promptGlobals || []; }
     normalizeData();
     showToast('Backed up previous data, then replaced');
   } else {
@@ -8996,7 +9307,7 @@ async function fileSyncWrite(data){
           const {added, updated} = mergeData(externalData);
           if(added || updated){
             normalizeData();
-            payload = { ...data, projects, tasks, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds };
+            payload = { ...data, projects, tasks, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
             render();
             showToast(`Synced changes from another tab/device (${added} added, ${updated} updated)`);
