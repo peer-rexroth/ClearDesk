@@ -314,3 +314,26 @@ test('global values can be reordered, and the order is what every prompt shows',
   assertTrue(moveGlobalValue(0, 2)); assertDeepEqual(g.options, ['b', 'c', 'a']); assertEqual(globalsValSel, 2); assertTrue(g.updatedAt > 1);
   assertFalse(moveGlobalValue(1, 1)); assertDeepEqual(promptGlobalOptions('@Tone'), ['b', 'c', 'a']);
 });
+
+test('a fresh install can start with built-in global variables; they are added once by name and are then editable', function () {
+  pgfresh();
+  seedDefaultPromptGlobals([{ name: 'Tone', options: ['natural', 'professional'] }, { name: 'Language', options: ['English'] }]);
+  assertEqual(promptGlobals.length, 2); assertDeepEqual(promptGlobalByName('Tone').options, ['natural', 'professional']);
+  assertTrue(isSafeId(promptGlobalByName('Tone').id)); assertEqual(promptGlobalByName('Tone').id, 'gdtone', 'a fixed id, so fresh installs agree');
+  promptGlobalByName('Tone').options.push('direct');
+  seedDefaultPromptGlobals([{ name: 'tone', options: ['x'] }]);
+  assertEqual(promptGlobals.length, 2, 'not added again, whatever the case'); assertDeepEqual(promptGlobalByName('Tone').options, ['natural', 'professional', 'direct']);
+});
+
+test('the built-in global variables: six, valid names, no clashes, and a fresh install gets them', function () {
+  assertEqual(DEFAULT_PROMPT_GLOBALS.length, 6);
+  pgfresh(); seedDefaultPromptGlobals();
+  assertEqual(promptGlobals.length, 6, 'no two share a name or an id');
+  ['language', 'language_level', 'tone', 'wording_style', 'audience', 'detail_level'].forEach(function (n) { assertTrue(!!promptGlobalByName(n), n); });
+  assertDeepEqual(promptGlobalByName('tone').options, ['Professional', 'Neutral', 'Friendly', 'Formal']);
+  promptGlobals.forEach(function (g) { assertTrue(isSafeId(g.id), g.id); assertTrue(g.options.length > 0); });
+  localStorage.clear(); pgfresh(); load();
+  assertEqual(promptGlobals.length, 6, 'load() with nothing saved seeds them'); assertTrue(!!promptGlobalOfKey('@language_level'));
+  const d = dataPayload(); localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.assign({}, d, { promptGlobals: [] }))); load();
+  assertEqual(promptGlobals.length, 0, 'saved data without globals is left alone');
+});

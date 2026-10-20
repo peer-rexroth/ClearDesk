@@ -2895,6 +2895,7 @@ function load(){
     } else {
       projects = defaultProjects();
       tasks = defaultTasks();
+      seedDefaultPromptGlobals();                                     // a fresh install: the built-in global variables
     }
     normalizeData();
   }catch(e){
@@ -8677,6 +8678,23 @@ const promptGlobalByName = name=>{ const n = String(name || '').trim().toLowerCa
 const promptGlobalOfKey = key=>promptGlobalByName(String(key).slice(1));
 const promptGlobalById = id=>promptGlobals.find(g=>g.id===id);
 function promptGlobalOptions(key){ const g = promptGlobalOfKey(key); return g ? g.options : null; }
+// Global variables a fresh install starts with (name + values). They are added once, only when the app has no saved data at all, and are then the
+// user's to edit or delete. The ids are fixed so two fresh installs that sync with each other agree, and a deleted one stays deleted (its tombstone is respected).
+const DEFAULT_PROMPT_GLOBALS = [
+  { name: 'language', options: ['English', 'German', 'Match input'] },
+  { name: 'language_level', options: ['B1', 'B2', 'C1', 'C2'] },
+  { name: 'tone', options: ['Professional', 'Neutral', 'Friendly', 'Formal'] },
+  { name: 'wording_style', options: ['Polished', 'Natural', 'Direct'] },
+  { name: 'audience', options: ['General', 'Business', 'Executive', 'Technical', 'Expert'] },
+  { name: 'detail_level', options: ['Brief', 'Standard', 'Detailed', 'Comprehensive'] }
+];
+function seedDefaultPromptGlobals(list){
+  (list || DEFAULT_PROMPT_GLOBALS).forEach(d=>{
+    if(!d || !d.name || promptGlobalByName(d.name)) return;
+    promptGlobals.push({ id: 'gd' + String(d.name).toLowerCase().replace(/[^a-z0-9]/g, ''), name: d.name, options: (d.options || []).slice(), updatedAt: Date.now() });
+  });
+  normalizePromptGlobals();
+}
 // The prompts (not in Recently Deleted) whose template uses this global.
 function promptGlobalUsers(g){
   const want = globalKey(g.name).toLowerCase();
