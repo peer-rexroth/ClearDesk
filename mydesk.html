@@ -529,7 +529,7 @@ const ICONS = {
   .sync-note strong { color: var(--text); font-weight: 600; }
   .about-modal { width: 320px; padding: 40px 28px 24px; gap: 0; align-items: center; text-align: center; position: relative; }
   .about-close { position: absolute; top: 14px; left: 14px; }
-  .about-icon { width: 88px; height: 88px; border-radius: 22%; box-shadow: var(--elev-2), 0 0 0 0.5px rgba(0,0,0,.12); }
+  .about-icon { width: 88px; height: 88px; border-radius: 22%; box-shadow: var(--elev-2), 0 0 0 0.5px var(--ink-ring); }
   .about-name { font-size: var(--fs-22); font-weight: 700; margin-top: 16px; letter-spacing: -0.01em; }
   .about-tag { font-size: var(--fs-13); color: var(--text-3); margin-top: 3px; }
   .about-credits { font-size: var(--fs-13); color: var(--text-2); margin-top: 22px; }
@@ -1001,7 +1001,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1258,7 +1258,7 @@ const ICONS = {
   .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg-2); font: 700 13px/1 var(--font); cursor: default; display: inline-flex; align-items: center; justify-content: center; }
   .nc-sw:hover { box-shadow: 0 0 0 2px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
-  ::highlight(note-search) { background-color: rgba(255, 214, 10, .45); color: inherit; }
+  ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
   /* the copy button on a code block: a small Apple-style material chip in its top right corner, shown while the pointer is over the block */
   .note-code-copy { position: absolute; z-index: 3; width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 1px solid var(--border-2); background: var(--glass-strong, var(--bg-2)); color: var(--text-2); font-size: var(--fs-12); cursor: default; box-shadow: var(--elev-1); transition: background .12s ease, color .12s ease; }
   .note-code-copy .tb-ico2 { width: 14px; height: 14px; }
@@ -2067,7 +2067,7 @@ const ICONS = {
 <div class="modal-bg" id="allTasksProjectsModalBg" onclick="if(event.target===this) closeAllModals()">
   <div class="modal" style="width:360px" role="dialog" aria-modal="true" aria-labelledby="allTasksProjectsTitle">
     <h3 id="allTasksProjectsTitle">Projects shown</h3>
-    <p style="font-size:12px;color:var(--text-3);margin-top:-8px">Choose which projects' tasks show up in the All Tasks list and as board columns.</p>
+    <p style="font-size:var(--fs-12);color:var(--text-3);margin-top:-8px">Choose which projects' tasks show up in the All Tasks list and as board columns.</p>
     <div id="allTasksProjectsList" style="display:flex;flex-direction:column;gap:1px;max-height:320px;overflow-y:auto"></div>
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeAllModals()">Done</button></div>
   </div>
@@ -3614,7 +3614,7 @@ function renderDrawer(){
         <div class="field">
           <label style="display:flex;justify-content:space-between;align-items:center">
             <span>Repeat</span>
-            ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="skipOccurrence('${t.id}')" title="Advance to the next occurrence without completing" style="text-transform:none;letter-spacing:normal;font-weight:600;font-size:11px;color:var(--text-2)"><i class="fa-solid fa-forward-step"></i> Skip</button>` : ''}
+            ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="skipOccurrence('${t.id}')" title="Advance to the next occurrence without completing" style="text-transform:none;letter-spacing:normal;font-weight:600;font-size:var(--fs-11);color:var(--text-2)"><i class="fa-solid fa-forward-step"></i> Skip</button>` : ''}
           </label>
           <select onchange="updateTaskField('${t.id}','repeat',this.value)">${repeatOptions}</select>
         </div>
@@ -3627,7 +3627,7 @@ function renderDrawer(){
         </div>
         <div class="field">
           <label>&nbsp;</label>
-          <div style="padding:8px 0;font-size:13px;color:var(--text-2)">${repeatUnitLabel(t.repeat, t.repeatInterval)}</div>
+          <div style="padding:8px 0;font-size:var(--fs-13);color:var(--text-2)">${repeatUnitLabel(t.repeat, t.repeatInterval)}</div>
         </div>
       </div>
       ${t.repeat==='weekly' ? `
@@ -6526,8 +6526,8 @@ function noteTableMenuHtml(){
   return tblMenuJoin([
     [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')),
      item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter'))],
-    [...(cr===0 ? [item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table)))] : []),                 // header toggles only where they apply: first row / first column
-     ...(cc===0 && table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), tblTick(tblHeadCol(table)))] : [])],
+    [item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: cr!==0}),                 // the header toggles stay in the menu but are dimmed away from the first row / first column
+     item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: cc!==0 || table.rows.length<2})],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
@@ -6734,7 +6734,7 @@ function tblGripMenuHtml(kind, sel, table){
   return tblMenuJoin([
     [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), `Insert ${nounN} ${col ? 'left' : 'above'}`, run(col ? 'colBefore' : 'rowBefore')),
      item(tblInsIcon(col ? 'colRight' : 'rowBelow'), `Insert ${nounN} ${col ? 'right' : 'below'}`, run(col ? 'colAfter' : 'rowAfter'))],
-    a===0 && table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), tblTick(tblHeadCol(table))) : item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table)))] : [],   // only on the first row / column
+    table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: a!==0})] : [],   // dimmed except on the first row / column
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
@@ -6799,7 +6799,7 @@ function tblTableMenuHtml(table){
   const item = rowMenuItem, run = op=>`tblTableRun('${op}')`;
   return tblMenuJoin([
     [item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table))),
-     ...(table.rows.length>1 ? [item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), tblTick(tblHeadCol(table)))] : []),
+     item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: table.rows.length<2}),
      ...(table.querySelector('colgroup') ? [item(TBL_ICON.even, 'Distribute Columns Evenly', run('even'))] : [])],
     [item(TBL_ICON.cut, 'Cut', run('cut')), item(TBL_ICON.copy, 'Copy', run('copy'))],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
