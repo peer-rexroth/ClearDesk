@@ -1344,7 +1344,6 @@ const ICONS = {
   html[data-scheme] .note-toolbar .tool-split .tool-btn, html[data-scheme] .note-toolbar .tool-split .tool-btn:hover:not(:disabled), html[data-scheme] .note-toolbar .tool-split .tool-btn:is(.active, .on) { background: transparent; }
   .note-toolbar .tool-split .list-main { min-width: 0 !important; padding: 0 4px 0 10px; }
   .note-toolbar .tool-split .list-caret { min-width: 0 !important; width: auto; padding: 0 10px 0 4px; color: var(--text-3); }   /* 22px wide: the split button's arrow is a target of its own (HIG minimum 20) */
-  .note-list-menu .pop-check { width: 14px; }
   .note-list-menu .pop-label { white-space: nowrap; }
   .note-table-menu:not(:has(.tbl-picker)) .pop-label { white-space: nowrap; }   /* "Insert column right" must not wrap */
   .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0 .8em; }
@@ -1492,6 +1491,11 @@ const ICONS = {
   /* the ⋯ button at the right of the editor bar: same round filled button as compose; amber while the note is locked */
   html[data-scheme="glass"] .note-toolbar .note-more-btn, html[data-scheme="glass"] .note-toolbar .note-lock-btn { width: var(--bar-ctl-h); height: var(--bar-ctl-h); min-width: 0; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; font-size: 16px; }
   html[data-scheme="glass"] .note-toolbar .note-more-btn.on { background: var(--amber-bg); color: var(--amber-text); }
+  /* The round bar buttons (new, lock, ⋯, the panel toggle, the list's ⋯) are plain symbols on the same soft fill as the capsule groups: no ring or rim, as in a macOS toolbar */
+  html[data-scheme="glass"] :is(.note-toolbar, .notes-list-head) :is(.note-new-btn, .note-more-btn, .note-lock-btn, .note-sort-btn) { border: 0; box-shadow: none; background: var(--cap-fill); }
+  html[data-scheme="glass"] :is(.note-toolbar, .notes-list-head) :is(.note-new-btn, .note-more-btn, .note-lock-btn, .note-sort-btn):hover:not(:disabled) { background: var(--cap-hover); }
+  html[data-scheme="glass"] .note-toolbar .note-more-btn.on { background: var(--amber-bg); color: var(--amber-text); }
+  html[data-scheme="glass"] .note-toolbar #pInspToggle[aria-pressed="true"] { background: var(--cap-on); }
   /* keep the editor bar on ONE row in a narrower pane: the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
   @container notepane (max-width: 740px) { .note-toolbar .tool-btn { min-width: 28px !important; } .note-toolbar .tool-group { gap: 0; } .note-toolbar .note-clear-btn { display: none; } }
