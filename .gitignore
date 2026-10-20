@@ -1,4 +1,6 @@
 .claude/
+.workbench-server.pid
 .mydesk-server.pid
+.workbench-server.log
 .mydesk-server.log
 .DS_Store

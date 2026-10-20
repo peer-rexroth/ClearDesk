@@ -1,8 +1,8 @@
 {
-  "name": "MyDesk",
-  "short_name": "MyDesk",
-  "description": "A local-first task and notes manager — projects, priorities, due dates, subtasks and recurring tasks, stored entirely on your device.",
-  "start_url": "./mydesk.html",
+  "name": "Workbench",
+  "short_name": "Workbench",
+  "description": "A local-first workspace for tasks, notes and prompts — projects, due dates, rich notes and reusable prompt templates, stored entirely on your device.",
+  "start_url": "./workbench.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",

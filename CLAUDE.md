@@ -1,17 +1,17 @@
-# MyDesk (formerly mytasks)
+# Workbench (formerly MyDesk, and before that mytasks)
 
 
-**Rename note:** the app was renamed from mytasks to MyDesk. Internal storage keys (`mytasks_*` in localStorage) and the IndexedDB name `mytasks-fs` were deliberately NOT renamed, so existing users keep their data and linked file. Don't "fix" them without a migration.
+**Rename note:** the app was renamed mytasks → MyDesk → Workbench (the GitHub repository and the PWA name too). Internal identifiers were deliberately NOT renamed, so existing users keep their data and linked file: the localStorage keys (`mytasks_*` and the Prompts keys `mydesk_prompts_*`), the IndexedDB name `mytasks-fs`, the folder-picker id `mydesk-folder` and the drag types `application/x-mydesk-*`. Don't "fix" them without a migration. The app file used to be `mydesk.html`; that file is now a tiny redirect to `workbench.html` so an old install or bookmark still opens (an installed PWA keeps its old name until it is reinstalled). New export and backup files are named `workbench-…json`; older `mydesk-…json` data files are still recognised (a data file is detected by its content, not its name).
 
 A single-file task manager PWA. Everything — HTML, CSS, and JS — lives in
-`mydesk.html` (~3,200 lines). There is no build step, no bundler, no
+`workbench.html` (~3,200 lines). There is no build step, no bundler, no
 dependencies (no CDN either: icons are inline CSS). Edit the file directly.
 
 ## Running it
 
-`./start-mydesk.command` serves the directory on `http://127.0.0.1:8934` and
+`./start-workbench.command` serves the directory on `http://127.0.0.1:8934` and
 opens it in Chrome/Edge (Safari can't install this kind of PWA on macOS).
-`./stop-mydesk.command` kills the server. A plain `file://` open also works
+`./stop-workbench.command` kills the server. A plain `file://` open also works
 for quick checks, but PWA install/offline support requires the http server.
 
 Data persists to `localStorage` by default; there's also an optional
@@ -500,7 +500,7 @@ the old top bar's right-hand group) and the counts footer. Every column then sta
 - Narrow windows: the sidebar and the opened drawer float from `top: 0`; the sidebar resizer is hidden.
 - Notes mode hides every sidebar child except search, `#notesSide`, `.sb-head` and `.sb-tools` (the `:not()` chain in the
   `html[data-mode="notes"] .sidebar >` rule — add a new always-visible sidebar block there).
-- The wordmark is gone from the UI (About, the page title and the manifest still say MyDesk).
+- The wordmark is gone from the UI (About, the page title and the manifest still say Workbench).
 
 ## Shared state that spans views
 
@@ -801,8 +801,8 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 - Per-note conflicts: each note has `baseAt` (the `updatedAt` last in sync with the file; set after a file write and when a merge adopts a note; legacy notes default to `updatedAt`). In `mergeNotesData`, if both sides changed a note past `baseAt` with different text, the newer stays and the other becomes a new note "<title> (conflicted copy)" in the same folder. No copy when we hadn't edited since the last sync or the text is identical.
 
 ## Linking by folder and the daily file backup
-- Modelled on Milestone / Pulse. **Linking asks for the data file's folder** (`pickDataFolder()`: `showDirectoryPicker({id:'mydesk-folder', mode:'readwrite'})`, one permission); the file picker is no longer used. *Create new file* asks for a name in a small dialog (`#newFileModalBg`, default `mydesk-data`, `.json` added, path characters and existing names refused; the daily backup file is named `<name>-YYYY-MM-DD.json`) and creates it in the folder; *Link existing file* lists the folder's `.json` files that hold MyDesk data (`listDataFiles`), links the only one directly or shows the `#dataFilesModalBg` chooser, then `finishLink()` merges it. Handles are stored in IndexedDB: `linked-file` (file) and `linked-dir` (folder, `_FS.dirKey`, via `_fsGetK/_fsPutK/_fsDelK`); `_clearFileLink()` drops both. `reconnectFile()` asks the folder's permission first.
-- **Daily backup**: `fileBackupIfDue()` (from `save()`, after linking and at startup; gate `lastFileBackupDay`, in memory) writes `Backup/mydesk-data-YYYY-MM-DD.json` (compact `dataPayload()`) into the linked folder. Like Milestone/Pulse: first writer each day wins (an existing file for today is left alone, probed with `getFileHandle` without `create`), best-effort and silent, never prompts, **kept forever** (nothing is deleted). No separate backup-folder pick.
+- Modelled on Milestone / Pulse. **Linking asks for the data file's folder** (`pickDataFolder()`: `showDirectoryPicker({id:'mydesk-folder', mode:'readwrite'})`, one permission); the file picker is no longer used. *Create new file* asks for a name in a small dialog (`#newFileModalBg`, default `workbench-data`, `.json` added, path characters and existing names refused; the daily backup file is named `<name>-YYYY-MM-DD.json`) and creates it in the folder; *Link existing file* lists the folder's `.json` files that hold Workbench data (`listDataFiles`), links the only one directly or shows the `#dataFilesModalBg` chooser, then `finishLink()` merges it. Handles are stored in IndexedDB: `linked-file` (file) and `linked-dir` (folder, `_FS.dirKey`, via `_fsGetK/_fsPutK/_fsDelK`); `_clearFileLink()` drops both. `reconnectFile()` asks the folder's permission first.
+- **Daily backup**: `fileBackupIfDue()` (from `save()`, after linking and at startup; gate `lastFileBackupDay`, in memory) writes `Backup/workbench-data-YYYY-MM-DD.json` (compact `dataPayload()`) into the linked folder. Like Milestone/Pulse: first writer each day wins (an existing file for today is left alone, probed with `getFileHandle` without `create`), best-effort and silent, never prompts, **kept forever** (nothing is deleted). No separate backup-folder pick.
 - A file linked by the old picker keeps working without a folder; The Data menu row *Enable daily file backup* / *Resume daily file backup* (`fileBackupMenuAction`, `updateFileBackupUI`) exists ONLY when action is needed (file linked without a folder, or a lapsed permission) and is hidden when backups just work; for an old link, `linkBackupFolder()` asks for its folder (must contain the file, checked with `dir.resolve()`). A lapsed folder permission shows "Permission needed" there; clicking re-grants and backs up.
 - Verified in Chromium through the origin-private file system with a stubbed `showDirectoryPicker` (create, same-day no-overwrite, link one file, chooser for several, legacy folder link).
 
