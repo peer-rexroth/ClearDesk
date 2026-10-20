@@ -84,7 +84,7 @@ Type: **I** inconsistency, **H** HIG deviation, **B** both. Status: **Fixed**, *
 ### Surfaces and colour
 - Content panes are opaque (`--bg`, `--bg-2`, `--bg-3`); chrome (sidebar, toolbars, menus, popovers, dialogs) uses the Glass material. Every colour is a token with a light and a dark value.
 - One accent: `--accent` (light `#2a5fcf`, dark `#2c62c9`) with `--accent-hover`, `--accent-tint`, `--on-accent`, `--danger`. Selected rows use the accent with white text at 0.94 / 0.85 opacity for the secondary levels.
-- Text: `--text`, `--text-2` (0.74), `--text-3` (0.62 light / 0.56 dark), all at least 4.5:1 on the content surfaces.
+- Text: `--text`, `--text-2` (0.74), `--text-3` (0.62 light / 0.62 dark), all at least 4.5:1 on the content surfaces.
 
 ### Type, spacing, shape, depth
 | Scale | Values |
@@ -123,11 +123,11 @@ Title-style labels, a 16px icon slot, "…" only where more input follows, no sh
 - **F-16, F-28, F-33** are done with a deliberate remainder: status dots and the focus ring keep their own colours; row hovers keep `--bg-2`; about 36 component shadows stay as single-use definitions.
 - **Not remapped on purpose:** the colours and sizes in the mail/clipboard export HTML (`noteToMailHtml`), the print rules, and the glyph sizes inside controls (tick marks, grips, small chevrons).
 
-## 5. Needs a visual check
+## 5. Visual checks (done) and what remains
 
-These could not be confirmed from code or headless screenshots:
-1. **Secondary-text contrast on translucent Glass chrome** (sidebar, toolbars). It was calculated against flat surfaces only.
-2. **The light theme overall.** Headless light-mode rendering was unreliable, so the light theme was judged by calculation, not by eye.
-3. **The Notes editor toolbar with a note open**, for icon sizes and spacing.
-4. **Hover states and the new keyboard routes** (Shift+F10 in tables, ⌥↑/⌥↓ on folders) with a real mouse and keyboard; they were tested by script.
-5. **The native select pop-up lists** in Safari and Firefox, which follow `color-scheme` but could not be rendered headlessly.
+**Done, with a screenshot-based method.** The light theme was rendered reliably (by switching theme through the app, not by editing attributes), and contrast was measured from the real pixels behind every text run, including the translucent Glass chrome, in both themes, across the task list, the board, the detail panel, a context menu and Notes with a note open.
+- **Contrast:** no text run below the HIG minimum in the light theme. In the dark theme two spots measured 4.2–4.3:1 (the inactive Tasks/Notes tab and the sidebar counts); `--text-3` in dark was raised from 0.56 to 0.62 and they now pass.
+- **Light theme:** looks consistent with the dark theme in every screen checked. One defect found and fixed: the number fields in the task detail panel ("Every", "After N times") were unstyled (square corners, native border). They now match the other fields in both themes.
+- **Notes toolbar with a note open:** every control is 36px high, groups are 6px apart, icons are 18px, and the bar's left and right edges sit on the 20px gutter (the same as the note title).
+
+**Still only tested by script.** Hover states and the keyboard routes (Shift+F10 in tables, ⌥↑/⌥↓ on folders) with a real mouse and keyboard, and the open select pop-up lists in Safari and Firefox.

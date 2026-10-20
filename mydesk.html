@@ -441,7 +441,7 @@ const ICONS = {
 
   .field { display: flex; flex-direction: column; gap: 6px; }
   .field label { font-size: var(--fs-11); font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text-3); }
-  .field input[type=text], .field input[type=date], .field textarea, .field select {
+  .field input[type=text], .field input[type=date], .field input[type=number], .field textarea, .field select {
     width: 100%; border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px;
     font-size: var(--fs-14); background: var(--bg-2); color: var(--text); outline: none; font-family: var(--font);
   }
@@ -689,7 +689,7 @@ const ICONS = {
   .help-row { font-size: var(--fs-14); }
   .drawer-header input.title-input { font-size: var(--fs-17); }
   .drawer-footer .meta, .subtask-progress { font-size: var(--fs-12); }
-  .field input[type=text], .field input[type=date], .field textarea, .field select { font-size: var(--fs-15); border-width: 1px; }
+  .field input[type=text], .field input[type=date], .field input[type=number], .field textarea, .field select { font-size: var(--fs-15); border-width: 1px; }
   .ui-scale-panel-header { font-size: var(--fs-13); }
 
   /* ── UX pass: inline cell editing, quick-add preview, sync banner,
@@ -862,7 +862,7 @@ const ICONS = {
   }
   html[data-scheme="glass"][data-theme="dark"] {
     --bg: rgba(34,36,52,.50); --bg-2: rgba(22,24,36,.40); --bg-3: rgba(255,255,255,.12);
-    --text: #f5f6fa; --text-2: rgba(245,246,250,.74); --text-3: rgba(245,246,250,.56);
+    --text: #f5f6fa; --text-2: rgba(245,246,250,.74); --text-3: rgba(245,246,250,.62);
     --border: rgba(255,255,255,.14); --border-2: rgba(255,255,255,.26);
     --blue-bg: rgba(10,132,255,.26); --blue-text: #8cc2ff; --blue-border: #3a82e0;
     --teal-bg: rgba(48,176,160,.26); --teal-text: #7fe0d0;
@@ -932,7 +932,7 @@ const ICONS = {
   html[data-scheme="glass"] .view-switch-btn.active { background: var(--glass-strong); color: var(--text); box-shadow: inset 0 1px 0 var(--glass-rim), 0 2px 8px var(--glass-lift-2); }
   html[data-scheme="glass"] .f-chip { background: var(--bg-3); border-color: var(--glass-edge); }
   html[data-scheme="glass"] .main-toolbar select { border-radius: var(--radius); background: var(--bg-3); border-color: var(--glass-edge); }
-  html[data-scheme="glass"] .field input[type=text], html[data-scheme="glass"] .field input[type=date], html[data-scheme="glass"] .field textarea, html[data-scheme="glass"] .field select,
+  html[data-scheme="glass"] .field input[type=text], html[data-scheme="glass"] .field input[type=date], html[data-scheme="glass"] .field input[type=number], html[data-scheme="glass"] .field textarea, html[data-scheme="glass"] .field select,
   html[data-scheme="glass"] .modal input, html[data-scheme="glass"] .modal select { background: var(--bg-2); border: 1px solid var(--glass-edge); border-radius: var(--radius); }
   html[data-scheme="glass"] .sel-chip { background: var(--bg-3); }
 
