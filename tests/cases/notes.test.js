@@ -923,3 +923,17 @@ test('noteTableNextWidth steps a table through 35 / 44 / 66 / 88 / 100 and stops
   assertEqual(noteTableNextWidth(mk('50%'), 1), 66, 'an off-step width moves to the next step up');
   assertEqual(noteTableNextWidth(mk('50%'), -1), 44, 'or the next step down');
 });
+
+// ---- the Pinned filter ----
+test('the Pinned filter lists pinned notes from every folder (not deleted ones), and a search still looks everywhere', function () {
+  noteFolders.push({ id: 'f-a', name: 'A' });
+  notes = [
+    { id: 'n1', title: 'One', body: '<p>x</p>', folderId: NOTES_DEFAULT_FOLDER, pinned: true, createdAt: 1, updatedAt: 3 },
+    { id: 'n2', title: 'Two', body: '<p>y</p>', folderId: 'f-a', pinned: true, createdAt: 1, updatedAt: 2 },
+    { id: 'n3', title: 'Three', body: '<p>z</p>', folderId: 'f-a', createdAt: 1, updatedAt: 1 },
+    { id: 'n4', title: 'Four', body: '<p>w</p>', folderId: 'f-a', pinned: true, deletedAt: 5, createdAt: 1, updatedAt: 5 }];
+  noteFolderFilter = 'pinned'; noteSearchQuery = '';
+  assertDeepEqual(visibleNotes().map(n => n.id), ['n1', 'n2']);
+  noteSearchQuery = 'three'; assertDeepEqual(visibleNotes().map(n => n.id), ['n3'], 'a search looks through every note, pinned or not');
+  noteSearchQuery = ''; noteFolderFilter = 'all';
+});

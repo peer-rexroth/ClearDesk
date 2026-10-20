@@ -269,6 +269,7 @@ const ICONS = {
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
+  .pr-empty-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: center; }
   .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
   .note-row.dragging { opacity: .4; }
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
@@ -845,7 +846,7 @@ const ICONS = {
     --bg: rgba(255,255,255,.46); --bg-2: rgba(255,255,255,.30); --bg-3: rgba(255,255,255,.62);
     --text: #15161b; --text-2: rgba(21,22,27,.74); --text-3: rgba(21,22,27,.62);
     --border: rgba(40,44,70,.13); --border-2: rgba(40,44,70,.24);
-    --blue-bg: rgba(10,132,255,.16); --blue-text: #0a5fd0; --blue-border: #7ab4ff;
+    --blue-bg: rgba(10,132,255,.16); --blue-text: #0959c8; --blue-border: #7ab4ff;
     --teal-bg: rgba(48,176,160,.18); --teal-text: #0b6b5f;
     --amber-bg: rgba(255,159,10,.20); --amber-text: #8a4b00;
     --red-bg: rgba(255,69,58,.15); --red-text: #c4281f;
@@ -1001,7 +1002,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 80%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1171,7 +1172,7 @@ const ICONS = {
   html[data-mode="notes"] .sidebar > :not(.sidebar-search):not(#notesSide):not(.sb-head):not(.sb-tools) { display: none !important; }
   html[data-mode="notes"] .main, html[data-mode="notes"] .drawer { display: none !important; }
   .notes-main { display: none; flex: 1; min-width: 0; overflow: hidden; background: var(--bg); }
-  html[data-mode="notes"] .notes-main { display: flex; }
+  html[data-mode="notes"] #notesMain { display: flex; }
   .notes-list-pane { width: var(--notes-list-w, 300px); flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); }
   .notes-list-head { display: flex; align-items: center; gap: 10px; padding: 16px 14px 4px 20px; }
   .notes-list-head h2 { flex: 1; min-width: 0; font-size: var(--fs-22); font-weight: 700; letter-spacing: -0.01em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -1552,6 +1553,87 @@ const ICONS = {
   .ap-match-text { display: flex; flex-direction: column; gap: 1px; }
   .ap-sub { font-size: var(--fs-12); color: var(--text-3); }
 
+
+  /* ── Prompts (the third mode) ──────────────────────────────────────────────────────────────────────────────────────────
+     Same three-pane shape as Notes: sidebar (All Prompts, Favorites, folders, Recently Deleted), a list, and the editor. The editor is the
+     template (a monospace field with its placeholders tinted) and, on the right, a Variables inspector that slides in and out (⌥⌘I). */
+  #promptsSide { display: none; flex-direction: column; flex: 1; min-height: 0; }
+  html[data-mode="prompts"] #promptsSide { display: flex; }
+  html[data-mode="prompts"] .sidebar > :not(.sidebar-search):not(#promptsSide):not(.sb-head):not(.sb-tools) { display: none !important; }
+  html[data-mode="prompts"] .main, html[data-mode="prompts"] .drawer { display: none !important; }
+  html[data-mode="prompts"] #promptsMain { display: flex; }
+  .pr-doc { width: 100%; max-width: var(--note-max-w, 900px); position: relative; }
+  .pr-section-label { font-size: var(--fs-12); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin: 22px 0 8px; display: flex; align-items: center; justify-content: space-between; }
+  .pr-section-label .pr-lock-hint { text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .pr-sub { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .note-row-sub:has(.pr-sub) { display: flex; min-width: 0; }
+  .pr-row-star { font-size: var(--ico-12); opacity: .85; }
+  /* the template: a transparent field laid over a layer that shows the same text with its placeholders tinted (the layer sets the height) */
+  .pr-tpl { position: relative; border-radius: var(--r-s); background: var(--bg-2); }
+  .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
+  .pr-tpl-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
+  .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
+  .pr-tpl textarea::selection { background: var(--accent-tint); }
+  .pr-tpl textarea::placeholder { color: var(--text-3); }
+  .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
+  .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
+  .ph-opt { background: var(--blue-bg); color: var(--blue-text); }
+  .ph-ins { background: var(--teal-bg); color: var(--teal-text); }
+  .ph-txt { background: var(--amber-bg); color: var(--amber-text); }
+  .pr-tb-mono { font-family: var(--mono); font-weight: 600; font-size: var(--fs-14); letter-spacing: -.02em; }
+  /* the variables inspector */
+  .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
+  .pr-split > .note-scroll { flex: 1; min-width: 0; }
+  .pr-inspector { flex: none; width: 340px; overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width .24s ease, border-color .24s ease; }
+  .pr-insp-inner { width: 340px; height: 100%; overflow-y: auto; padding: 16px 18px 40px; box-sizing: border-box; transition: opacity .18s ease; }
+  .pr-split.insp-closed .pr-inspector { width: 0; border-left-color: transparent; }
+  .pr-split.insp-closed .pr-insp-inner { opacity: 0; pointer-events: none; }
+  .pr-insp-head { font-size: var(--fs-17); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  .pr-insp-sub { font-size: var(--fs-12); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
+  .pr-insp-label { font-size: var(--fs-12); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin: 4px 0 8px; }
+  .pr-insp-empty { font-size: var(--fs-13); line-height: 1.6; color: var(--text-2); }
+  .pr-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; align-items: center; }
+  .pr-chip { font-size: var(--fs-12); padding: 4px 12px; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); border: 0; font-family: inherit; font-weight: 500; cursor: default; }
+  .pr-chip:hover { background: var(--cap-hover); color: var(--text); }
+  .pr-chip.on { background: var(--accent-tint); color: var(--blue-text); }
+  .pr-chip.add { background: transparent; color: var(--text-3); border: 1px dashed var(--border-2); }
+  /* An option or a preset in an unlocked prompt: the pill is a small container with the × inside it, at the trailing edge (space always reserved, so nothing jumps on hover).
+     The × shows on hover or focus; the same removal is Delete / Backspace on the focused pill and Remove in its right-click menu. */
+  .pr-chip-wrap.has-x, .pr-pill-wrap.has-x { display: inline-flex; align-items: center; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); }
+  .pr-chip-wrap.has-x:hover, .pr-pill-wrap.has-x:hover { background: var(--cap-hover); color: var(--text); }
+  .pr-chip-wrap.has-x.on { background: var(--accent-tint); color: var(--blue-text); }
+  .pr-pill-wrap.has-x.on { background: var(--accent); color: var(--on-accent); }
+  .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: 999px 0 0 999px; }
+  .pr-chip-wrap.has-x .pr-chip { padding-left: 12px; }
+  .pr-pill-x, .pr-chip-x { flex: none; width: 18px; height: 18px; margin-right: 6px; padding: 0; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: inherit; font-size: var(--ico-12); opacity: 0; cursor: default; }
+  .pr-chip-wrap.has-x:hover .pr-chip-x, .pr-chip-wrap.has-x:focus-within .pr-chip-x, .pr-pill-wrap.has-x:hover .pr-pill-x, .pr-pill-wrap.has-x:focus-within .pr-pill-x { opacity: .7; }
+  .pr-chip-x:hover, .pr-pill-x:hover { opacity: 1 !important; background: color-mix(in srgb, currentColor 18%, transparent); }
+  .pr-chip-input, .pr-add-input { border: 1px solid var(--border-2); border-radius: 999px; padding: 4px 12px; font: inherit; font-size: var(--fs-12); background: var(--bg); color: var(--text); width: 150px; }
+  .pr-add-input { font-size: var(--fs-13); }
+  .pr-vars { margin-top: 10px; }
+  .pr-var { display: flex; flex-direction: column; gap: 8px; padding: 12px 0; border-top: 1px solid var(--border); align-items: stretch; }
+  .pr-var-name { align-self: flex-start; font-family: var(--mono); font-size: var(--fs-12); padding: 3px 8px; }
+  .pr-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pr-pill { font-size: var(--fs-13); padding: 4px 12px; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); border: 0; font-family: inherit; cursor: default; }
+  .pr-pill:hover { background: var(--cap-hover); color: var(--text); }
+  .pr-pill.on { background: var(--accent); color: var(--on-accent); }
+  .pr-pill.add { background: transparent; border: 1px dashed var(--border-2); color: var(--text-3); padding: 4px 9px; }
+  .pr-checks { display: flex; flex-direction: column; }
+  .pr-check { display: flex; align-items: center; gap: 10px; padding: 3px 0; font-size: var(--fs-14); color: var(--text); cursor: default; border-radius: var(--r-xs); }
+  .pr-check .box { width: 18px; height: 18px; border-radius: 50%; border: 1.5px solid var(--border-2); display: inline-flex; align-items: center; justify-content: center; flex: none; background: var(--bg); position: relative; }
+  .pr-check .box::before { content: ""; position: absolute; inset: -5px; }
+  .pr-check.on .box { background: var(--teal-text); border-color: var(--teal-text); }
+  .pr-check.on .box i { color: var(--on-accent); font-size: var(--ico-12); }
+  .pr-check:not(.on) .box i { opacity: 0; }
+  .pr-check-text { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pr-check-x { opacity: 0; margin-left: auto; }
+  .pr-check:hover .pr-check-x, .pr-check:focus-within .pr-check-x { opacity: 1; }
+  .pr-add-item { align-self: flex-start; border: 0; background: none; color: var(--text-3); font: inherit; font-size: var(--fs-13); padding: 4px 0; cursor: default; }
+  .pr-add-item:hover { color: var(--text); }
+  .pr-textfield { width: 100%; border: 1px solid var(--border); border-radius: var(--r-m); padding: 7px 12px; font: inherit; font-size: var(--fs-14); background: var(--bg); color: var(--text); box-sizing: border-box; }
+  #pInspToggle[aria-pressed="true"] { background: var(--cap-on); color: var(--text); }
+  .btn-copy { display: inline-flex; align-items: center; gap: 6px; }
+  .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
 </style>
 </head>
 <body>
@@ -1570,6 +1652,7 @@ const ICONS = {
   </div>
 </div>
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
+<input type="file" id="promptLabInput" accept=".json" style="display:none" onchange="handlePromptLabImport(event)">
 
 <div class="layout">
 <!-- Collapsed sidebar: a floating toggle plus a small mirror of the file-sync status (so "Link file / Linked" is never hidden) -->
@@ -1580,9 +1663,10 @@ const ICONS = {
   <div class="sidebar">
     <div class="sb-head" id="sbHead">
       <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
-    <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks or Notes">
+    <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks, Notes or Prompts">
       <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')">Tasks</button>
       <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')">Notes</button>
+      <button type="button" class="view-switch-btn" data-mode="prompts" onclick="setAppMode('prompts')">Prompts</button>
     </div>
     </div>
     <div class="sidebar-search">
@@ -1595,6 +1679,10 @@ const ICONS = {
           <span><i class="fa-regular fa-note-sticky" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Notes</span>
           <span class="count" id="allNotesCount"></span>
         </div>
+        <div class="nav-item" id="pinnedNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('pinned')">
+          <span><i class="fa-solid fa-thumbtack" style="width:14px;color:var(--text-3);margin-right:6px"></i>Pinned</span>
+          <span class="count" id="pinnedCount"></span>
+        </div>
       </div>
       <div class="sidebar-section grow">
         <div class="sidebar-section-label">Folders <span class="sidebar-section-actions">
@@ -1606,6 +1694,30 @@ const ICONS = {
         <div class="nav-item" id="trashNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('trash')">
           <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
           <span class="count" id="trashCount"></span>
+        </div>
+      </div>
+    </div>
+    <div id="promptsSide">
+      <div class="sidebar-section">
+        <div class="nav-item" id="pAllNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('all')">
+          <span><i class="fa-regular fa-clone" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Prompts</span>
+          <span class="count" id="pAllCount"></span>
+        </div>
+        <div class="nav-item" id="pFavNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('favorites')">
+          <span><i class="fa-regular fa-star" style="width:14px;color:var(--text-3);margin-right:6px"></i>Favorites</span>
+          <span class="count" id="pFavCount"></span>
+        </div>
+      </div>
+      <div class="sidebar-section grow">
+        <div class="sidebar-section-label">Folders <span class="sidebar-section-actions">
+          <button class="icon-btn" onclick="openPromptFolderModal()" title="New folder" aria-label="New folder"><i class="fa-solid fa-plus"></i></button>
+        </span></div>
+        <div id="promptFolderList"></div>
+      </div>
+      <div class="sidebar-section">
+        <div class="nav-item" id="pTrashNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('trash')">
+          <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
+          <span class="count" id="pTrashCount"></span>
         </div>
       </div>
     </div>
@@ -1808,6 +1920,53 @@ const ICONS = {
       </div>
     </div>
   </div>
+  <div class="notes-main" id="promptsMain">
+    <div class="notes-list-pane">
+      <div class="notes-list-head">
+        <div class="nl-titles"><h2 id="pListTitle">All Prompts</h2><div class="notes-list-sub" id="pListSub"></div></div>
+        <button type="button" class="btn note-sort-btn" onclick="openPromptListMenu(event)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+      </div>
+      <div id="pList" role="listbox" aria-label="Prompts"></div>
+    </div>
+    <div class="notes-editor-pane">
+      <div class="note-toolbar note-empty-bar" id="pEmptyBar">
+        <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
+      </div>
+      <div class="notes-empty" id="pEmpty"><i class="fa-regular fa-clone"></i><div>No prompt selected</div></div>
+      <div class="note-editor" id="pEditor">
+        <div class="note-toolbar" role="toolbar" aria-label="Prompt tools" onmousedown="if(!event.target.closest('select,input,textarea'))event.preventDefault()">
+          <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
+          <div class="tool-group note-fmt" role="group" aria-label="Insert a variable">
+            <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('option')" title="Insert a choice variable: {{name}}" aria-label="Insert a choice variable"><span class="tb-txt pr-tb-mono">{{ }}</span></button>
+            <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('instruction')" title="Insert a checklist variable: [[name]]" aria-label="Insert a checklist variable"><span class="tb-txt pr-tb-mono">[[ ]]</span></button>
+            <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('text')" title="Insert a text variable: ((name))" aria-label="Insert a text variable"><span class="tb-txt pr-tb-mono">(( ))</span></button>
+          </div>
+          <div class="tool-group note-fmt" role="group" aria-label="Undo">
+            <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
+            <button type="button" class="tool-btn" onclick="promptUndo('redo')" title="Redo (⇧⌘Z)" aria-label="Redo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg></button>
+          </div>
+          <span class="note-toolbar-grow"></span>
+          <button type="button" class="btn note-more-btn" id="pFavBtn" onclick="togglePromptFavorite()" title="Add to Favorites" aria-label="Favorite" aria-pressed="false"><i class="fa-solid fa-star"></i></button>
+          <button type="button" class="btn note-more-btn note-lock-btn" id="pLockBtn" onclick="togglePromptLock()" title="Lock" aria-label="Lock" aria-pressed="false"></button>
+          <button type="button" class="btn note-more-btn" id="pMoreBtn" onclick="openPromptMenu(event, promptEditorId)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+          <button type="button" class="btn note-more-btn" id="pInspToggle" onclick="togglePromptInspector()" title="Hide Variables (⌥⌘I)" aria-label="Hide Variables" aria-pressed="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.7" y="2.7" width="12.6" height="10.6" rx="2.4"/><path d="M10 2.9v10.2"/></svg></button>
+          <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)"><i class="fa-solid fa-copy"></i> Copy Prompt</button>
+        </div>
+        <div class="pr-split" id="prSplit">
+          <div class="note-scroll">
+            <div class="pr-doc">
+              <input type="text" class="note-title" id="pName" placeholder="Prompt name" maxlength="200" aria-label="Prompt name" autocomplete="off" oninput="onPromptNameInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('pTemplate').focus()}">
+              <div class="note-meta" id="pMeta"></div>
+              <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
+              <div class="pr-section-label"><span>Template</span></div>
+              <div class="pr-tpl" id="pTpl"><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
+            </div>
+          </div>
+          <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-inner" id="pInspector"></div></aside>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
 
@@ -1876,6 +2035,7 @@ const ICONS = {
         <button type="button" role="tab" id="helpTab-views" aria-selected="false" tabindex="-1" aria-controls="helpPane-views" onclick="setHelpTab('views')"><i class="fa-solid fa-table-columns"></i><span>Views &amp; filters</span></button>
         <button type="button" role="tab" id="helpTab-org" aria-selected="false" tabindex="-1" aria-controls="helpPane-org" onclick="setHelpTab('org')"><i class="fa-regular fa-folder"></i><span>Projects &amp; tags</span></button>
         <button type="button" role="tab" id="helpTab-notes" aria-selected="false" tabindex="-1" aria-controls="helpPane-notes" onclick="setHelpTab('notes')"><i class="fa-regular fa-note-sticky"></i><span>Notes</span></button>
+        <button type="button" role="tab" id="helpTab-prompts" aria-selected="false" tabindex="-1" aria-controls="helpPane-prompts" onclick="setHelpTab('prompts')"><i class="fa-regular fa-clone"></i><span>Prompts</span></button>
         <button type="button" role="tab" id="helpTab-look" aria-selected="false" tabindex="-1" aria-controls="helpPane-look" onclick="setHelpTab('look')"><i class="fa-solid fa-circle-half-stroke"></i><span>Appearance</span></button>
         <button type="button" role="tab" id="helpTab-data" aria-selected="false" tabindex="-1" aria-controls="helpPane-data" onclick="setHelpTab('data')"><i class="fa-solid fa-hard-drive"></i><span>Data &amp; sync</span></button>
       </div>
@@ -1999,7 +2159,7 @@ const ICONS = {
         <div class="help-section">
           <div class="help-section-title">Writing notes</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em> and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
+          <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
@@ -2030,7 +2190,20 @@ const ICONS = {
           </div>
         </div>
       </div>
-      <div class="help-pane" id="helpPane-look" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-look" hidden>
+            <div class="help-pane" id="helpPane-prompts" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-prompts" hidden>
+        <div class="help-section">
+          <div class="help-section-title">Reusable prompts</div>
+          <div class="help-list">
+          <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the switch beside the app name. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
+          <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
+          <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
+          <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
+          <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
+          <div class="help-row"><i class="fa-solid fa-upload"></i><span><strong>From PromptLab</strong>: <em>Import PromptLab Library…</em> in the list's <strong>⋯</strong> menu reads a PromptLab export (<code>.json</code>). Its categories become folders; favorites, locks and presets come along, version history does not. Importing the same file twice changes nothing.</span></div>
+          </div>
+        </div>
+      </div>
+<div class="help-pane" id="helpPane-look" role="tabpanel" tabindex="0" onkeydown="helpPaneKey(event)" aria-labelledby="helpTab-look" hidden>
         <div class="help-section">
           <div class="help-section-title">Look and feel</div>
           <div class="help-list">
@@ -2362,6 +2535,7 @@ let projects = [], tasks = [];
 let deletedTaskIds = [], deletedProjectIds = [];
 // Notes (see the Notes section below): folders and notes ride in the same data blob; their tombstones work like the tasks'.
 let notes = [], noteFolders = [], deletedNoteIds = [], deletedNoteFolderIds = [];
+let prompts = [], promptFolders = [], deletedPromptIds = [], deletedPromptFolderIds = [];   // the Prompts mode (see the Prompts section)
 let activeTaskId = null;
 let kbdSelectedTaskId = null;
 let renamingTaskId = null;
@@ -2480,6 +2654,7 @@ function normalizeData(){
   if(!Array.isArray(allTasksHiddenProjectIds)) allTasksHiddenProjectIds=[];
   allTasksHiddenProjectIds = allTasksHiddenProjectIds.filter(id=>projects.some(p=>p.id===id));
   normalizeNotes();
+  normalizePrompts();
 }
 function load(){
   try{
@@ -2492,6 +2667,7 @@ function load(){
       deletedProjectIds = d.deletedProjectIds || [];
       notes = d.notes || []; noteFolders = d.noteFolders || [];
       deletedNoteIds = d.deletedNoteIds || []; deletedNoteFolderIds = d.deletedNoteFolderIds || [];
+      prompts = d.prompts || []; promptFolders = d.promptFolders || []; deletedPromptIds = d.deletedPromptIds || []; deletedPromptFolderIds = d.deletedPromptFolderIds || [];
       allTasksHiddenProjectIds = d.allTasksHiddenProjectIds || [];
       sortBy = d.sortBy || 'smart';
       if(d.viewMode==='board'||d.viewMode==='list'){ viewMode=d.viewMode; localStorage.setItem(VIEW_KEY, viewMode); }
@@ -2505,11 +2681,12 @@ function load(){
     projects = defaultProjects();
     tasks = defaultTasks();
     notes = []; noteFolders = []; deletedNoteIds = []; deletedNoteFolderIds = []; normalizeNotes();
+    prompts = []; promptFolders = []; deletedPromptIds = []; deletedPromptFolderIds = []; normalizePrompts();
   }
 }
 // Everything that is saved to localStorage and to the linked file. (Per-device choices — theme, mode, sidebar — are not in it.)
 function dataPayload(){
-  return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
+  return { projects, tasks, deletedTaskIds, deletedProjectIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
 let storageFullWarned = false;
 let dirHandle = null, backupRunning = false;     // the linked data file's folder (daily file backup), see "Daily file backup"
@@ -2668,6 +2845,7 @@ function isThisWeek(dueDate){
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
   if(appMode==='notes'){ renderNotes(); return; }
+  if(appMode==='prompts'){ renderPrompts(); return; }
   renderSidebar();
   if(viewMode==='board'){ renderBoard(); } else { renderList(); }
   renderDrawer();
@@ -4955,6 +5133,7 @@ function setTagFilter(tg){
 }
 function setSortBy(v){ sortBy = v; save(); render(); }
 function setSearchQuery(v){
+  if(appMode==='prompts'){ promptSearchInput(v); return; }
   if(appMode==='notes'){                                    // in Notes the search box filters notes, across every folder
     noteSearchQuery = v;
     const vis = visibleNotes();
@@ -5021,6 +5200,9 @@ function shortcutGroups(){
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
       ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or clone (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Table options (rows, columns, header) at the caret', ['Shift','F10']], ['Next cell, adding a row after the last one', ['Tab']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
+    { id:'prompts', label:'Prompts', icon:'fa-regular fa-clone', rows:[
+      ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
+      ['Copy the finished prompt', [mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']], ['Undo / redo typing in the template', [mod,'Z / ⇧ Z']], ['Focus search', ['/']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
   ];
@@ -5090,7 +5272,7 @@ const NOTES_DEFAULT_FOLDER = 'nf-notes';
 const noteFoldersCollapsed = new Set();   // top-level folders folded shut in the sidebar (per device)
 let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '';
 try{
-  if(localStorage.getItem(MODE_KEY)==='notes') appMode = 'notes';
+  { const m = localStorage.getItem(MODE_KEY); if(m==='notes' || m==='prompts') appMode = m; }
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
   const savedSort = JSON.parse(localStorage.getItem(NOTES_SORT_KEY) || 'null');
   if(savedSort && ['edited','created','title'].includes(savedSort.key) && ['asc','desc'].includes(savedSort.dir)){ noteSortKey = savedSort.key; noteSortDir = savedSort.dir; }
@@ -5343,6 +5525,7 @@ function folderPath(f){ const p = f && f.parentId ? folderById(f.parentId) : nul
 // Choosing a folder shows its own notes and those of its subfolders.
 function noteInFilter(n){
   if(noteFolderFilter==='all') return true;
+  if(noteFolderFilter==='pinned') return n.pinned===true;
   return n.folderId===noteFolderFilter || (folderById(n.folderId) || {}).parentId===noteFolderFilter;
 }
 function toggleFolderCollapsed(id){
@@ -5404,13 +5587,15 @@ function mergeNotesData(data, respectTombstones){
 function applyAppMode(){
   document.documentElement.setAttribute('data-mode', appMode);
   const si = document.getElementById('searchInput');
-  if(si){ si.placeholder = appMode==='notes' ? 'Search notes…' : 'Search tasks…'; si.value = appMode==='notes' ? noteSearchQuery : searchQuery; }
+  if(si){ si.placeholder = appMode==='notes' ? 'Search notes…' : appMode==='prompts' ? 'Search prompts…' : 'Search tasks…'; si.value = appMode==='notes' ? noteSearchQuery : appMode==='prompts' ? promptSearchQuery : searchQuery; }
+  if(appMode==='prompts') applyPromptInspectorState();
   document.querySelectorAll('#modeSwitch .view-switch-btn').forEach(b=>{ const on = b.dataset.mode===appMode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
 }
 function setAppMode(mode){
-  mode = mode==='notes' ? 'notes' : 'tasks';
+  mode = mode==='notes' || mode==='prompts' ? mode : 'tasks';
   if(mode===appMode) return;
   if(appMode==='notes'){ flushNoteEdit(); removeIfEmptyNote(selectedNoteId); }
+  if(appMode==='prompts'){ flushPromptEdit(); promptEditorId = null; }
   appMode = mode;
   try{ localStorage.setItem(MODE_KEY, mode); }catch(_){}
   applyAppMode(); render();
@@ -5830,6 +6015,9 @@ function renderNotesSidebar(){
   if(trashCount) trashCount.textContent = notes.length - live.length || '';
   if(trashNav){ trashNav.classList.toggle('active', noteFolderFilter==='trash'); trashNav.setAttribute('aria-pressed', noteFolderFilter==='trash' ? 'true' : 'false'); }
   if(all){ all.classList.toggle('active', noteFolderFilter==='all'); all.setAttribute('aria-pressed', noteFolderFilter==='all' ? 'true' : 'false'); }
+  const pinNav = document.getElementById('pinnedNav'), pinCount = document.getElementById('pinnedCount');
+  if(pinCount) pinCount.textContent = live.filter(n=>n.pinned).length || '';
+  if(pinNav){ pinNav.classList.toggle('active', noteFolderFilter==='pinned'); pinNav.setAttribute('aria-pressed', noteFolderFilter==='pinned' ? 'true' : 'false'); }
   const list = document.getElementById('noteFolderList');
   const activeF = folderById(noteFolderFilter);
   const row = (f, sub, kids)=>{
@@ -5855,14 +6043,14 @@ function renderNotesList(vis){
   const f = folderById(noteFolderFilter);
   const searching = !!noteSearchQuery.trim();                                   // a search looks through every folder
   const inTrash = noteFolderFilter==='trash';
-  if(title) title.textContent = inTrash ? 'Recently Deleted' : searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : (f ? f.name : 'Notes');
+  if(title) title.textContent = inTrash ? 'Recently Deleted' : searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : noteFolderFilter==='pinned' ? 'Pinned' : (f ? f.name : 'Notes');
   if(sub) sub.textContent = vis.length ? `${vis.length} note${vis.length===1?'':'s'}` : '';
   if(!list) return;
   if(!vis.length){
-    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No notes match your search.' : inTrash ? 'No deleted notes.' : 'No notes yet.'}</div>`;
+    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No notes match your search.' : inTrash ? 'No deleted notes.' : noteFolderFilter==='pinned' ? 'No pinned notes. Pin a note from its ⋯ menu or by right-clicking it.' : 'No notes yet.'}</div>`;
     return;
   }
-  const anyPinned = !inTrash && vis.some(n=>n.pinned);
+  const anyPinned = !inTrash && noteFolderFilter!=='pinned' && vis.some(n=>n.pinned);   // (the Pinned list needs no "Pinned" header)
   let seen = '';                                                                   // section headers: "Pinned" then "Notes", only when something is pinned
   const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted notes are removed after ${NOTE_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyTrash()">Delete All</button></div>` : '';
   list.innerHTML = banner + vis.map(n=>{
@@ -5939,7 +6127,7 @@ function renderNoteEditor(){
   noteApplySearchHighlight();
 }
 function renderNotes(){
-  if(noteFolderFilter!=='all' && noteFolderFilter!=='trash' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
+  if(noteFolderFilter!=='all' && noteFolderFilter!=='trash' && noteFolderFilter!=='pinned' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
   const vis = visibleNotes();
   if(selectedNoteId && !notes.some(n=>n.id===selectedNoteId)) selectedNoteId = null;
   if(!selectedNoteId && vis.length) selectedNoteId = vis[0].id;      // open the newest note, like Apple Notes
@@ -5963,7 +6151,7 @@ function removeIfEmptyNote(id){
   if(!n || n.locked || !noteIsEmpty(n)) return;
   notes.splice(notes.indexOf(n), 1); tombstone(deletedNoteIds, id); save();
 }
-function syncSearchBox(){ const si = document.getElementById('searchInput'); if(si && appMode==='notes') si.value = noteSearchQuery; }
+function syncSearchBox(){ const si = document.getElementById('searchInput'); if(si && appMode==='notes') si.value = noteSearchQuery; else if(si && appMode==='prompts') si.value = promptSearchQuery; }
 
 // ---- actions ----
 function selectNote(id){
@@ -5975,7 +6163,7 @@ function selectNote(id){
 }
 function createNote(){
   flushNoteEdit();
-  if(noteFolderFilter==='trash') noteFolderFilter = 'all';                          // a new note cannot live in Recently Deleted
+  if(noteFolderFilter==='trash' || noteFolderFilter==='pinned') noteFolderFilter = 'all';   // a new note cannot live in Recently Deleted, and it is not pinned, so it would not show in Pinned
   const leaving = selectedNoteId;
   const now = Date.now();
   const n = { id: genId(), title:'', body:'', folderId: folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, createdAt: now, updatedAt: now };
@@ -6050,7 +6238,7 @@ function moveNote(id, folderId){
 function setNoteFolder(id){
   flushNoteEdit();
   const leaving = selectedNoteId;
-  noteFolderFilter = (id==='all' || id==='trash' || folderById(id)) ? id : 'all';
+  noteFolderFilter = (id==='all' || id==='trash' || id==='pinned' || folderById(id)) ? id : 'all';
   try{ localStorage.setItem(NOTES_FOLDER_KEY, noteFolderFilter); }catch(_){}
   const picked = folderById(noteFolderFilter);
   if(picked && picked.parentId && noteFoldersCollapsed.has(picked.parentId)){ noteFoldersCollapsed.delete(picked.parentId); try{ localStorage.setItem(NOTES_COLLAPSED_KEY, JSON.stringify([...noteFoldersCollapsed])); }catch(_){} }
@@ -6058,6 +6246,7 @@ function setNoteFolder(id){
   render();
 }
 function openFolderModal(id, parentId){
+  folderModalKind = null;
   editingFolderId = id || null;
   const f = id ? folderById(id) : null;
   document.getElementById('folderModalTitle').textContent = f ? 'Edit Folder' : (parentId ? 'New Subfolder' : 'New Folder');
@@ -6075,6 +6264,7 @@ function openFolderModal(id, parentId){
   if(typeof setTimeout==='function') setTimeout(()=>{ input.focus(); input.select(); }, 50);   // the dialog fades in; a hidden field cannot take focus
 }
 function saveFolderModal(){
+  if(folderModalKind==='prompts'){ savePromptFolderModal(); return; }
   const name = (document.getElementById('folderNameInput').value || '').trim().slice(0,40);
   if(!name) return;
   const picked = (document.getElementById('folderParentSelect') || {}).value || '';
@@ -6135,6 +6325,729 @@ function deleteNoteFolder(id){
       });
     }
   });
+}
+
+// ───────────────────────── Prompts: the third mode (reusable prompt templates with variables) ─────────────────────────
+// A prompt is a template with three kinds of placeholders — {{choice}} (one of several options), [[checklist]] (any number of items,
+// copied as a bullet list) and ((text)) (typed each time). Copying fills the placeholders in. Prompts live in folders (one level of
+// subfolders, like Notes), can be favourites or locked, and are deleted into Recently Deleted. Ported from PromptLab without its
+// version history and categories.
+const PROMPT_TRASH_DAYS = 30;
+const PROMPT_FOLDER_KEY = 'mydesk_prompts_folder', PROMPT_COLLAPSED_KEY = 'mydesk_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'mydesk_prompts_inspector';
+let promptFolderFilter = 'all', promptSearchQuery = '', selectedPromptId = null, promptEditorId = null, promptSaveTimer = null;
+let promptMenuId = null, promptFolderMenuId = null, draggedPromptId = null, editingPromptFolderId = null, folderModalKind = null;
+let promptPresetDraft = false, promptVarSig = '';
+let promptFoldersCollapsed = new Set();
+try{ promptFoldersCollapsed = new Set(JSON.parse(localStorage.getItem(PROMPT_COLLAPSED_KEY) || '[]')); }catch(_){}
+try{ const f = localStorage.getItem(PROMPT_FOLDER_KEY); if(f) promptFolderFilter = f; }catch(_){}
+
+const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
+const promptFolderById = id=>promptFolders.find(f=>f.id===id);
+const byNameCI = (a, b)=>String(a.name).localeCompare(String(b.name), undefined, {sensitivity:'base'});
+const topPromptFolders = ()=>promptFolders.filter(f=>!f.parentId).sort(byNameCI);
+const promptFolderKids = id=>promptFolders.filter(f=>f.parentId===id).sort(byNameCI);
+const orderedPromptFolders = ()=>{ const out = []; topPromptFolders().forEach(f=>{ out.push(f); promptFolderKids(f.id).forEach(c=>out.push(c)); }); return out; };
+const promptFolderPath = f=>{ const p = f && f.parentId ? promptFolderById(f.parentId) : null; return f ? (p ? `${p.name} / ${f.name}` : f.name) : ''; };
+
+// ---- the template language ----
+const PROMPT_ESC_RE = /\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g;      // \{{name}} (and the other two) is literal text, not a variable
+function detectPromptVars(template, existing){
+  existing = existing || {};
+  const result = {}, stripped = String(template || '').replace(PROMPT_ESC_RE, '');
+  [...stripped.matchAll(/\{\{([^}]+)\}\}/g)].map(m=>m[1]).forEach(k=>{
+    if(existing[k] && existing[k].type==='option') result[k] = existing[k];
+    else if(!result[k]) result[k] = { type:'option', options:['Option 1'], selected:'Option 1' };
+  });
+  [...stripped.matchAll(/\[\[([^\]]+)\]\]/g)].map(m=>m[1]).forEach(k=>{
+    if(existing[k] && existing[k].type==='instruction') result[k] = existing[k];
+    else if(!result[k]) result[k] = { type:'instruction', options:['Instruction 1'], selected:[] };
+  });
+  [...stripped.matchAll(/\(\(([^)]+)\)\)/g)].map(m=>m[1]).forEach(k=>{
+    if(existing[k] && existing[k].type==='text') result[k] = existing[k];
+    else if(!result[k]) result[k] = { type:'text', value:'' };
+  });
+  return result;
+}
+const sortByPromptOptions = (selected, options)=>[...selected].sort((a, b)=>options.indexOf(a) - options.indexOf(b));
+// The finished prompt: every placeholder replaced by what is chosen, checklist items as "• item" lines, escaped placeholders as plain text.
+function buildPromptFinal(p){
+  const TOKEN = '\x00ESC\x00', escaped = [];
+  let t = String(p.template || '').replace(PROMPT_ESC_RE, (_, ph)=>{ escaped.push(ph); return TOKEN + (escaped.length - 1) + TOKEN; });
+  Object.entries(p.vars || {}).forEach(([k, v])=>{
+    if(v.type==='instruction') t = t.split(`[[${k}]]`).join(sortByPromptOptions(Array.isArray(v.selected) ? v.selected : [], v.options || []).map(s=>`• ${s}`).join('\n'));
+    else if(v.type==='text') t = t.split(`((${k}))`).join(v.value || '');
+    else t = t.split(`{{${k}}}`).join(v.selected || '');
+  });
+  return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>escaped[+i]);
+}
+// The template with its placeholders tinted (the layer under the editing field).
+function promptHighlight(template){
+  const TOKEN = '\u0001', keep = [];
+  let t = esc(String(template || '')).replace(/\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g, m=>{ keep.push(m); return TOKEN + (keep.length - 1) + TOKEN; });
+  t = t.replace(/\{\{([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
+  return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>keep[+i]) + '\n';
+}
+
+// ---- data integrity ----
+function cleanPromptVars(vars){
+  const out = {};
+  if(!vars || typeof vars!=='object') return out;
+  Object.entries(vars).forEach(([k, v])=>{
+    if(!v || typeof v!=='object') return;
+    const opts = Array.isArray(v.options) ? v.options.map(x=>String(x).slice(0,200)).slice(0,60) : [];
+    if(v.type==='option') out[k] = { type:'option', options:opts, selected:typeof v.selected==='string' ? v.selected : '' };
+    else if(v.type==='instruction') out[k] = { type:'instruction', options:opts, selected:Array.isArray(v.selected) ? v.selected.map(String).filter(x=>opts.includes(x)) : [] };
+    else if(v.type==='text') out[k] = { type:'text', value:typeof v.value==='string' ? v.value.slice(0,5000) : '' };
+  });
+  return out;
+}
+function normalizePrompts(){
+  if(!Array.isArray(prompts)) prompts = [];
+  if(!Array.isArray(promptFolders)) promptFolders = [];
+  promptFolders = promptFolders.filter(f=>f && typeof f==='object');
+  promptFolders.forEach(f=>{
+    if(!isSafeId(f.id)) f.id = genId();
+    f.name = String(f.name || 'Folder').slice(0,40);
+    if(!Number.isFinite(f.updatedAt)) f.updatedAt = 0;
+  });
+  const byId = new Map(promptFolders.map(f=>[f.id, f])), hadParent = new Set(promptFolders.filter(f=>f.parentId).map(f=>f.id));
+  promptFolders.forEach(f=>{                                       // one level only: anything else is flattened to the top level
+    const pid = f.parentId;
+    if(!(typeof pid==='string' && isSafeId(pid) && pid!==f.id && byId.has(pid) && !hadParent.has(pid))) delete f.parentId;
+  });
+  prompts = prompts.filter(p=>p && typeof p==='object');
+  prompts.forEach(p=>{
+    if(!isSafeId(p.id)) p.id = genId();
+    p.name = String(p.name || '').slice(0,200);
+    p.template = String(p.template || '').slice(0,100000);
+    if(!promptFolders.some(f=>f.id===p.folderId)) p.folderId = '';
+    p.favorite = p.favorite===true; p.locked = p.locked===true;
+    p.vars = detectPromptVars(p.template, cleanPromptVars(p.vars));
+    p.presets = (Array.isArray(p.presets) ? p.presets : []).filter(x=>x && typeof x.name==='string' && x.values && typeof x.values==='object').slice(0,40).map(x=>({ name:x.name.slice(0,60), values:x.values }));
+    if(!p.createdAt) p.createdAt = Date.now();
+    if(!Number.isFinite(p.updatedAt)) p.updatedAt = p.createdAt;
+    if(!Number.isFinite(p.deletedAt)) delete p.deletedAt;
+    delete p.versions; delete p.catId;                              // PromptLab's version history and categories do not exist here
+  });
+  const cut = Date.now() - PROMPT_TRASH_DAYS * 86400000;           // Recently Deleted keeps a prompt for 30 days, then it is really gone (and tombstoned)
+  prompts = prompts.filter(p=>{ if(Number.isFinite(p.deletedAt) && p.deletedAt < cut){ tombstone(deletedPromptIds, p.id); return false; } return true; });
+  if(!Array.isArray(deletedPromptIds)) deletedPromptIds = [];
+  if(!Array.isArray(deletedPromptFolderIds)) deletedPromptFolderIds = [];
+  deletedPromptIds = deletedPromptIds.filter(x=>x && x.id);
+  deletedPromptFolderIds = deletedPromptFolderIds.filter(x=>x && x.id);
+}
+// Same rules as Notes: the newer edit wins; a tombstone keeps a deleted prompt deleted unless the incoming copy is newer.
+function mergePromptsData(data, respectTombstones){
+  let added = 0, updated = 0;
+  const mergeTombs = (local, incoming)=>(incoming || []).forEach(d=>{
+    if(!d || !d.id) return;
+    const ex = local.find(x=>x.id===d.id);
+    if(!ex) local.push({ id:d.id, deletedAt:d.deletedAt || Date.now() });
+    else if((d.deletedAt || 0) > ex.deletedAt) ex.deletedAt = d.deletedAt;
+  });
+  mergeTombs(deletedPromptFolderIds, data.deletedPromptFolderIds);
+  mergeTombs(deletedPromptIds, data.deletedPromptIds);
+  (data.promptFolders || []).forEach(f=>{
+    if(!f || !f.id) return;
+    const ex = promptFolderById(f.id);
+    if(ex){ if((f.updatedAt || 0) > (ex.updatedAt || 0)){ Object.assign(ex, f); if(!f.parentId) delete ex.parentId; } return; }
+    const tomb = deletedPromptFolderIds.find(x=>x.id===f.id);
+    if(respectTombstones && tomb && tomb.deletedAt >= (f.updatedAt || 0)) return;
+    if(tomb) untombstone(deletedPromptFolderIds, f.id);
+    promptFolders.push(f);
+  });
+  (data.prompts || []).forEach(it=>{
+    if(!it || !it.id) return;
+    const ex = prompts.find(p=>p.id===it.id);
+    if(ex){
+      if((it.updatedAt || 0) > (ex.updatedAt || 0)){ Object.assign(ex, it); if(!Number.isFinite(it.deletedAt)) delete ex.deletedAt; updated++; }
+      return;
+    }
+    const tomb = deletedPromptIds.find(x=>x.id===it.id);
+    if(respectTombstones && tomb && tomb.deletedAt >= (it.updatedAt || 0)) return;
+    if(tomb) untombstone(deletedPromptIds, it.id);
+    prompts.push(it); added++;
+  });
+  return { added, updated };
+}
+// A PromptLab library (.json, version 4: categories + prompts) becomes folders + prompts. Categories turn into folders, versions are dropped, ids are kept,
+// so importing the same file twice changes nothing.
+function importPromptLabLibrary(data){
+  const cats = Array.isArray(data && data.categories) ? data.categories : [], list = Array.isArray(data) ? data : (Array.isArray(data && data.prompts) ? data.prompts : null);
+  if(!list) return null;
+  const folderOf = {};
+  cats.forEach(c=>{
+    if(!c || typeof c.name!=='string' || !c.id) return;
+    let f = promptFolders.find(x=>!x.parentId && x.name.toLowerCase()===c.name.toLowerCase());
+    if(!f){ f = { id: genId(), name: c.name.slice(0,40), updatedAt: Date.now() }; promptFolders.push(f); }
+    folderOf[c.id] = f.id;
+  });
+  let added = 0;
+  list.forEach(src=>{
+    if(!src || typeof src.template!=='string') return;
+    const id = isSafeId(String(src.id)) ? 'pl' + String(src.id) : genId();
+    if(prompts.some(p=>p.id===id)) return;
+    const stamp = Number.isFinite(src.lastEdited) ? src.lastEdited : Date.now();
+    prompts.push({ id, name: String(src.name || 'Untitled prompt'), folderId: folderOf[src.catId] || '', favorite: src.favorite===true, locked: src.locked===true,
+      template: src.template, vars: src.vars || {}, presets: src.presets || [], createdAt: stamp, updatedAt: stamp });
+    untombstone(deletedPromptIds, id); added++;
+  });
+  normalizePrompts();
+  return { added, folders: Object.keys(folderOf).length };
+}
+function handlePromptLabImport(ev){
+  const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = ()=>{
+    let data; try{ data = JSON.parse(r.result); }catch(_){ showToast('That file is not a PromptLab library', true); return; }
+    const res = importPromptLabLibrary(data);
+    if(!res){ showToast('That file is not a PromptLab library', true); return; }
+    save(); render();
+    showToast(res.added ? `Imported ${res.added} prompt${res.added===1?'':'s'}${res.folders ? ` in ${res.folders} folder${res.folders===1?'':'s'}` : ''}` : 'Nothing new to import');
+  };
+  r.readAsText(file);
+}
+
+// ---- lists ----
+function visiblePrompts(){
+  const q = promptSearchQuery.trim().toLowerCase(), words = q ? q.split(/\s+/).filter(Boolean) : [];
+  const inTrash = promptFolderFilter==='trash';
+  return prompts.filter(p=>{
+    if(promptTrashed(p)!==inTrash) return false;
+    if(words.length) { const hay = (p.name + ' ' + p.template).toLowerCase(); return words.every(w=>hay.includes(w)); }   // a search looks through every folder
+    if(promptFolderFilter==='all' || inTrash) return true;
+    if(promptFolderFilter==='favorites') return p.favorite;
+    return p.folderId===promptFolderFilter || (promptFolderById(p.folderId) || {}).parentId===promptFolderFilter;
+  }).sort(byNameCI);
+}
+const promptTitle = p=>p.name.trim() || 'Untitled prompt';
+const promptPreviewLine = p=>{ const t = (p.template || '').replace(/\s+/g, ' ').trim(); return t || 'Empty template'; };
+
+function renderPromptsSidebar(){
+  const live = prompts.filter(p=>!promptTrashed(p)), own = {}; live.forEach(p=>{ own[p.folderId] = (own[p.folderId] || 0) + 1; });
+  const total = f=>(own[f.id] || 0) + promptFolderKids(f.id).reduce((a, c)=>a + (own[c.id] || 0), 0);
+  const set = (id, v)=>{ const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('pAllCount', live.length); set('pFavCount', live.filter(p=>p.favorite).length || ''); set('pTrashCount', prompts.length - live.length || '');
+  [['pAllNav', 'all'], ['pFavNav', 'favorites'], ['pTrashNav', 'trash']].forEach(([id, key])=>{
+    const el = document.getElementById(id); if(!el) return;
+    el.classList.toggle('active', promptFolderFilter===key); el.setAttribute('aria-pressed', promptFolderFilter===key ? 'true' : 'false');
+  });
+  const list = document.getElementById('promptFolderList'); if(!list) return;
+  const activeF = promptFolderById(promptFolderFilter);
+  const row = (f, sub, kids)=>{
+    const shut = kids.length && promptFoldersCollapsed.has(f.id) && !(activeF && activeF.parentId===f.id);
+    const twisty = sub ? '' : kids.length
+      ? `<button type="button" class="folder-twisty" aria-label="${shut ? 'Expand' : 'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();togglePromptFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut ? 'right' : 'down'}"></i></button>`
+      : '<span class="folder-twisty-gap"></span>';
+    return `<div class="project-row ${promptFolderFilter===f.id ? 'active' : ''}${sub ? ' sub-folder' : ''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${promptFolderFilter===f.id}" onclick="setPromptFolder('${f.id}')" oncontextmenu="openPromptFolderMenu(event,'${f.id}')" ondragover="promptFolderDragOver(event)" ondragleave="this.classList.remove('drop-into')" ondrop="promptFolderDrop(event,'${f.id}')">
+      ${twisty}<i class="fa-regular fa-folder picon"></i>
+      <span class="pname">${esc(f.name)}</span>
+      <span class="count">${total(f)}</span>
+      <span class="project-actions row-actions">
+        <button class="icon-btn" onclick="event.stopPropagation();openPromptFolderModal('${f.id}')" title="Edit" aria-label="Edit folder"><i class="fa-solid fa-pen"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();deletePromptFolder('${f.id}')" title="Delete" aria-label="Delete folder"><i class="fa-solid fa-trash"></i></button>
+      </span>
+    </div>` + (shut ? '' : kids.map(c=>row(c, true, [])).join(''));
+  };
+  list.innerHTML = topPromptFolders().map(f=>row(f, false, promptFolderKids(f.id))).join('');
+}
+function togglePromptFolderCollapsed(id){
+  if(promptFoldersCollapsed.has(id)) promptFoldersCollapsed.delete(id); else promptFoldersCollapsed.add(id);
+  try{ localStorage.setItem(PROMPT_COLLAPSED_KEY, JSON.stringify([...promptFoldersCollapsed])); }catch(_){}
+  renderPromptsSidebar();
+}
+function renderPromptsList(vis){
+  vis = vis || visiblePrompts();
+  const title = document.getElementById('pListTitle'), sub = document.getElementById('pListSub'), list = document.getElementById('pList');
+  const f = promptFolderById(promptFolderFilter), inTrash = promptFolderFilter==='trash', searching = !!promptSearchQuery.trim();
+  if(title) title.textContent = inTrash ? 'Recently Deleted' : searching ? 'Search results' : promptFolderFilter==='all' ? 'All Prompts' : promptFolderFilter==='favorites' ? 'Favorites' : (f ? f.name : 'Prompts');
+  if(sub) sub.textContent = vis.length ? `${vis.length} prompt${vis.length===1 ? '' : 's'}` : '';
+  if(!list) return;
+  if(!vis.length){
+    list.innerHTML = `<div class="notes-list-empty">${searching ? 'No prompts match your search.' : inTrash ? 'No deleted prompts.' : promptFolderFilter==='favorites' ? 'No favorites yet.' : 'No prompts yet.'}</div>`;
+    return;
+  }
+  const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted prompts are removed after ${PROMPT_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyPromptTrash()">Delete All</button></div>` : '';
+  list.innerHTML = banner + vis.map(p=>{
+    const sel = p.id===selectedPromptId;
+    return `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="${sel ? 0 : -1}" data-id="${p.id}" onclick="selectPrompt('${p.id}')" onkeydown="promptRowKey(event,'${p.id}')" oncontextmenu="openPromptMenu(event,'${p.id}')" draggable="true" ondragstart="draggedPromptId='${p.id}';event.dataTransfer.effectAllowed='move'" ondragend="draggedPromptId=null">
+      <div class="note-row-title">${esc(promptTitle(p))}${p.favorite ? ' <i class="fa-solid fa-star pr-row-star" title="Favorite"></i>' : ''}${p.locked ? ' <i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</div>
+      <div class="note-row-sub"><span class="note-row-date pr-sub">${esc(promptPreviewLine(p))}</span></div>
+    </div>`;
+  }).join('');
+}
+function promptRowKey(e, id){ if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectPrompt(id); } }
+
+function renderPrompts(){
+  if(promptFolderFilter!=='all' && promptFolderFilter!=='favorites' && promptFolderFilter!=='trash' && !promptFolderById(promptFolderFilter)) promptFolderFilter = 'all';
+  const vis = visiblePrompts();
+  if(selectedPromptId && !prompts.some(p=>p.id===selectedPromptId)) selectedPromptId = null;
+  if(selectedPromptId && !vis.some(p=>p.id===selectedPromptId) && !promptSearchQuery.trim()) selectedPromptId = null;
+  if(!selectedPromptId && vis.length) selectedPromptId = vis[0].id;
+  renderPromptsSidebar(); renderPromptsList(vis); renderPromptEditor();
+}
+
+// ---- the editor ----
+function promptIsOpen(){ return prompts.find(p=>p.id===promptEditorId); }
+function renderPromptEditor(){
+  const p = prompts.find(x=>x.id===selectedPromptId);
+  const ed = document.getElementById('pEditor'), empty = document.getElementById('pEmpty'), bar = document.getElementById('pEmptyBar');
+  if(!ed) return;
+  if(!p){
+    promptEditorId = null; ed.classList.remove('open');
+    if(empty){
+      empty.style.display = '';
+      const none = !prompts.some(x=>!promptTrashed(x)) && promptFolderFilter!=='trash';
+      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="document.getElementById('promptLabInput').click()">Import PromptLab Library…</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
+    }
+    if(bar) bar.style.display = ''; return;
+  }
+  if(empty) empty.style.display = 'none'; if(bar) bar.style.display = 'none';
+  ed.classList.add('open');
+  const trashed = promptTrashed(p), ro = p.locked || trashed;
+  if(promptEditorId!==p.id){                                       // a different prompt: load its fields (the same prompt keeps the caret where it is)
+    promptEditorId = p.id; promptPresetDraft = false;
+    document.getElementById('pName').value = p.name;
+    document.getElementById('pTemplate').value = p.template;
+    promptAutoSize();
+  }
+  const name = document.getElementById('pName'), ta = document.getElementById('pTemplate');
+  name.readOnly = ro; ta.readOnly = ro;
+  document.getElementById('pTplHl').innerHTML = promptHighlight(ta.value);
+  updatePromptMeta(p);
+  const tb = document.getElementById('pTrashBar'); if(tb){ tb.hidden = !trashed; const t = document.getElementById('pTrashText'); if(t && trashed) t.textContent = `Deleted ${new Date(p.deletedAt).toLocaleDateString(undefined, {dateStyle:'medium'})}. It is removed after ${PROMPT_TRASH_DAYS} days.`; }
+  const set = (id, fn)=>{ const el = document.getElementById(id); if(el) fn(el); };
+  set('pFavBtn', b=>{ b.classList.toggle('on', p.favorite); b.title = p.favorite ? 'Remove from Favorites' : 'Add to Favorites'; b.setAttribute('aria-pressed', String(p.favorite)); b.disabled = trashed; });
+  set('pLockBtn', b=>{ b.classList.toggle('on', p.locked); b.title = p.locked ? 'Locked (read-only). Click to unlock' : 'Lock (make read-only)'; b.setAttribute('aria-pressed', String(p.locked)); b.innerHTML = p.locked ? NOTE_ICON_LOCK : NOTE_ICON_UNLOCK; b.disabled = trashed; });
+  document.querySelectorAll('.pr-insert').forEach(b=>{ b.disabled = ro; });
+  renderPromptInspector(p);
+}
+function updatePromptMeta(p){
+  const el = document.getElementById('pMeta'); if(!el) return;
+  const f = promptFolderById(p.folderId);                          // the same line as under a note's title: when, the folder, and Locked
+  el.innerHTML = `${promptTrashed(p) ? 'Deleted' : 'Edited'} ${esc(new Date(promptTrashed(p) ? p.deletedAt : p.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${f ? ' · ' + esc(promptFolderPath(f)) : ''}${p.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''}`;
+}
+function promptAutoSize(){ /* the highlight layer sets the height; the field is laid over it */ }
+
+// Editing: the template field updates the highlight and the variables at once, and is saved after a short pause.
+function onPromptTemplateInput(){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
+  const ta = document.getElementById('pTemplate');
+  p.template = ta.value.slice(0,100000);
+  document.getElementById('pTplHl').innerHTML = promptHighlight(p.template);
+  p.vars = detectPromptVars(p.template, p.vars);
+  p.updatedAt = Date.now();
+  const sig = Object.entries(p.vars).map(([k, v])=>k + ':' + v.type).join('|');
+  if(sig!==promptVarSig){ promptVarSig = sig; renderPromptInspector(p); }
+  updatePromptMeta(p);
+  schedulePromptSave();
+}
+function onPromptNameInput(){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
+  p.name = document.getElementById('pName').value.slice(0,200); p.updatedAt = Date.now();
+  schedulePromptSave();
+}
+function schedulePromptSave(){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = (typeof setTimeout==='function') ? setTimeout(commitPromptEdit, 450) : null; }
+function flushPromptEdit(){ if(promptSaveTimer){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = null; commitPromptEdit(); } }
+function commitPromptEdit(){ promptSaveTimer = null; save(); renderPromptsList(); }
+function touchPrompt(p){ p.updatedAt = Date.now(); }
+
+// ---- the variables panel (an inspector on the right) ----
+function renderPromptInspector(p){
+  const host = document.getElementById('pInspector'); if(!host) return;
+  p = p || prompts.find(x=>x.id===promptEditorId); if(!p){ host.innerHTML = ''; return; }
+  const locked = p.locked || promptTrashed(p), entries = Object.entries(p.vars || {});
+  promptVarSig = entries.map(([k, v])=>k + ':' + v.type).join('|');
+  const dis = locked ? ' disabled' : '';
+  const kindClass = t=>t==='option' ? 'ph-opt' : t==='instruction' ? 'ph-ins' : 'ph-txt';
+  let html = `<div class="pr-insp-head">Variables <span class="pr-insp-sub">${entries.length} in this prompt</span></div>`;
+  if(!entries.length){
+    html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time. The buttons above insert one.</div>`;
+    document.getElementById('pInspector').innerHTML = html; return;
+  }
+  const hasPickable = entries.some(([, v])=>v.type!=='text');
+  if(hasPickable){
+    html += `<div class="pr-insp-label">Presets</div><div class="pr-presets">`;
+    html += `<button type="button" class="pr-chip${promptPresetMatches(p, null) ? ' on' : ''}" onclick="applyPromptPreset(-1)">Clear</button>`;
+    (p.presets || []).forEach((ps, i)=>{
+      const on = promptPresetMatches(p, ps);
+      html += locked
+        ? `<button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})">${esc(ps.name)}</button>`
+        : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i})" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
+    });
+    if(!locked) html += promptPresetDraft
+      ? `<input type="text" class="pr-chip-input" id="pPresetInput" placeholder="Preset name" maxlength="60" aria-label="Preset name" onkeydown="promptPresetKey(event)" onblur="promptPresetKey({key:'Enter'})">`
+      : `<button type="button" class="pr-chip add" onclick="startPromptPresetSave()">+ Save as Preset</button>`;
+    html += `</div>`;
+  }
+  html += `<div class="pr-vars">`;
+  entries.forEach(([k, v])=>{
+    html += `<div class="pr-var" data-v="${esc(k)}"><span class="pr-var-name ph ${kindClass(v.type)}">${esc(k)}</span>`;
+    if(v.type==='option'){
+      html += `<div class="pr-pills">` + (v.options || []).map((o, i)=>{ const on = v.selected===o; return locked
+          ? `<button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})">${esc(o)}</button>`
+          : `<span class="pr-pill-wrap has-x${on ? ' on' : ''}" oncontextmenu="openPromptItemMenu(event,'option',${i})"><button type="button" class="pr-pill${on ? ' on' : ''}" aria-pressed="${on}" onclick="pickPromptOption(this,${i})" onkeydown="promptItemKey(event,'option',${i})">${esc(o)}</button><button type="button" class="pr-pill-x" tabindex="-1" title="Remove option" aria-label="Remove ${esc(o)}" onclick="removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button></span>`; }).join('')
+        + (locked ? '' : `<button type="button" class="pr-pill add" title="Add an option" aria-label="Add an option" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i></button>`) + `</div>`;
+    } else if(v.type==='instruction'){
+      html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i})" oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
+        + (locked ? '' : `<button type="button" class="pr-add-item" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i> Add item</button>`) + `</div>`;
+    } else {
+      html += `<input type="text" class="pr-textfield" value="${esc(v.value || '')}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>`;
+    }
+    html += `</div>`;
+  });
+  html += `</div>`;
+  host.innerHTML = html;
+}
+const promptVarOf = el=>{ const p = prompts.find(x=>x.id===promptEditorId), row = el.closest('.pr-var'); return p && row ? { p, key: row.dataset.v, v: p.vars[row.dataset.v] } : null; };
+function pickPromptOption(btn, i){
+  const c = promptVarOf(btn); if(!c || promptTrashed(c.p) || !c.v) return;
+  const o = c.v.options[i]; c.v.selected = c.v.selected===o ? '' : o;
+  touchPrompt(c.p); save(); renderPromptInspector(c.p);
+}
+function togglePromptItem(el, i){
+  const c = promptVarOf(el); if(!c || promptTrashed(c.p) || !c.v) return;
+  const o = c.v.options[i], sel = c.v.selected || [];
+  c.v.selected = sel.includes(o) ? sel.filter(x=>x!==o) : [...sel, o];
+  touchPrompt(c.p); save(); renderPromptInspector(c.p);
+}
+function setPromptText(input){
+  const c = promptVarOf(input); if(!c || !c.v) return;
+  c.v.value = input.value.slice(0,5000); touchPrompt(c.p); schedulePromptSave();      // typing what this use needs is allowed even when the prompt is locked
+}
+// Removing an option or a checklist item: the × inside it (on hover or focus), Delete / Backspace on the focused one, or Remove in its right-click menu.
+function promptItemKey(e, kind, i){
+  if(e.key!=='Delete' && e.key!=='Backspace') return;
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
+  e.preventDefault(); e.stopPropagation();
+  if(kind==='preset') deletePromptPreset(i); else removePromptOption(e.currentTarget, i);
+}
+let promptItemMenu = null;
+function openPromptItemMenu(e, kind, i){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;       // a locked prompt keeps its options
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  const row = e.currentTarget.closest('.pr-var');
+  const name = kind==='preset' ? (p.presets[i] || {}).name : (row && p.vars[row.dataset.v] ? p.vars[row.dataset.v].options[i] : '');
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptItemMenu = { kind, i, key: row ? row.dataset.v : '' }; promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = rowMenuItem('fa-solid fa-trash', `Remove “${esc(String(name).slice(0, 30))}”`, 'promptItemMenuRun()', { danger: true });
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function promptItemMenuRun(){
+  const m = promptItemMenu; closeRowMenu(); promptItemMenu = null; if(!m) return;
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p) return;
+  if(m.kind==='preset') deletePromptPreset(m.i);
+  else { const v = p.vars[m.key]; if(v) removePromptOptionAt(p, m.key, m.i); }
+}
+function removePromptOption(btn, i){
+  const c = promptVarOf(btn); if(!c) return;
+  removePromptOptionAt(c.p, c.key, i);
+}
+function removePromptOptionAt(p, key, i){
+  const c = { p, key, v: p.vars[key] };
+  if(c.p.locked || promptTrashed(c.p) || !c.v) return;
+  const o = c.v.options[i]; c.v.options.splice(i, 1);
+  if(c.v.type==='option'){ if(c.v.selected===o) c.v.selected = ''; } else c.v.selected = (c.v.selected || []).filter(x=>x!==o);
+  (c.p.presets || []).forEach(ps=>{ if(ps.values && c.key in ps.values){ if(Array.isArray(ps.values[c.key])) ps.values[c.key] = ps.values[c.key].filter(x=>x!==o); else if(ps.values[c.key]===o) ps.values[c.key] = ''; } });
+  touchPrompt(c.p); save(); renderPromptInspector(c.p);
+}
+function startPromptAddOption(btn){
+  const c = promptVarOf(btn); if(!c || c.p.locked || promptTrashed(c.p)) return;
+  const input = document.createElement('input');
+  input.type = 'text'; input.className = 'pr-add-input'; input.maxLength = 200; input.placeholder = c.v.type==='option' ? 'New option' : 'New item'; input.setAttribute('aria-label', input.placeholder);
+  let done = false;
+  const commit = ()=>{
+    if(done) return; done = true;
+    const text = input.value.trim().slice(0,200);
+    if(text && !c.v.options.includes(text)){ c.v.options.push(text); touchPrompt(c.p); save(); }
+    renderPromptInspector(c.p);
+  };
+  input.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); commit(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); done = true; renderPromptInspector(c.p); } });
+  input.addEventListener('blur', commit);
+  btn.replaceWith(input); input.focus();
+}
+// ---- presets: named sets of the choices and checklists (text variables are never part of one: they are typed for each use) ----
+function promptPresetMatches(p, preset){
+  const keys = Object.keys(p.vars || {}).filter(k=>p.vars[k].type!=='text');
+  if(!preset) return keys.length > 0 && keys.every(k=>{ const v = p.vars[k]; return v.type==='option' ? v.selected==='' : !(v.selected && v.selected.length); }) && Object.values(p.vars).filter(v=>v.type==='text').every(v=>!v.value);
+  const pk = Object.keys(preset.values || {}).filter(k=>p.vars[k] && p.vars[k].type!=='text');
+  if(pk.length!==keys.length) return false;
+  return pk.every(k=>{ const v = p.vars[k], val = preset.values[k]; if(v.type==='option') return v.selected===val; const a = v.selected || [], b = Array.isArray(val) ? val : []; return a.length===b.length && a.every(x=>b.includes(x)); });
+}
+function applyPromptPreset(i){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || promptTrashed(p)) return;
+  if(i<0){ Object.values(p.vars).forEach(v=>{ if(v.type==='option') v.selected = ''; else if(v.type==='instruction') v.selected = []; else v.value = ''; }); }
+  else {
+    const ps = (p.presets || [])[i]; if(!ps) return;
+    Object.entries(ps.values || {}).forEach(([k, val])=>{ const v = p.vars[k]; if(!v) return; if(v.type==='option') v.selected = typeof val==='string' && v.options.includes(val) ? val : ''; else if(v.type==='instruction') v.selected = Array.isArray(val) ? val.filter(x=>v.options.includes(x)) : []; });
+  }
+  touchPrompt(p); save(); renderPromptInspector(p);
+}
+function startPromptPresetSave(){ promptPresetDraft = true; const p = prompts.find(x=>x.id===promptEditorId); if(p) renderPromptInspector(p); const el = document.getElementById('pPresetInput'); if(el) el.focus(); }
+function promptPresetKey(e){
+  const p = prompts.find(x=>x.id===promptEditorId), input = document.getElementById('pPresetInput');
+  if(!p || !input || !promptPresetDraft){ return; }
+  if(e.key==='Escape'){ promptPresetDraft = false; renderPromptInspector(p); return; }
+  if(e.key!=='Enter') return;
+  promptPresetDraft = false;
+  const name = input.value.trim().slice(0,60);
+  if(name){
+    const values = {};
+    Object.entries(p.vars).forEach(([k, v])=>{ if(v.type==='option') values[k] = v.selected; else if(v.type==='instruction') values[k] = [...(v.selected || [])]; });
+    p.presets = p.presets || []; const at = p.presets.findIndex(x=>x.name===name);
+    if(at>=0) p.presets[at].values = values; else p.presets.push({ name, values });
+    touchPrompt(p); save(); showToast(`Preset "${name}" saved`);
+  }
+  renderPromptInspector(p);
+}
+function deletePromptPreset(i){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked) return;
+  const gone = (p.presets || []).splice(i, 1)[0]; if(!gone) return;
+  touchPrompt(p); save(); renderPromptInspector(p);
+  showToast(`Preset "${gone.name}" deleted`, false, ()=>{ p.presets.splice(Math.min(i, p.presets.length), 0, gone); touchPrompt(p); save(); renderPromptInspector(p); showToast('Preset restored'); });
+}
+function togglePromptInspector(force, remember){
+  const split = document.getElementById('prSplit'); if(!split) return;
+  const closed = typeof force==='boolean' ? !force : !split.classList.contains('insp-closed');
+  split.classList.toggle('insp-closed', closed);
+  if(remember!==false){ try{ localStorage.setItem(PROMPT_INSPECTOR_KEY, closed ? '0' : '1'); }catch(_){} }       // only your own choice is remembered, not the window-size default
+  const b = document.getElementById('pInspToggle');
+  if(b){ b.setAttribute('aria-pressed', String(!closed)); b.title = (closed ? 'Show' : 'Hide') + ' Variables (⌥⌘I)'; b.setAttribute('aria-label', (closed ? 'Show' : 'Hide') + ' Variables'); }
+}
+function applyPromptInspectorState(){
+  let v = null; try{ v = localStorage.getItem(PROMPT_INSPECTOR_KEY); }catch(_){}
+  togglePromptInspector(v===null ? (window.innerWidth || 1400) >= 1300 : v==='1', false);
+}
+// Insert a placeholder at the caret ({{ }}, [[ ]] or (( )) — a selected word becomes its name; otherwise a new unique name that is left selected to type over).
+function insertPromptVar(kind){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
+  const ta = document.getElementById('pTemplate'), open = kind==='option' ? '{{' : kind==='instruction' ? '[[' : '((', close = kind==='option' ? '}}' : kind==='instruction' ? ']]' : '))';
+  ta.focus();
+  let name = ta.value.slice(ta.selectionStart, ta.selectionEnd).trim().replace(/\s+/g, '_').replace(/[{}\[\]()]/g, '');
+  const had = !!name;
+  if(!name){ const base = kind==='option' ? 'choice' : kind==='instruction' ? 'checklist' : 'text'; let n = 1; name = base; while(p.vars[name]) name = `${base}_${++n}`; }
+  const start = ta.selectionStart;
+  document.execCommand('insertText', false, open + name + close);
+  if(!had){ ta.setSelectionRange(start + open.length, start + open.length + name.length); }
+  onPromptTemplateInput();
+}
+function promptUndo(cmd){ const ta = document.getElementById('pTemplate'); if(!ta || ta.readOnly) return; ta.focus(); document.execCommand(cmd); onPromptTemplateInput(); }
+
+// ---- actions ----
+function selectPrompt(id){
+  if(id===selectedPromptId) return;
+  flushPromptEdit(); selectedPromptId = id; promptEditorId = null; render();
+}
+function setPromptFolder(id){
+  flushPromptEdit();
+  promptFolderFilter = (id==='all' || id==='favorites' || id==='trash' || promptFolderById(id)) ? id : 'all';
+  try{ localStorage.setItem(PROMPT_FOLDER_KEY, promptFolderFilter); }catch(_){}
+  const picked = promptFolderById(promptFolderFilter);
+  if(picked && picked.parentId && promptFoldersCollapsed.has(picked.parentId)){ promptFoldersCollapsed.delete(picked.parentId); try{ localStorage.setItem(PROMPT_COLLAPSED_KEY, JSON.stringify([...promptFoldersCollapsed])); }catch(_){} }
+  selectedPromptId = null; promptEditorId = null; render();
+}
+function createPrompt(){
+  flushPromptEdit();
+  if(promptFolderFilter==='trash' || promptFolderFilter==='favorites') promptFolderFilter = 'all';   // a new prompt is neither deleted nor a favorite
+  const now = Date.now();
+  const p = { id: genId(), name: '', folderId: promptFolderById(promptFolderFilter) ? promptFolderFilter : '', favorite: false, locked: false, template: '', vars: {}, presets: [], createdAt: now, updatedAt: now };
+  prompts.push(p); selectedPromptId = p.id; promptEditorId = null;
+  promptSearchQuery = ''; syncSearchBox();
+  save(); render();
+  document.getElementById('pName')?.focus();
+}
+function togglePromptFavorite(id){
+  const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p || promptTrashed(p)) return;
+  p.favorite = !p.favorite; touchPrompt(p); save(); render();
+}
+function togglePromptLock(id){
+  const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p || promptTrashed(p)) return;
+  flushPromptEdit(); p.locked = !p.locked; touchPrompt(p); promptEditorId = null; save(); render();
+}
+function clonePrompt(id){
+  const p = prompts.find(x=>x.id===id); if(!p) return;
+  flushPromptEdit();
+  const now = Date.now(), c = JSON.parse(JSON.stringify(p));
+  Object.assign(c, { id: genId(), name: (p.name.trim() || 'Untitled prompt') + ' copy', favorite: false, locked: false, createdAt: now, updatedAt: now }); delete c.deletedAt;
+  prompts.push(c); selectedPromptId = c.id; promptEditorId = null; save(); render(); showToast('Prompt cloned');
+}
+function movePrompt(id, folderId){
+  const p = prompts.find(x=>x.id===id); if(!p || p.locked || promptTrashed(p)) return;
+  folderId = promptFolderById(folderId) ? folderId : '';
+  if(p.folderId===folderId) return;
+  const was = p.folderId; p.folderId = folderId; touchPrompt(p); promptEditorId = null; save(); render();
+  showToast(folderId ? `Moved to ${promptFolderById(folderId).name}` : 'Moved out of its folder', false, ()=>{ p.folderId = promptFolderById(was) ? was : ''; touchPrompt(p); save(); render(); });
+}
+// Delete moves a prompt to Recently Deleted (30 days, restorable, and the delete syncs as an edit); deleting it THERE is permanent.
+function deletePrompt(id){
+  const p = prompts.find(x=>x.id===id); if(!p) return;
+  if(promptTrashed(p)){ openConfirmModal({ title: 'Delete this prompt permanently?', body: 'It will be removed for good. This cannot be undone.', action: ()=>permanentDeletePrompt(id), confirmLabel: 'Delete' }); return; }
+  if(p.locked){ showToast('Unlock the prompt to delete it', true); return; }
+  flushPromptEdit();
+  const vis = visiblePrompts(), vi = vis.findIndex(x=>x.id===id);
+  p.deletedAt = Date.now(); p.updatedAt = p.deletedAt;
+  if(selectedPromptId===id){ const next = vis[vi + 1] || vis[vi - 1]; selectedPromptId = next ? next.id : null; }
+  promptEditorId = null; save(); render();
+  showToast('Prompt moved to Recently Deleted', false, ()=>{ delete p.deletedAt; touchPrompt(p); selectedPromptId = p.id; promptEditorId = null; save(); render(); showToast('Prompt restored'); });
+}
+function restorePrompt(id){
+  const p = prompts.find(x=>x.id===id); if(!p || !promptTrashed(p)) return;
+  delete p.deletedAt; touchPrompt(p);
+  if(!promptFolderById(p.folderId)) p.folderId = '';
+  promptFolderFilter = 'all'; selectedPromptId = p.id; promptEditorId = null; save(); render(); showToast('Prompt restored');
+}
+function permanentDeletePrompt(id){
+  const i = prompts.findIndex(x=>x.id===id); if(i<0) return;
+  const vis = visiblePrompts(), vi = vis.findIndex(x=>x.id===id);
+  prompts.splice(i, 1); tombstone(deletedPromptIds, id);
+  if(selectedPromptId===id){ const next = vis[vi + 1] || vis[vi - 1]; selectedPromptId = next ? next.id : null; }
+  promptEditorId = null; save(); render();
+}
+function emptyPromptTrash(){
+  const n = prompts.filter(promptTrashed).length; if(!n) return;
+  openConfirmModal({ title: `Delete ${n} prompt${n===1 ? '' : 's'} permanently?`, body: 'They will be removed for good. This cannot be undone.', confirmLabel: 'Delete All', action: ()=>{
+    prompts.filter(promptTrashed).forEach(p=>tombstone(deletedPromptIds, p.id)); prompts = prompts.filter(p=>!promptTrashed(p));
+    selectedPromptId = null; promptEditorId = null; save(); render();
+  }});
+}
+function copyPrompt(id){
+  const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p) return;
+  const missing = Object.entries(p.vars || {}).filter(([, v])=>v.type==='option' ? !v.selected : v.type==='text' ? !(v.value || '').trim() : false).map(([k])=>k);
+  Promise.resolve(noteWriteText(buildPromptFinal(p))).then(ok=>{
+    if(!ok){ showToast('Could not use the clipboard here', true); return; }
+    showToast(missing.length ? `Prompt copied — ${missing.length} variable${missing.length===1 ? '' : 's'} left empty (${missing.slice(0,3).join(', ')}${missing.length>3 ? '…' : ''})` : 'Prompt copied');
+  });
+}
+// ---- drag a prompt onto a folder ----
+function promptFolderDragOver(e){ if(!draggedPromptId) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop-into'); }
+function promptFolderDrop(e, folderId){ e.preventDefault(); e.currentTarget.classList.remove('drop-into'); const id = draggedPromptId; draggedPromptId = null; if(id) movePrompt(id, folderId); }
+
+// ---- folders (the Notes folder dialog is reused; folderModalKind says which set it edits) ----
+function openPromptFolderModal(id, parentId){
+  folderModalKind = 'prompts'; editingPromptFolderId = id || null;
+  const f = id ? promptFolderById(id) : null;
+  document.getElementById('folderModalTitle').textContent = f ? 'Edit Folder' : (parentId ? 'New Subfolder' : 'New Folder');
+  const input = document.getElementById('folderNameInput'); input.value = f ? f.name : '';
+  const field = document.getElementById('folderParentField'), sel = document.getElementById('folderParentSelect');
+  const canNest = !f || !promptFolderKids(f.id).length;
+  if(field) field.style.display = canNest ? '' : 'none';
+  if(sel){
+    const cur = f ? (f.parentId || '') : (parentId || '');
+    sel.innerHTML = `<option value="">Top level</option>` + topPromptFolders().filter(x=>!f || x.id!==f.id).map(x=>`<option value="${x.id}"${x.id===cur ? ' selected' : ''}>${esc(x.name)}</option>`).join('');
+    sel.value = cur;
+  }
+  document.getElementById('folderModalBg').classList.add('open');
+  if(typeof setTimeout==='function') setTimeout(()=>{ input.focus(); input.select(); }, 50);
+}
+function savePromptFolderModal(){
+  const name = (document.getElementById('folderNameInput').value || '').trim().slice(0,40); if(!name) return;
+  const picked = (document.getElementById('folderParentSelect') || {}).value || '';
+  const parent = picked && promptFolderById(picked) && !promptFolderById(picked).parentId ? picked : '';
+  if(editingPromptFolderId){
+    const f = promptFolderById(editingPromptFolderId);
+    if(f){
+      const newParent = !promptFolderKids(f.id).length && parent!==f.id ? parent : (f.parentId || '');
+      f.name = name; if(newParent) f.parentId = newParent; else delete f.parentId; f.updatedAt = Date.now();
+    }
+  } else {
+    const f = { id: genId(), name, updatedAt: Date.now() }; if(parent) f.parentId = parent;
+    promptFolders.push(f); promptFolderFilter = f.id; try{ localStorage.setItem(PROMPT_FOLDER_KEY, f.id); }catch(_){} selectedPromptId = null; promptEditorId = null;
+    if(parent && promptFoldersCollapsed.has(parent)){ promptFoldersCollapsed.delete(parent); try{ localStorage.setItem(PROMPT_COLLAPSED_KEY, JSON.stringify([...promptFoldersCollapsed])); }catch(_){} }
+  }
+  closeAllModals(); save(); render();
+}
+function deletePromptFolder(id){
+  const f = promptFolderById(id); if(!f) return;
+  const kids = promptFolderKids(id), gone = new Set([id, ...kids.map(k=>k.id)]), count = prompts.filter(p=>gone.has(p.folderId)).length, bits = [];
+  if(kids.length) bits.push(`Its ${kids.length} subfolder${kids.length===1 ? '' : 's'} will be deleted too. `);
+  if(count) bits.push(`${count} prompt${count===1 ? '' : 's'} will move out of the folder (they stay in All Prompts). `);
+  openConfirmModal({ title: `Delete "${f.name}"?`, body: bits.join('') + 'You can undo this from the toast right after deleting.', action: ()=>{
+    if(!promptFolderById(id)) return;
+    flushPromptEdit();
+    const removed = []; promptFolders.forEach((x, i)=>{ if(gone.has(x.id)) removed.push({ f: x, i }); });
+    promptFolders = promptFolders.filter(x=>!gone.has(x.id)); gone.forEach(g=>tombstone(deletedPromptFolderIds, g));
+    const moved = []; prompts.forEach(p=>{ if(gone.has(p.folderId)){ moved.push([p.id, p.folderId]); p.folderId = ''; p.updatedAt = Date.now(); } });
+    if(gone.has(promptFolderFilter)) promptFolderFilter = 'all';
+    promptEditorId = null; save(); render();
+    showToast('Folder deleted', false, ()=>{
+      removed.forEach(r=>{ untombstone(deletedPromptFolderIds, r.f.id); promptFolders.splice(Math.min(r.i, promptFolders.length), 0, r.f); });
+      moved.forEach(([pid, fid])=>{ const p = prompts.find(x=>x.id===pid); if(p){ p.folderId = fid; p.updatedAt = Date.now(); } });
+      promptEditorId = null; save(); render(); showToast('Folder restored');
+    });
+  }});
+}
+
+// ---- right-click menus ----
+function promptMenuHtml(id){
+  const p = prompts.find(x=>x.id===id); if(!p) return '';
+  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+  if(promptTrashed(p)) return [item('fa-solid fa-rotate-left', 'Restore', `promptMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy Prompt', `promptMenuRun('copy')`), sep, item('fa-solid fa-trash', 'Delete Permanently', `promptMenuRun('delete')`, {danger:true})].join('');
+  const moveOpts = menuOpt(`promptMenuRun('move','')`, {svg: menuSvg('folder')}, 'No Folder', !p.folderId) + orderedPromptFolders().map(f=>menuOpt(`promptMenuRun('move','${f.id}')`, {svg: menuSvg('folder'), indent: !!f.parentId}, f.name, f.id===p.folderId)).join('');
+  return [
+    item('fa-regular fa-clipboard', 'Copy Prompt', `promptMenuRun('copy')`),
+    item('fa-regular fa-star', p.favorite ? 'Remove from Favorites' : 'Add to Favorites', `promptMenuRun('favorite')`),
+    item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
+    sep,
+    item('fa-regular fa-clone', 'Clone', `promptMenuRun('clone')`),
+    rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
+    sep,
+    item('fa-solid fa-trash', 'Delete', `promptMenuRun('delete')`, {danger:true, off:p.locked, hint: p.locked ? 'Unlock First' : '⌫'})
+  ].join('');
+}
+function openPromptMenu(e, id){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = id; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = promptMenuHtml(id);
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function promptMenuRun(kind, arg){
+  const id = promptMenuId; closeRowMenu();
+  if(!id) return;
+  if(kind==='copy') copyPrompt(id); else if(kind==='favorite') togglePromptFavorite(id); else if(kind==='lock') togglePromptLock(id);
+  else if(kind==='clone') clonePrompt(id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
+}
+function promptFolderMenuHtml(id){
+  const f = promptFolderById(id); if(!f) return '';
+  const item = rowMenuItem, parts = [item('fa-solid fa-plus', 'New Prompt Here', `promptFolderMenuRun('new')`)];
+  if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `promptFolderMenuRun('newsub')`));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `promptFolderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true}));
+  return parts.join('');
+}
+function openPromptFolderMenu(e, id){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptFolderMenuId = id; promptMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = promptFolderMenuHtml(id);
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function promptFolderMenuRun(kind){
+  const id = promptFolderMenuId; closeRowMenu(); if(!id) return;
+  if(kind==='new'){ setPromptFolder(id); createPrompt(); } else if(kind==='newsub') openPromptFolderModal(null, id);
+  else if(kind==='rename') openPromptFolderModal(id); else if(kind==='delete') deletePromptFolder(id);
+}
+function openPromptListMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = rowMenuItem('fa-solid fa-upload', 'Import PromptLab Library…', `closeRowMenu();document.getElementById('promptLabInput').click()`);
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  menu.classList.add('open');
+  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
+  placeRowMenu(menu, r.right - menu.offsetWidth * k, r.bottom + 6, btn);
+}
+function promptSearchInput(v){
+  promptSearchQuery = v;
+  const vis = visiblePrompts();
+  if(vis.length && !vis.some(p=>p.id===selectedPromptId)){ flushPromptEdit(); selectedPromptId = vis[0].id; promptEditorId = null; render(); }
+  else renderPromptsList(vis);
 }
 
 // ---- the editor (contenteditable + execCommand: deprecated on paper, but it is what every browser still ships and needs no library) ----
@@ -7343,8 +8256,8 @@ document.addEventListener('mousedown', e=>{
 });
 function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
 document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); } });
-window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); });
-document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') flushNoteEdit(); });
+window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); flushPromptEdit(); });
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden'){ flushNoteEdit(); flushPromptEdit(); } });
 
 // ---- keyboard (the list side; the editor has its own handlers) ----
 function handleNotesKeys(e){
@@ -7367,9 +8280,29 @@ function handleNotesKeys(e){
   else if((e.key==='Delete' || e.key==='Backspace') && selectedNoteId){ e.preventDefault(); deleteNote(selectedNoteId); }
 }
 
+// ---- keyboard (Prompts: the list side; the template field and the variables have their own) ----
+function handlePromptsKeys(e){
+  if(document.querySelector('.modal-bg.open')) return;
+  const el = document.activeElement, typing = isTypingTarget(el);
+  if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); togglePromptInspector(); return; }
+  if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key==='Enter' && selectedPromptId){ e.preventDefault(); copyPrompt(selectedPromptId); return; }
+  if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
+  if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
+  if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createPrompt(); return; }
+  const onList = !el || el===document.body || (el.classList && el.classList.contains('note-row'));
+  if(!onList || typing) return;
+  const vis = visiblePrompts(), i = vis.findIndex(p=>p.id===selectedPromptId);
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){
+    e.preventDefault(); if(!vis.length) return;
+    const next = vis[Math.max(0, Math.min(vis.length - 1, i + (e.key==='ArrowDown' ? 1 : -1)))];
+    if(next && next.id!==selectedPromptId){ selectPrompt(next.id); document.querySelector(`#pList .note-row[data-id="${next.id}"]`)?.focus(); }
+  } else if(e.key==='Enter' && selectedPromptId){ e.preventDefault(); document.getElementById('pTemplate')?.focus(); }
+  else if((e.key==='Delete' || e.key==='Backspace') && selectedPromptId){ e.preventDefault(); deletePrompt(selectedPromptId); }
+}
+
 // ── Help dialog (tabbed, with search — modelled on Milestone's) ────────────────
-const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'notes', 'look', 'data'];
-const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', notes: 'Notes', look: 'Appearance', data: 'Data & sync' };
+const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'notes', 'prompts', 'look', 'data'];
+const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', notes: 'Notes', prompts: 'Prompts', look: 'Appearance', data: 'Data & sync' };
 let helpTab = 'start';   // the topic last read (this session): the dialog reopens where you left it
 let helpSearching = false;
 function openHelpModal(tab){
@@ -7585,6 +8518,7 @@ document.addEventListener('keydown', e=>{
     }
     return;
   }
+  if(appMode==='prompts'){ handlePromptsKeys(e); return; }
   if(appMode==='notes'){ handleNotesKeys(e); return; }     // Notes has its own keys; the task handlers below must not touch the hidden list
   if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==='a' && !isTypingTarget(document.activeElement) && !document.querySelector('.modal-bg.open') && !activeTaskId){
     e.preventDefault();
@@ -7835,7 +8769,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
+  downloadBackup(projects, tasks, `mydesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 function handleFileImport(event){
@@ -7896,16 +8830,18 @@ function mergeData(data, opts){
     tasks.push(it); added++;
   });
   const nm = mergeNotesData(data, respectTombstones); added += nm.added; updated += nm.updated;
+  const pm = mergePromptsData(data, respectTombstones); added += pm.added; updated += pm.updated;
   return {added, updated};
 }
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders});
+    downloadBackup(projects, tasks, `mydesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
     // an older export has no notes: leave yours alone rather than wiping them
     if(Array.isArray(pendingImportData.notes)){ notes = pendingImportData.notes; noteFolders = pendingImportData.noteFolders || []; }
+    if(Array.isArray(pendingImportData.prompts)){ prompts = pendingImportData.prompts; promptFolders = pendingImportData.promptFolders || []; }
     normalizeData();
     showToast('Backed up previous data, then replaced');
   } else {
@@ -7971,7 +8907,7 @@ async function fileSyncWrite(data){
           const {added, updated} = mergeData(externalData);
           if(added || updated){
             normalizeData();
-            payload = { ...data, projects, tasks, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds };
+            payload = { ...data, projects, tasks, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
             render();
             showToast(`Synced changes from another tab/device (${added} added, ${updated} updated)`);
