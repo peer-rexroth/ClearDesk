@@ -597,3 +597,20 @@ test('undoable deletes do not ask: the item goes and the toast offers Undo; erro
   showToast('Saved');
   assertEqual(document.getElementById('toast').getAttribute('role'), 'status');
 });
+
+test('mode shortcuts: Option+Command+1/2/3 (Ctrl+Alt on other systems) pick Tasks, Notes and Prompts; plain ⌘1–3 and other combinations do nothing', function () {
+  assertEqual(modeShortcutOf({ altKey: true, metaKey: true, code: 'Digit1' }), 'tasks');
+  assertEqual(modeShortcutOf({ altKey: true, ctrlKey: true, code: 'Digit2' }), 'notes');
+  assertEqual(modeShortcutOf({ altKey: true, metaKey: true, code: 'Digit3' }), 'prompts');
+  assertEqual(modeShortcutOf({ metaKey: true, code: 'Digit1' }), null, 'plain ⌘1 is the browser\'s');
+  assertEqual(modeShortcutOf({ altKey: true, metaKey: true, shiftKey: true, code: 'Digit1' }), null);
+  assertEqual(modeShortcutOf({ altKey: true, metaKey: true, code: 'Digit4' }), null);
+  var seen = null, orig = setAppMode; setAppMode = function (m) { seen = m; };
+  var pd = false; handleSidebarShortcut({ altKey: true, metaKey: true, code: 'Digit2', key: '2', preventDefault: function () { pd = true; } });
+  setAppMode = orig;
+  assertEqual(seen, 'notes'); assertTrue(pd);
+});
+
+test('the sidebar cannot be made narrower than its bottom tools bar needs', function () {
+  assertEqual(clampSidebarW(100), 260); assertEqual(clampSidebarW(259), 260); assertEqual(clampSidebarW(300), 300); assertEqual(clampSidebarW(999), 480);
+});

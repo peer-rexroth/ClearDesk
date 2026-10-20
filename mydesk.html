@@ -1375,8 +1375,9 @@ const ICONS = {
   html.sidebar-collapsed .sidebar { overflow: hidden; }
   .sidebar-resizer { z-index: 61; }
   .sb-head { display: flex; align-items: center; gap: 10px; height: 52px; padding: 0 12px; flex: none; box-sizing: border-box; }
-  .sb-head .mode-switch { margin: 0; flex: 1; display: flex; }
-  .sb-head .mode-switch .view-switch-btn { flex: 1; text-align: center; }
+  .sb-head .mode-switch { margin: 0; flex: none; display: flex; }
+  /* The mode switch is icons only (Tasks, Notes, Prompts): three equal segments, 40 x 28, sized to their icons rather than stretched across the sidebar; the names are the tooltips and the labels */
+  .sb-head .mode-switch .view-switch-btn { flex: none; width: 40px; min-height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
   .sb-tools { margin-top: auto; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; border-top: 0.5px solid var(--border); flex: none; }
   .sb-tools .topbar-divider { display: none; }
   .sb-tools .split-btn-menu { top: auto !important; bottom: calc(100% + 8px); left: 0 !important; right: auto !important; }
@@ -1766,9 +1767,9 @@ const ICONS = {
     <div class="sb-head" id="sbHead">
       <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
     <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks, Notes or Prompts">
-      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')">Tasks</button>
-      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')">Notes</button>
-      <button type="button" class="view-switch-btn" data-mode="prompts" onclick="setAppMode('prompts')">Prompts</button>
+      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')" title="Tasks" aria-label="Tasks"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.3 2.5 2.5 4.6-5"/></svg></button>
+      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')" title="Notes" aria-label="Notes"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h11a2 2 0 0 1 2 2V14l-5.5 5.5H6.5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2z"/><path d="M19.5 14H15a1 1 0 0 0-1 1v4.5"/></svg></button>
+      <button type="button" class="view-switch-btn" data-mode="prompts" onclick="setAppMode('prompts')" title="Prompts" aria-label="Prompts"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4C6.5 4 6 5 6 6.5V9c0 1.2-.8 2-2 3 1.2 1 2 1.8 2 3v2.5C6 19 6.5 20 8.5 20"/><path d="M15.5 4C17.5 4 18 5 18 6.5V9c0 1.2.8 2 2 3-1.2 1-2 1.8-2 3v2.5c0 1.5-.5 2.5-2.5 2.5"/></svg></button>
     </div>
     </div>
     <div class="sidebar-search">
@@ -1897,7 +1898,7 @@ const ICONS = {
     </div>
     <div class="sidebar-footer" id="sidebarFooter"></div>
   </div>
-  <div class="sidebar-resizer" id="sidebarResizer" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" aria-valuemin="200" aria-valuemax="480" tabindex="0" title="Drag to resize (double-click to reset)"></div>
+  <div class="sidebar-resizer" id="sidebarResizer" role="separator" aria-orientation="vertical" aria-label="Resize sidebar" aria-valuemin="260" aria-valuemax="480" tabindex="0" title="Drag to resize (double-click to reset)"></div>
 
   <div class="main">
     <div class="main-toolbar">
@@ -2305,7 +2306,7 @@ const ICONS = {
         <div class="help-section">
           <div class="help-section-title">Writing notes</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong> and <strong>Notes</strong> with the switch beside the app name. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
+          <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong>, <strong>Notes</strong> and <strong>Prompts</strong> with the three icons at the top of the sidebar (a circled check, a note and curly braces; hover one for its name) or with <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
@@ -2340,7 +2341,7 @@ const ICONS = {
         <div class="help-section">
           <div class="help-section-title">Reusable prompts</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the switch beside the app name. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
+          <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the curly-braces icon at the top of the sidebar. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
@@ -2534,7 +2535,7 @@ function collapseSidebarIfNarrow(){
   mirror();
 })();
 // Sidebar width: drag the sidebar's right edge (or use the arrow keys on it); a per-device display preference like the collapse state.
-const SIDEBAR_W_KEY = 'mytasks_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 200, SIDEBAR_W_MAX = 480;
+const SIDEBAR_W_KEY = 'mytasks_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 260, SIDEBAR_W_MAX = 480;   // 260 = the widest the tools bar needs (Reconnect chip + Data / Appearance / Help = 259px), so nothing runs past the edge
 const clampSidebarW = v=>Math.max(SIDEBAR_W_MIN, Math.min(SIDEBAR_W_MAX, Math.round(v)));
 let sidebarW = SIDEBAR_W_DEFAULT;   // the chosen width (the element's own width lags while the .2s transition runs)
 function setSidebarWidth(v, save){
@@ -5445,7 +5446,7 @@ function shortcutGroups(){
   const mod = mac ? '⌘' : 'Ctrl', shift = mac ? '⇧' : 'Shift';
   return [
     { id:'nav', label:'Navigation', icon:'fa-solid fa-compass', rows:[
-      ['Focus search', ['/']], ['Focus quick-add', ['N']], ['Show or hide the sidebar', mac ? ['⌥','⌘','S'] : ['Ctrl','Alt','S']], ['Show or hide the sidebar (Tasks only; in Notes it is Bold)', [mod,'B']], ['Navigate tasks', ['↑','↓']],
+      ['Focus search', ['/']], ['Focus quick-add', ['N']], ['Show or hide the sidebar', mac ? ['⌥','⌘','S'] : ['Ctrl','Alt','S']], ['Switch to Tasks, Notes or Prompts', mac ? ['⌥','⌘','1 / 2 / 3'] : ['Ctrl','Alt','1 / 2 / 3']], ['Show or hide the sidebar (Tasks only; in Notes it is Bold)', [mod,'B']], ['Navigate tasks', ['↑','↓']],
       ['Jump from the quick-add field into the list, and back', ['↓','↑']], ['Open selected task', ['↵']] ] },
     { id:'actions', label:'Task actions', icon:'fa-solid fa-list-check', rows:[
       ['Collapse/expand selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Delete selected task', ['Delete']],
@@ -9144,13 +9145,22 @@ document.addEventListener('pointerdown', noteInputModality, true);
 document.addEventListener('keydown', noteInputModality, true);
 document.addEventListener('change', releaseSelectAfterPointerChange);
 // Show / hide the sidebar: ⌥⌘S (Ctrl+Alt+S) everywhere, the macOS sidebar shortcut. ⌘B (Ctrl+B) keeps doing it in Tasks, but in Notes it is Bold, so it is left to the editor there.
+// ⌥⌘1 / ⌥⌘2 / ⌥⌘3 (Ctrl+Alt+1…3) switch between Tasks, Notes and Prompts (plain ⌘1–⌘3 belong to the browser's tabs).
+const MODE_BY_DIGIT = { Digit1: 'tasks', Digit2: 'notes', Digit3: 'prompts', Numpad1: 'tasks', Numpad2: 'notes', Numpad3: 'prompts' };
+function modeShortcutOf(e){ return (e.altKey && (e.metaKey || e.ctrlKey) && !e.shiftKey) ? (MODE_BY_DIGIT[e.code] || null) : null; }
+function applyModeSwitchTitles(){
+  const mac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent), names = { tasks: 'Tasks', notes: 'Notes', prompts: 'Prompts' };
+  document.querySelectorAll('#modeSwitch .view-switch-btn').forEach((b, i)=>{ b.title = `${names[b.dataset.mode]} (${mac ? '⌥⌘' : 'Ctrl+Alt+'}${i + 1})`; });
+}
 function handleSidebarShortcut(e){
+  const md = modeShortcutOf(e); if(md){ e.preventDefault(); setAppMode(md); return; }
   if(!(e.metaKey || e.ctrlKey) || e.shiftKey) return;
   const key = String(e.key).toLowerCase();
   if(e.altKey){ if(e.code==='KeyS' || key==='s' || key==='ß'){ e.preventDefault(); toggleSidebar(); } return; }
   if(key==='b' && appMode!=='notes'){ e.preventDefault(); toggleSidebar(); }
 }
 document.addEventListener('keydown', handleSidebarShortcut);
+applyModeSwitchTitles();
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
     closeCellPop(); closeRowMenu(); closeToolMenus(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
