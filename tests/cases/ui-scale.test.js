@@ -3,26 +3,28 @@
 // .view-switch pill (the same segmented control the List/Board toggle uses),
 // persisted/synced the same way the theme is. Small and Extra Large were removed.
 
-test('UI_SCALE_STEPS offers exactly Medium and Large, in order, as a small and a large A', function () {
-  assertDeepEqual(UI_SCALE_STEPS.map(s => s.label), ['Medium', 'Large']);
-  assertDeepEqual(UI_SCALE_STEPS.map(s => s.pct), [100, 115]);
-  assertTrue(UI_SCALE_STEPS[0].glyph < UI_SCALE_STEPS[1].glyph, 'the Large letter is drawn bigger than the Medium one');
+test('UI_SCALE_STEPS offers Small, Medium, Large and Extra Large, in order, each drawn as a bigger A', function () {
+  assertDeepEqual(UI_SCALE_STEPS.map(s => s.label), ['Small', 'Medium', 'Large', 'Extra Large']);
+  assertDeepEqual(UI_SCALE_STEPS.map(s => s.pct), [90, 100, 115, 130]);
+  for (let i = 1; i < UI_SCALE_STEPS.length; i++) assertTrue(UI_SCALE_STEPS[i - 1].glyph < UI_SCALE_STEPS[i].glyph, 'each letter is drawn bigger than the one before');
 });
 
 test('uiScaleStepIndex finds the exact stop, and snaps an in-between value to the nearest one', function () {
-  assertEqual(uiScaleStepIndex(100), 0);
-  assertEqual(uiScaleStepIndex(115), 1);
-  assertEqual(uiScaleStepIndex(103), 0, 'closer to Medium (100) than Large (115)');
-  assertEqual(uiScaleStepIndex(90), 0, 'a saved Small snaps to Medium');
-  assertEqual(uiScaleStepIndex(130), 1, 'a saved Extra Large snaps to Large');
-  assertEqual(uiScaleStepIndex(999), 1, 'clamps to the last stop for anything past it');
+  assertEqual(uiScaleStepIndex(90), 0);
+  assertEqual(uiScaleStepIndex(100), 1);
+  assertEqual(uiScaleStepIndex(115), 2);
+  assertEqual(uiScaleStepIndex(130), 3);
+  assertEqual(uiScaleStepIndex(103), 1, 'closer to Medium (100) than Large (115)');
+  assertEqual(uiScaleStepIndex(124), 3, 'closer to Extra Large (130) than Large (115)');
+  assertEqual(uiScaleStepIndex(999), 3, 'clamps to the last stop for anything past it');
+  assertEqual(uiScaleStepIndex(10), 0, 'and to the first for anything before it');
 });
 
-test('clampUiScale snaps any value to one of the 2 real stops', function () {
+test('clampUiScale snaps any value to one of the 4 real stops', function () {
   assertEqual(clampUiScale(103), 100);
-  assertEqual(clampUiScale(90), 100);
-  assertEqual(clampUiScale(130), 115);
-  assertEqual(clampUiScale(999), 115);
+  assertEqual(clampUiScale(95), 90);
+  assertEqual(clampUiScale(125), 130);
+  assertEqual(clampUiScale(999), 130);
   assertEqual(clampUiScale('not-a-number'), UI_SCALE_DEFAULT, 'falls back to the default on garbage input');
 });
 
@@ -40,7 +42,7 @@ test('setUiScale updates state, applies the zoom style, and localStorage', funct
 
 test('setUiScale snaps an off-stop value to the nearest real one before storing it', function () {
   setUiScale(999);
-  assertEqual(uiScale, 115);
+  assertEqual(uiScale, 130);
   setUiScale(103);
   assertEqual(uiScale, 100);
 });
@@ -60,13 +62,16 @@ test('load() picks up a uiScale saved in the data blob, same as the theme', func
   assertEqual(document.documentElement.style.zoom, 1.15);
 });
 
-test('load() moves a removed size (Small / Extra Large) onto the nearest offered one', function () {
+test('load() keeps a saved Small / Extra Large and snaps an off-stop value to the nearest one', function () {
   localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 90 }));
   load();
-  assertEqual(uiScale, 100, 'Small -> Medium');
+  assertEqual(uiScale, 90, 'Small stays Small');
   localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 130 }));
   load();
-  assertEqual(uiScale, 115, 'Extra Large -> Large');
+  assertEqual(uiScale, 130, 'Extra Large stays Extra Large');
+  localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 108 }));
+  load();
+  assertEqual(uiScale, 115, '108 snaps to Large');
 });
 
 test('load() ignores a non-numeric uiScale rather than crashing', function () {
@@ -96,12 +101,12 @@ function renderedUiScaleSegments(){
   return out;
 }
 
-test('renderUiScaleMenu builds a 2-segment pill of a small and a large A, with the current stop marked active', function () {
+test('renderUiScaleMenu builds a 4-segment pill of ever larger As, with the current stop marked active', function () {
   setUiScale(115);
   renderUiScaleMenu();
   const segments = renderedUiScaleSegments();
-  assertDeepEqual(segments.map(s => s.short), ['A', 'A'], 'both segments show the letter A, at different sizes');
-  assertDeepEqual(segments.map(s => s.title), ['Medium', 'Large'], 'the full name is each segment\'s own tooltip');
+  assertDeepEqual(segments.map(s => s.short), ['A', 'A', 'A', 'A'], 'every segment shows the letter A, at different sizes');
+  assertDeepEqual(segments.map(s => s.title), ['Small', 'Medium', 'Large', 'Extra Large'], 'the full name is each segment\'s own tooltip');
   assertEqual(segments.filter(s => s.active).length, 1, 'exactly one segment is marked active');
   assertEqual(segments.find(s => s.active).title, 'Large', 'Large (115%) is the active segment');
 });

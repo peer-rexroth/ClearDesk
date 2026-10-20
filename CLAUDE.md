@@ -672,18 +672,12 @@ still has one is simply ignored by `load()`).
   (`mytasks_theme` in localStorage) and is deliberately not in the synced data
   blob**: each device should follow its own system, and a synced file must not
   push one device's choice onto another (`load()` ignores a `theme` in a file).
-  It is changed from the **Appearance** popover's *Theme* control: **Light | Dark
-  | Auto** with thin outlined sun / crescent-moon / half-filled-circle icons drawn
-  in the SF Symbols idiom (`ICON_SUN`/`ICON_MOON`/`ICON_AUTO`, inline SVG,
-  `currentColor`). The user disliked the heavy solid Font Awesome sun/moon, so
-  don't swap those back.
-- **One density, one of two text sizes.** The density option is gone: compact is
-  the only layout (`.task-row` is `padding: 3px 10px; row-gap: 2px` in the base
-  rules — it used to be switched by `html[data-density="compact"]`, which is also
-  gone, along with `compactMode`/`mytasks_compact` and their save/load/sync
-  entries). Text size offers only **Medium (100%) and Large (115%)** (`UI_SCALE_STEPS`), shown as a small "A" and a large "A" (each segment's `glyph` is its font size, like Safari's "aA" menu; the full name is the tooltip);
-  Small and Extra Large were removed, and `clampUiScale` snaps a saved 90 to M
-  and a saved 130 to L so nobody is stranded on a size the control no longer has.
+  It is changed from the **Appearance** popover (the "aA" button): an **Appearance** row with a *Match System* switch (on by default; it is
+  the only thing shown) — switching it off reveals the **Light | Dark** override (thin outlined sun / crescent-moon icons, `ICON_SUN`/`ICON_MOON`),
+  and switching it back on returns to `'auto'`. Behaviour is unchanged (`themePref` is still `'light'|'dark'|'auto'`); the switch just keeps the
+  override out of the way, as Apple's guidance prefers following the system.
+  Text size (also saved in the synced data) offers **Small 90%, Medium 100% (default), Large 115% and Extra Large 130%** (`UI_SCALE_STEPS`), shown as four ever larger "A"s (each segment's `glyph` is its font size, like Safari's "aA" menu; the full name is the tooltip);
+  `clampUiScale` snaps any other saved value to the nearest of the four.
 - **`<html data-scheme="glass">`** is set in the markup and is now only a
   styling hook: every Glass selector is written `html[data-scheme="glass"] …`,
   and it is not toggled by script. Rewriting those to bare `html …` would lower

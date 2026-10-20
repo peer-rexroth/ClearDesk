@@ -254,3 +254,5 @@ Type: **I** = Inconsistency, **H** = HIG deviation, **B** = Both. Base URL: `htt
 **Update:** F-20 (type scale), F-31 (spacing scale) and F-32 (radius ladder) are applied to the stylesheet: 7 text sizes (`--fs-*`), spacing snapped to a 2/4/6/8/10/12/14/16/20/24/28/32/40 scale, and 5 radius steps (`--r-*`) plus pill and circle. Inline styles in templates were not remapped.
 
 **Update 2:** F-22 (no serif font), F-30 (arrow cursor on controls, hand only for links), F-21 (small controls have 20px+ hit areas), F-38 (Shift+F10 / Menu key opens the table options with the caret in a cell) and F-37 (closed selects are one custom look; the opened list is the native pop-up menu, themed through `color-scheme`) are done.
+
+**Update 3:** F-18 (the Light/Dark override now sits behind a *Match System* switch, on by default) and F-23 (four text sizes: 90 / 100 / 115 / 130%) are done.

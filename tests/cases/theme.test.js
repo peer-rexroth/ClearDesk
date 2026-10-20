@@ -38,15 +38,21 @@ test('setThemeMode switches light and dark, persists it, and does nothing if alr
   assertEqual(localStorage.getItem('mytasks_theme'), 'light');
 });
 
-test('the Appearance menu offers Light and Dark with thin SF-style SVG icons, not Font Awesome ones', function () {
-  renderUiScaleMenu();
-  const html = document.getElementById('uiScaleMenu').innerHTML;
+test('the Appearance menu: Light | Dark are always shown (dimmed while Match System is on), SVG icons not Font Awesome', function () {
+  setThemeMode('auto');
+  let html = document.getElementById('uiScaleMenu').innerHTML;
+  assertIncludes(html, 'Match System'); assertIncludes(html, 'aria-checked="true"'); assertIncludes(html, 'Currently');
   assertIncludes(html, 'Light'); assertIncludes(html, 'Dark');
-  assertIncludes(html, 'Auto');
-  assertEqual((html.match(/class="theme-ico"/g) || []).length, 3, 'one inline SVG icon per option (Light, Dark, Auto)');
+  assertIncludes(html, 'ap-off', 'the segments are dimmed while the app follows the system');
+  assertEqual((html.match(/ disabled/g) || []).length, 2, 'and not clickable');
+  setThemeMode('dark');
+  html = document.getElementById('uiScaleMenu').innerHTML;
+  assertIncludes(html, 'aria-checked="false"'); assertFalse(html.includes('ap-off')); assertFalse(html.includes(' disabled'));
+  assertEqual((html.match(/class="theme-ico"/g) || []).length, 2, 'one inline SVG icon per option (Light, Dark)');
   assertFalse(html.includes('fa-sun') || html.includes('fa-moon'), 'the heavy solid glyphs stay out');
   assertFalse(html.includes('Color scheme'), 'the scheme button is gone');
   assertFalse(html.includes('Density'), 'the density control is gone');
+  setThemeMode('auto');
 });
 
 test('Auto is the default and follows the system; Light and Dark override it', function () {

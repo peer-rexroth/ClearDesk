@@ -1537,6 +1537,18 @@ const ICONS = {
   .icon-btn.subtask-toggle, .sub-hierarchy-btn, .sub-step-toggle, .th-sort, .tags-section .sidebar-section-label { position: relative; }
   .icon-btn.subtask-toggle::before, .sub-hierarchy-btn::before, .sub-step-toggle::before { content: ""; position: absolute; inset: -3px; }
   .th-sort::before, .tags-section .sidebar-section-label::before { content: ""; position: absolute; inset: -3px 0; }
+
+  /* Appearance: "Match System" is the default and the only thing shown; switching it off reveals the Light / Dark override. */
+  .ap-match { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 4px 0; background: none; border: 0; color: var(--text); font: inherit; font-size: var(--fs-13); cursor: default; text-align: left; }
+  .ap-switch { position: relative; flex: none; width: 34px; height: 20px; border-radius: 999px; background: var(--cap-hover, var(--bg-3)); transition: background-color .15s ease; }
+  .ap-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--on-accent); box-shadow: 0 1px 2px var(--shadow-ink); transition: transform .15s ease; }
+  .ap-match[aria-checked="true"] .ap-switch { background: var(--accent); }
+  .ap-match[aria-checked="true"] .ap-switch::after { transform: translateX(14px); }
+  .ap-override { margin-bottom: 8px; }
+  .ap-override.ap-off { opacity: .5; }   /* Light | Dark stay visible while the app follows the system: dimmed, the current one marked */
+  .ap-override .view-switch-btn:disabled { cursor: default; }
+  .ap-match-text { display: flex; flex-direction: column; gap: 1px; }
+  .ap-sub { font-size: var(--fs-12); color: var(--text-3); }
 </style>
 </head>
 <body>
@@ -2273,14 +2285,14 @@ function setNotesListWidth(v, save){
   });
 })();
 const UI_SCALE_KEY = 'mytasks_uiscale';
-// Two stops: Medium (the default) and Large. Small and Extra Large were removed at
-// the user's request; a saved 90 (Small) snaps to Medium and a saved 130 (Extra
-// Large) snaps to Large, so nobody is left on a size the control no longer offers.
-// Each segment shows the letter A at its own size (glyph, in px) — a small A and a
-// large A, as in Safari's "aA" menu — and label is its tooltip.
+// Four stops: Small, Medium (the default), Large and Extra Large. (Small and Extra Large were taken out once and are back, on request:
+// the text-size scale needs room both ways.) A stored value that is not exactly a stop snaps to the nearest one.
+// Each segment shows the letter A at its own size (glyph, in px) — as in Safari's "aA" menu — and label is its tooltip.
 const UI_SCALE_STEPS = [
-  { pct: 100, label: 'Medium', glyph: 14 },
-  { pct: 115, label: 'Large',  glyph: 19 }
+  { pct: 90,  label: 'Small',       glyph: 12 },
+  { pct: 100, label: 'Medium',      glyph: 14 },
+  { pct: 115, label: 'Large',       glyph: 18 },
+  { pct: 130, label: 'Extra Large', glyph: 22 }
 ];
 const UI_SCALE_DEFAULT = 100;
 // Index into UI_SCALE_STEPS of whichever stop is closest to pct — this is
@@ -7390,7 +7402,6 @@ function closeLibMenu(){ document.getElementById('libMenu')?.classList.remove('o
 // idiom (round caps, ~1px stroke, currentColor) rather than the heavy solid Font
 // Awesome glyphs, which the user disliked.
 const ICON_SUN = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.1M12 19.3v2.1M2.6 12h2.1M19.3 12h2.1M5.35 5.35l1.5 1.5M17.15 17.15l1.5 1.5M5.35 18.65l1.5-1.5M17.15 6.85l1.5-1.5"/></svg>';
-const ICON_AUTO = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="M12 3.8a8.2 8.2 0 0 0 0 16.4z" fill="currentColor"/></svg>';
 const ICON_MOON = '<svg class="theme-ico" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.2 14.4A8.4 8.4 0 0 1 9.6 3.8a8.4 8.4 0 1 0 10.6 10.6z"/></svg>';
 function renderUiScaleMenu(){
   const el = document.getElementById('uiScaleMenu');
@@ -7401,12 +7412,12 @@ function renderUiScaleMenu(){
       <div class="view-switch">${UI_SCALE_STEPS.map(s=>`
         <button type="button" class="view-switch-btn${s.pct===uiScale?' active':''}" title="${esc(s.label)}" style="font-size:${s.glyph}px" onclick="setUiScale(${s.pct})">A</button>
       `).join('')}</div>
-      <div class="ui-scale-panel-header ap-gap">Theme</div>
-      <div class="view-switch">
-        <button type="button" class="view-switch-btn${themePref==='light'?' active':''}" onclick="event.stopPropagation();setThemeMode('light')">${ICON_SUN}Light</button>
-        <button type="button" class="view-switch-btn${themePref==='dark'?' active':''}" onclick="event.stopPropagation();setThemeMode('dark')">${ICON_MOON}Dark</button>
-        <button type="button" class="view-switch-btn${themePref==='auto'?' active':''}" onclick="event.stopPropagation();setThemeMode('auto')" title="Follow the system's light/dark setting">${ICON_AUTO}Auto</button>
+      <div class="ui-scale-panel-header ap-gap">Appearance</div>
+      <div class="view-switch ap-override${themePref==='auto' ? ' ap-off' : ''}" role="group" aria-label="Light or Dark">
+        <button type="button" class="view-switch-btn${(themePref==='auto' ? currentTheme : themePref)==='light'?' active':''}"${themePref==='auto' ? ' disabled' : ''} onclick="event.stopPropagation();setThemeMode('light')">${ICON_SUN}Light</button>
+        <button type="button" class="view-switch-btn${(themePref==='auto' ? currentTheme : themePref)==='dark'?' active':''}"${themePref==='auto' ? ' disabled' : ''} onclick="event.stopPropagation();setThemeMode('dark')">${ICON_MOON}Dark</button>
       </div>
+      <button type="button" class="ap-match" role="switch" aria-checked="${themePref==='auto'}" onclick="event.stopPropagation();setThemeMode('${themePref==='auto' ? currentTheme : 'auto'}')" title="Follow the system's light or dark setting"><span class="ap-match-text"><span>Match System</span>${themePref==='auto' ? `<span class="ap-sub">Currently ${currentTheme==='dark' ? 'Dark' : 'Light'}</span>` : ''}</span><span class="ap-switch" aria-hidden="true"></span></button>
     </div>
   `;
 }
