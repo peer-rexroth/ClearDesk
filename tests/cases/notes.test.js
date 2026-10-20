@@ -905,3 +905,21 @@ test('noteFillEmptyBlocks gives an empty block a <br> so the blank line keeps it
   assertEqual(noteFillEmptyBlocks('<div>text</div><td></td>'), '<div>text</div><td></td>', 'only div and p, and only when empty');
   assertEqual(noteFillEmptyBlocks(''), '');
 });
+
+// ---- table width in steps ----
+test('noteTableNextWidth steps a table through 35 / 44 / 66 / 88 / 100 and stops at both ends', function () {
+  const mk = (w, cols) => ({ style: { width: w }, rows: [{ cells: new Array(cols || 2) }] });
+  assertEqual(noteTableWidthOf(mk('44%')), 44);
+  assertEqual(noteTableWidthOf(mk('')), 100, 'no stored width is the full width');
+  assertEqual(noteTableNextWidth(mk('44%'), 1), 66);
+  assertEqual(noteTableNextWidth(mk('66%'), 1), 88);
+  assertEqual(noteTableNextWidth(mk('88%'), 1), 100);
+  assertEqual(noteTableNextWidth(mk(''), 1), null, 'already the full width');
+  assertEqual(noteTableNextWidth(mk(''), -1), 88);
+  assertEqual(noteTableNextWidth(mk('66%'), -1), 44);
+  assertEqual(noteTableNextWidth(mk('44%'), -1), 35, 'a two-column table can go down to 35%');
+  assertEqual(noteTableNextWidth(mk('35%'), -1), null, 'and no further');
+  assertEqual(noteTableNextWidth(mk('66%', 6), -1), null, 'six columns need at least 66%');
+  assertEqual(noteTableNextWidth(mk('50%'), 1), 66, 'an off-step width moves to the next step up');
+  assertEqual(noteTableNextWidth(mk('50%'), -1), 44, 'or the next step down');
+});

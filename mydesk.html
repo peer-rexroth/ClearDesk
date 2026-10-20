@@ -2011,7 +2011,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Clone</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Clone, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -6484,6 +6484,10 @@ function noteTableEdit(op, ref){
     const first = [...clone.rows[0].cells], allTh = first.every(x=>x.tagName==='TH'), keepFirst = tblHeadCol(clone);   // with a header column, the corner cell stays a header
     first.forEach((x, i)=>{ if(allTh){ if(!(i===0 && keepFirst)) swap(x, 'td'); } else if(x.tagName!=='TH') swap(x, 'th'); });
   }
+  else if(op==='widen' || op==='narrow'){
+    const nw = noteTableNextWidth(clone, op==='widen' ? 1 : -1); if(nw===null) return;
+    if(nw>=100) clone.removeAttribute('style'); else clone.style.width = nw + '%';
+  }
   else if(op==='headerCol'){
     const on = !tblHeadCol(clone), headRow = tblHeadRow(clone);
     [...clone.rows].forEach((row, i)=>{ const x = row.cells[0]; if(!x) return; const want = (on || (i===0 && headRow)) ? 'TH' : 'TD'; if(x.tagName!==want) swap(x, want.toLowerCase()); });
@@ -6494,6 +6498,16 @@ function noteTableEdit(op, ref){
   const t = body.querySelectorAll('table')[idx];
   if(t){ const row = t.rows[Math.max(0, Math.min(focusR, t.rows.length - 1))]; noteCaretIn(row && row.cells[Math.max(0, Math.min(focusC, row.cells.length - 1))]); }
   onNoteInput(); updateNoteToolbarState();
+}
+// Table width in steps: a table is 35 / 44 / 66 / 88 / 100% of the note area (44% is a new two-column table, 66% three columns, 88% four, 100% the full
+// width). Increase / Decrease Width move one step; a table never goes narrower than 11% per column.
+const NOTE_TABLE_WIDTH_STEPS = [35, 44, 66, 88, 100];
+function noteTableWidthOf(table){ const m = /(\d{1,3}(?:\.\d+)?)%/.exec((table.style && table.style.width) || ''); return m ? parseFloat(m[1]) : 100; }
+function noteTableNextWidth(table, dir){
+  const w = noteTableWidthOf(table), cols = Math.max(1, ...[...table.rows].map(r=>r.cells.length)), lowest = Math.max(NOTE_TABLE_WIDTH_STEPS[0], cols * 11);
+  if(dir>0) return NOTE_TABLE_WIDTH_STEPS.find(x=>x>w + 0.5) || null;
+  const lower = NOTE_TABLE_WIDTH_STEPS.filter(x=>x < w - 0.5 && x>=lowest);
+  return lower.length ? lower[lower.length - 1] : null;
 }
 function noteTableInsert(rows, cols){
   rows = Math.max(1, Math.min(NOTE_TABLE_MAX, rows|0)); cols = Math.max(1, Math.min(NOTE_TABLE_MAX, cols|0));
@@ -6520,6 +6534,9 @@ const TBL_INS_PATHS = {
   rowBelow: ['M3.5 4.5H16.5',  'M10 8.5V16.5M6.6 13.1L10 16.5L13.4 13.1'],
   colLeft:  ['M15.5 3.5V16.5', 'M11.5 10H3.5M6.9 6.6L3.5 10L6.9 13.4'],
   colRight: ['M4.5 3.5V16.5',  'M8.5 10H16.5M13.1 6.6L16.5 10L13.1 13.4'],
+  // Table width: the two outer edges are the faint line, the arrows (apart = Increase Width, together = Decrease Width) are the bold part
+  widen:    ['M3.5 4.5V15.5M16.5 4.5V15.5', 'M5.8 10H14.2M8.4 7.4L5.8 10L8.4 12.6M11.6 7.4L14.2 10L11.6 12.6'],
+  narrow:   ['M3.5 4.5V15.5M16.5 4.5V15.5', 'M5 10H8.6M6.3 7.6L8.9 10L6.3 12.4M15 10H11.4M13.7 7.6L11.1 10L13.7 12.4'],
 };
 const tblInsIcon = k=>`<svg class="tbl-ins" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="${TBL_INS_PATHS[k][0]}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".5"/><path d="${TBL_INS_PATHS[k][1]}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 // Header row = every cell of the first row is a <th>; header column = the first cell of every row below the first is a <th> (needs 2+ rows).
@@ -6550,6 +6567,7 @@ function noteTableMenuHtml(){
      item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter'))],
     [item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: cr!==0}),                 // the header toggles stay in the menu but are dimmed away from the first row / first column
      item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: cc!==0 || table.rows.length<2})],
+    [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {off: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {off: noteTableNextWidth(table, -1)===null})],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
@@ -6823,6 +6841,7 @@ function tblTableMenuHtml(table){
     [item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table))),
      item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: table.rows.length<2}),
      ...(table.querySelector('colgroup') ? [item(TBL_ICON.even, 'Distribute Columns Evenly', run('even'))] : [])],
+    [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {off: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {off: noteTableNextWidth(table, -1)===null})],
     [item(TBL_ICON.cut, 'Cut', run('cut')), item(TBL_ICON.copy, 'Copy', run('copy'))],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
@@ -6838,7 +6857,7 @@ function tblShowTableMenuAt(x, y, measureEl){
 function tblTableRun(op){
   const ref = tblMenuRef; closeRowMenu(); closeNoteTableMenu();
   const table = ref && ref.table; if(!table || !table.isConnected) return;
-  if(op==='header' || op==='headerCol' || op==='delTable'){ tblWhole = null; noteTableEdit(op, ref); return; }
+  if(op==='header' || op==='headerCol' || op==='delTable' || op==='widen' || op==='narrow'){ if(op==='widen' || op==='narrow'){ tblWhole = null; tblSel = null; } else tblWhole = null; noteTableEdit(op, ref); return; }
   if(op==='even'){ tblWhole = null; tblCommitColWidths(table, null, null); return; }
   if(op==='cut' || op==='copy'){
     tblSelectRange(table);
