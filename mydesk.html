@@ -1992,15 +1992,15 @@ const ICONS = {
       <div class="note-editor" id="pEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Prompt tools" onmousedown="if(!event.target.closest('select,input,textarea'))event.preventDefault()">
           <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
+          <div class="tool-group note-fmt" role="group" aria-label="Undo">
+            <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
+            <button type="button" class="tool-btn" onclick="promptUndo('redo')" title="Redo (⇧⌘Z)" aria-label="Redo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg></button>
+          </div>
           <div class="tool-group note-fmt" role="group" aria-label="Insert a variable">
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('option')" title="Insert a choice variable: {{name}}" aria-label="Insert a choice variable"><span class="tb-txt pr-tb-mono">{{ }}</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('instruction')" title="Insert a checklist variable: [[name]]" aria-label="Insert a checklist variable"><span class="tb-txt pr-tb-mono">[[ ]]</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('text')" title="Insert a text variable: ((name))" aria-label="Insert a text variable"><span class="tb-txt pr-tb-mono">(( ))</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="openPromptGlobalInsertMenu(event)" title="Insert a global variable: {{@name}}" aria-label="Insert a global variable" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{@}}</span></button>
-          </div>
-          <div class="tool-group note-fmt" role="group" aria-label="Undo">
-            <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
-            <button type="button" class="tool-btn" onclick="promptUndo('redo')" title="Redo (⇧⌘Z)" aria-label="Redo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg></button>
           </div>
           <span class="note-toolbar-grow"></span>
           <button type="button" class="btn note-more-btn" id="pFavBtn" onclick="togglePromptFavorite()" title="Add to Favorites" aria-label="Favorite" aria-pressed="false"><i class="fa-solid fa-star"></i></button>
