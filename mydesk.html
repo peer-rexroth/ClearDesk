@@ -908,7 +908,8 @@ const ICONS = {
   html[data-scheme="glass"] .task-row { border-radius: var(--glass-r-row); }
   html[data-scheme="glass"] .task-row:hover:not(.kbd-selected):not(.bulk-selected) { background: var(--bg-2); border-color: transparent; box-shadow: none; }
   html[data-scheme="glass"] .board-col { background: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
-  html[data-scheme="glass"] .board-card { background: var(--bg); border-color: var(--border); box-shadow: none; }
+  html[data-scheme="glass"] .board-card { background: var(--bg); border-color: transparent; box-shadow: none; }   /* no outline: the tile is set off from its column by its fill, like a notes row (the transparent border keeps the size) */
+  html[data-scheme="glass"]:not([data-theme="dark"]) .board-card:not(.kbd-selected):not(.bulk-selected) { box-shadow: 0 1px 3px var(--glass-lift-1); }   /* light theme: white on near-white needs a whisper of a shadow */
 
   /* pill controls with a springy press */
   html[data-scheme="glass"] .btn { border-radius: var(--radius); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px var(--glass-lift-1); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
@@ -1136,7 +1137,7 @@ const ICONS = {
   .task-row.kbd-selected .row-actions, .board-card:is(.kbd-selected, .bulk-selected) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }
   /* Board cards get the same hover language as list rows: a grey fill on hover (the Glass card border rule used to cancel
      the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
-  html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg-2); border-color: var(--border-2); }
+  html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg); border-color: transparent; box-shadow: 0 2px 10px var(--shadow-ink); }   /* hover lifts the tile instead of outlining it (a filled hover would swallow the status pill) */
   .board-card-meta { position: relative; min-height: 24px; }
   .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
   .board-card .row-actions { right: 0; }
