@@ -1874,7 +1874,7 @@ const ICONS = {
       <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
         <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
           <i class="fa-solid fa-download split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export Everything</div><div class="split-btn-menu-desc">Everything as a .json file</div></div>
+          <div><div class="split-btn-menu-label">Export All Data</div><div class="split-btn-menu-desc">Full backup as a .json file</div></div>
         </div>
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
@@ -9559,7 +9559,7 @@ function exportLibrary(){
   downloadBackup(projects, tasks, `workbench-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
-// What a chosen .json file is: a prompts file (Export Prompts / Export Prompt / Export Folder) or a full backup (Export Everything).
+// What a chosen .json file is: a prompts file (Export Prompts / Export Prompt / Export Folder) or a full backup (Export All Data).
 function importKindOf(data){
   if(!data || typeof data!=='object') return null;
   if(data.format===PROMPTS_FILE_FORMAT) return 'prompts';
