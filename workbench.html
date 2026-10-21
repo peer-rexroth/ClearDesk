@@ -758,6 +758,7 @@ const ICONS = {
   .sync-banner .btn { border-radius: 999px; }
   .sync-banner .icon-btn { color: var(--text-3); }
   .update-banner > i:first-child { color: var(--accent); }
+  .split-btn-menu-item.prompts-only { border-top: 0.5px solid var(--border-2); }
   html:not([data-mode="prompts"]) .prompts-only { display: none !important; }   /* Export / Import Prompts in the Data menu only matter in Prompts */
 
   .filter-menu { min-width: 280px; }
@@ -1758,7 +1759,6 @@ const ICONS = {
     <button type="button" class="btn btn-primary btn-sm" onclick="applyNoteLink()">Done</button>
   </div>
 </div>
-<input type="file" id="promptsFileInput" accept=".json,application/json" style="display:none" onchange="handlePromptsImport(event)">
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
@@ -1874,19 +1874,15 @@ const ICONS = {
       <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
         <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
           <i class="fa-solid fa-download split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export</div><div class="split-btn-menu-desc">Download data as .json</div></div>
+          <div><div class="split-btn-menu-label">Export Everything</div><div class="split-btn-menu-desc">Everything as a .json file</div></div>
         </div>
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
+          <div><div class="split-btn-menu-label">Import…</div><div class="split-btn-menu-desc">A backup or a prompts file</div></div>
         </div>
         <div class="split-btn-menu-item prompts-only" onclick="exportPrompts('all');closeLibMenu()">
           <i class="fa-solid fa-download split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Export Prompts</div><div class="split-btn-menu-desc">Prompts as a .json file</div></div>
-        </div>
-        <div class="split-btn-menu-item prompts-only" onclick="importPromptsPick();closeLibMenu()">
-          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Import Prompts…</div><div class="split-btn-menu-desc">Load prompts from .json</div></div>
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
@@ -2359,7 +2355,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
-          <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import Prompts…</em> adds the prompts from such a file. Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported. A whole Workbench export works as a prompts file too.</span></div>
+          <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
         </div>
@@ -6854,7 +6850,7 @@ function renderPromptEditor(){
     if(empty){
       empty.style.display = '';
       const none = !prompts.some(x=>!promptTrashed(x)) && promptFolderFilter!=='trash';
-      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="importPromptsPick()">Import Prompts…</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
+      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="triggerImport()">Import…</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
     }
     if(bar) bar.style.display = ''; return;
   }
@@ -7450,22 +7446,14 @@ function importPromptsData(data){
   normalizePrompts();
   return { added, skipped, folders: foldersAdded, globals: globalsAdded };
 }
-function importPromptsPick(){ const el = document.getElementById('promptsFileInput'); if(el) el.click(); }
-function handlePromptsImport(ev){
-  const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
-  if(!file) return;
-  if(file.size > 20e6){ showToast('That file is too large to be a prompts file', true); return; }
-  const r = new FileReader();
-  r.onload = ()=>{
-    let data; try{ data = JSON.parse(r.result); }catch(_){ showToast('That file is not a prompts file', true); return; }
-    const res = importPromptsData(data);
-    if(!res){ showToast('That file contains no prompts', true); return; }
-    save(); render();
-    const bits = [];
-    if(res.skipped) bits.push(`${res.skipped} already here`); if(res.folders) bits.push(`${res.folders} folder${res.folders===1 ? '' : 's'}`); if(res.globals) bits.push(`${res.globals} global variable${res.globals===1 ? '' : 's'}`);
-    showToast(res.added ? `Imported ${res.added} prompt${res.added===1 ? '' : 's'}${bits.length ? ' · ' + bits.join(' · ') : ''}` : `Nothing new to import${res.skipped ? ' — all ' + res.skipped + ' were already here' : ''}`);
-  };
-  r.readAsText(file);
+function finishPromptsImport(data){
+  const res = importPromptsData(data);
+  if(!res){ showToast('That file contains no prompts', true); return; }
+  if(appMode!=='prompts') setAppMode('prompts');
+  save(); render();
+  const bits = [];
+  if(res.skipped) bits.push(`${res.skipped} already here`); if(res.folders) bits.push(`${res.folders} folder${res.folders===1 ? '' : 's'}`); if(res.globals) bits.push(`${res.globals} global variable${res.globals===1 ? '' : 's'}`);
+  showToast(res.added ? `Imported ${res.added} prompt${res.added===1 ? '' : 's'}${bits.length ? ' · ' + bits.join(' · ') : ''}` : `Nothing new to import${res.skipped ? ' — all ' + res.skipped + ' were already here' : ''}`);
 }
 
 // ---- right-click menus ----
@@ -9571,12 +9559,20 @@ function exportLibrary(){
   downloadBackup(projects, tasks, `workbench-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
+// What a chosen .json file is: a prompts file (Export Prompts / Export Prompt / Export Folder) or a full backup (Export Everything).
+function importKindOf(data){
+  if(!data || typeof data!=='object') return null;
+  if(data.format===PROMPTS_FILE_FORMAT) return 'prompts';
+  if(Array.isArray(data.prompts) && !Array.isArray(data.tasks) && !Array.isArray(data.projects)) return 'prompts';
+  return (Array.isArray(data.tasks) && Array.isArray(data.projects)) ? 'backup' : null;
+}
 function handleFileImport(event){
   const file = event.target.files[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e=>{
     try{
       const data = JSON.parse(e.target.result);
+      if(importKindOf(data)==='prompts'){ finishPromptsImport(data); return; }          // a prompts file is merged straight in (no Replace choice that could empty your tasks)
       if(!data.tasks || !data.projects) throw new Error('bad');
       pendingImportData = data;
       document.getElementById('importModalBg').classList.add('open');

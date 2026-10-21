@@ -407,3 +407,13 @@ test('the prompt and folder right-click menus offer Export', function () {
   pxSetup();
   assertIncludes(promptMenuHtml('p2'), 'Export Prompt'); assertIncludes(promptFolderMenuHtml('f1'), 'Export Folder');
 });
+
+test('one Import door: importKindOf tells a prompts file from a full backup, and a prompts file never goes to the Replace dialog', function () {
+  assertEqual(importKindOf({ format: 'workbench-prompts', prompts: [] }), 'prompts');
+  assertEqual(importKindOf({ prompts: [{ template: 'x' }] }), 'prompts', 'prompts without tasks or projects');
+  assertEqual(importKindOf({ tasks: [], projects: [], prompts: [] }), 'backup'); assertEqual(importKindOf({ tasks: [], projects: [] }), 'backup');
+  assertEqual(importKindOf({ nothing: 1 }), null); assertEqual(importKindOf(null), null); assertEqual(importKindOf([1]), null);
+  pgfresh(); pendingImportData = null;
+  finishPromptsImport({ format: 'workbench-prompts', prompts: [{ id: 'z1', name: 'N', template: 't' }] });
+  assertEqual(prompts.length, 1); assertEqual(pendingImportData, null, 'no Replace / Merge choice was opened');
+});
