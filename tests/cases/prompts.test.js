@@ -22,7 +22,7 @@ test('buildPromptFinal fills choices, checklists (as bullet lines, in option ord
     t: { type: 'text', value: 'churn' } } });
   assertEqual(buildPromptFinal(p), 'Depth 3\n• One\n• Three\nTopic: churn {{literal}}');
   p.vars.d.selected = ''; p.vars.items.selected = [];
-  assertEqual(buildPromptFinal(p), 'Depth \n\nTopic: churn {{literal}}', 'nothing chosen leaves the spot empty');
+  assertEqual(buildPromptFinal(p), 'Depth {{d}}\n[[items]]\nTopic: churn {{literal}}', 'nothing chosen keeps the placeholder in the text');
 });
 
 test('promptHighlight tints placeholders, escapes the text and leaves escaped placeholders plain', function () {
@@ -223,9 +223,9 @@ test('a global variable takes its values from the central list: the final text u
   const p = pmk({ template: 'In {{@language}}!', vars: { '@language': { type: 'global', selected: 'Deutsch' } } });   // the name is matched without regard to case
   assertEqual(buildPromptFinal(p), 'In Deutsch!');
   promptGlobals[0].options = ['English'];
-  assertEqual(buildPromptFinal(p), 'In !', 'a value that was removed centrally no longer counts');
+  assertEqual(buildPromptFinal(p), 'In {{@language}}!', 'a value that was removed centrally no longer counts: the placeholder stays');
   promptGlobals = [];
-  assertEqual(buildPromptFinal(p), 'In !', 'and a missing variable fills in nothing');
+  assertEqual(buildPromptFinal(p), 'In {{@language}}!', 'and so does a missing variable');
 });
 
 test('normalizePromptGlobals repairs names and values and drops duplicates; mergePromptGlobals: newer wins, tombstones respected', function () {
@@ -416,4 +416,17 @@ test('one Import door: importKindOf tells a prompts file from a full backup, and
   pgfresh(); pendingImportData = null;
   finishPromptsImport({ format: 'workbench-prompts', prompts: [{ id: 'z1', name: 'N', template: 't' }] });
   assertEqual(prompts.length, 1); assertEqual(pendingImportData, null, 'no Replace / Merge choice was opened');
+});
+
+test('unfilled variables stay as placeholders in the copied text; each kind, and whitespace-only text, counts as unfilled; filled ones are replaced', function () {
+  pgfresh();
+  promptGlobals = [{ id: 'g1', name: 'tone', options: ['Formal'], updatedAt: 1 }];
+  const p = pmk({ template: 'A {{c}} B [[l]] C ((t)) D {{@tone}} E ((u))', vars: {
+    c: { type: 'option', options: ['x'], selected: '' }, l: { type: 'instruction', options: ['a'], selected: [] }, t: { type: 'text', value: '   ' },
+    '@tone': { type: 'global', selected: 'Formal' }, u: { type: 'text', value: 'ok' } } });
+  assertEqual(buildPromptFinal(p), 'A {{c}} B [[l]] C ((t)) D Formal E ok');
+  ['c', 'l', 't'].forEach(function (k) { assertTrue(promptVarUnfilled(p, k, p.vars[k]), k); });
+  assertFalse(promptVarUnfilled(p, '@tone', p.vars['@tone'])); assertFalse(promptVarUnfilled(p, 'u', p.vars.u));
+  p.vars.c.selected = 'x'; p.vars.l.selected = ['a']; p.vars.t.value = 'hi';
+  assertEqual(buildPromptFinal(p), 'A x B • a C hi D Formal E ok');
 });

@@ -2354,7 +2354,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
-          <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
+          <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
           <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
@@ -6658,10 +6658,20 @@ function detectPromptVars(template, existing){
 }
 const sortByPromptOptions = (selected, options)=>[...selected].sort((a, b)=>options.indexOf(a) - options.indexOf(b));
 // The finished prompt: every placeholder replaced by what is chosen, checklist items as "• item" lines, escaped placeholders as plain text.
+// A variable with no value yet: no choice, no checklist item, only spaces typed, or a global that has no (or no longer that) value.
+function promptVarUnfilled(p, k, v){
+  if(!v) return false;
+  if(v.type==='option') return !v.selected;
+  if(v.type==='global') return !promptGlobalChoice(p, k);
+  if(v.type==='instruction') return !(Array.isArray(v.selected) && v.selected.length);
+  if(v.type==='text') return !(v.value || '').trim();
+  return false;
+}
 function buildPromptFinal(p){
   const TOKEN = '\x00ESC\x00', escaped = [];
   let t = String(p.template || '').replace(PROMPT_ESC_RE, (_, ph)=>{ escaped.push(ph); return TOKEN + (escaped.length - 1) + TOKEN; });
   Object.entries(p.vars || {}).forEach(([k, v])=>{
+    if(promptVarUnfilled(p, k, v)) return;                          // nothing chosen or typed: the placeholder stays in the text, so the gap is visible
     if(v.type==='instruction') t = t.split(`[[${k}]]`).join(sortByPromptOptions(Array.isArray(v.selected) ? v.selected : [], v.options || []).map(s=>`• ${s}`).join('\n'));
     else if(v.type==='text') t = t.split(`((${k}))`).join(v.value || '');
     else if(v.type==='global') t = t.split(`{{${k}}}`).join(promptGlobalChoice(p, k));
@@ -7315,10 +7325,10 @@ function emptyPromptTrash(){
 }
 function copyPrompt(id){
   const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p) return;
-  const missing = Object.entries(p.vars || {}).filter(([k, v])=>v.type==='option' ? !v.selected : v.type==='global' ? !promptGlobalChoice(p, k) : v.type==='text' ? !(v.value || '').trim() : false).map(([k])=>k);
+  const missing = Object.entries(p.vars || {}).filter(([k, v])=>promptVarUnfilled(p, k, v)).map(([k])=>k);
   Promise.resolve(noteWriteText(buildPromptFinal(p))).then(ok=>{
     if(!ok){ showToast('Could not use the clipboard here', true); return; }
-    showToast(missing.length ? `Prompt copied — ${missing.length} variable${missing.length===1 ? '' : 's'} left empty (${missing.slice(0,3).join(', ')}${missing.length>3 ? '…' : ''})` : 'Prompt copied');
+    showToast(missing.length ? `Prompt copied — ${missing.length} variable${missing.length===1 ? '' : 's'} still unfilled, left in as placeholders (${missing.slice(0,3).join(', ')}${missing.length>3 ? '…' : ''})` : 'Prompt copied');
   });
 }
 // ---- drag a prompt onto a folder ----
