@@ -757,6 +757,8 @@ const ICONS = {
   .sync-banner strong { color: var(--text); font-weight: 600; }
   .sync-banner .btn { border-radius: 999px; }
   .sync-banner .icon-btn { color: var(--text-3); }
+  .update-banner > i:first-child { color: var(--accent); }
+  html:not([data-mode="prompts"]) .prompts-only { display: none !important; }   /* Export / Import Prompts in the Data menu only matter in Prompts */
 
   .filter-menu { min-width: 280px; }
   .filter-menu-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -1743,6 +1745,7 @@ const ICONS = {
 <body>
 
 <div class="sync-banner" id="syncBanner" role="status"></div>
+<div class="sync-banner update-banner" id="updateBanner" role="status"></div>
 <div class="row-menu" id="rowMenu" role="menu"></div>
 <div class="note-link-pop" id="noteLinkPop" role="dialog" aria-label="Link">
   <div class="nlp-list">
@@ -1755,6 +1758,7 @@ const ICONS = {
     <button type="button" class="btn btn-primary btn-sm" onclick="applyNoteLink()">Done</button>
   </div>
 </div>
+<input type="file" id="promptsFileInput" accept=".json,application/json" style="display:none" onchange="handlePromptsImport(event)">
 <input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
@@ -1875,6 +1879,14 @@ const ICONS = {
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-upload split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Import</div><div class="split-btn-menu-desc">Load a .json data file</div></div>
+        </div>
+        <div class="split-btn-menu-item prompts-only" onclick="exportPrompts('all');closeLibMenu()">
+          <i class="fa-solid fa-download split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Export Prompts</div><div class="split-btn-menu-desc">Prompts as a .json file</div></div>
+        </div>
+        <div class="split-btn-menu-item prompts-only" onclick="importPromptsPick();closeLibMenu()">
+          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Import Prompts…</div><div class="split-btn-menu-desc">Load prompts from .json</div></div>
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
@@ -2347,6 +2359,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A toast tells you if a choice or a text field was left empty.</span></div>
+          <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import Prompts…</em> adds the prompts from such a file. Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported. A whole Workbench export works as a prompts file too.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
         </div>
@@ -2651,8 +2664,8 @@ function wireColumnResizer(col, api, widthFromPointer, growKey){
     else if(e.key==='Home' || e.key==='Enter'){ e.preventDefault(); api.set(col.def, true); }
   });
 }
-const PROMPTS_LIST_COL = { key: 'mydesk_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
-const PROMPTS_INSP_COL = { key: 'mydesk_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
+const PROMPTS_LIST_COL = { key: 'workbench_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
+const PROMPTS_INSP_COL = { key: 'workbench_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
 const promptsListW = makeColumnWidth(PROMPTS_LIST_COL), promptsInspW = makeColumnWidth(PROMPTS_INSP_COL);
 wireColumnResizer(PROMPTS_LIST_COL, promptsListW, {
   start(){ const pane = document.querySelector('#promptsMain .notes-list-pane'), rect = pane.getBoundingClientRect(); return { left: rect.left, k: pane.offsetWidth ? rect.width / pane.offsetWidth : 1 }; },
@@ -5749,7 +5762,7 @@ function folderDropOk(targetId){
 }
 // A note dragged from the list onto a folder row moves it there (moveNote: undoable, ignores locked notes).
 function handleNoteDragStart(e, id){
-  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-mydesk-note', id);
+  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-workbench-note', id);
   e.currentTarget.classList.add('dragging');
 }
 function handleNoteDragEnd(){
@@ -6585,7 +6598,7 @@ function deleteNoteFolder(id){
 // copied as a bullet list) and ((text)) (typed each time). Copying fills the placeholders in. Prompts live in folders (one level of
 // subfolders, like Notes), can be favourites or locked, and are deleted into Recently Deleted.
 const PROMPT_TRASH_DAYS = 30;
-const PROMPT_FOLDER_KEY = 'mydesk_prompts_folder', PROMPT_COLLAPSED_KEY = 'mydesk_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'mydesk_prompts_inspector';
+const PROMPT_FOLDER_KEY = 'workbench_prompts_folder', PROMPT_COLLAPSED_KEY = 'workbench_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'workbench_prompts_inspector';
 let promptFolderFilter = 'all', promptSearchQuery = '', selectedPromptId = null, promptEditorId = null, promptSaveTimer = null;
 let promptMenuId = null, promptFolderMenuId = null, draggedPromptId = null, editingPromptFolderId = null, folderModalKind = null;
 let promptPresetDraft = false, promptVarSig = '';
@@ -6596,7 +6609,7 @@ try{ const f = localStorage.getItem(PROMPT_FOLDER_KEY); if(f) promptFolderFilter
 const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
 const promptFolderById = id=>promptFolders.find(f=>f.id===id);
 // The order of the prompts list: the same three keys and the same menu as Notes (per device). Date edited, newest first, is the default (as in Notes).
-const PROMPT_SORT_KEY = 'mydesk_prompts_sort';
+const PROMPT_SORT_KEY = 'workbench_prompts_sort';
 let promptSortKey = 'edited', promptSortDir = 'desc';
 try{ const sv = JSON.parse(localStorage.getItem(PROMPT_SORT_KEY) || 'null'); if(sv && ['edited','created','title'].includes(sv.key) && ['asc','desc'].includes(sv.dir)){ promptSortKey = sv.key; promptSortDir = sv.dir; } }catch(_){}
 function promptSorter(){
@@ -6841,7 +6854,7 @@ function renderPromptEditor(){
     if(empty){
       empty.style.display = '';
       const none = !prompts.some(x=>!promptTrashed(x)) && promptFolderFilter!=='trash';
-      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
+      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No prompts yet</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="importPromptsPick()">Import Prompts…</button></div>` : '<i class="fa-regular fa-clone"></i><div>No prompt selected</div>';
     }
     if(bar) bar.style.display = ''; return;
   }
@@ -7011,7 +7024,7 @@ function focusPromptItem(kind, key, idx){
 function promptDragStart(e, kind, i){
   if(e.target.closest && e.target.closest('input')) { e.preventDefault(); return; }
   promptDrag = { kind, key: promptVarKeyOf(e.currentTarget), from: i };
-  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-mydesk-pitem', String(i)); }catch(_){}
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-workbench-pitem', String(i)); }catch(_){}
   e.currentTarget.classList.add('dragging');
 }
 function promptDropAfter(e, kind){ const r = e.currentTarget.getBoundingClientRect(); return kind==='check' ? e.clientY > r.top + r.height/2 : e.clientX > r.left + r.width/2; }
@@ -7369,6 +7382,92 @@ function deletePromptFolder(id){
   }
 }
 
+// ---- export / import ----
+// A prompts file: { format: 'workbench-prompts', version: 1, exported, folders[{id,name,parentId?}], prompts[…], globals[{name,options}] } — the prompts
+// (never Recently Deleted ones), the folders that hold them (and their parents) and the global variables they use, so a file is complete on its own.
+const PROMPTS_FILE_FORMAT = 'workbench-prompts';
+const promptFileSlug = t=>String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+function buildPromptsExport(scope, id){                           // scope: 'all' | 'prompt' (one prompt) | 'folder' (a folder and its subfolders)
+  let list = prompts.filter(p=>!promptTrashed(p));
+  const need = new Set();
+  if(scope==='prompt') list = list.filter(p=>p.id===id);
+  else if(scope==='folder'){
+    if(!promptFolderById(id)) return null;
+    const ids = new Set([id, ...promptFolderKids(id).map(k=>k.id)]); ids.forEach(x=>need.add(x));
+    list = list.filter(p=>ids.has(p.folderId));
+  }
+  if(!list.length) return null;
+  list.forEach(p=>{ let f = promptFolderById(p.folderId); while(f && !need.has(f.id)){ need.add(f.id); f = f.parentId ? promptFolderById(f.parentId) : null; } });
+  if(scope==='all') promptFolders.forEach(f=>need.add(f.id));
+  const used = new Set(); list.forEach(p=>Object.keys(p.vars || {}).forEach(k=>{ if(k.charAt(0)==='@') used.add(k.toLowerCase()); }));
+  return JSON.parse(JSON.stringify({
+    format: PROMPTS_FILE_FORMAT, version: 1, exported: new Date().toISOString(),
+    folders: promptFolders.filter(f=>need.has(f.id)).map(f=>f.parentId ? { id: f.id, name: f.name, parentId: f.parentId } : { id: f.id, name: f.name }),
+    prompts: list.map(p=>({ id: p.id, name: p.name, folderId: p.folderId, favorite: !!p.favorite, locked: !!p.locked, template: p.template, vars: p.vars, presets: p.presets, createdAt: p.createdAt, updatedAt: p.updatedAt })),
+    globals: promptGlobals.filter(g=>used.has(globalKey(g.name).toLowerCase())).map(g=>({ name: g.name, options: g.options }))
+  }));
+}
+function exportPrompts(scope, id){
+  flushPromptEdit();
+  const data = buildPromptsExport(scope, id);
+  if(!data){ showToast('There are no prompts to export', true); return; }
+  const day = new Date().toISOString().slice(0, 10), name = scope==='prompt' ? promptFileSlug((prompts.find(p=>p.id===id) || {}).name) : scope==='folder' ? promptFileSlug((promptFolderById(id) || {}).name) : '';
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = `workbench-prompt${scope==='prompt' ? '' : 's'}-${name ? name + '-' : ''}${day}.json`; a.click(); URL.revokeObjectURL(url);
+  showToast(`Exported ${data.prompts.length} prompt${data.prompts.length===1 ? '' : 's'}`);
+}
+// Merge a prompts file (or a whole Workbench export, which has the same keys) into what is here. A prompt that is already here (same id) is left alone, so importing
+// the same file twice changes nothing; folders are matched by name and level; global variables are added only if no variable of that name exists.
+function importPromptsData(data){
+  if(!data || typeof data!=='object' || !Array.isArray(data.prompts)) return null;
+  const incoming = data.prompts.filter(x=>x && typeof x==='object' && typeof x.template==='string');
+  if(!incoming.length) return null;
+  const srcFolders = Array.isArray(data.folders) ? data.folders : Array.isArray(data.promptFolders) ? data.promptFolders : [];
+  const srcGlobals = Array.isArray(data.globals) ? data.globals : Array.isArray(data.promptGlobals) ? data.promptGlobals : [];
+  const now = Date.now(), byId = {}, fmap = {}; let foldersAdded = 0, globalsAdded = 0, added = 0, skipped = 0;
+  srcFolders.forEach(f=>{ if(f && f.id && typeof f.name==='string' && f.name.trim()) byId[f.id] = f; });
+  const resolve = sid=>{
+    const sf = byId[sid]; if(!sf) return '';
+    if(fmap[sid]!==undefined) return fmap[sid];
+    const parentSrc = sf.parentId && byId[sf.parentId] && !byId[sf.parentId].parentId ? sf.parentId : null, parent = parentSrc ? resolve(parentSrc) : '';
+    const same = promptFolders.find(x=>x.name.toLowerCase()===sf.name.trim().toLowerCase() && (x.parentId || '')===parent);
+    if(same){ fmap[sid] = same.id; return same.id; }
+    const nf = { id: isSafeId(String(sf.id)) && !promptFolderById(String(sf.id)) ? String(sf.id) : genId(), name: sf.name.trim().slice(0, 40), updatedAt: now };
+    if(parent) nf.parentId = parent;
+    promptFolders.push(nf); foldersAdded++; fmap[sid] = nf.id; return nf.id;
+  };
+  incoming.forEach(x=>{
+    const id = isSafeId(String(x.id)) ? String(x.id) : genId();
+    if(prompts.some(p=>p.id===id)){ skipped++; return; }
+    prompts.push({ id, name: String(x.name || 'Untitled prompt').slice(0, 200), folderId: x.folderId ? resolve(x.folderId) : '', favorite: x.favorite===true, locked: x.locked===true,
+      template: x.template, vars: x.vars || {}, presets: Array.isArray(x.presets) ? x.presets : [], createdAt: Number.isFinite(x.createdAt) ? x.createdAt : now, updatedAt: now });
+    untombstone(deletedPromptIds, id); added++;
+  });
+  srcGlobals.forEach(g=>{
+    if(!g || typeof g.name!=='string' || !g.name.trim() || promptGlobalByName(g.name)) return;
+    promptGlobals.push({ id: genId(), name: g.name, options: Array.isArray(g.options) ? g.options.map(String) : [], updatedAt: now }); globalsAdded++;
+  });
+  normalizePrompts();
+  return { added, skipped, folders: foldersAdded, globals: globalsAdded };
+}
+function importPromptsPick(){ const el = document.getElementById('promptsFileInput'); if(el) el.click(); }
+function handlePromptsImport(ev){
+  const file = ev.target.files && ev.target.files[0]; ev.target.value = '';
+  if(!file) return;
+  if(file.size > 20e6){ showToast('That file is too large to be a prompts file', true); return; }
+  const r = new FileReader();
+  r.onload = ()=>{
+    let data; try{ data = JSON.parse(r.result); }catch(_){ showToast('That file is not a prompts file', true); return; }
+    const res = importPromptsData(data);
+    if(!res){ showToast('That file contains no prompts', true); return; }
+    save(); render();
+    const bits = [];
+    if(res.skipped) bits.push(`${res.skipped} already here`); if(res.folders) bits.push(`${res.folders} folder${res.folders===1 ? '' : 's'}`); if(res.globals) bits.push(`${res.globals} global variable${res.globals===1 ? '' : 's'}`);
+    showToast(res.added ? `Imported ${res.added} prompt${res.added===1 ? '' : 's'}${bits.length ? ' · ' + bits.join(' · ') : ''}` : `Nothing new to import${res.skipped ? ' — all ' + res.skipped + ' were already here' : ''}`);
+  };
+  r.readAsText(file);
+}
+
 // ---- right-click menus ----
 function promptMenuHtml(id){
   const p = prompts.find(x=>x.id===id); if(!p) return '';
@@ -7381,6 +7480,7 @@ function promptMenuHtml(id){
     item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
     sep,
     item('fa-regular fa-clone', 'Duplicate', `promptMenuRun('clone')`),
+    item('fa-solid fa-arrow-up-from-bracket', 'Export Prompt', `promptMenuRun('export')`),
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
     sep,
     item('fa-solid fa-trash', 'Delete', `promptMenuRun('delete')`, {danger:true, off:p.locked, hint: p.locked ? 'Unlock First' : '⌫'})
@@ -7399,13 +7499,13 @@ function promptMenuRun(kind, arg){
   const id = promptMenuId; closeRowMenu();
   if(!id) return;
   if(kind==='copy') copyPrompt(id); else if(kind==='favorite') togglePromptFavorite(id); else if(kind==='lock') togglePromptLock(id);
-  else if(kind==='clone') clonePrompt(id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
+  else if(kind==='clone') clonePrompt(id); else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
 }
 function promptFolderMenuHtml(id){
   const f = promptFolderById(id); if(!f) return '';
   const item = rowMenuItem, parts = [item('fa-solid fa-plus', 'New Prompt Here', `promptFolderMenuRun('new')`)];
   if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `promptFolderMenuRun('newsub')`));
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `promptFolderMenuRun('rename')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true}));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `promptFolderMenuRun('rename')`), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true}));
   return parts.join('');
 }
 function openPromptFolderMenu(e, id){
@@ -7420,7 +7520,7 @@ function openPromptFolderMenu(e, id){
 function promptFolderMenuRun(kind){
   const id = promptFolderMenuId; closeRowMenu(); if(!id) return;
   if(kind==='new'){ setPromptFolder(id); createPrompt(); } else if(kind==='newsub') openPromptFolderModal(null, id);
-  else if(kind==='rename') openPromptFolderModal(id); else if(kind==='delete') deletePromptFolder(id);
+  else if(kind==='rename') openPromptFolderModal(id); else if(kind==='export') exportPrompts('folder', id); else if(kind==='delete') deletePromptFolder(id);
 }
 function openPromptListMenu(e){
   e.preventDefault(); e.stopPropagation();
@@ -8930,7 +9030,7 @@ function moveGlobalValue(from, to){
 function globalDragStart(e, i){
   if(e.target.closest && e.target.closest('input')){ e.preventDefault(); return; }
   promptDrag = { kind: 'gval', key: globalsSel, from: i };
-  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-mydesk-gval', String(i)); }catch(_){}
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-workbench-gval', String(i)); }catch(_){}
   e.currentTarget.classList.add('dragging');
 }
 function globalDragOver(e){
@@ -9662,7 +9762,7 @@ async function _clearFileLink(){
 // and gain backups once their folder is linked (Data menu -> Daily file backup).
 async function pickDataFolder(){
   if(!window.showDirectoryPicker){ showToast('File linking requires Chrome or Edge', true); return null; }
-  try{ return await window.showDirectoryPicker({id:'mydesk-folder', mode:'readwrite'}); }
+  try{ return await window.showDirectoryPicker({id:'workbench-folder', mode:'readwrite'}); }
   catch(e){
     if(e.name!=='AbortError') showToast('That folder cannot be used. Pick a folder inside Documents (not Documents itself).', true);
     return null;
@@ -9937,6 +10037,16 @@ async function initFileSync(){
   }
 }
 
+// The app's jump-list shortcuts (manifest `shortcuts`: right-click its Dock icon) open it with ?new=task | note | prompt.
+function launchActionOf(search){ const m = /[?&]new=(task|note|prompt)(?:&|$)/.exec(search || ''); return m ? m[1] : null; }
+function runLaunchAction(){
+  const a = launchActionOf(location.search); if(!a) return;
+  try{ history.replaceState(null, '', location.pathname + location.hash); }catch(_){}          // a reload must not start another new item
+  if(a==='task'){ setAppMode('tasks'); const q = document.getElementById('quickAddInput'); if(q) q.focus(); }   // a task is started in the quick-add line
+  else if(a==='note'){ setAppMode('notes'); createNote(); }
+  else { setAppMode('prompts'); createPrompt(); }
+}
+
 // ── Init ──────────────────────────────────────────────────────────────────────
 try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(_){}   // Enter in the note editor makes <p>, not <div>
 load();
@@ -9944,8 +10054,35 @@ purgeOldCompletedTasks();
 applyAppMode();
 render();
 initFileSync();
+runLaunchAction();
 
+// ── New version notice ──────────────────────────────────────────────────────
+// The page you have open keeps running the code it loaded, so when a newer copy is published the app says so (a banner that stays until you act, with Reload).
+// A copy is "newer" when its server headers differ from the ones seen when this page loaded (ETag, else Last-Modified, else Content-Length); a service worker
+// taking over from an older one says the same. Checked when you come back to the tab and every hour.
+const versionStampOf = h=>{ if(!h || !h.get) return ''; return h.get('etag') || h.get('last-modified') || h.get('content-length') || ''; };
+let loadedVersionStamp = null, updateBannerDismissed = false;
+function showUpdateBanner(){
+  const el = document.getElementById('updateBanner'); if(!el || updateBannerDismissed) return;
+  el.innerHTML = `<i class="fa-solid fa-rotate-right"></i><span>A new version of <strong>Workbench</strong> is ready.</span><button class="btn btn-sm btn-primary" onclick="reloadForUpdate()">Reload</button><button class="icon-btn" onclick="dismissUpdateBanner()" title="Not now" aria-label="Not now"><i class="fa-solid fa-xmark"></i></button>`;
+  el.classList.add('show');
+}
+function dismissUpdateBanner(){ updateBannerDismissed = true; const el = document.getElementById('updateBanner'); if(el){ el.classList.remove('show'); el.innerHTML = ''; } }
+function reloadForUpdate(){ flushNoteEdit && flushNoteEdit(); flushPromptEdit && flushPromptEdit(); location.reload(); }
+async function checkForNewVersion(){
+  if(location.protocol==='file:' || !window.fetch) return;
+  try{
+    const stamp = versionStampOf((await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' })).headers);
+    if(loadedVersionStamp===null) loadedVersionStamp = stamp;
+    else if(stamp && loadedVersionStamp && stamp!==loadedVersionStamp) showUpdateBanner();
+  }catch(_){}                                                        // offline: nothing to compare
+}
+checkForNewVersion();
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkForNewVersion(); });
+if(typeof setInterval==='function') setInterval(checkForNewVersion, 60 * 60 * 1000);
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(hadController) showUpdateBanner(); });
   window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('workbench: service worker registration failed — offline support unavailable', e)); });
 }
 </script>

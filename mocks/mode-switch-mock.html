@@ -2663,8 +2663,8 @@ function wireColumnResizer(col, api, widthFromPointer, growKey){
     else if(e.key==='Home' || e.key==='Enter'){ e.preventDefault(); api.set(col.def, true); }
   });
 }
-const PROMPTS_LIST_COL = { key: 'mydesk_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
-const PROMPTS_INSP_COL = { key: 'mydesk_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
+const PROMPTS_LIST_COL = { key: 'workbench_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
+const PROMPTS_INSP_COL = { key: 'workbench_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
 const promptsListW = makeColumnWidth(PROMPTS_LIST_COL), promptsInspW = makeColumnWidth(PROMPTS_INSP_COL);
 wireColumnResizer(PROMPTS_LIST_COL, promptsListW, {
   start(){ const pane = document.querySelector('#promptsMain .notes-list-pane'), rect = pane.getBoundingClientRect(); return { left: rect.left, k: pane.offsetWidth ? rect.width / pane.offsetWidth : 1 }; },
@@ -5761,7 +5761,7 @@ function folderDropOk(targetId){
 }
 // A note dragged from the list onto a folder row moves it there (moveNote: undoable, ignores locked notes).
 function handleNoteDragStart(e, id){
-  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-mydesk-note', id);
+  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-workbench-note', id);
   e.currentTarget.classList.add('dragging');
 }
 function handleNoteDragEnd(){
@@ -6597,7 +6597,7 @@ function deleteNoteFolder(id){
 // copied as a bullet list) and ((text)) (typed each time). Copying fills the placeholders in. Prompts live in folders (one level of
 // subfolders, like Notes), can be favourites or locked, and are deleted into Recently Deleted.
 const PROMPT_TRASH_DAYS = 30;
-const PROMPT_FOLDER_KEY = 'mydesk_prompts_folder', PROMPT_COLLAPSED_KEY = 'mydesk_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'mydesk_prompts_inspector';
+const PROMPT_FOLDER_KEY = 'workbench_prompts_folder', PROMPT_COLLAPSED_KEY = 'workbench_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'workbench_prompts_inspector';
 let promptFolderFilter = 'all', promptSearchQuery = '', selectedPromptId = null, promptEditorId = null, promptSaveTimer = null;
 let promptMenuId = null, promptFolderMenuId = null, draggedPromptId = null, editingPromptFolderId = null, folderModalKind = null;
 let promptPresetDraft = false, promptVarSig = '';
@@ -6608,7 +6608,7 @@ try{ const f = localStorage.getItem(PROMPT_FOLDER_KEY); if(f) promptFolderFilter
 const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
 const promptFolderById = id=>promptFolders.find(f=>f.id===id);
 // The order of the prompts list: the same three keys and the same menu as Notes (per device). Date edited, newest first, is the default (as in Notes).
-const PROMPT_SORT_KEY = 'mydesk_prompts_sort';
+const PROMPT_SORT_KEY = 'workbench_prompts_sort';
 let promptSortKey = 'edited', promptSortDir = 'desc';
 try{ const sv = JSON.parse(localStorage.getItem(PROMPT_SORT_KEY) || 'null'); if(sv && ['edited','created','title'].includes(sv.key) && ['asc','desc'].includes(sv.dir)){ promptSortKey = sv.key; promptSortDir = sv.dir; } }catch(_){}
 function promptSorter(){
@@ -7023,7 +7023,7 @@ function focusPromptItem(kind, key, idx){
 function promptDragStart(e, kind, i){
   if(e.target.closest && e.target.closest('input')) { e.preventDefault(); return; }
   promptDrag = { kind, key: promptVarKeyOf(e.currentTarget), from: i };
-  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-mydesk-pitem', String(i)); }catch(_){}
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-workbench-pitem', String(i)); }catch(_){}
   e.currentTarget.classList.add('dragging');
 }
 function promptDropAfter(e, kind){ const r = e.currentTarget.getBoundingClientRect(); return kind==='check' ? e.clientY > r.top + r.height/2 : e.clientX > r.left + r.width/2; }
@@ -8942,7 +8942,7 @@ function moveGlobalValue(from, to){
 function globalDragStart(e, i){
   if(e.target.closest && e.target.closest('input')){ e.preventDefault(); return; }
   promptDrag = { kind: 'gval', key: globalsSel, from: i };
-  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-mydesk-gval', String(i)); }catch(_){}
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-workbench-gval', String(i)); }catch(_){}
   e.currentTarget.classList.add('dragging');
 }
 function globalDragOver(e){
@@ -9665,7 +9665,7 @@ async function _clearFileLink(){
 // and gain backups once their folder is linked (Data menu -> Daily file backup).
 async function pickDataFolder(){
   if(!window.showDirectoryPicker){ showToast('File linking requires Chrome or Edge', true); return null; }
-  try{ return await window.showDirectoryPicker({id:'mydesk-folder', mode:'readwrite'}); }
+  try{ return await window.showDirectoryPicker({id:'workbench-folder', mode:'readwrite'}); }
   catch(e){
     if(e.name!=='AbortError') showToast('That folder cannot be used. Pick a folder inside Documents (not Documents itself).', true);
     return null;

@@ -337,3 +337,73 @@ test('the built-in global variables: six, valid names, no clashes, and a fresh i
   const d = dataPayload(); localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.assign({}, d, { promptGlobals: [] }))); load();
   assertEqual(promptGlobals.length, 0, 'saved data without globals is left alone');
 });
+
+function pxSetup() {
+  pgfresh();
+  promptFolders = [{ id: 'f1', name: 'Work', updatedAt: 1 }, { id: 'f2', name: 'Emails', parentId: 'f1', updatedAt: 1 }, { id: 'f3', name: 'Other', updatedAt: 1 }];
+  promptGlobals = [{ id: 'g1', name: 'tone', options: ['Formal', 'Direct'], updatedAt: 1 }, { id: 'g2', name: 'language', options: ['English'], updatedAt: 1 }];
+  prompts = [
+    pmk({ id: 'p1', name: 'Reply', folderId: 'f2', template: 'Write {{@tone}} {{size}}', vars: { '@tone': { type: 'global', selected: 'Formal' }, size: { type: 'option', options: ['short', 'long'], selected: 'short' } }, presets: [{ name: 'P', values: { size: 'long' } }] }),
+    pmk({ id: 'p2', name: 'Loose', folderId: '', template: 'Plain' }),
+    pmk({ id: 'p3', name: 'Elsewhere', folderId: 'f3', template: 'x' }),
+    pmk({ id: 'p4', name: 'Gone', folderId: '', template: 'y', deletedAt: 5 })
+  ];
+}
+
+test('export: all prompts with their folders and only the global variables they use; trashed prompts are left out', function () {
+  pxSetup();
+  const d = buildPromptsExport('all');
+  assertEqual(d.format, 'workbench-prompts'); assertEqual(d.version, 1);
+  assertDeepEqual(d.prompts.map(function (p) { return p.id; }), ['p1', 'p2', 'p3']);
+  assertDeepEqual(d.folders.map(function (f) { return f.id; }), ['f1', 'f2', 'f3']);
+  assertDeepEqual(d.globals.map(function (g) { return g.name; }), ['tone'], 'language is not used by any prompt');
+  assertDeepEqual(d.globals[0].options, ['Formal', 'Direct']);
+  assertFalse('deletedAt' in d.prompts[0]);
+});
+
+test('export: one prompt brings its folder chain; a folder brings its subfolders; nothing to export gives null', function () {
+  pxSetup();
+  const one = buildPromptsExport('prompt', 'p1');
+  assertDeepEqual(one.prompts.map(function (p) { return p.id; }), ['p1']); assertDeepEqual(one.folders.map(function (f) { return f.id; }).sort(), ['f1', 'f2']);
+  const fol = buildPromptsExport('folder', 'f1');
+  assertDeepEqual(fol.prompts.map(function (p) { return p.id; }), ['p1']); assertDeepEqual(fol.folders.map(function (f) { return f.id; }).sort(), ['f1', 'f2']);
+  assertEqual(buildPromptsExport('folder', 'nope'), null); assertEqual(buildPromptsExport('prompt', 'p4'), null, 'a trashed prompt is not exported');
+});
+
+test('import: an export round-trips into an empty library; importing it again adds nothing', function () {
+  pxSetup(); const file = JSON.parse(JSON.stringify(buildPromptsExport('all')));
+  pgfresh();
+  const r = importPromptsData(file);
+  assertEqual(r.added, 3); assertEqual(r.skipped, 0); assertEqual(r.folders, 3); assertEqual(r.globals, 1);
+  const p1 = prompts.find(function (p) { return p.id === 'p1'; });
+  assertEqual(promptFolderById(p1.folderId).name, 'Emails'); assertEqual(promptFolderById(p1.folderId).parentId, promptFolders.find(function (f) { return f.name === 'Work'; }).id);
+  assertEqual(p1.vars.size.selected, 'short'); assertEqual(p1.presets.length, 1);
+  assertDeepEqual(promptGlobalByName('tone').options, ['Formal', 'Direct']);
+  const again = importPromptsData(file);
+  assertEqual(again.added, 0); assertEqual(again.skipped, 3); assertEqual(again.folders, 0); assertEqual(again.globals, 0); assertEqual(prompts.length, 3);
+});
+
+test('import: folders are matched by name and level, an existing global variable keeps its own values, a trashed or deleted id comes back', function () {
+  pxSetup(); const file = JSON.parse(JSON.stringify(buildPromptsExport('prompt', 'p1')));
+  pgfresh();
+  promptFolders = [{ id: 'mine', name: 'work', updatedAt: 1 }]; promptGlobals = [{ id: 'gx', name: 'Tone', options: ['Mine'], updatedAt: 1 }]; deletedPromptIds = [{ id: 'p1', deletedAt: 9 }];
+  const r = importPromptsData(file);
+  assertEqual(r.added, 1); assertEqual(r.folders, 1, 'only Emails is new; Work matched "work"'); assertEqual(r.globals, 0);
+  assertDeepEqual(promptGlobalByName('tone').options, ['Mine']);
+  const p1 = prompts[0]; assertEqual(promptFolderById(p1.folderId).parentId, 'mine');
+  assertFalse(deletedPromptIds.some(function (d) { return d.id === 'p1'; }), 'the old tombstone is cleared');
+});
+
+test('import: a whole Workbench export works too; unsafe ids are replaced; files without prompts are refused', function () {
+  pgfresh();
+  const whole = { projects: [], tasks: [], prompts: [{ id: 'a b"', name: 5, template: 'hi {{x}}', folderId: 'zz', vars: {}, presets: [] }, { id: 'ok1', name: 'Two', template: 'yo' }, { name: 'No template' }], promptFolders: [], promptGlobals: [{ name: 'tone', options: ['A'] }] };
+  const r = importPromptsData(whole);
+  assertEqual(r.added, 2); assertEqual(r.globals, 1);
+  prompts.forEach(function (p) { assertTrue(isSafeId(p.id), p.id); assertEqual(p.folderId, ''); });
+  assertEqual(importPromptsData({ prompts: [] }), null); assertEqual(importPromptsData({ nothing: 1 }), null); assertEqual(importPromptsData(null), null); assertEqual(importPromptsData([1, 2]), null);
+});
+
+test('the prompt and folder right-click menus offer Export', function () {
+  pxSetup();
+  assertIncludes(promptMenuHtml('p2'), 'Export Prompt'); assertIncludes(promptFolderMenuHtml('f1'), 'Export Folder');
+});

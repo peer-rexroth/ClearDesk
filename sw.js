@@ -1,4 +1,4 @@
-const CACHE_NAME = 'workbench-cache-v1';
+const CACHE_NAME = 'workbench-cache-v3';
 const APP_SHELL = [
   'workbench.html',
   'manifest.json',

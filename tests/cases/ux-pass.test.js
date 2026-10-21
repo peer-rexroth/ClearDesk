@@ -614,3 +614,18 @@ test('mode shortcuts: Option+Command+1/2/3 (Ctrl+Alt on other systems) pick Task
 test('the sidebar cannot be made narrower than its bottom tools bar needs', function () {
   assertEqual(clampSidebarW(100), 260); assertEqual(clampSidebarW(259), 260); assertEqual(clampSidebarW(300), 300); assertEqual(clampSidebarW(999), 480);
 });
+
+test('launch shortcuts: ?new=task | note | prompt are recognised, anything else is ignored', function () {
+  assertEqual(launchActionOf('?new=task'), 'task'); assertEqual(launchActionOf('?new=note'), 'note'); assertEqual(launchActionOf('?a=1&new=prompt'), 'prompt');
+  assertEqual(launchActionOf('?new=notes'), null); assertEqual(launchActionOf('?new='), null); assertEqual(launchActionOf(''), null); assertEqual(launchActionOf(undefined), null);
+});
+
+test('the new-version check compares the server headers (ETag first, then Last-Modified, then length) and shows a banner that stays until dismissed', function () {
+  var H = function (o) { return { get: function (k) { return o[k] || null; } }; };
+  assertEqual(versionStampOf(H({ etag: '"a1"', 'last-modified': 'x' })), '"a1"'); assertEqual(versionStampOf(H({ 'last-modified': 'Tue' })), 'Tue');
+  assertEqual(versionStampOf(H({ 'content-length': '770000' })), '770000'); assertEqual(versionStampOf(H({})), ''); assertEqual(versionStampOf(null), '');
+  updateBannerDismissed = false; showUpdateBanner();
+  var el = document.getElementById('updateBanner'); assertIncludes(el.innerHTML, 'new version'); assertIncludes(el.innerHTML, 'Reload');
+  dismissUpdateBanner(); assertEqual(el.innerHTML, ''); showUpdateBanner(); assertEqual(el.innerHTML, '', 'once dismissed it stays away this session');
+  updateBannerDismissed = false;
+});
