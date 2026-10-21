@@ -338,6 +338,10 @@ const ICONS = {
   .task-row.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
 
   .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 calc(var(--gutter) - 10px) 20px; }   /* rows have 10px of their own padding, so their content starts at the gutter */
+  .task-list.is-empty { display: flex; flex-direction: column; }
+  .task-list.is-empty .task-list-header { display: none; }
+  .task-list.is-empty #taskList { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+  .task-list.is-empty .empty-state { padding: 20px 20px 60px; }
   .task-list-header, .task-row { grid-template-columns: 44px minmax(240px,1fr) 152px 88px 108px 112px; min-width: 816px; }   /* Due = widest date seen across 22 locales (pt-BR "28 de mar." 108px, with chevron) + a little */   /* a fixed floor, not max-content: max-content made a long title stretch its own row out of line with the header */
   .task-list-header { display: grid; column-gap: 10px; padding: 0 10px 8px; font-size: var(--fs-11); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; color: var(--text-3); border-bottom: 0.5px solid var(--border); margin-bottom: 4px; position: sticky; top: 0; background: var(--bg-2); z-index: 5; }
 
@@ -426,8 +430,8 @@ const ICONS = {
   .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 20%, transparent); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: var(--sel-fill-hover); box-shadow: 0 0 0 3px var(--sel-halo); }
 
-  .empty-state { text-align: center; padding: 60px 20px; color: var(--text-3); }
-  .empty-state i { font-size: 30px; margin-bottom: 10px; display: block; opacity: .5; }
+  .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 60px 20px; color: var(--text-3); }   /* same stack as .notes-empty: icon above the text, both centred */
+  .empty-state i { font-size: 30px; opacity: .5; }
   .empty-state div { font-size: var(--fs-13); }
 
   /* drawer */
@@ -3259,7 +3263,8 @@ function getVisibleListTasks(){
 
 function renderList(){
   const { tasks: list, hiddenCount, doneTotal } = getVisibleListTasks();
-  const el = document.getElementById('taskList');
+  const el = document.getElementById('taskList'), wrap = document.getElementById('taskListWrap');
+  if(wrap && wrap.classList) wrap.classList.toggle('is-empty', list.length===0);                     // an empty list: no column headers, the message centred (like the other modes' empty states)
   if(list.length===0){
     const html = tasks.length===0
       ? `<div class="empty-state"><i class="fa-solid fa-clipboard-check"></i><div>No tasks yet</div><button class="btn btn-primary btn-sm" style="margin-top:12px" onclick="document.getElementById('quickAddInput').focus()">Add a task</button></div>`
