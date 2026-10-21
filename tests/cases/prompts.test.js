@@ -430,3 +430,17 @@ test('unfilled variables stay as placeholders in the copied text; each kind, and
   p.vars.c.selected = 'x'; p.vars.l.selected = ['a']; p.vars.t.value = 'hi';
   assertEqual(buildPromptFinal(p), 'A x B • a C hi D Formal E ok');
 });
+
+test('a ((text)) variable keeps up to PROMPT_TEXT_MAX characters (50,000) and no more', function () {
+  assertEqual(PROMPT_TEXT_MAX, 50000);
+  const v = cleanPromptVars({ t: { type: 'text', value: 'x'.repeat(60000) } });
+  assertEqual(v.t.value.length, 50000);
+  assertEqual(cleanPromptVars({ t: { type: 'text', value: 'y'.repeat(20000) } }).t.value.length, 20000, 'what used to be cut at 5,000 now stays');
+});
+
+test('a text variable keeps line breaks: a pasted list is copied as a list', function () {
+  pgfresh();
+  const p = pmk({ template: 'Notes:\n((n))', vars: { n: { type: 'text', value: '- one\n- two\n\n- three' } } });
+  assertEqual(buildPromptFinal(p), 'Notes:\n- one\n- two\n\n- three');
+  assertEqual(cleanPromptVars({ n: { type: 'text', value: 'a\nb' } }).n.value, 'a\nb');
+});

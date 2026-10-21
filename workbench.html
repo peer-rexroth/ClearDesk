@@ -1691,7 +1691,10 @@ const ICONS = {
   .pr-check:hover .pr-check-x, .pr-check:focus-within .pr-check-x { opacity: 1; }
   .pr-add-item { align-self: flex-start; border: 0; background: none; color: var(--text-3); font: inherit; font-size: var(--fs-13); padding: 4px 0; cursor: default; }
   .pr-add-item:hover { color: var(--text); }
-  .pr-textfield { width: 100%; border: 1px solid var(--border); border-radius: var(--r-m); padding: 7px 12px; font: inherit; font-size: var(--fs-14); background: var(--bg); color: var(--text); box-sizing: border-box; }
+  .pr-textfield { display: block; width: 100%; border: 1px solid var(--border); border-radius: var(--r-m); padding: 7px 12px; font: inherit; font-size: var(--fs-14); line-height: 1.45; background: var(--bg); color: var(--text); box-sizing: border-box; resize: none; overflow: hidden; }
+  .pr-count { font-size: var(--fs-12); color: var(--text-3); text-align: right; margin-top: 4px; }
+  .pr-count:empty { display: none; }
+  .pr-count.full { color: var(--amber-text); }
   #pInspToggle[aria-pressed="true"] { background: var(--cap-on); color: var(--text); }
   .btn-copy { display: inline-flex; align-items: center; gap: 6px; }
   .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -6594,6 +6597,7 @@ function deleteNoteFolder(id){
 // copied as a bullet list) and ((text)) (typed each time). Copying fills the placeholders in. Prompts live in folders (one level of
 // subfolders, like Notes), can be favourites or locked, and are deleted into Recently Deleted.
 const PROMPT_TRASH_DAYS = 30;
+const PROMPT_TEXT_MAX = 50000;     // characters kept in one ((text)) variable (about 8,000 words); the saved data lives in the browser's ~5 MB of local storage, so this is a limit with room, not unlimited
 const PROMPT_FOLDER_KEY = 'workbench_prompts_folder', PROMPT_COLLAPSED_KEY = 'workbench_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'workbench_prompts_inspector';
 let promptFolderFilter = 'all', promptSearchQuery = '', selectedPromptId = null, promptEditorId = null, promptSaveTimer = null;
 let promptMenuId = null, promptFolderMenuId = null, draggedPromptId = null, editingPromptFolderId = null, folderModalKind = null;
@@ -6696,7 +6700,7 @@ function cleanPromptVars(vars){
     const opts = Array.isArray(v.options) ? v.options.map(x=>String(x).slice(0,200)).slice(0,60) : [];
     if(v.type==='option') out[k] = { type:'option', options:opts, selected:typeof v.selected==='string' ? v.selected : '' };
     else if(v.type==='instruction') out[k] = { type:'instruction', options:opts, selected:Array.isArray(v.selected) ? v.selected.map(String).filter(x=>opts.includes(x)) : [] };
-    else if(v.type==='text') out[k] = { type:'text', value:typeof v.value==='string' ? v.value.slice(0,5000) : '' };
+    else if(v.type==='text') out[k] = { type:'text', value:typeof v.value==='string' ? v.value.slice(0,PROMPT_TEXT_MAX) : '' };
     else if(v.type==='global' && k.startsWith('@')) out[k] = { type:'global', selected:typeof v.selected==='string' ? v.selected.slice(0,200) : '' };
   });
   return out;
@@ -6957,12 +6961,28 @@ function renderPromptInspector(p){
       html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i},event)"${locked ? '' : promptReorderAttrs('check', i) + ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-add-item" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i> Add item</button>`) + `</div>`;
     } else {
-      html += `<input type="text" class="pr-textfield" value="${esc(v.value || '')}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>`;
+      html += `<textarea class="pr-textfield" rows="1" maxlength="${PROMPT_TEXT_MAX}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>${esc(v.value || '')}</textarea><div class="pr-count" aria-live="polite"></div>`;
     }
     html += `</div>`;
   });
   html += `</div>`;
   host.innerHTML = html + promptInspectorFoot();
+  if(host.querySelectorAll) host.querySelectorAll('.pr-textfield').forEach(growPromptText);
+}
+// A text variable is a small multi-line box: it grows with what is typed (up to about 12 lines, then scrolls) and keeps line breaks, so a pasted list stays a list.
+// Near the limit a counter appears under it.
+function growPromptText(el){
+  if(!el || !el.style) return;
+  el.style.height = 'auto';
+  const h = el.scrollHeight || 0, max = 260;
+  if(h) el.style.height = Math.min(h + 2, max) + 'px';
+  el.style.overflowY = h > max ? 'auto' : 'hidden';
+  const c = el.nextElementSibling;
+  if(c && c.classList && c.classList.contains('pr-count')){
+    const n = (el.value || '').length, near = n >= PROMPT_TEXT_MAX * .9;
+    c.textContent = near ? `${n.toLocaleString()} / ${PROMPT_TEXT_MAX.toLocaleString()}${n >= PROMPT_TEXT_MAX ? ' — limit reached' : ''}` : '';
+    c.classList.toggle('full', n >= PROMPT_TEXT_MAX);
+  }
 }
 // The way in to the shared variables from the panel: a visible text link (the globe button above it is the shortcut).
 const promptInspectorFoot = ()=>`<div class="pr-insp-foot"><button type="button" class="pr-g-link" onclick="openPromptGlobalsModal()">Manage Global Variables…</button></div>`;
@@ -6992,7 +7012,7 @@ function refreshPromptSelection(p){
     if(v.type==='option') row.querySelectorAll('.pr-pill:not(.add)').forEach((b, i)=>{ const on = v.selected!=='' && v.options[i]===v.selected; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); const w = b.closest('.pr-pill-wrap'); if(w) w.classList.toggle('on', on); });
     else if(v.type==='global'){ const o = promptGlobalOptions(k) || []; row.querySelectorAll('.pr-pill:not(.add)').forEach((b, i)=>{ const on = v.selected!=='' && o[i]===v.selected; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }); }
     else if(v.type==='instruction') row.querySelectorAll('.pr-check').forEach((c, i)=>{ const on = (v.selected || []).includes(v.options[i]); c.classList.toggle('on', on); c.setAttribute('aria-checked', String(on)); });
-    else { const f = row.querySelector('.pr-textfield'); if(f && f.value!==(v.value || '') && document.activeElement!==f) f.value = v.value || ''; }
+    else { const f = row.querySelector('.pr-textfield'); if(f && f.value!==(v.value || '') && document.activeElement!==f){ f.value = v.value || ''; growPromptText(f); } }
   });
   const chips = [...host.querySelectorAll('.pr-presets .pr-chip:not(.add)')];
   chips.forEach((b, j)=>{ const on = promptPresetMatches(p, j===0 ? null : (p.presets || [])[j - 1]); b.classList.toggle('on', on); const w = b.closest('.pr-chip-wrap'); if(w) w.classList.toggle('on', on); });
@@ -7006,7 +7026,7 @@ function togglePromptItem(el, i, ev){
 }
 function setPromptText(input){
   const c = promptVarOf(input); if(!c || !c.v) return;
-  c.v.value = input.value.slice(0,5000); touchPrompt(c.p); schedulePromptSave();      // typing what this use needs is allowed even when the prompt is locked
+  c.v.value = input.value.slice(0,PROMPT_TEXT_MAX); growPromptText(input); touchPrompt(c.p); schedulePromptSave();      // typing what this use needs is allowed even when the prompt is locked
 }
 // Removing an option or a checklist item: the × inside it (on hover or focus), Delete / Backspace on the focused one, or Remove in its right-click menu.
 // ---- reordering the options, checklist items and presets of a variable: drag one, press ⌥← / ⌥→ (⌥↑ / ⌥↓ in a checklist) on it, or use Move in its right-click menu ----
