@@ -2366,7 +2366,7 @@ const ICONS = {
           <div class="help-section-title">Folders &amp; finding notes</div>
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Folders</strong>: <strong>+</strong> beside <em>Folders</em> adds one; hover a folder to edit or delete it. Deleting a folder moves its notes to <em>Notes</em>. Move a note with the folder menu in its toolbar. Deleting, moving or renaming shows an <strong>Undo</strong> toast, and <kbd>⌘Z</kbd> does the same while you are not typing; inside a note, <kbd>⌘Z</kbd> undoes your typing.</span></div>
-          <div class="help-row"><i class="fa-regular fa-folder-open"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows its own notes plus those of its subfolders, and its count includes them. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
+          <div class="help-row"><i class="fa-regular fa-folder-open"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows only the notes directly in it, and so does its count; each subfolder has its own list. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
           <div class="help-row"><i class="fa-solid fa-arrows-up-down"></i><span><strong>Reordering folders</strong>: drag a folder up or down within its level, or right-click it and choose <em>Move up</em> / <em>Move down</em>. The order, renames and moves sync between devices like note edits.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of <em>every</em> note, whatever folder you are in, and opens the first result.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Delete</kbd> while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
@@ -5852,7 +5852,7 @@ function folderPath(f){ const p = f && f.parentId ? folderById(f.parentId) : nul
 function noteInFilter(n){
   if(noteFolderFilter==='all') return true;
   if(noteFolderFilter==='pinned') return n.pinned===true;
-  return n.folderId===noteFolderFilter || (folderById(n.folderId) || {}).parentId===noteFolderFilter;
+  return n.folderId===noteFolderFilter;                            // a folder shows only what is directly in it (its subfolders have their own lists)
 }
 function toggleFolderCollapsed(id){
   if(noteFoldersCollapsed.has(id)) noteFoldersCollapsed.delete(id); else noteFoldersCollapsed.add(id);
@@ -6334,7 +6334,7 @@ function fmtNoteDate(ts){
 }
 function renderNotesSidebar(){
   const live = notes.filter(n=>!noteTrashed(n)), own = {}; live.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
-  const total = f=>(own[f.id]||0) + folderChildren(f.id).reduce((a,c)=>a + (own[c.id]||0), 0);   // a folder's count includes its subfolders
+  const total = f=>own[f.id]||0;   // a folder's count is what is directly in it, the same as its list
   const all = document.getElementById('allNotesNav'), cnt = document.getElementById('allNotesCount');
   if(cnt) cnt.textContent = live.length;
   const trashNav = document.getElementById('trashNav'), trashCount = document.getElementById('trashCount');
@@ -6871,14 +6871,14 @@ function visiblePrompts(){
     if(words.length) { const hay = (p.name + ' ' + p.template).toLowerCase(); return words.every(w=>hay.includes(w)); }   // a search looks through every folder
     if(promptFolderFilter==='all' || inTrash) return true;
     if(promptFolderFilter==='favorites') return p.favorite;
-    return p.folderId===promptFolderFilter || (promptFolderById(p.folderId) || {}).parentId===promptFolderFilter;
+    return p.folderId===promptFolderFilter;                      // a folder shows only what is directly in it
   }).sort(inTrash ? (a, b)=>(b.deletedAt || 0) - (a.deletedAt || 0) : promptSorter());
 }
 const promptTitle = p=>p.name.trim() || 'Untitled prompt';
 
 function renderPromptsSidebar(){
   const live = prompts.filter(p=>!promptTrashed(p)), own = {}; live.forEach(p=>{ own[p.folderId] = (own[p.folderId] || 0) + 1; });
-  const total = f=>(own[f.id] || 0) + promptFolderKids(f.id).reduce((a, c)=>a + (own[c.id] || 0), 0);
+  const total = f=>own[f.id] || 0;   // a folder's count is what is directly in it, the same as its list
   const set = (id, v)=>{ const el = document.getElementById(id); if(el) el.textContent = v; };
   set('pAllCount', live.length); set('pFavCount', live.filter(p=>p.favorite).length || ''); set('pTrashCount', prompts.length - live.length || '');
   [['pAllNav', 'all'], ['pFavNav', 'favorites'], ['pTrashNav', 'trash']].forEach(([id, key])=>{

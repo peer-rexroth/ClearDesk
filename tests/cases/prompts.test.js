@@ -71,13 +71,13 @@ test('mergePromptsData: the newer edit wins, tombstones keep a deleted prompt de
   assertTrue(deletedPromptIds.some(t => t.id === 'p2'), 'incoming tombstones are merged in');
 });
 
-test('visiblePrompts: folders include their subfolders, Favorites, Recently Deleted and a search through every folder, sorted by name', function () {
+test('visiblePrompts: a folder shows only its own prompts, Favorites, Recently Deleted and a search through every folder, sorted by name', function () {
   pfresh();
   setPromptSort('title');
   promptFolders = [{ id: 'f1', name: 'Top', updatedAt: 1 }, { id: 'f2', name: 'Sub', parentId: 'f1', updatedAt: 1 }];
   prompts = [pmk({ id: 'a', name: 'Zed', folderId: 'f2', favorite: true }), pmk({ id: 'b', name: 'Alpha', folderId: 'f1', template: 'finds the needle' }), pmk({ id: 'c', name: 'Loose' }), pmk({ id: 'd', name: 'Gone', deletedAt: 5 })];
   assertDeepEqual(visiblePrompts().map(p => p.id), ['b', 'c', 'a'], 'All Prompts: alphabetical, without the deleted one');
-  promptFolderFilter = 'f1'; assertDeepEqual(visiblePrompts().map(p => p.id), ['b', 'a'], 'a folder shows its subfolders too');
+  promptFolderFilter = 'f1'; assertDeepEqual(visiblePrompts().map(p => p.id), ['b'], 'a folder shows only what is directly in it');
   promptFolderFilter = 'f2'; assertDeepEqual(visiblePrompts().map(p => p.id), ['a']);
   promptFolderFilter = 'favorites'; assertDeepEqual(visiblePrompts().map(p => p.id), ['a']);
   promptFolderFilter = 'trash'; assertDeepEqual(visiblePrompts().map(p => p.id), ['d']);

@@ -406,11 +406,11 @@ test('normalizeNotes keeps one level of nesting and flattens anything else', fun
   assertEqual(f(NOTES_DEFAULT_FOLDER).parentId, undefined, 'the default folder always stays top level');
 });
 
-test('a folder shows its own notes and its subfolders notes; a subfolder only its own', function () {
+test('a folder shows only the notes directly in it, its subfolders have their own lists', function () {
   ntTree();
   notes = [ntNote({ id: 'a', folderId: 'f-work' }), ntNote({ id: 'b', folderId: 'f-q1' }), ntNote({ id: 'c', folderId: 'f-home' })];
   noteFolderFilter = 'f-work';
-  assertDeepEqual(visibleNotes().map(n => n.id).sort(), ['a', 'b']);
+  assertDeepEqual(visibleNotes().map(n => n.id), ['a']);
   noteFolderFilter = 'f-q1';
   assertDeepEqual(visibleNotes().map(n => n.id), ['b']);
   noteFolderFilter = 'all';
