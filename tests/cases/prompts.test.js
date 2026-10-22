@@ -444,3 +444,61 @@ test('a text variable keeps line breaks: a pasted list is copied as a list', fun
   assertEqual(buildPromptFinal(p), 'Notes:\n- one\n- two\n\n- three');
   assertEqual(cleanPromptVars({ n: { type: 'text', value: 'a\nb' } }).n.value, 'a\nb');
 });
+
+// ---- chaining: {{>Name}} includes another prompt ----
+test('{{>Name}} is not a variable, and an escaped one is plain text', function () {
+  assertDeepEqual(Object.keys(detectPromptVars('{{>Role}} {{a}} \\{{>Literal}}')), ['a']);
+});
+
+test('an included prompt goes in as its finished text (with its own choices), matched by name ignoring case', function () {
+  pfresh();
+  const role = pmk({ name: 'Role', template: 'You are a {{who}}.\n\n', vars: { who: { type: 'option', options: ['coach', 'critic'], selected: 'critic' } } });
+  const host = pmk({ name: 'Host', template: '{{> role }}\nDo ((t)).', vars: { t: { type: 'text', value: 'it' } } });
+  prompts.push(role, host);
+  assertEqual(buildPromptFinal(host), 'You are a critic.\nDo it.', 'the include is replaced by the other prompt, trailing blank lines trimmed');
+  role.vars.who.selected = '';
+  assertEqual(buildPromptFinal(host), 'You are a {{who}}.\nDo it.', 'an unfilled variable of the included prompt stays visible');
+  host.template = '\\{{>Role}}';
+  assertEqual(buildPromptFinal(host), '{{>Role}}', 'escaped: literal text');
+});
+
+test('includes nest, and a missing, trashed or looping include stays as its placeholder', function () {
+  pfresh();
+  const a = pmk({ name: 'A', template: 'a>{{>B}}' }), b = pmk({ name: 'B', template: 'b>{{>C}}' }), c = pmk({ name: 'C', template: 'c' });
+  prompts.push(a, b, c);
+  assertEqual(buildPromptFinal(a), 'a>b>c');
+  c.deletedAt = Date.now();
+  assertEqual(buildPromptFinal(a), 'a>b>{{>C}}', 'a trashed prompt counts as missing');
+  delete c.deletedAt; c.template = 'c>{{>A}}';
+  assertEqual(buildPromptFinal(a), 'a>b>c>{{>A}}', 'a loop is cut where it would repeat');
+  assertEqual(promptIncludes(a)[0].status, 'loop');
+  assertEqual(promptIncludes(pmk({ template: '{{>Nope}}' }))[0].status, 'missing');
+});
+
+test('the highlight tints an include green, and red when it cannot be found', function () {
+  pfresh();
+  const a = pmk({ name: 'A', template: '{{>B}} {{>Nope}}' }), b = pmk({ name: 'B', template: 'x' });
+  prompts.push(a, b);
+  const h = promptHighlight(a.template, a.id);
+  assertIncludes(h, '<span class="ph ph-inc">{{&gt;B}}</span>');
+  assertIncludes(h, 'ph-inc ph-miss">{{&gt;Nope}}');
+});
+
+test('renaming a prompt updates the {{>Old}} references in the other, unlocked prompts', function () {
+  pfresh();
+  const role = pmk({ name: 'Role', template: 'x' }), a = pmk({ name: 'A', template: '{{>role}} \\{{>Role}}' }), l = pmk({ name: 'L', template: '{{>Role}}', locked: true });
+  prompts.push(role, a, l);
+  promptEditorId = role.id; promptRenameStart();
+  role.name = 'Persona'; promptRenameCommit();
+  assertEqual(a.template, '{{>Persona}} \\{{>Role}}', 'the reference follows the rename; an escaped one is left alone');
+  assertEqual(l.template, '{{>Role}}', 'a locked prompt is not touched');
+});
+
+// ---- Open in an AI app ----
+test('the AI app list keeps only a name and a safe address', function () {
+  assertEqual(cleanPromptAiApps('x'), null);
+  assertDeepEqual(cleanPromptAiApps([{ name: ' Claude ', url: 'https://claude.ai/new' }, { name: 'Bad', url: 'javascript:alert(1)' }, { name: '', url: 'https://a.b' }, { name: 'Local', url: 'http://localhost:3000/' }, { name: 'Plain http', url: 'http://example.com' }, 5]),
+    [{ name: 'Claude', url: 'https://claude.ai/new' }, { name: 'Local', url: 'http://localhost:3000/' }]);
+  assertDeepEqual(cleanPromptAiApps([]), [], 'an empty list is allowed (the menu is then empty)');
+  assertTrue(getPromptAiApps().length >= 2, 'the defaults include Claude and Copilot');
+});

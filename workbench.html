@@ -1597,6 +1597,25 @@ const ICONS = {
   .ph-opt { background: var(--blue-bg); color: var(--blue-text); }
   .ph-ins { background: var(--teal-bg); color: var(--teal-text); }
   .ph-txt { background: var(--amber-bg); color: var(--amber-text); }
+  .ph-inc { background: var(--green-bg); color: var(--green-text); }
+  .ph-inc.ph-miss { background: var(--red-bg); color: var(--red-text); }   /* an included prompt that cannot be found, or would include itself */
+  .pr-inc-list { margin-top: 18px; }
+  .pr-inc { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: var(--fs-13); min-width: 0; }
+  .pr-inc + .pr-inc { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
+  .pr-inc > i { flex: none; color: var(--green-text); }
+  .pr-inc.bad > i { color: var(--red-text); }
+  .pr-inc-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: var(--text); cursor: pointer; }
+  .pr-inc-name:hover { text-decoration: underline; }
+  .pr-inc.bad .pr-inc-name { color: var(--text-2); cursor: default; text-decoration: none; }
+  .pr-inc-note { flex: none; font-size: var(--fs-12); color: var(--red-text); }
+  .ai-modal { width: 560px; max-width: calc(100vw - 32px); }
+  .ai-apps-list { display: flex; flex-direction: column; gap: 8px; }
+  .ai-app-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; align-items: center; }
+  .ai-app-row input { font-size: var(--fs-13); }
+  .ai-app-row input.bad { border-color: var(--red-text); }
+  .ai-apps-empty { font-size: var(--fs-13); color: var(--text-3); padding: 6px 0; }
+  .ai-apps-tools { display: flex; gap: 8px; }
+  .row-menu-scroll { max-height: min(60vh, 360px); overflow-y: auto; }
   .pr-tb-mono { font-family: var(--mono); font-weight: 600; font-size: var(--fs-14); letter-spacing: -.02em; }
   /* the variables inspector */
   /* Recently Deleted (Tasks): replaces the list, board, quick-add and the selection tools while it is open */
@@ -2076,6 +2095,7 @@ const ICONS = {
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('instruction')" title="Insert a checklist variable: [[name]]" aria-label="Insert a checklist variable"><span class="tb-txt pr-tb-mono">[[ ]]</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('text')" title="Insert a text variable: ((name))" aria-label="Insert a text variable"><span class="tb-txt pr-tb-mono">(( ))</span></button>
             <button type="button" class="tool-btn pr-insert" onclick="openPromptGlobalInsertMenu(event)" title="Insert a global variable: {{@name}}" aria-label="Insert a global variable" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{@}}</span></button>
+            <button type="button" class="tool-btn pr-insert" onclick="openPromptIncludeMenu(event)" title="Include another prompt: {{>name}}" aria-label="Include another prompt" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{&gt;}}</span></button>
           </div>
           <div class="tool-group note-fmt pr-insert-menu" role="group" aria-label="Insert a variable">
             <button type="button" class="tool-btn" onclick="openPromptInsertMenu(event)" title="Insert a variable" aria-label="Insert a variable" aria-haspopup="menu"><span class="tb-txt pr-tb-mono">{{ }}</span><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
@@ -2084,13 +2104,14 @@ const ICONS = {
           <button type="button" class="btn note-more-btn" id="pFavBtn" onclick="togglePromptFavorite()" title="Add to Favorites" aria-label="Favorite" aria-pressed="false"><i class="fa-solid fa-star"></i></button>
           <button type="button" class="btn note-more-btn note-lock-btn" id="pLockBtn" onclick="togglePromptLock()" title="Lock" aria-label="Lock" aria-pressed="false"></button>
           <button type="button" class="btn note-more-btn" id="pMoreBtn" onclick="openPromptMenu(event, promptEditorId)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+          <button type="button" class="btn note-more-btn" id="pOpenBtn" onclick="openPromptAiMenu(event)" title="Copy the prompt and open it in an AI app" aria-label="Open in an AI app" aria-haspopup="menu"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
           <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)" aria-label="Copy Prompt"><i class="fa-solid fa-copy"></i><span class="pr-copy-label"> Copy Prompt</span></button>
           <button type="button" class="btn note-more-btn" id="pInspToggle" onclick="togglePromptInspector()" title="Hide Variables (⌥⌘I)" aria-label="Hide Variables" aria-pressed="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.7" y="2.7" width="12.6" height="10.6" rx="2.4"/><path d="M10 2.9v10.2"/></svg></button>
         </div>
         <div class="pr-split" id="prSplit">
           <div class="note-scroll">
             <div class="pr-doc">
-              <input type="text" class="note-title" id="pName" placeholder="Prompt name" maxlength="200" aria-label="Prompt name" autocomplete="off" oninput="onPromptNameInput()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('pTemplate').focus()}">
+              <input type="text" class="note-title" id="pName" placeholder="Prompt name" maxlength="200" aria-label="Prompt name" autocomplete="off" oninput="onPromptNameInput()" onfocus="promptRenameStart()" onblur="promptRenameCommit()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('pTemplate').focus()}">
               <div class="note-meta" id="pMeta"></div>
               <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
               <div class="pr-section-label"><span>Template</span></div>
@@ -2362,7 +2383,9 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
+          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case; the Variables panel lists what a prompt includes and opens it with a click. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the button next to <em>Copy Prompt</em> copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <em>Edit Apps…</em> in its menu changes the list (a name and a web address each; kept on this device).</span></div>
           <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
@@ -2489,6 +2512,20 @@ const ICONS = {
     <div class="field newfile-field"><input type="text" id="newFileName" maxlength="80" autocomplete="off" spellcheck="false" aria-label="File name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitNewFile()}else if(event.key==='Escape'){event.stopPropagation();closeNewFileModal()}" oninput="document.getElementById('newFileError').textContent=''"><span class="newfile-ext" aria-hidden="true">.json</span></div>
     <div id="newFileError" class="newfile-error" role="alert"></div>
     <div class="modal-actions"><button type="button" class="btn" onclick="closeNewFileModal()">Cancel</button><button type="button" class="btn btn-primary" onclick="submitNewFile()">Create</button></div>
+  </div>
+</div>
+
+<!-- AI apps: the pages the Open in button offers (a name and a web address each) -->
+<div class="modal-bg" id="aiAppsModalBg" onclick="if(event.target===this) closeAiAppsModal()">
+  <div class="modal sync-modal ai-modal" role="dialog" aria-modal="true" aria-labelledby="aiAppsTitle" onkeydown="if(event.key==='Escape'){event.stopPropagation();closeAiAppsModal()}">
+    <div class="sync-head">
+      <span class="sync-head-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+      <div><h3 id="aiAppsTitle">AI Apps</h3><p>Open in copies the finished prompt, then opens the page, so you can paste it there</p></div>
+    </div>
+    <div class="ai-apps-list" id="aiAppsList"></div>
+    <div class="ai-apps-tools"><button type="button" class="btn btn-sm" onclick="addAiApp()"><i class="fa-solid fa-plus"></i> Add App</button><button type="button" class="btn btn-sm" onclick="resetAiApps()">Reset to Defaults</button></div>
+    <div id="aiAppsError" class="newfile-error" role="alert"></div>
+    <div class="modal-actions"><button type="button" class="btn" onclick="closeAiAppsModal()">Cancel</button><button type="button" class="btn btn-primary" onclick="saveAiApps()">Done</button></div>
   </div>
 </div>
 
@@ -6656,6 +6693,28 @@ const promptFolderPath = f=>{ const p = f && f.parentId ? promptFolderById(f.par
 
 // ---- the template language ----
 const PROMPT_ESC_RE = /\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g;      // \{{name}} (and the other two) is literal text, not a variable
+// {{>Name}} includes another prompt: when this prompt is copied, that prompt's finished text (with its own choices) is put in its place. Matched by name, ignoring case.
+const PROMPT_INC_RE = /\{\{>\s*([^}]+?)\s*\}\}/g, PROMPT_INCLUDE_DEPTH = 6;
+const promptIncKey = n=>String(n).trim().replace(/\s+/g, ' ').toLowerCase();
+function promptIncludeTarget(name){
+  const k = promptIncKey(name);
+  return prompts.filter(q=>!promptTrashed(q) && promptIncKey(promptTitle(q))===k).sort((a, b)=>(a.createdAt || 0) - (b.createdAt || 0))[0] || null;
+}
+const promptIncludeNames = p=>[...String(p.template || '').replace(PROMPT_ESC_RE, '').matchAll(PROMPT_INC_RE)].map(m=>m[1]);
+function promptIncludeLoops(q, p, seen){                           // would including q bring p back in (directly or through other prompts)?
+  if(q.id===p.id) return true;
+  seen = seen || new Set(); if(seen.has(q.id)) return false; seen.add(q.id);
+  return promptIncludeNames(q).some(n=>{ const r = promptIncludeTarget(n); return !!r && promptIncludeLoops(r, p, seen); });
+}
+function promptIncludes(p){                                        // the distinct prompts this one includes, with whether each one resolves
+  const seen = new Set(), out = [];
+  promptIncludeNames(p).forEach(n=>{
+    const k = promptIncKey(n); if(seen.has(k)) return; seen.add(k);
+    const q = promptIncludeTarget(n);
+    out.push({ name: n.trim(), target: q, status: !q ? 'missing' : promptIncludeLoops(q, p) ? 'loop' : 'ok' });
+  });
+  return out;
+}
 function detectPromptVars(template, existing){
   existing = existing || {};
   const result = {}, stripped = String(template || '').replace(PROMPT_ESC_RE, '');
@@ -6663,7 +6722,7 @@ function detectPromptVars(template, existing){
     if(existing[k] && existing[k].type==='global') result[k] = existing[k];
     else if(!result[k]) result[k] = { type:'global', selected:'' };
   });
-  [...stripped.matchAll(/\{\{(?!@)([^}]+)\}\}/g)].map(m=>m[1]).forEach(k=>{
+  [...stripped.matchAll(/\{\{(?![@>])([^}]+)\}\}/g)].map(m=>m[1]).forEach(k=>{
     if(existing[k] && existing[k].type==='option') result[k] = existing[k];
     else if(!result[k]) result[k] = { type:'option', options:['Option 1'], selected:'Option 1' };
   });
@@ -6688,9 +6747,16 @@ function promptVarUnfilled(p, k, v){
   if(v.type==='text') return !(v.value || '').trim();
   return false;
 }
-function buildPromptFinal(p){
+function buildPromptFinal(p, stack){
   const TOKEN = '\x00ESC\x00', escaped = [];
+  stack = stack || [p.id];
   let t = String(p.template || '').replace(PROMPT_ESC_RE, (_, ph)=>{ escaped.push(ph); return TOKEN + (escaped.length - 1) + TOKEN; });
+  t = t.replace(PROMPT_INC_RE, (m, name)=>{                         // an included prompt goes in as finished text; one that is missing, would loop or is nested too deep stays as its placeholder
+    const q = promptIncludeTarget(name);
+    if(!q || stack.includes(q.id) || stack.length>=PROMPT_INCLUDE_DEPTH) return m;
+    escaped.push(buildPromptFinal(q, stack.concat(q.id)).replace(/\s+$/, ''));
+    return TOKEN + (escaped.length - 1) + TOKEN;
+  });
   Object.entries(p.vars || {}).forEach(([k, v])=>{
     if(promptVarUnfilled(p, k, v)) return;                          // nothing chosen or typed: the placeholder stays in the text, so the gap is visible
     if(v.type==='instruction') t = t.split(`[[${k}]]`).join(sortByPromptOptions(Array.isArray(v.selected) ? v.selected : [], v.options || []).map(s=>`• ${s}`).join('\n'));
@@ -6701,10 +6767,15 @@ function buildPromptFinal(p){
   return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>escaped[+i]);
 }
 // The template with its placeholders tinted (the layer under the editing field).
-function promptHighlight(template){
+const unescHtml = x=>String(x).replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+function promptHighlight(template, selfId){
   const TOKEN = '\u0001', keep = [];
   let t = esc(String(template || '')).replace(/\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g, m=>{ keep.push(m); return TOKEN + (keep.length - 1) + TOKEN; });
-  t = t.replace(/\{\{@([^}]+)\}\}/g, '<span class="ph ph-glob">{{@$1}}</span>').replace(/\{\{(?!@)([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
+  const self = selfId ? prompts.find(x=>x.id===selfId) : null;
+  t = t.replace(/\{\{@([^}]+)\}\}/g, '<span class="ph ph-glob">{{@$1}}</span>').replace(/\{\{&gt;\s*([^}]+?)\s*\}\}/g, (m, n)=>{
+    const q = promptIncludeTarget(unescHtml(n)), bad = !q || (self && promptIncludeLoops(q, self));
+    return `<span class="ph ph-inc${bad ? ' ph-miss' : ''}">${m}</span>`;
+  }).replace(/\{\{(?!@|&gt;)([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
   return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>keep[+i]) + '\n';
 }
 
@@ -6895,7 +6966,7 @@ function renderPromptEditor(){
   }
   const name = document.getElementById('pName'), ta = document.getElementById('pTemplate');
   name.readOnly = ro; ta.readOnly = ro;
-  document.getElementById('pTplHl').innerHTML = promptHighlight(ta.value);
+  document.getElementById('pTplHl').innerHTML = promptHighlight(ta.value, p.id);
   updatePromptMeta(p);
   const tb = document.getElementById('pTrashBar'); if(tb){ tb.hidden = !trashed; const t = document.getElementById('pTrashText'); if(t && trashed) t.textContent = `Deleted ${new Date(p.deletedAt).toLocaleDateString(undefined, {dateStyle:'medium'})}. It is removed after ${PROMPT_TRASH_DAYS} days.`; }
   const set = (id, fn)=>{ const el = document.getElementById(id); if(el) fn(el); };
@@ -6916,10 +6987,10 @@ function onPromptTemplateInput(){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
   const ta = document.getElementById('pTemplate');
   p.template = ta.value.slice(0,100000);
-  document.getElementById('pTplHl').innerHTML = promptHighlight(p.template);
+  document.getElementById('pTplHl').innerHTML = promptHighlight(p.template, p.id);
   p.vars = detectPromptVars(p.template, p.vars);
   p.updatedAt = Date.now();
-  const sig = Object.entries(p.vars).map(([k, v])=>k + ':' + v.type).join('|');
+  const sig = promptSigOf(p);
   if(sig!==promptVarSig){ promptVarSig = sig; renderPromptInspector(p); }
   updatePromptMeta(p);
   schedulePromptSave();
@@ -6929,23 +7000,46 @@ function onPromptNameInput(){
   p.name = document.getElementById('pName').value.slice(0,200); p.updatedAt = Date.now();
   schedulePromptSave();
 }
+// Renaming a prompt that others include: when the name field is left, every {{>Old Name}} in the other prompts becomes {{>New Name}} (locked prompts are left as they are).
+let promptRenameFrom = null;
+function promptRenameStart(){ const p = prompts.find(x=>x.id===promptEditorId); promptRenameFrom = p ? { id: p.id, title: promptTitle(p) } : null; }
+function promptRenameCommit(){
+  const from = promptRenameFrom; promptRenameFrom = null;
+  const p = from && prompts.find(x=>x.id===from.id); if(!p) return;
+  const to = promptTitle(p); if(promptIncKey(to)===promptIncKey(from.title) || to.includes('}')) return;
+  let n = 0;
+  prompts.forEach(q=>{
+    if(q.id===p.id || q.locked || promptTrashed(q) || !q.template.includes('{{>')) return;
+    const t = q.template.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, name)=>esc_ || promptIncKey(name)!==promptIncKey(from.title) ? m : `{{>${to}}}`);
+    if(t!==q.template){ q.template = t; q.vars = detectPromptVars(t, q.vars); touchPrompt(q); n++; }
+  });
+  if(n){ save(); renderPromptsList(); showToast(`Updated the reference in ${n} prompt${n===1 ? '' : 's'}`); }
+}
 function schedulePromptSave(){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = (typeof setTimeout==='function') ? setTimeout(commitPromptEdit, 450) : null; }
 function flushPromptEdit(){ if(promptSaveTimer){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = null; commitPromptEdit(); } }
 function commitPromptEdit(){ promptSaveTimer = null; save(); renderPromptsList(); }
 function touchPrompt(p){ p.updatedAt = Date.now(); }
 
 // ---- the variables panel (an inspector on the right) ----
+const promptSigOf = p=>Object.entries(p.vars || {}).map(([k, v])=>k + ':' + v.type).join('|') + '#' + promptIncludes(p).map(i=>i.name + ':' + i.status + ':' + (i.target ? i.target.id : '')).join('|');
+// The prompts this one includes: a click opens that prompt (to edit the shared text in one place); a missing or looping one is flagged.
+function promptIncludesHtml(p){
+  const inc = promptIncludes(p); if(!inc.length) return '';
+  return `<div class="pr-inc-list"><div class="pr-insp-label">Included Prompts</div>` + inc.map(i=>i.status==='ok'
+    ? `<div class="pr-inc"><i class="fa-regular fa-clone"></i><button type="button" class="pr-inc-name" title="Open ${esc(promptTitle(i.target))}" onclick="selectPrompt('${i.target.id}')">${esc(promptTitle(i.target))}</button></div>`
+    : `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span></div>`).join('') + `</div>`;
+}
 function renderPromptInspector(p){
   const host = document.getElementById('pInspector'); if(!host) return;
   p = p || prompts.find(x=>x.id===promptEditorId); if(!p){ host.innerHTML = ''; return; }
   const locked = p.locked || promptTrashed(p), entries = Object.entries(p.vars || {});
-  promptVarSig = entries.map(([k, v])=>k + ':' + v.type).join('|');
+  promptVarSig = promptSigOf(p);
   const dis = locked ? ' disabled' : '';
   const kindClass = t=>t==='option' ? 'ph-opt' : t==='instruction' ? 'ph-ins' : t==='global' ? 'ph-glob' : 'ph-txt';
   let html = `<div class="pr-insp-head"><span>Variables</span><span class="pr-insp-tools"><span class="pr-insp-sub">${entries.length} in this prompt</span><button type="button" class="icon-btn" title="Global Variables…" aria-label="Global Variables" onclick="openPromptGlobalsModal()"><i class="fa-solid fa-globe"></i></button></span></div>`;
   if(!entries.length){
     html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time, and <span class="ph ph-glob">{{@global}}</span> takes its options from the Global Variables list. The buttons above insert one.</div>`;
-    host.innerHTML = html + promptInspectorFoot(); return;
+    host.innerHTML = html + promptIncludesHtml(p) + promptInspectorFoot(); return;
   }
   const hasPickable = entries.some(([, v])=>v.type!=='text');
   if(hasPickable){
@@ -6982,7 +7076,7 @@ function renderPromptInspector(p){
     html += `</div>`;
   });
   html += `</div>`;
-  host.innerHTML = html + promptInspectorFoot();
+  host.innerHTML = html + promptIncludesHtml(p) + promptInspectorFoot();
   if(host.querySelectorAll) host.querySelectorAll('.pr-textfield').forEach(growPromptText);
 }
 // A text variable is a small multi-line box: it grows with what is typed (up to about 12 lines, then scrolls) and keeps line breaks, so a pasted list stays a list.
@@ -7176,7 +7270,7 @@ function renamePromptVar(p, key, text){
   p.template = p.template.replace(new RegExp('(?<!\\\\)' + pair[0] + escapeRegExp(key) + pair[1], 'g'), pair[2] + text + pair[3]);
   const vars = {}; Object.keys(p.vars).forEach(k=>{ vars[k===key ? text : k] = p.vars[k]; }); p.vars = vars;
   (p.presets || []).forEach(ps=>{ if(ps.values && key in ps.values){ ps.values[text] = ps.values[key]; delete ps.values[key]; } });
-  const ta = document.getElementById('pTemplate'); if(ta && promptEditorId===p.id){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template); }
+  const ta = document.getElementById('pTemplate'); if(ta && promptEditorId===p.id){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template, p.id); }
   touchPrompt(p); save(); updatePromptMeta(p); return null;
 }
 function removePromptOption(btn, i){
@@ -7366,6 +7460,74 @@ function copyPrompt(id){
     if(!ok){ showToast('Could not use the clipboard here', true); return; }
     showToast(missing.length ? `Prompt copied — ${missing.length} variable${missing.length===1 ? '' : 's'} still unfilled, left in as placeholders (${missing.slice(0,3).join(', ')}${missing.length>3 ? '…' : ''})` : 'Prompt copied');
   });
+}
+// ---- Open in an AI app: copy the finished prompt, then open the app's page in a new tab (the list is a per-device setting) ----
+const PROMPT_AI_APPS_KEY = 'workbench_prompt_ai_apps';
+const DEFAULT_PROMPT_AI_APPS = [{ name:'Claude', url:'https://claude.ai/new' }, { name:'Microsoft Copilot', url:'https://copilot.microsoft.com/' }];
+function aiAppUrlOk(u){ return /^https:\/\/[^\s\/?#]+\.[^\s\/?#]+|^https:\/\/localhost\b/i.test(u) && !/\s/.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(u); }
+function cleanPromptAiApps(list){                                  // only a name and a safe address (https, or http on this computer); null when it is not a list at all
+  if(!Array.isArray(list)) return null;
+  return list.filter(a=>a && typeof a.name==='string' && typeof a.url==='string').map(a=>({ name: a.name.trim().slice(0,40), url: a.url.trim().slice(0,500) })).filter(a=>a.name && aiAppUrlOk(a.url)).slice(0,12);
+}
+function getPromptAiApps(){
+  let v = null; try{ v = JSON.parse(localStorage.getItem(PROMPT_AI_APPS_KEY) || 'null'); }catch(_){}
+  return cleanPromptAiApps(v) || DEFAULT_PROMPT_AI_APPS.map(a=>({ ...a }));
+}
+function openPromptAiMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu || !prompts.some(x=>x.id===promptEditorId)) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  const apps = getPromptAiApps();
+  menu.innerHTML = apps.map((a, i)=>rowMenuItem('fa-solid fa-arrow-up-right-from-square', 'Open in ' + esc(a.name), `promptOpenInApp(${i})`)).join('')
+    + (apps.length ? '<div class="row-menu-sep"></div>' : '') + rowMenuItem('fa-solid fa-sliders', 'Edit Apps…', `closeRowMenu();openAiAppsModal()`);
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  menu.classList.add('open');
+  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+}
+function promptOpenInApp(i){
+  closeRowMenu();
+  const p = prompts.find(x=>x.id===promptEditorId), app = getPromptAiApps()[i]; if(!p || !app) return;
+  const text = buildPromptFinal(p);
+  if(!text.trim()){ showToast('The prompt is empty, so there is nothing to copy', true); return; }
+  const missing = Object.entries(p.vars || {}).filter(([k, v])=>promptVarUnfilled(p, k, v)).length;
+  const w = typeof window.open==='function' ? window.open(app.url, '_blank', 'noopener') : null;      // opened straight from the click, so the browser lets it through
+  Promise.resolve(noteWriteText(text)).then(ok=>{
+    if(!ok){ showToast('Could not use the clipboard here', true); return; }
+    showToast((w===null ? `Prompt copied, but the browser blocked the new tab. Open ${app.name} yourself and paste` : `Prompt copied. Paste it into ${app.name}`) + (missing ? ` (${missing} variable${missing===1 ? '' : 's'} still unfilled)` : ''));
+  });
+}
+let aiAppsDraft = [];
+function openAiAppsModal(){
+  aiAppsDraft = getPromptAiApps(); renderAiAppsModal();
+  document.getElementById('aiAppsModalBg').classList.add('open');
+  const first = document.querySelector('#aiAppsList input'); if(first && typeof setTimeout==='function') setTimeout(()=>first.focus(), 50);
+}
+function closeAiAppsModal(){ closeModal('aiAppsModalBg'); }
+function renderAiAppsModal(){
+  const el = document.getElementById('aiAppsList'); if(!el) return;
+  el.innerHTML = aiAppsDraft.length ? aiAppsDraft.map((a, i)=>`<div class="ai-app-row">
+      <input type="text" value="${esc(a.name)}" maxlength="40" placeholder="Name" spellcheck="false" autocomplete="off" aria-label="Name" oninput="aiAppsDraft[${i}].name=this.value;this.classList.remove('bad')">
+      <input type="text" value="${esc(a.url)}" maxlength="500" placeholder="https://…" spellcheck="false" autocomplete="off" aria-label="Web address" oninput="aiAppsDraft[${i}].url=this.value;this.classList.remove('bad')">
+      <button type="button" class="icon-btn" title="Remove" aria-label="Remove ${esc(a.name || 'app')}" onclick="removeAiApp(${i})"><i class="fa-solid fa-xmark"></i></button></div>`).join('')
+    : `<div class="ai-apps-empty">No apps. The Open in menu will be empty.</div>`;
+  const err = document.getElementById('aiAppsError'); if(err) err.textContent = '';
+}
+function addAiApp(){ aiAppsDraft.push({ name:'', url:'' }); renderAiAppsModal(); const rows = document.querySelectorAll('#aiAppsList .ai-app-row'); const last = rows[rows.length - 1]; if(last) last.querySelector('input').focus(); }
+function removeAiApp(i){ aiAppsDraft.splice(i, 1); renderAiAppsModal(); }
+function resetAiApps(){ aiAppsDraft = DEFAULT_PROMPT_AI_APPS.map(a=>({ ...a })); renderAiAppsModal(); }
+function saveAiApps(){
+  const rows = [...document.querySelectorAll('#aiAppsList .ai-app-row')], err = document.getElementById('aiAppsError'), out = [];
+  for(let i = 0; i < aiAppsDraft.length; i++){
+    const name = (aiAppsDraft[i].name || '').trim(); let url = (aiAppsDraft[i].url || '').trim();
+    if(!name && !url) continue;                                    // an untouched new row is just dropped
+    if(url && !/^[a-z][a-z0-9+.-]*:/i.test(url)) url = 'https://' + url;
+    const bad = !name ? 0 : !aiAppUrlOk(url) ? 1 : -1, inputs = rows[i] ? rows[i].querySelectorAll('input') : [];
+    if(bad>=0){ if(inputs[bad]){ inputs[bad].classList.add('bad'); inputs[bad].focus(); } if(err) err.textContent = bad===0 ? 'Give the app a name.' : 'Use a web address that starts with https://'; return; }
+    out.push({ name: name.slice(0,40), url });
+  }
+  try{ localStorage.setItem(PROMPT_AI_APPS_KEY, JSON.stringify(out.slice(0,12))); }catch(_){}
+  closeAiAppsModal();
 }
 // ---- drag a prompt onto a folder ----
 function promptFolderDragOver(e){ if(!draggedPromptId) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop-into'); }
@@ -8896,7 +9058,8 @@ function openPromptInsertMenu(e){
   const off = !!(p.locked || promptTrashed(p)), run = k=>`closeRowMenu();insertPromptVar('${k}')`;
   const globals = promptGlobals.slice().sort(byNameCI).map(g=>rowMenuItem('', esc(g.name), `promptInsertGlobal('${g.id}')`, { off }));
   menu.innerHTML = rowMenuItem('', 'Choice', run('option'), { off }) + rowMenuItem('', 'Checklist', run('instruction'), { off }) + rowMenuItem('', 'Text', run('text'), { off })
-    + '<div class="row-menu-sep"></div>' + (globals.length ? globals.join('') : '') + rowMenuItem('', 'Manage Global Variables…', `closeRowMenu();openPromptGlobalsModal()`);
+    + '<div class="row-menu-sep"></div>' + (globals.length ? globals.join('') : '') + rowMenuItem('', 'Manage Global Variables…', `closeRowMenu();openPromptGlobalsModal()`)
+    + '<div class="row-menu-sep"></div>' + rowMenuItem('', 'Include Prompt…', `openPromptIncludeMenu(null)`, { off });
   const btn = e.currentTarget, r = btn.getBoundingClientRect();
   menu.classList.add('open');
   placeRowMenu(menu, r.left, r.bottom + 6, btn);
@@ -8913,6 +9076,28 @@ function openPromptGlobalInsertMenu(e){
   menu.classList.add('open');
   const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
   placeRowMenu(menu, r.left, r.bottom + 6, btn);
+}
+// The "{{>}}" toolbar button: a menu of the other prompts; the choice is written as {{>Name}}.
+function openPromptIncludeMenu(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
+  const btn = (e && e.currentTarget) || document.querySelector('.pr-insert-menu .tool-btn') || document.querySelector('.pr-insert-group .tool-btn'), r = btn.getBoundingClientRect();
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  const off = !!(p.locked || promptTrashed(p));
+  const others = prompts.filter(q=>q.id!==p.id && !promptTrashed(q) && !promptTitle(q).includes('}')).sort((a, b)=>promptTitle(a).localeCompare(promptTitle(b), undefined, {sensitivity:'base'}));
+  menu.innerHTML = others.length
+    ? `<div class="row-menu-scroll">` + others.map(q=>rowMenuItem('fa-regular fa-clone', esc(promptTitle(q)), `promptInsertInclude('${q.id}')`, { off })).join('') + `</div>`
+    : `<div class="row-menu-hint" style="padding:8px 12px">No other prompts to include yet</div>`;
+  menu.classList.add('open');
+  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+}
+function promptInsertInclude(id){
+  closeRowMenu();
+  const q = prompts.find(x=>x.id===id), p = prompts.find(x=>x.id===promptEditorId); if(!q || !p || p.locked || promptTrashed(p)) return;
+  const ta = document.getElementById('pTemplate'); ta.focus();
+  document.execCommand('insertText', false, `{{>${promptTitle(q)}}}`);
+  onPromptTemplateInput();
 }
 function promptInsertGlobal(id){
   closeRowMenu();
@@ -8990,7 +9175,7 @@ function renamePromptGlobal(g, name){
     const vars = {}; Object.keys(p.vars).forEach(x=>{ vars[x===k ? newKey : x] = p.vars[x]; }); p.vars = vars;
     (p.presets || []).forEach(ps=>{ if(ps.values && k in ps.values){ ps.values[newKey] = ps.values[k]; delete ps.values[k]; } });
     p.updatedAt = Date.now();
-    if(p.id===promptEditorId){ const ta = document.getElementById('pTemplate'); if(ta){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template); } }
+    if(p.id===promptEditorId){ const ta = document.getElementById('pTemplate'); if(ta){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template, p.id); } }
   });
   g.name = name; g.updatedAt = Date.now();
 }
