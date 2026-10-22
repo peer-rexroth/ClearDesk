@@ -1284,6 +1284,7 @@ const ICONS = {
   }
   .note-section i { margin-right: 5px; font-size: var(--ico-12); }
   .note-section:has(.fa-thumbtack) i { color: var(--accent); }
+  .note-section:has(.fa-star) i { color: var(--amber-text); }
   .note-section { padding: 10px 12px 4px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
   .notes-list-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 4px 6px; padding: 8px 10px; border-radius: var(--r-m); font-size: var(--fs-12); color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, transparent); }
   .note-trash-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 8px 12px; border-radius: var(--r-m); font-size: var(--fs-12); color: var(--text-2); background: color-mix(in srgb, var(--red-text) 10%, transparent); }
@@ -6872,7 +6873,7 @@ function visiblePrompts(){
     if(promptFolderFilter==='all' || inTrash) return true;
     if(promptFolderFilter==='favorites') return p.favorite;
     return p.folderId===promptFolderFilter;                      // a folder shows only what is directly in it
-  }).sort(inTrash ? (a, b)=>(b.deletedAt || 0) - (a.deletedAt || 0) : promptSorter());
+  }).sort(inTrash ? (a, b)=>(b.deletedAt || 0) - (a.deletedAt || 0) : (a, b)=>(b.favorite ? 1 : 0) - (a.favorite ? 1 : 0) || promptSorter()(a, b));   // favorites stay on top, then the chosen order (like pinned notes)
 }
 const promptTitle = p=>p.name.trim() || 'Untitled prompt';
 
@@ -6921,9 +6922,12 @@ function renderPromptsList(vis){
     return;
   }
   const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted prompts are removed after ${PROMPT_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyPromptTrash()">Delete All</button></div>` : '';
+  const anyFav = !inTrash && promptFolderFilter!=='favorites' && vis.some(p=>p.favorite);   // "Favorites" then "Prompts" headers, only when something is a favorite (the Favorites list needs none)
+  let seen = '';
   list.innerHTML = banner + vis.map(p=>{
-    const sel = p.id===selectedPromptId;
-    return `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="${sel ? 0 : -1}" data-id="${p.id}" onclick="selectPrompt('${p.id}')" onkeydown="promptRowKey(event,'${p.id}')" oncontextmenu="openPromptMenu(event,'${p.id}')" draggable="true" ondragstart="draggedPromptId='${p.id}';event.dataTransfer.effectAllowed='move'" ondragend="draggedPromptId=null">
+    const sel = p.id===selectedPromptId, sec = anyFav ? (p.favorite ? 'Favorites' : 'Prompts') : '';
+    const head = sec && sec!==seen ? `<div class="note-section">${sec==='Favorites' ? '<i class="fa-solid fa-star"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
+    return head + `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="${sel ? 0 : -1}" data-id="${p.id}" onclick="selectPrompt('${p.id}')" onkeydown="promptRowKey(event,'${p.id}')" oncontextmenu="openPromptMenu(event,'${p.id}')" draggable="true" ondragstart="draggedPromptId='${p.id}';event.dataTransfer.effectAllowed='move'" ondragend="draggedPromptId=null">
       <div class="note-row-title"><span class="note-row-name">${esc(promptTitle(p))}</span>${p.favorite || p.locked ? `<span class="note-row-marks">${p.favorite ? '<i class="fa-solid fa-star note-row-star" title="Favorite"></i>' : ''}${p.locked ? '<i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</span>` : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? p.deletedAt : promptSortKey==='created' ? p.createdAt : p.updatedAt))}</span></div>
     </div>`;
