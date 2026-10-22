@@ -540,9 +540,6 @@ const ICONS = {
   .about-tag { font-size: var(--fs-13); color: var(--text-3); margin-top: 3px; }
   .about-credits { font-size: var(--fs-13); color: var(--text-2); margin-top: 22px; }
   .about-credits strong { color: var(--text); font-weight: 600; }
-  .about-feedback { font-size: var(--fs-12); color: var(--text-3); line-height: 1.6; margin-top: 12px; }
-  .about-feedback a { color: var(--blue-text); text-decoration: none; font-weight: 500; font-size: var(--fs-13); }
-  .about-feedback a:hover { text-decoration: underline; }
   .about-fine { font-size: var(--fs-11); color: var(--text-3); margin-top: 22px; text-wrap: balance; }
   .help-close:hover { background: var(--pressed); color: var(--text); }
   .help-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px 12px; overflow-y: auto; }
@@ -600,7 +597,7 @@ const ICONS = {
   .sc-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 0; font-size: var(--fs-13); color: var(--text); }
   .sc-row + .sc-row { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
   .sc-keys { display: inline-flex; gap: 4px; flex-shrink: 0; }
-  .sc-row kbd { font-family: var(--mono); font-size: var(--fs-12); padding: 1px 8px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: var(--r-xs); background: var(--bg-2); color: var(--text); }
+  .sc-row kbd { font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: var(--fs-13); letter-spacing: .04em; padding: 1px 8px; border: 1px solid var(--border); border-bottom-width: 2px; border-radius: var(--r-xs); background: var(--bg-2); color: var(--text); }
   .sc-row mark { background: color-mix(in srgb, var(--sel-bg) 28%, transparent); color: inherit; border-radius: var(--r-xs); padding: 0 1px; }
   .shortcut-row { display: flex; align-items: center; justify-content: space-between; font-size: var(--fs-13); padding: 4px 0; }
   .shortcut-row span { color: var(--text-2); }
@@ -2412,10 +2409,9 @@ const ICONS = {
     <button type="button" class="help-close about-close" aria-label="Close" title="Close (Esc)" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button>
     <img class="about-icon" src="icons/icon-192.png" alt="" width="88" height="88">
     <h3 class="about-name" id="aboutTitle">Workbench</h3>
-    <div class="about-tag">A local-first task and notes manager</div>
+    <div class="about-tag">A local-first workspace for tasks, notes and prompts</div>
     <div class="about-credits">Created by <strong>Peer Rexroth</strong></div>
-    <div class="about-feedback">Feedback &amp; suggestions welcome<br><a href="mailto:peer.rexroth@db.com">peer.rexroth@db.com</a></div>
-    <div class="about-fine">Your tasks and notes stay in this browser. No server, no account.</div>
+    <div class="about-fine">Your tasks, notes and prompts stay in this browser. No server, no account.</div>
   </div>
 </div>
 
@@ -5464,32 +5460,44 @@ function confirmModalAction(){
 // ── Keyboard shortcuts dialog: the same System-Settings layout as Help — groups in the sidebar, a grouped list of rows per group ──
 function shortcutGroups(){
   const mac = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  const mod = mac ? '⌘' : 'Ctrl', shift = mac ? '⇧' : 'Shift';
+  const mod = mac ? '⌘' : 'Ctrl', shift = mac ? '⇧' : 'Shift', opt = mac ? '⌥' : 'Alt';
+  // Keyboard only: mouse gestures (click, double-click, right-click) live in Help. One row is one key combination; alternatives are separate rows.
   return [
     { id:'nav', label:'Navigation', icon:'fa-solid fa-compass', rows:[
-      ['Focus search', ['/']], ['Focus quick-add', ['N']], ['Show or hide the sidebar', mac ? ['⌥','⌘','S'] : ['Ctrl','Alt','S']], ['Switch to Tasks, Notes or Prompts', mac ? ['⌥','⌘','1 / 2 / 3'] : ['Ctrl','Alt','1 / 2 / 3']], ['Show or hide the sidebar (Tasks only; in Notes it is Bold)', [mod,'B']], ['Navigate tasks', ['↑','↓']],
-      ['Jump from the quick-add field into the list, and back', ['↓','↑']], ['Open selected task', ['↵']] ] },
+      ['Focus search', ['/']], ['Focus quick-add', ['N']],
+      ['Show or hide the sidebar', mac ? ['⌥','⌘','S'] : ['Ctrl','Alt','S']], ['Show or hide the sidebar (Tasks only; in Notes it is Bold)', [mod,'B']],
+      ['Switch to Tasks', [opt,mod,'1']], ['Switch to Notes', [opt,mod,'2']], ['Switch to Prompts', [opt,mod,'3']],
+      ['Navigate tasks', ['↑','↓']], ['Jump from the quick-add field into the list', ['↓']], ['Back to the quick-add field from the first task', ['↑']], ['Open selected task', ['↵']] ] },
     { id:'actions', label:'Task actions', icon:'fa-solid fa-list-check', rows:[
-      ['Collapse/expand selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Delete selected task', ['Delete']],
-      ['Undo last delete or edit', [mod,'Z']] ] },
-    { id:'select', label:'Selection', icon:'fa-solid fa-object-group', rows:[
-      ['Multi-select tasks', [mod,'Click']], ['Range-select tasks', [shift,'Click']], ['Select all visible tasks', [mod,'A']] ] },
+      ['Collapse or expand the selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Rename the selected task', ['F2']], ['Delete selected task', ['Delete']],
+      ['Select all visible tasks', [mod,'A']], ['Undo last delete or edit', [mod,'Z']] ] },
     { id:'general', label:'General', icon:'fa-solid fa-sliders', rows:[
-      ['Open a task', ['Double-click']], ['Rename the selected task', ['F2']], ['Open the row menu', ['Right-click']],
-      ['Rename title or subtask', ['Double-click text']], ['Change priority, status or due date', ['Click its badge']],
-      ['Show shortcuts', ['?']], ['Close drawer/modal, clear selection', ['Esc']] ] },
+      ['Show shortcuts', ['?']], ['Close drawer or dialog, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
-      ['Undo / redo typing and formatting', [mod,'Z / ⇧ Z']], ['Undo a delete, move or duplicate (when not typing)', [mod,'Z']], ['Bold / italic / underline', [mod,'B / I / U']], ['Add or edit a link', [mod,'K']], ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print / Save as PDF', [mod,'P']], ['Leave a table: go to the line below it', [mod,'↵']], ['Table options (rows, columns, header) at the caret', ['Shift','F10']], ['Next cell, adding a row after the last one', ['Tab']], ['Indent / outdent a list item', ['Tab','⇧ Tab']], ['Open a link', [mod,'Click']], ['Move the focused folder up or down (sidebar)', ['⌥','↑ / ↓']] ] },
+      ['Undo typing and formatting', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Undo a delete, move or duplicate (when not typing)', [mod,'Z']],
+      ['Bold', [mod,'B']], ['Italic', [mod,'I']], ['Underline', [mod,'U']], ['Add or edit a link', [mod,'K']],
+      ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print or save as PDF', [mod,'P']],
+      ['Leave a table: go to the line below it', [mod,'↵']], ...(mac ? [] : [['Table options (rows, columns, header) at the caret', ['Shift','F10']]]),
+      ['Next cell, adding a row after the last one', ['Tab']], ['Indent a list item', ['Tab']], ['Outdent a list item', [shift,'Tab']],
+      ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']] ] },
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-clone', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
-      ['Copy the finished prompt', [mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']], ['Undo / redo typing in the template', [mod,'Z / ⇧ Z']], ['Focus search', ['/']] ] },
+      ['Copy the finished prompt', [mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
+      ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
-      ['Switch topic', ['↑','↓']], ['Into the text / back to the topics', ['→','←']], ['Search help', ['/']] ] }
+      ['Switch topic', ['↑','↓']], ['Into the text', ['→']], ['Back to the topics', ['←']], ['Search help', ['/']] ] }
   ];
 }
+// One row = one key combination = one key cap. On a Mac it reads as Apple writes it (⇧⌘Z, ⌫, ⎋, ↩, ⇥); elsewhere as Ctrl+Z, Delete, Esc, Enter, Tab.
+const SC_MAC_KEYS = { 'Delete':'⌫', 'Esc':'⎋', '↵':'↩', 'Tab':'⇥' };
+const scIsMac = ()=>/Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+function scKeyText(keys){
+  const mac = scIsMac();
+  return mac ? keys.map(k=>SC_MAC_KEYS[k] || k).join('') : keys.map(k=>k==='↵' ? 'Enter' : k).join('+');
+}
 let scGroups = [], scTab = 'nav', scSearching = false;
-const scRowHtml = ([label, keys])=>`<div class="sc-row"><span>${esc(label)}</span><span class="sc-keys">${keys.map(x=>`<kbd>${esc(x)}</kbd>`).join('')}</span></div>`;
+const scRowHtml = ([label, keys])=>`<div class="sc-row"><span>${esc(label)}</span><span class="sc-keys"><kbd>${esc(scKeyText(keys))}</kbd></span></div>`;
 function renderShortcutsDialog(){
   scGroups = shortcutGroups();
   document.getElementById('scNav').innerHTML = scGroups.map(g=>`<button type="button" role="tab" id="scTab-${g.id}" aria-controls="scPane-${g.id}" aria-selected="false" tabindex="-1" onclick="setScTab('${g.id}')"><i class="${g.icon}"></i><span>${esc(g.label)}</span></button>`).join('');
@@ -5515,7 +5523,7 @@ function scSearch(q){
   const rx = w => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), re = new RegExp(`(<[^>]*>)|(${words.map(rx).join('|')})`, 'gi');
   let html = '', n = 0;
   for(const g of scGroups){
-    const rows = g.rows.filter(([label, keys])=>words.every(w=>(label + ' ' + keys.join(' ')).toLowerCase().includes(w)));
+    const rows = g.rows.filter(([label, keys])=>words.every(w=>(label + ' ' + keys.join(' ') + ' ' + scKeyText(keys)).toLowerCase().includes(w)));
     if(!rows.length) continue;
     n += rows.length;
     html += `<div class="help-section"><div class="help-section-title"><button type="button" class="help-jump" onclick="clearScSearch();setScTab('${g.id}')" title="Open this group">${esc(g.label)} <i class="fa-solid fa-arrow-right"></i></button></div><div class="sc-list">${rows.map(r=>scRowHtml(r).replace(re, (m, tag)=>tag ? tag : `<mark>${m}</mark>`)).join('')}</div></div>`;
@@ -10082,6 +10090,16 @@ function runLaunchAction(){
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+// The Help text is written once with neutral key names; say them the way this platform does (⌘-click on a Mac, Ctrl+click elsewhere).
+(function platformizeHelp(){
+  const el = document.getElementById('helpModalBg'); if(!el) return;
+  const mac = scIsMac();
+  let h = el.innerHTML.split('<kbd>Cmd/Ctrl</kbd>').join(mac ? '<kbd>⌘</kbd>' : '<kbd>Ctrl</kbd>')
+    .split('<strong>Cmd/Ctrl+click</strong>').join(mac ? '<strong>⌘-click</strong>' : '<strong>Ctrl+click</strong>');
+  if(mac) h = h.split('<strong>Shift+click</strong>').join('<strong>⇧-click</strong>')
+    .split('(or use its <strong>⋯</strong> button, or the <kbd>Menu</kbd> key / <kbd>Shift</kbd>+<kbd>F10</kbd>)').join('(or Control-click it, or use its <strong>⋯</strong> button or <kbd>⇧</kbd><kbd>F10</kbd>)');
+  el.innerHTML = h;
+})();
 try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(_){}   // Enter in the note editor makes <p>, not <div>
 load();
 purgeOldCompletedTasks();

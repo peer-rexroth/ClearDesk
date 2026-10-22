@@ -50,4 +50,4 @@ model, if you're digging into the code.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+Copyright © 2026 Peer Rexroth. All rights reserved — see [LICENSE](LICENSE).
