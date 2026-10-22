@@ -1598,7 +1598,7 @@ const ICONS = {
   .ph-ins { background: var(--teal-bg); color: var(--teal-text); }
   .ph-txt { background: var(--amber-bg); color: var(--amber-text); }
   .ph-inc { background: var(--green-bg); color: var(--green-text); }
-  .ph-inc.ph-miss { background: var(--red-bg); color: var(--red-text); }   /* an included prompt that cannot be found, or would include itself */
+  .ph-inc.ph-miss { background: var(--red-bg); color: var(--red-text); text-decoration: underline wavy; text-decoration-thickness: 1px; text-underline-offset: 2px; }   /* an included prompt that cannot be found, or would include itself */
   .pr-inc-list { margin-top: 18px; }
   .pr-inc { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: var(--fs-13); min-width: 0; }
   .pr-inc + .pr-inc { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
@@ -1611,7 +1611,6 @@ const ICONS = {
   .ai-modal { width: 560px; max-width: calc(100vw - 32px); }
   .ai-apps-list { display: flex; flex-direction: column; gap: 8px; }
   .ai-app-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto; gap: 8px; align-items: center; }
-  .ai-app-row input { font-size: var(--fs-13); }
   .ai-app-row input.bad { border-color: var(--red-text); }
   .ai-apps-empty { font-size: var(--fs-13); color: var(--text-3); padding: 6px 0; }
   .ai-apps-tools { display: flex; gap: 8px; }
@@ -1647,6 +1646,7 @@ const ICONS = {
   }
   @container notepane (max-width: 860px) { .pr-insert-group { display: none; } .pr-insert-menu { display: inline-flex; } }
   @container notepane (max-width: 560px) { .pr-copy-label { display: none; } #pCopyBtn { padding-left: 10px; padding-right: 10px; } }
+  @container notepane (max-width: 640px) { #pOpenBtn { display: none; } }   /* too narrow for another button: Open in lives in the ⋯ menu and the right-click menu as well */
   @container notepane (max-width: 450px) { #pFavBtn, #pLockBtn, #pEditor .note-toolbar .tool-group:has([aria-label="Undo"]) { display: none; } }
   @container notepane (max-width: 330px) { .pr-insert-menu { display: none; } }
   @media (min-width: 801px) and (max-width: 1000px) { .notes-list-pane { width: min(var(--list-w, var(--notes-list-w, 300px)), 240px); } }   /* a window this narrow gives the editor the room */
@@ -2104,7 +2104,7 @@ const ICONS = {
           <button type="button" class="btn note-more-btn" id="pFavBtn" onclick="togglePromptFavorite()" title="Add to Favorites" aria-label="Favorite" aria-pressed="false"><i class="fa-solid fa-star"></i></button>
           <button type="button" class="btn note-more-btn note-lock-btn" id="pLockBtn" onclick="togglePromptLock()" title="Lock" aria-label="Lock" aria-pressed="false"></button>
           <button type="button" class="btn note-more-btn" id="pMoreBtn" onclick="openPromptMenu(event, promptEditorId)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
-          <button type="button" class="btn note-more-btn" id="pOpenBtn" onclick="openPromptAiMenu(event)" title="Copy the prompt and open it in an AI app" aria-label="Open in an AI app" aria-haspopup="menu"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+          <button type="button" class="btn btn-copy" id="pOpenBtn" onclick="openPromptAiMenu(event)" title="Copy the prompt and open it in an AI app (⇧⌘↵ for the first one)" aria-label="Open in an AI app" aria-haspopup="menu"><span>Open in</span><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
           <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)" aria-label="Copy Prompt"><i class="fa-solid fa-copy"></i><span class="pr-copy-label"> Copy Prompt</span></button>
           <button type="button" class="btn note-more-btn" id="pInspToggle" onclick="togglePromptInspector()" title="Hide Variables (⌥⌘I)" aria-label="Hide Variables" aria-pressed="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.7" y="2.7" width="12.6" height="10.6" rx="2.4"/><path d="M10 2.9v10.2"/></svg></button>
         </div>
@@ -2385,7 +2385,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case; the Variables panel lists what a prompt includes and opens it with a click. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the button next to <em>Copy Prompt</em> copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <em>Edit Apps…</em> in its menu changes the list (a name and a web address each; kept on this device).</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the <em>Open in</em> menu next to <em>Copy Prompt</em> (in a narrow window: <em>Open in</em> in the ⋯ and right-click menus) copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> does it with the first one. <em>Edit Apps…</em> changes the list (a name and a web address each; kept on this device).</span></div>
           <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
@@ -2520,7 +2520,7 @@ const ICONS = {
   <div class="modal sync-modal ai-modal" role="dialog" aria-modal="true" aria-labelledby="aiAppsTitle" onkeydown="if(event.key==='Escape'){event.stopPropagation();closeAiAppsModal()}">
     <div class="sync-head">
       <span class="sync-head-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
-      <div><h3 id="aiAppsTitle">AI Apps</h3><p>Open in copies the finished prompt, then opens the page, so you can paste it there</p></div>
+      <div><h3 id="aiAppsTitle">AI Apps</h3><p>Open in copies the prompt, then opens the page.</p></div>
     </div>
     <div class="ai-apps-list" id="aiAppsList"></div>
     <div class="ai-apps-tools"><button type="button" class="btn btn-sm" onclick="addAiApp()"><i class="fa-solid fa-plus"></i> Add App</button><button type="button" class="btn btn-sm" onclick="resetAiApps()">Reset to Defaults</button></div>
@@ -5520,7 +5520,7 @@ function shortcutGroups(){
       ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']] ] },
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-clone', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
-      ['Copy the finished prompt', [mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
+      ['Copy the finished prompt', [mod,'↵']], ['Copy and open in the first AI app', [shift,mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
       ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text', ['→']], ['Back to the topics', ['←']], ['Search help', ['/']] ] }
@@ -7007,13 +7007,20 @@ function promptRenameCommit(){
   const from = promptRenameFrom; promptRenameFrom = null;
   const p = from && prompts.find(x=>x.id===from.id); if(!p) return;
   const to = promptTitle(p); if(promptIncKey(to)===promptIncKey(from.title) || to.includes('}')) return;
-  let n = 0;
+  const before = [];
   prompts.forEach(q=>{
     if(q.id===p.id || q.locked || promptTrashed(q) || !q.template.includes('{{>')) return;
     const t = q.template.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, name)=>esc_ || promptIncKey(name)!==promptIncKey(from.title) ? m : `{{>${to}}}`);
-    if(t!==q.template){ q.template = t; q.vars = detectPromptVars(t, q.vars); touchPrompt(q); n++; }
+    if(t!==q.template){ before.push({ q, template: q.template, vars: q.vars }); q.template = t; q.vars = detectPromptVars(t, q.vars); touchPrompt(q); }
   });
-  if(n){ save(); renderPromptsList(); showToast(`Updated the reference in ${n} prompt${n===1 ? '' : 's'}`); }
+  const n = before.length;
+  if(n){
+    save(); renderPromptsList();
+    showToast(`Updated the reference in ${n} prompt${n===1 ? '' : 's'}`, false, ()=>{          // Undo puts the old text back (the new name stays)
+      before.forEach(b=>{ if(prompts.includes(b.q)){ b.q.template = b.template; b.q.vars = b.vars; touchPrompt(b.q); } });
+      save(); render();
+    });
+  }
 }
 function schedulePromptSave(){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = (typeof setTimeout==='function') ? setTimeout(commitPromptEdit, 450) : null; }
 function flushPromptEdit(){ if(promptSaveTimer){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = null; commitPromptEdit(); } }
@@ -7478,16 +7485,16 @@ function openPromptAiMenu(e){
   const menu = document.getElementById('rowMenu'); if(!menu || !prompts.some(x=>x.id===promptEditorId)) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  const apps = getPromptAiApps();
-  menu.innerHTML = apps.map((a, i)=>rowMenuItem('fa-solid fa-arrow-up-right-from-square', 'Open in ' + esc(a.name), `promptOpenInApp(${i})`)).join('')
-    + (apps.length ? '<div class="row-menu-sep"></div>' : '') + rowMenuItem('fa-solid fa-sliders', 'Edit Apps…', `closeRowMenu();openAiAppsModal()`);
+  const apps = getPromptAiApps(), mac = scIsMac();
+  menu.innerHTML = apps.map((a, i)=>rowMenuItem('', esc(a.name), `promptOpenInApp(${i})`, i===0 ? { hint: mac ? '⇧⌘↵' : 'Ctrl+Shift+Enter' } : {})).join('')
+    + (apps.length ? '<div class="row-menu-sep"></div>' : '') + rowMenuItem('', 'Edit Apps…', `closeRowMenu();openAiAppsModal()`);
   const btn = e.currentTarget, r = btn.getBoundingClientRect();
   menu.classList.add('open');
   placeRowMenu(menu, r.left, r.bottom + 6, btn);
 }
-function promptOpenInApp(i){
+function promptOpenInApp(i, id){
   closeRowMenu();
-  const p = prompts.find(x=>x.id===promptEditorId), app = getPromptAiApps()[i]; if(!p || !app) return;
+  const p = prompts.find(x=>x.id===(id || promptEditorId)), app = getPromptAiApps()[i]; if(!p || !app) return;
   const text = buildPromptFinal(p);
   if(!text.trim()){ showToast('The prompt is empty, so there is nothing to copy', true); return; }
   const missing = Object.entries(p.vars || {}).filter(([k, v])=>promptVarUnfilled(p, k, v)).length;
@@ -7509,7 +7516,7 @@ function renderAiAppsModal(){
   el.innerHTML = aiAppsDraft.length ? aiAppsDraft.map((a, i)=>`<div class="ai-app-row">
       <input type="text" value="${esc(a.name)}" maxlength="40" placeholder="Name" spellcheck="false" autocomplete="off" aria-label="Name" oninput="aiAppsDraft[${i}].name=this.value;this.classList.remove('bad')">
       <input type="text" value="${esc(a.url)}" maxlength="500" placeholder="https://…" spellcheck="false" autocomplete="off" aria-label="Web address" oninput="aiAppsDraft[${i}].url=this.value;this.classList.remove('bad')">
-      <button type="button" class="icon-btn" title="Remove" aria-label="Remove ${esc(a.name || 'app')}" onclick="removeAiApp(${i})"><i class="fa-solid fa-xmark"></i></button></div>`).join('')
+      <button type="button" class="icon-btn" title="Remove" aria-label="Remove ${esc(a.name || 'app')}" onclick="removeAiApp(${i})"><i class="fa-solid fa-minus"></i></button></div>`).join('')
     : `<div class="ai-apps-empty">No apps. The Open in menu will be empty.</div>`;
   const err = document.getElementById('aiAppsError'); if(err) err.textContent = '';
 }
@@ -7670,8 +7677,10 @@ function promptMenuHtml(id){
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
   if(promptTrashed(p)) return [item('fa-solid fa-rotate-left', 'Restore', `promptMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy Prompt', `promptMenuRun('copy')`), sep, item('fa-solid fa-trash', 'Delete Permanently', `promptMenuRun('delete')`, {danger:true})].join('');
   const moveOpts = menuOpt(`promptMenuRun('move','')`, {svg: menuSvg('folder')}, 'No Folder', !p.folderId) + orderedPromptFolders().map(f=>menuOpt(`promptMenuRun('move','${f.id}')`, {svg: menuSvg('folder'), indent: !!f.parentId}, f.name, f.id===p.folderId)).join('');
+  const openOpts = getPromptAiApps().map((a, i)=>menuOpt(`promptMenuRun('open',${i})`, {none: true}, a.name, false)).join('') + '<div class="row-menu-sep"></div>' + menuOpt(`promptMenuRun('apps')`, {none: true}, 'Edit Apps…', false);
   return [
     item('fa-regular fa-clipboard', 'Copy Prompt', `promptMenuRun('copy')`),
+    rowMenuSub('fa-solid fa-arrow-up-right-from-square', 'Open in', openOpts),
     item('fa-regular fa-star', p.favorite ? 'Remove from Favorites' : 'Add to Favorites', `promptMenuRun('favorite')`),
     item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
     sep,
@@ -7694,6 +7703,8 @@ function openPromptMenu(e, id){
 function promptMenuRun(kind, arg){
   const id = promptMenuId; closeRowMenu();
   if(!id) return;
+  if(kind==='open') return promptOpenInApp(arg, id);
+  if(kind==='apps') return openAiAppsModal();
   if(kind==='copy') copyPrompt(id); else if(kind==='favorite') togglePromptFavorite(id); else if(kind==='lock') togglePromptLock(id);
   else if(kind==='clone') clonePrompt(id); else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
 }
@@ -9280,6 +9291,7 @@ function handlePromptsKeys(e){
   if(e.key==='Escape' && promptInspectorFloats() && !document.getElementById('prSplit').classList.contains('insp-closed') && !document.getElementById('rowMenu').classList.contains('open')){ e.preventDefault(); togglePromptInspector(false, false); return; }
   if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); togglePromptInspector(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key==='Enter' && selectedPromptId){ e.preventDefault(); copyPrompt(selectedPromptId); return; }
+  if((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && e.key==='Enter' && selectedPromptId){ e.preventDefault(); promptOpenInApp(0); return; }     // copy and open the first AI app
   if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
   if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createPrompt(); return; }
