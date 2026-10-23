@@ -2832,6 +2832,8 @@ let myDayFilter = false, thisWeekFilter = false, overdueFilter = false, trashFil
 // rather than an inclusion whitelist so a newly created project defaults to
 // visible instead of silently missing until someone remembers to opt it in.
 let allTasksHiddenProjectIds = [];
+let projectsPrefsAt = 0;   // when the project order or the "shown in All Tasks" choice last changed here: the newer one wins when a linked file is merged
+const touchProjectsPrefs = ()=>{ projectsPrefsAt = Date.now(); };
 let searchQuery = '', sortBy = 'smart';
 let currentTheme = 'light';   // the RESOLVED theme ('light' | 'dark') that data-theme shows
 let themePref = 'auto';       // what the user chose: 'light' | 'dark' | 'auto' (follow the system)
@@ -2951,6 +2953,13 @@ function load(){
       prompts = d.prompts || []; promptFolders = d.promptFolders || []; deletedPromptIds = d.deletedPromptIds || []; deletedPromptFolderIds = d.deletedPromptFolderIds || [];
       promptGlobals = d.promptGlobals || []; deletedPromptGlobalIds = d.deletedPromptGlobalIds || [];
       allTasksHiddenProjectIds = d.allTasksHiddenProjectIds || [];
+      projectsPrefsAt = Number.isFinite(d.projectsPrefsAt) ? d.projectsPrefsAt : 0;
+      // the view you left: the project / My Day / This Week / Overdue and the filters (they were saved, but never read back)
+      myDayFilter = d.myDayFilter===true; thisWeekFilter = !myDayFilter && d.thisWeekFilter===true; overdueFilter = !myDayFilter && !thisWeekFilter && d.overdueFilter===true;
+      filterProjectId = !(myDayFilter || thisWeekFilter || overdueFilter) && typeof d.filterProjectId==='string' && projects.some(p=>p.id===d.filterProjectId) ? d.filterProjectId : null;
+      if(d.filterStatus!==undefined) filterStatus = normStatusFilter(d.filterStatus);
+      if(d.filterPriority!==undefined) filterPriority = normPriorityFilter(d.filterPriority);
+      if(d.filterTags!==undefined) filterTags = normTagFilter(d.filterTags);
       sortBy = d.sortBy || 'smart';
       if(d.viewMode==='board'||d.viewMode==='list'){ viewMode=d.viewMode; localStorage.setItem(VIEW_KEY, viewMode); }
       if(d.uiScale!==undefined && !isNaN(parseInt(d.uiScale,10))){ uiScale=clampUiScale(d.uiScale); document.documentElement.style.zoom=(uiScale/100); localStorage.setItem(UI_SCALE_KEY,String(uiScale)); }
@@ -2970,7 +2979,7 @@ function load(){
 }
 // Everything that is saved to localStorage and to the linked file. (Per-device choices — theme, mode, sidebar — are not in it.)
 function dataPayload(){
-  return { projects, tasks, deletedTaskIds, deletedProjectIds, trashedTasks, purgedTaskIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds, allTasksHiddenProjectIds, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
+  return { projects, tasks, deletedTaskIds, deletedProjectIds, trashedTasks, purgedTaskIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds, allTasksHiddenProjectIds, projectsPrefsAt, filterProjectId, filterStatus, filterPriority, filterTags, myDayFilter, thisWeekFilter, overdueFilter, sortBy, viewMode, uiScale };
 }
 let storageFullWarned = false;
 let dirHandle = null, backupRunning = false;     // the linked data file's folder (daily file backup), see "Daily file backup"
@@ -5063,7 +5072,7 @@ function handleProjectDrop(e, targetId){
   let targetIdx = projects.findIndex(p=>p.id===targetId);
   if(targetIdx===-1){ projects.push(src); }
   else{ projects.splice(zone==='top' ? targetIdx : targetIdx+1, 0, src); }
-  draggedProjectId = null;
+  draggedProjectId = null; touchProjectsPrefs();
   save(); render();
   document.querySelector(`.project-row[data-id="${src.id}"]`)?.classList.add('settle');
 }
@@ -9975,6 +9984,12 @@ function mergeData(data, opts){
     if(!respectTombstones) untombstone(deletedProjectIds, ip.id);
     projects.push(ip);
   });
+  if(Number.isFinite(data.projectsPrefsAt) && data.projectsPrefsAt > projectsPrefsAt){            // the other copy changed the project order / "shown in All Tasks" choice more recently
+    const order = (data.projects||[]).map(p=>p.id).filter(id=>projects.some(p=>p.id===id));
+    projects = order.map(id=>projects.find(p=>p.id===id)).concat(projects.filter(p=>!order.includes(p.id)));
+    if(Array.isArray(data.allTasksHiddenProjectIds)) allTasksHiddenProjectIds = data.allTasksHiddenProjectIds.filter(id=>projects.some(p=>p.id===id));
+    projectsPrefsAt = data.projectsPrefsAt;
+  }
   (data.tasks||[]).forEach(it=>{
     const existing = tasks.find(t=>t.id===it.id);
     if(existing){
@@ -10048,7 +10063,7 @@ function renderAllTasksProjectsModal(){
 }
 function toggleAllTasksProject(id){
   allTasksHiddenProjectIds = allTasksHiddenProjectIds.includes(id) ? allTasksHiddenProjectIds.filter(x=>x!==id) : [...allTasksHiddenProjectIds, id];
-  save(); render(); renderAllTasksProjectsModal();
+  touchProjectsPrefs(); save(); render(); renderAllTasksProjectsModal();
 }
 // ── File System Access API ────────────────────────────────────────────────────
 let fileHandle = null;
@@ -10084,7 +10099,7 @@ async function fileSyncWrite(data){
           const {added, updated} = mergeData(externalData);
           if(added || updated){
             normalizeData();
-            payload = { ...data, projects, tasks, trashedTasks, purgedTaskIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds };
+            payload = { ...data, projects, allTasksHiddenProjectIds, projectsPrefsAt, tasks, trashedTasks, purgedTaskIds, notes, noteFolders, deletedNoteIds, deletedNoteFolderIds, prompts, promptFolders, deletedPromptIds, deletedPromptFolderIds, promptGlobals, deletedPromptGlobalIds };
             localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
             render();
             showToast(`Synced changes from another tab/device (${added} added, ${updated} updated)`);
@@ -10224,7 +10239,7 @@ async function reconnectFile(){
       if(data.myDayFilter!==undefined) myDayFilter = data.myDayFilter;
       if(data.thisWeekFilter!==undefined) thisWeekFilter = data.thisWeekFilter;
       if(data.overdueFilter!==undefined) overdueFilter = data.overdueFilter;
-      if(data.allTasksHiddenProjectIds!==undefined) allTasksHiddenProjectIds = data.allTasksHiddenProjectIds;
+      if(data.allTasksHiddenProjectIds!==undefined && data.projectsPrefsAt===undefined) allTasksHiddenProjectIds = data.allTasksHiddenProjectIds;   // (a file from an older version has no timestamp: it decides, as before)
       normalizeData();
       lastSyncedSnapshot = text;
       purgeOldCompletedTasks();

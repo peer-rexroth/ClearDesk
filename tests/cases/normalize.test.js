@@ -128,3 +128,47 @@ test('load() migrates old-schema data read from localStorage', function () {
   assertDeepEqual(tasks[0].subtasks[0].subtasks, []);
   assertDeepEqual(tasks[0].tags, []);
 });
+
+// ---- the project order, the "shown in All Tasks" choice and the view you left ----
+function projsFixture() {
+  tasks = []; deletedProjectIds = []; trashedTasks = []; purgedTaskIds = [];
+  projects = [{ id: 'proj-inbox', name: 'Inbox', icon: 'inbox', locked: true }, { id: 'a', name: 'A', icon: 'folder' }, { id: 'b', name: 'B', icon: 'folder' }, { id: 'proj-deleted', name: 'Deleted', icon: 'trash', locked: true }];
+  allTasksHiddenProjectIds = []; projectsPrefsAt = 0;
+}
+
+test('the project order, the hidden-from-All-Tasks list and the view you left survive save and load', function () {
+  projsFixture();
+  var b = projects.splice(2, 1)[0]; projects.splice(1, 0, b);
+  allTasksHiddenProjectIds = ['a']; touchProjectsPrefs();
+  filterProjectId = 'b'; myDayFilter = false; filterStatus = ['todo'];
+  save();
+  projects = []; allTasksHiddenProjectIds = []; filterProjectId = null; filterStatus = STATUSES.map(function (s) { return s.id; }); projectsPrefsAt = 0;
+  load();
+  assertDeepEqual(projects.map(function (p) { return p.id; }), ['proj-inbox', 'b', 'a', 'proj-deleted']);
+  assertDeepEqual(allTasksHiddenProjectIds, ['a']);
+  assertEqual(filterProjectId, 'b', 'the project you were looking at is open again');
+  assertDeepEqual(filterStatus, ['todo']);
+  assertTrue(projectsPrefsAt > 0);
+});
+
+test('a project that no longer exists is not reopened, and My Day wins over a saved project', function () {
+  projsFixture();
+  filterProjectId = 'gone'; save(); filterProjectId = 'x'; load();
+  assertEqual(filterProjectId, null);
+  filterProjectId = 'a'; myDayFilter = true; save(); filterProjectId = null; myDayFilter = false; load();
+  assertTrue(myDayFilter && filterProjectId === null, 'My Day, not the project');
+  myDayFilter = false;
+});
+
+test('merging a file: the newer project order and shown-projects choice win, an older one does not', function () {
+  projsFixture();
+  var incoming = { projects: [projects[0], projects[2], projects[1], projects[3]].map(function (p) { return Object.assign({}, p); }), tasks: [], allTasksHiddenProjectIds: ['b', 'zzz'], projectsPrefsAt: 500 };
+  projectsPrefsAt = 100; mergeData(incoming);
+  assertDeepEqual(projects.map(function (p) { return p.id; }), ['proj-inbox', 'b', 'a', 'proj-deleted'], 'newer: the other order is taken');
+  assertDeepEqual(allTasksHiddenProjectIds, ['b'], 'and its list (ids that do not exist are dropped)');
+  assertEqual(projectsPrefsAt, 500);
+  incoming.projectsPrefsAt = 200; incoming.projects = incoming.projects.slice().reverse(); incoming.allTasksHiddenProjectIds = [];
+  mergeData(incoming);
+  assertDeepEqual(projects.map(function (p) { return p.id; }), ['proj-inbox', 'b', 'a', 'proj-deleted'], 'older: ours stays');
+  assertDeepEqual(allTasksHiddenProjectIds, ['b']);
+});
