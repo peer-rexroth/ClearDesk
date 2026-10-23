@@ -38,7 +38,7 @@ test('normalizePrompts repairs the data: ids, fields, folders, variables, one-le
   normalizePrompts();
   assertEqual(prompts.length, 1);
   const p = prompts[0];
-  assertTrue(isSafeId(p.id)); assertEqual(p.name, '5'); assertEqual(p.folderId, '');
+  assertTrue(isSafeId(p.id)); assertEqual(p.name, '5'); assertEqual(p.folderId, PROMPTS_DEFAULT_FOLDER, 'a prompt whose folder is gone goes to the default folder');
   assertDeepEqual(Object.keys(p.vars), ['v'], 'variables follow the template');
   assertEqual(p.presets.length, 1);
   assertEqual(promptFolders.find(f => f.id === 'f2').parentId, 'f1');
@@ -140,11 +140,11 @@ test('folders: creating through the dialog, deleting moves prompts out, and the 
   const input = document.getElementById('folderNameInput'); input.value = 'Ideas';
   openPromptFolderModal(); assertEqual(folderModalKind, 'prompts');
   input.value = 'Ideas'; savePromptFolderModal();
-  assertEqual(promptFolders.length, 1); assertEqual(promptFolders[0].name, 'Ideas'); assertEqual(promptFolderFilter, promptFolders[0].id);
-  const fid = promptFolders[0].id;
+  const ideas = promptFolders.find(f => f.name === 'Ideas'); assertTrue(!!ideas); assertEqual(promptFolderFilter, ideas.id);
+  const fid = ideas.id;
   prompts = [pmk({ id: 'a', folderId: fid })];
   deletePromptFolder(fid);                                         
-  assertEqual(promptFolders.length, 0); assertEqual(prompts[0].folderId, '');
+  assertFalse(!!promptFolderById(fid)); assertEqual(prompts[0].folderId, PROMPTS_DEFAULT_FOLDER, 'its prompts move to the default folder');
   assertTrue(deletedPromptFolderIds.some(t => t.id === fid)); assertEqual(promptFolderFilter, 'all');
 });
 
@@ -399,7 +399,7 @@ test('import: a whole Workbench export works too; unsafe ids are replaced; files
   const whole = { projects: [], tasks: [], prompts: [{ id: 'a b"', name: 5, template: 'hi {{x}}', folderId: 'zz', vars: {}, presets: [] }, { id: 'ok1', name: 'Two', template: 'yo' }, { name: 'No template' }], promptFolders: [], promptGlobals: [{ name: 'tone', options: ['A'] }] };
   const r = importPromptsData(whole);
   assertEqual(r.added, 2); assertEqual(r.globals, 1);
-  prompts.forEach(function (p) { assertTrue(isSafeId(p.id), p.id); assertEqual(p.folderId, ''); });
+  prompts.forEach(function (p) { assertTrue(isSafeId(p.id), p.id); assertEqual(p.folderId, PROMPTS_DEFAULT_FOLDER); });
   assertEqual(importPromptsData({ prompts: [] }), null); assertEqual(importPromptsData({ nothing: 1 }), null); assertEqual(importPromptsData(null), null); assertEqual(importPromptsData([1, 2]), null);
 });
 
@@ -511,4 +511,22 @@ test('the app reopens on the prompt you had open, once, and falls back to the to
   assertEqual(promptOpenPending, null);
   selectedPromptId = null; promptOpenPending = 'gone'; renderPrompts();
   assertEqual(selectedPromptId, 'a', 'a missing prompt: the top of the list (the favorite)');
+});
+
+test('the default Prompts folder always exists, is first, cannot be edited or deleted, and new prompts go there', function () {
+  pfresh();
+  promptFolders = [{ id: 'fz', name: 'A first by name', updatedAt: 1 }];
+  prompts = [pmk({ id: 'x', folderId: '' })];
+  normalizePrompts();
+  var d = promptFolderById(PROMPTS_DEFAULT_FOLDER);
+  assertTrue(!!d && d.locked === true && d.name === 'Prompts', 'created when missing');
+  assertEqual(topPromptFolders()[0].id, PROMPTS_DEFAULT_FOLDER, 'listed first');
+  assertEqual(prompts[0].folderId, PROMPTS_DEFAULT_FOLDER, 'a prompt without a folder is placed in it');
+  deletePromptFolder(PROMPTS_DEFAULT_FOLDER);
+  assertTrue(!!promptFolderById(PROMPTS_DEFAULT_FOLDER), 'it cannot be deleted');
+  d.parentId = 'fz'; normalizePrompts(); assertFalse('parentId' in promptFolderById(PROMPTS_DEFAULT_FOLDER), 'and it is always top level');
+  promptFolderFilter = 'all'; createPrompt();
+  assertEqual(prompts[prompts.length - 1].folderId, PROMPTS_DEFAULT_FOLDER, 'a new prompt (from All Prompts) goes into it');
+  var del = promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER).split('<button').filter(function (b) { return b.indexOf("promptFolderMenuRun('delete')") >= 0; })[0] || '';
+  assertTrue(del.indexOf('disabled') >= 0, 'Delete is disabled in its menu');
 });
