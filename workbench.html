@@ -1618,6 +1618,8 @@ const ICONS = {
   .note-slash { min-width: 230px; max-width: 280px; }
   .note-slash .row-menu-item.sel { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .note-slash .row-menu-item.sel i, .note-slash .row-menu-item.sel .row-menu-hint { color: var(--on-accent); }
+  .note-slash .slash-glyph { display: inline-block; width: 16px; flex: none; text-align: center; font-size: 10px; font-weight: 700; letter-spacing: -.02em; color: var(--text-3); }
+  .note-slash .row-menu-item.sel .slash-glyph { color: var(--on-accent); }
   .note-slash .row-menu-hint { font-family: var(--mono); }
   .row-menu-scroll { max-height: min(60vh, 360px); overflow-y: auto; }
   .pr-tb-mono { font-family: var(--mono); font-weight: 600; font-size: var(--fs-14); letter-spacing: -.02em; }
@@ -2065,7 +2067,7 @@ const ICONS = {
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
-            <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing…"
+            <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing, or type / for blocks"
                  oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
                         <button type="button" class="note-code-copy" id="noteCodeCopy" hidden aria-label="Copy code" title="Copy code" onmousedown="event.preventDefault()" onclick="noteCodeCopyClick(event)"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg></button>
@@ -8570,17 +8572,17 @@ function openNoteMoreMenu(e){
 window.addEventListener('resize', ()=>{ tblHandlesRefresh(); tblChromeSync(); });
 // ---- the / menu: type "/" at the start of a line (or after a space) to insert a block; keep typing to filter, ↑ ↓ to move, ↵ or Tab to insert, Esc to close ----
 const NOTE_SLASH_ITEMS = [
-  { id:'h1', label:'Title', icon:'fa-solid fa-font', keys:'h1 heading', hint:'#', run:()=>noteBlock('h1') },
-  { id:'h2', label:'Heading', icon:'fa-solid fa-font', keys:'h2', hint:'##', run:()=>noteBlock('h2') },
-  { id:'h3', label:'Subheading', icon:'fa-solid fa-font', keys:'h3', hint:'###', run:()=>noteBlock('h3') },
-  { id:'quote', label:'Quote', icon:'fa-solid fa-indent', keys:'blockquote', run:()=>noteBlock('blockquote') },
-  { id:'code', label:'Code Block', icon:'fa-solid fa-code', keys:'pre snippet', hint:'```', run:()=>noteBlock('pre') },
-  { id:'hr', label:'Divider', icon:'fa-solid fa-minus', keys:'hr line rule separator', hint:'---', run:()=>document.execCommand('insertHorizontalRule', false) },
-  { id:'table', label:'Table', icon:'fa-solid fa-table', keys:'grid rows columns', run:()=>noteTableInsert(3, 3) },
-  { id:'checklist', label:'Checklist', icon:'fa-solid fa-list-check', keys:'todo task check', run:()=>noteChecklist() },
-  { id:'ul', label:'Bulleted List', icon:'fa-solid fa-list-ul', keys:'bullets unordered', run:()=>noteListStyle(noteBulletKind || 'disc') },
-  { id:'ol', label:'Numbered List', icon:'fa-solid fa-list', keys:'numbers ordered', run:()=>noteListStyle('decimal') },
-  { id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) }
+  { group:'text', id:'h1', label:'Title', icon:'<span class="mi slash-glyph" aria-hidden="true">H1</span>', keys:'h1 heading', hint:'#', run:()=>noteBlock('h1') },
+  { group:'text', id:'h2', label:'Heading', icon:'<span class="mi slash-glyph" aria-hidden="true">H2</span>', keys:'h2', hint:'##', run:()=>noteBlock('h2') },
+  { group:'text', id:'h3', label:'Subheading', icon:'<span class="mi slash-glyph" aria-hidden="true">H3</span>', keys:'h3', hint:'###', run:()=>noteBlock('h3') },
+  { group:'text', id:'quote', label:'Quote', icon:'fa-solid fa-indent', keys:'blockquote', run:()=>noteBlock('blockquote') },
+  { group:'text', id:'code', label:'Code Block', icon:'fa-solid fa-code', keys:'pre snippet', hint:'```', run:()=>noteBlock('pre') },
+  { group:'list', id:'checklist', label:'Checklist', icon:'fa-solid fa-list-check', keys:'todo task check', run:()=>noteChecklist() },
+  { group:'list', id:'ul', label:'Bulleted List', icon:'fa-solid fa-list-ul', keys:'bullets unordered', run:()=>noteListStyle(noteBulletKind || 'disc') },
+  { group:'list', id:'ol', label:'Numbered List', icon:'fa-solid fa-list', keys:'numbers ordered', run:()=>noteListStyle('decimal') },
+  { group:'insert', id:'table', label:'Table', icon:'fa-solid fa-table', keys:'grid rows columns', run:()=>noteTableInsert(3, 3) },
+  { group:'insert', id:'hr', label:'Divider', icon:'fa-solid fa-minus', keys:'hr line rule separator', hint:'---', run:()=>document.execCommand('insertHorizontalRule', false) },
+  { group:'insert', id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) }
 ];
 // What may be inserted where: nothing in a code block; only a date in a table cell; no headings, quotes, code, dividers or tables inside a list item.
 const noteSlashAllowed = node=>noteClosest(node, 'TD') || noteClosest(node, 'TH') ? ['date'] : noteClosest(node, 'LI') ? ['date', 'checklist', 'ul', 'ol'] : NOTE_SLASH_ITEMS.map(i=>i.id);
@@ -8624,11 +8626,15 @@ function noteSlashRender(){
     menu.onmousedown = ev=>ev.preventDefault();                        // the note keeps focus (and its caret) while you pick
     document.body.appendChild(menu);
   }
-  menu.innerHTML = s.items.map((it, i)=>`<button type="button" class="row-menu-item${i===s.idx ? ' sel' : ''}" id="noteSlashOpt${i}" role="option" aria-selected="${i===s.idx}" onmouseenter="noteSlashHover(${i})" onclick="noteSlashPick(${i})">${menuIconHtml(it.icon)}<span>${esc(it.label)}</span>${it.hint ? `<span class="row-menu-hint">${esc(it.hint)}</span>` : ''}</button>`).join('');
+  menu.innerHTML = s.items.map((it, i)=>(i && it.group!==s.items[i - 1].group ? '<div class="row-menu-sep" role="separator"></div>' : '')       // related items sit together: text styles, lists, then things to insert
+    + `<button type="button" class="row-menu-item${i===s.idx ? ' sel' : ''}" id="noteSlashOpt${i}" role="option" aria-selected="${i===s.idx}" onmouseenter="noteSlashHover(${i})" onclick="noteSlashPick(${i})">${it.icon.startsWith('<span') ? it.icon : menuIconHtml(it.icon)}<span>${esc(it.label)}</span>${it.hint ? `<span class="row-menu-hint">${esc(it.hint)}</span>` : ''}</button>`).join('');
   const r = document.createRange(); r.setStart(s.node, Math.min(s.end, s.node.nodeValue.length)); r.collapse(true);
   let rc = r.getBoundingClientRect(); if(!rc || !rc.height) rc = noteLineOf(s.node).getBoundingClientRect();
-  placeRowMenu(menu, rc.left, rc.bottom + 6, document.getElementById('noteBody'));
-  const body = document.getElementById('noteBody'); if(body){ body.setAttribute('aria-expanded', 'true'); body.setAttribute('aria-activedescendant', 'noteSlashOpt' + s.idx); }
+  const bodyEl = document.getElementById('noteBody');
+  placeRowMenu(menu, rc.left, rc.bottom + 6, bodyEl);
+  const mr = menu.getBoundingClientRect(), vh = document.documentElement.clientHeight;
+  if(mr.height && rc.bottom + 6 + mr.height > vh - 8 && rc.top - 6 - mr.height > 8) placeRowMenu(menu, rc.left, rc.top - 6 - mr.height, bodyEl);   // no room below the line: open above it, so the menu never covers what you are typing
+  const body = bodyEl; if(body){ body.setAttribute('role', 'combobox'); body.setAttribute('aria-haspopup', 'listbox'); body.setAttribute('aria-controls', 'noteSlashMenu'); body.setAttribute('aria-expanded', 'true'); body.setAttribute('aria-activedescendant', 'noteSlashOpt' + s.idx); }
 }
 function noteSlashHover(i){ if(!noteSlash) return; noteSlash.idx = i; noteSlashMark(); }
 function noteSlashMark(){
@@ -8640,7 +8646,7 @@ function noteSlashMark(){
 function noteSlashClose(){
   noteSlash = null;
   const menu = document.getElementById('noteSlashMenu'); if(menu) menu.classList.remove('open');
-  const body = document.getElementById('noteBody'); if(body){ body.removeAttribute('aria-expanded'); body.removeAttribute('aria-activedescendant'); }
+  const body = document.getElementById('noteBody'); if(body){ body.setAttribute('role', 'textbox'); ['aria-haspopup', 'aria-controls', 'aria-expanded', 'aria-activedescendant'].forEach(a=>body.removeAttribute(a)); }   // a combobox only while the menu is open
 }
 function noteSlashFollow(){                                           // the caret moved away from the "/…" (an arrow key, a click): close the menu
   if(!noteSlash) return;
