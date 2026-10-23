@@ -5613,10 +5613,11 @@ function scPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.
 const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder', NOTES_COLLAPSED_KEY = 'mytasks_notes_collapsed', NOTES_SORT_KEY = 'mytasks_notes_sort';
 const NOTES_DEFAULT_FOLDER = 'nf-notes';
 const noteFoldersCollapsed = new Set();   // top-level folders folded shut in the sidebar (per device)
-let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '';
+let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '', noteOpenPending = null;   // noteOpenPending: the note that was open when the app was closed (this device), reopened once
 try{
   { const m = localStorage.getItem(MODE_KEY); if(m==='notes' || m==='prompts') appMode = m; }
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
+  noteOpenPending = localStorage.getItem('workbench_notes_open') || null;
   const savedSort = JSON.parse(localStorage.getItem(NOTES_SORT_KEY) || 'null');
   if(savedSort && ['edited','created','title'].includes(savedSort.key) && ['asc','desc'].includes(savedSort.dir)){ noteSortKey = savedSort.key; noteSortDir = savedSort.dir; }
   const savedCollapsed = JSON.parse(localStorage.getItem(NOTES_COLLAPSED_KEY) || '[]'); if(Array.isArray(savedCollapsed)) savedCollapsed.forEach(x=>{ if(typeof x==='string') noteFoldersCollapsed.add(x); });
@@ -6469,11 +6470,18 @@ function renderNoteEditor(){
   updateNoteMeta(n);
   noteApplySearchHighlight();
 }
+// What was open is remembered per device (not in the data file); not while looking at Recently Deleted or a search, so the next start never lands in a deleted item.
+function rememberOpenItem(key, id, skip){
+  if(skip || !id) return;
+  try{ if(localStorage.getItem(key)!==id) localStorage.setItem(key, id); }catch(_){}
+}
 function renderNotes(){
   if(noteFolderFilter!=='all' && noteFolderFilter!=='trash' && noteFolderFilter!=='pinned' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
   const vis = visibleNotes();
   if(selectedNoteId && !notes.some(n=>n.id===selectedNoteId)) selectedNoteId = null;
-  if(!selectedNoteId && vis.length) selectedNoteId = vis[0].id;      // open the newest note, like Apple Notes
+  if(noteOpenPending){ const id = noteOpenPending; noteOpenPending = null; if(!selectedNoteId && vis.some(n=>n.id===id)) selectedNoteId = id; }      // the note you had open (once, at start)
+  if(!selectedNoteId && vis.length) selectedNoteId = vis[0].id;      // otherwise the top one (a pinned or the newest note), like Apple Notes
+  rememberOpenItem('workbench_notes_open', selectedNoteId, noteFolderFilter==='trash' || !!noteSearchQuery.trim());
   renderNotesSidebar(); renderNotesList(vis); renderNoteEditor();
 }
 
@@ -6676,6 +6684,7 @@ let promptPresetDraft = false, promptVarSig = '';
 let promptFoldersCollapsed = new Set();
 try{ promptFoldersCollapsed = new Set(JSON.parse(localStorage.getItem(PROMPT_COLLAPSED_KEY) || '[]')); }catch(_){}
 try{ const f = localStorage.getItem(PROMPT_FOLDER_KEY); if(f) promptFolderFilter = f; }catch(_){}
+let promptOpenPending = null; try{ promptOpenPending = localStorage.getItem('workbench_prompts_open') || null; }catch(_){}   // the prompt that was open when the app was closed (this device), reopened once
 
 const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
 const promptFolderById = id=>promptFolders.find(f=>f.id===id);
@@ -6955,8 +6964,10 @@ function renderPrompts(){
   if(promptFolderFilter!=='all' && promptFolderFilter!=='favorites' && promptFolderFilter!=='trash' && !promptFolderById(promptFolderFilter)) promptFolderFilter = 'all';
   const vis = visiblePrompts();
   if(selectedPromptId && !prompts.some(p=>p.id===selectedPromptId)) selectedPromptId = null;
+  if(promptOpenPending){ const id = promptOpenPending; promptOpenPending = null; if(!selectedPromptId && vis.some(p=>p.id===id)) selectedPromptId = id; }   // the prompt you had open (once, at start)
   if(selectedPromptId && !vis.some(p=>p.id===selectedPromptId) && !promptSearchQuery.trim()) selectedPromptId = null;
   if(!selectedPromptId && vis.length) selectedPromptId = vis[0].id;
+  rememberOpenItem('workbench_prompts_open', selectedPromptId, promptFolderFilter==='trash' || !!promptSearchQuery.trim());
   renderPromptsSidebar(); renderPromptsList(vis); renderPromptEditor();
 }
 
@@ -10232,13 +10243,7 @@ async function reconnectFile(){
     const data = JSON.parse(text);
     if(data.tasks && data.projects){
       const {added, updated} = mergeData(data);
-      if(data.filterProjectId!==undefined) filterProjectId = data.filterProjectId;
-      if(data.filterStatus!==undefined) filterStatus = normStatusFilter(data.filterStatus);
-      if(data.filterPriority!==undefined) filterPriority = normPriorityFilter(data.filterPriority);
-      if(data.filterTags!==undefined) filterTags = normTagFilter(data.filterTags);
-      if(data.myDayFilter!==undefined) myDayFilter = data.myDayFilter;
-      if(data.thisWeekFilter!==undefined) thisWeekFilter = data.thisWeekFilter;
-      if(data.overdueFilter!==undefined) overdueFilter = data.overdueFilter;
+      // (the view and the filters are this device's own: reconnecting does not take the other device's)
       if(data.allTasksHiddenProjectIds!==undefined && data.projectsPrefsAt===undefined) allTasksHiddenProjectIds = data.allTasksHiddenProjectIds;   // (a file from an older version has no timestamp: it decides, as before)
       normalizeData();
       lastSyncedSnapshot = text;

@@ -502,3 +502,13 @@ test('the AI app list keeps only a name and a safe address', function () {
   assertDeepEqual(cleanPromptAiApps([]), [], 'an empty list is allowed (the menu is then empty)');
   assertTrue(getPromptAiApps().length >= 2, 'the defaults include Claude and Copilot');
 });
+
+test('the app reopens on the prompt you had open, once, and falls back to the top one', function () {
+  pfresh();
+  prompts = [pmk({ id: 'a', name: 'A', favorite: true }), pmk({ id: 'b', name: 'B' })];
+  promptOpenPending = 'b'; selectedPromptId = null; renderPrompts();
+  assertEqual(selectedPromptId, 'b');
+  assertEqual(promptOpenPending, null);
+  selectedPromptId = null; promptOpenPending = 'gone'; renderPrompts();
+  assertEqual(selectedPromptId, 'a', 'a missing prompt: the top of the list (the favorite)');
+});

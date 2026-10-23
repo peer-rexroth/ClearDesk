@@ -958,3 +958,17 @@ test('the / menu filters by the start of a word in the name or its keywords, and
   assertDeepEqual(noteSlashFilter('zzz', all), []);
   assertDeepEqual(noteSlashFilter('', ['date']).map(function (i) { return i.id; }), ['date'], 'a table cell only offers the date');
 });
+
+test('the app reopens on the note you had open, once; a note that is gone or in another folder falls back to the top one', function () {
+  ntTree();
+  notes = [ntNote({ id: 'n1', folderId: 'f-work', updatedAt: 300 }), ntNote({ id: 'n2', folderId: 'f-work', updatedAt: 200 }), ntNote({ id: 'n3', folderId: 'f-home', updatedAt: 100 })];
+  noteFolderFilter = 'all'; noteSearchQuery = '';
+  selectedNoteId = null; noteOpenPending = 'n2'; renderNotes();
+  assertEqual(selectedNoteId, 'n2', 'the remembered note');
+  assertEqual(noteOpenPending, null, 'used once');
+  selectedNoteId = null; noteOpenPending = 'gone'; renderNotes();
+  assertEqual(selectedNoteId, 'n1', 'a deleted note: the top of the list');
+  noteFolderFilter = 'f-home'; selectedNoteId = null; noteOpenPending = 'n2'; renderNotes();
+  assertEqual(selectedNoteId, 'n3', 'a note that is not in the open folder: the top of that folder');
+  noteFolderFilter = 'all'; selectedNoteId = null;
+});
