@@ -1272,8 +1272,8 @@ const ICONS = {
   ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
   /* the copy button on a code block, as in Claude: a header strip with a quiet "Code" label on the left and a labelled Copy button on the right, always visible (one button per block, in a layer over the note) */
   .note-code-copy-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-  .note-code-copy { position: absolute; z-index: 3; height: 24px; padding: 0 9px 0 7px; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); font: 500 var(--fs-12)/1 var(--font); cursor: default; transition: background .12s ease, color .12s ease; }
-  .note-code-copy .tb-ico2 { width: 14px; height: 14px; }
+  .note-code-copy { position: absolute; z-index: 3; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); cursor: default; transition: background .12s ease, color .12s ease; }   /* icon only */
+  .note-code-copy .tb-ico2 { width: 16px; height: 16px; }
   .note-code-copy:hover { background: var(--cap-hover, var(--bg-3)); color: var(--text); }
   .note-code-copy.done { color: var(--green-text, var(--nc-green)); }
   #notePrintArea { display: none; }
@@ -1586,10 +1586,14 @@ const ICONS = {
   .pr-sub { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .note-row-sub:has(.pr-sub) { display: flex; min-width: 0; }
   /* the template: a transparent field laid over a layer that shows the same text with its placeholders tinted (the layer sets the height) */
-  .pr-tpl { position: relative; border-radius: var(--r-s); background: var(--bg-2); }
+  .pr-tpl { position: relative; margin-top: 22px; border-radius: var(--r-s); background: var(--bg-2); --pr-head: 36px; }
+  .pr-tpl-head { height: var(--pr-head); box-sizing: border-box; padding: 4px 4px 0 14px; display: flex; align-items: center; justify-content: space-between; }   /* the header strip, as on a note's code block: a label and a Copy button */
+  .pr-tpl-name { font: 500 var(--fs-12)/24px var(--font); color: var(--text-3); user-select: none; }
+  .pr-tpl-head .note-code-copy { position: static; }
   .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
   .pr-tpl-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
-  .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
+  .pr-tpl-hl, .pr-tpl textarea { padding-top: 4px; }   /* the strip above already leaves the room */
+  .pr-tpl textarea { position: absolute; inset: var(--pr-head) 0 0 0; width: 100%; height: calc(100% - var(--pr-head)); resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
   .pr-tpl textarea { border-radius: inherit; }
@@ -2122,8 +2126,7 @@ const ICONS = {
               <input type="text" class="note-title" id="pName" placeholder="Prompt name" maxlength="200" aria-label="Prompt name" autocomplete="off" oninput="onPromptNameInput()" onfocus="promptRenameStart()" onblur="promptRenameCommit()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('pTemplate').focus()}">
               <div class="note-meta" id="pMeta"></div>
               <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
-              <div class="pr-section-label"><span>Template</span></div>
-              <div class="pr-tpl" id="pTpl"><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
+              <div class="pr-tpl" id="pTpl"><div class="pr-tpl-head"><span class="pr-tpl-name">Template</span><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the finished prompt" aria-label="Copy the finished prompt" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"><span>Copy</span></button></div><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
             </div>
           </div>
           <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-grip" id="prInspResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Variables panel" aria-valuemin="260" aria-valuemax="560" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="pr-insp-inner" id="pInspector"></div></aside>
@@ -7496,11 +7499,20 @@ function emptyPromptTrash(){
     selectedPromptId = null; promptEditorId = null; save(); render();
   }});
 }
-function copyPrompt(id){
+// The Copy button in the template block's header: the same as Copy Prompt (the finished text), with its label turning to "Copied" for a moment.
+function promptCopyFromBlock(btn){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p) return;
+  copyPrompt(p.id, ()=>{
+    btn.classList.add('done'); btn.innerHTML = ICO_CHECK; btn.title = 'Copied';
+    clearTimeout(btn._reset); btn._reset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY; btn.title = 'Copy the finished prompt'; }, 1400);
+  });
+}
+function copyPrompt(id, onCopied){
   const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p) return;
   const missing = Object.entries(p.vars || {}).filter(([k, v])=>promptVarUnfilled(p, k, v)).map(([k])=>k);
   Promise.resolve(noteWriteText(buildPromptFinal(p))).then(ok=>{
     if(!ok){ showToast('Could not use the clipboard here', true); return; }
+    if(onCopied) onCopied();
     showToast(missing.length ? `Prompt copied — ${missing.length} variable${missing.length===1 ? '' : 's'} still unfilled, left in as placeholders (${missing.slice(0,3).join(', ')}${missing.length>3 ? '…' : ''})` : 'Prompt copied');
   });
 }
@@ -8264,21 +8276,22 @@ function noteCodeCopySync(){
   while(layer.children.length > pres.length) layer.lastChild.remove();
   while(layer.children.length < pres.length){
     const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'note-code-copy'; btn.title = 'Copy code'; btn.setAttribute('aria-label', 'Copy code');
-    btn.innerHTML = ICO_COPY + '<span>Copy</span>'; btn.onmousedown = ev=>ev.preventDefault();
+    btn.innerHTML = ICO_COPY; btn.onmousedown = ev=>ev.preventDefault();
     btn.onclick = ev=>noteCodeCopyClick(ev, btn); layer.appendChild(btn);
   }
   if(!pres.length) return;
   const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1;      // k: the UI-size zoom
   pres.forEach((pre, i)=>{
     const btn = layer.children[i], pr = pre.getBoundingClientRect(); btn._pre = pre;
-    btn.style.left = Math.round(((pr.right - dr.left) / k - btn.offsetWidth - 6) * 10) / 10 + 'px';
-    btn.style.top = Math.round(((pr.top - dr.top) / k + 6) * 10) / 10 + 'px';
+    btn.style.left = Math.round(((pr.right - dr.left) / k - btn.offsetWidth - 4) * 10) / 10 + 'px';
+    btn.style.top = Math.round(((pr.top - dr.top) / k + 4) * 10) / 10 + 'px';
   });
 }
 function noteCodeCopyQueue(){
   if(noteCodeCopySyncQueued || typeof requestAnimationFrame!=='function') return;
   noteCodeCopySyncQueued = true; requestAnimationFrame(()=>{ noteCodeCopySyncQueued = false; noteCodeCopySync(); });
 }
+{ const pb = document.getElementById('pTplCopy'); if(pb) pb.innerHTML = ICO_COPY; }
 if(typeof ResizeObserver==='function'){ const nb = document.getElementById('noteBody'); if(nb) new ResizeObserver(noteCodeCopyQueue).observe(nb); }   // the buttons follow the blocks when the note, the window or the sidebar changes size
 function noteCodeCopyClick(e, btn){
   e.preventDefault(); e.stopPropagation();
@@ -8286,8 +8299,8 @@ function noteCodeCopyClick(e, btn){
   const text = (pre.innerText || pre.textContent).replace(/\n$/, '');
   noteWriteText(text).then(ok=>{
     if(!ok){ showToast('Could not use the clipboard here', true); return; }
-    btn.classList.add('done'); btn.innerHTML = ICO_CHECK + '<span>Copied</span>'; btn.title = 'Copied';
-    clearTimeout(btn._reset); btn._reset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY + '<span>Copy</span>'; btn.title = 'Copy code'; }, 1400);
+    btn.classList.add('done'); btn.innerHTML = ICO_CHECK; btn.title = 'Copied';
+    clearTimeout(btn._reset); btn._reset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY; btn.title = 'Copy code'; }, 1400);
   });
 }
 function tblHandlesMove(e){
