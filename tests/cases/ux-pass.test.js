@@ -140,7 +140,7 @@ test('renderBoard in status mode renders without throwing and labels every statu
 test('setBoardGroup persists the choice and falls back to project for junk', function () {
   setBoardGroup('status');
   assertEqual(boardGroup, 'status');
-  assertEqual(localStorage.getItem('mytasks_boardgroup'), 'status');
+  assertEqual(localStorage.getItem('cleardesk_boardgroup'), 'status');
   setBoardGroup('nonsense');
   assertEqual(boardGroup, 'project');
 });
@@ -274,7 +274,7 @@ test('the side panel stays open and follows the selection with the arrow keys', 
 // ── Default project for quick-add ────────────────────────────────────────────
 function uxWithQuickAddDefault(id, fn) {
   const prev = quickAddProjectId;
-  try { quickAddProjectId = id; fn(); } finally { quickAddProjectId = prev; localStorage.removeItem('mytasks_quickadd_project'); }
+  try { quickAddProjectId = id; fn(); } finally { quickAddProjectId = prev; localStorage.removeItem('cleardesk_quickadd_project'); }
 }
 test('quick-add uses the chosen default project from All Tasks', function () {
   uxWithQuickAddDefault('proj-work', function () {
@@ -303,10 +303,10 @@ test('setQuickAddProject persists the choice and clears it for Inbox or junk', f
   uxWithQuickAddDefault(null, function () {
     setQuickAddProject('proj-personal');
     assertEqual(quickAddProjectId, 'proj-personal');
-    assertEqual(localStorage.getItem('mytasks_quickadd_project'), 'proj-personal');
+    assertEqual(localStorage.getItem('cleardesk_quickadd_project'), 'proj-personal');
     setQuickAddProject('proj-inbox');
     assertEqual(quickAddProjectId, null);
-    assertEqual(localStorage.getItem('mytasks_quickadd_project'), null);
+    assertEqual(localStorage.getItem('cleardesk_quickadd_project'), null);
     setQuickAddProject('not-a-project');
     assertEqual(quickAddProjectId, null);
   });
@@ -370,11 +370,11 @@ test('toggleSidebar flips the state, the html class, and persists the choice', f
   toggleSidebar();
   assertTrue(sidebarCollapsed);
   assertTrue(document.documentElement.classList.contains('sidebar-collapsed'));
-  assertEqual(localStorage.getItem('mytasks_sidebar_collapsed'), '1');
+  assertEqual(localStorage.getItem('cleardesk_sidebar_collapsed'), '1');
   toggleSidebar();
   assertFalse(sidebarCollapsed);
   assertFalse(document.documentElement.classList.contains('sidebar-collapsed'));
-  assertEqual(localStorage.getItem('mytasks_sidebar_collapsed'), '0');
+  assertEqual(localStorage.getItem('cleardesk_sidebar_collapsed'), '0');
 });
 test('Cmd/Ctrl+B toggles the sidebar in Tasks; other B combos and plain B do not', function () {
   appMode = 'tasks'; sidebarCollapsed = false;
@@ -386,7 +386,7 @@ test('Cmd/Ctrl+B toggles the sidebar in Tasks; other B combos and plain B do not
   handleSidebarShortcut({ key: 'b', ctrlKey: true, metaKey: false, shiftKey: true, altKey: false, preventDefault() {} });
   assertTrue(sidebarCollapsed, 'Ctrl+Shift+B must not toggle');
   sidebarCollapsed = false; applySidebarState();
-  localStorage.removeItem('mytasks_sidebar_collapsed');
+  localStorage.removeItem('cleardesk_sidebar_collapsed');
 });
 test('in Notes Cmd/Ctrl+B is left alone (it is Bold) and Alt+Cmd+S toggles the sidebar', function () {
   appMode = 'notes'; sidebarCollapsed = false;
@@ -396,7 +396,7 @@ test('in Notes Cmd/Ctrl+B is left alone (it is Bold) and Alt+Cmd+S toggles the s
   handleSidebarShortcut({ key: 'ß', code: 'KeyS', ctrlKey: false, metaKey: true, shiftKey: false, altKey: true, preventDefault() { prevented = true; } });
   assertTrue(sidebarCollapsed); assertTrue(prevented);
   appMode = 'tasks'; sidebarCollapsed = false; applySidebarState();
-  localStorage.removeItem('mytasks_sidebar_collapsed');
+  localStorage.removeItem('cleardesk_sidebar_collapsed');
 });
 
 // ── Selection toolbar and counts ─────────────────────────────────────────────

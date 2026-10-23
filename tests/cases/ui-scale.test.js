@@ -37,7 +37,7 @@ test('setUiScale updates state, applies the zoom style, and localStorage', funct
   setUiScale(115);
   assertEqual(uiScale, 115);
   assertEqual(document.documentElement.style.zoom, 1.15);
-  assertEqual(localStorage.getItem('mytasks_uiscale'), '115');
+  assertEqual(localStorage.getItem('cleardesk_uiscale'), '115');
 });
 
 test('setUiScale snaps an off-stop value to the nearest real one before storing it', function () {
@@ -54,7 +54,7 @@ test('setUiScale closes the popover after picking a segment', function () {
 });
 
 test('load() picks up a uiScale saved in the data blob, same as the theme', function () {
-  localStorage.setItem('mytasks_data_v1', JSON.stringify({
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify({
     projects: defaultProjects(), tasks: defaultTasks(), uiScale: 115
   }));
   load();
@@ -63,20 +63,20 @@ test('load() picks up a uiScale saved in the data blob, same as the theme', func
 });
 
 test('load() keeps a saved Small / Extra Large and snaps an off-stop value to the nearest one', function () {
-  localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 90 }));
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 90 }));
   load();
   assertEqual(uiScale, 90, 'Small stays Small');
-  localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 130 }));
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 130 }));
   load();
   assertEqual(uiScale, 130, 'Extra Large stays Extra Large');
-  localStorage.setItem('mytasks_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 108 }));
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify({ projects: defaultProjects(), tasks: defaultTasks(), uiScale: 108 }));
   load();
   assertEqual(uiScale, 115, '108 snaps to Large');
 });
 
 test('load() ignores a non-numeric uiScale rather than crashing', function () {
   uiScale = 115;
-  localStorage.setItem('mytasks_data_v1', JSON.stringify({
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify({
     projects: defaultProjects(), tasks: defaultTasks(), uiScale: 'huge'
   }));
   load();
@@ -85,7 +85,7 @@ test('load() ignores a non-numeric uiScale rather than crashing', function () {
 
 test('save() round-trips uiScale into the stored data blob', function () {
   setUiScale(115);
-  const saved = JSON.parse(localStorage.getItem('mytasks_data_v1'));
+  const saved = JSON.parse(localStorage.getItem('cleardesk_data_v1'));
   assertEqual(saved.uiScale, 115);
 });
 

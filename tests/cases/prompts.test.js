@@ -353,7 +353,7 @@ function pxSetup() {
 test('export: all prompts with their folders and only the global variables they use; trashed prompts are left out', function () {
   pxSetup();
   const d = buildPromptsExport('all');
-  assertEqual(d.format, 'workbench-prompts'); assertEqual(d.version, 1);
+  assertEqual(d.format, 'cleardesk-prompts'); assertEqual(d.version, 1);
   assertDeepEqual(d.prompts.map(function (p) { return p.id; }), ['p1', 'p2', 'p3']);
   assertDeepEqual(d.folders.map(function (f) { return f.id; }), ['f1', 'f2', 'f3']);
   assertDeepEqual(d.globals.map(function (g) { return g.name; }), ['tone'], 'language is not used by any prompt');
@@ -394,7 +394,7 @@ test('import: folders are matched by name and level, an existing global variable
   assertFalse(deletedPromptIds.some(function (d) { return d.id === 'p1'; }), 'the old tombstone is cleared');
 });
 
-test('import: a whole Workbench export works too; unsafe ids are replaced; files without prompts are refused', function () {
+test('import: a whole ClearDesk export works too; unsafe ids are replaced; files without prompts are refused', function () {
   pgfresh();
   const whole = { projects: [], tasks: [], prompts: [{ id: 'a b"', name: 5, template: 'hi {{x}}', folderId: 'zz', vars: {}, presets: [] }, { id: 'ok1', name: 'Two', template: 'yo' }, { name: 'No template' }], promptFolders: [], promptGlobals: [{ name: 'tone', options: ['A'] }] };
   const r = importPromptsData(whole);
@@ -409,12 +409,12 @@ test('the prompt and folder right-click menus offer Export', function () {
 });
 
 test('one Import door: importKindOf tells a prompts file from a full backup, and a prompts file never goes to the Replace dialog', function () {
-  assertEqual(importKindOf({ format: 'workbench-prompts', prompts: [] }), 'prompts');
+  assertEqual(importKindOf({ format: 'cleardesk-prompts', prompts: [] }), 'prompts');
   assertEqual(importKindOf({ prompts: [{ template: 'x' }] }), 'prompts', 'prompts without tasks or projects');
   assertEqual(importKindOf({ tasks: [], projects: [], prompts: [] }), 'backup'); assertEqual(importKindOf({ tasks: [], projects: [] }), 'backup');
   assertEqual(importKindOf({ nothing: 1 }), null); assertEqual(importKindOf(null), null); assertEqual(importKindOf([1]), null);
   pgfresh(); pendingImportData = null;
-  finishPromptsImport({ format: 'workbench-prompts', prompts: [{ id: 'z1', name: 'N', template: 't' }] });
+  finishPromptsImport({ format: 'cleardesk-prompts', prompts: [{ id: 'z1', name: 'N', template: 't' }] });
   assertEqual(prompts.length, 1); assertEqual(pendingImportData, null, 'no Replace / Merge choice was opened');
 });
 
@@ -529,4 +529,40 @@ test('the default Prompts folder always exists, is first, cannot be edited or de
   assertEqual(prompts[prompts.length - 1].folderId, PROMPTS_DEFAULT_FOLDER, 'a new prompt (from All Prompts) goes into it');
   var del = promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER).split('<button').filter(function (b) { return b.indexOf("promptFolderMenuRun('delete')") >= 0; })[0] || '';
   assertTrue(del.indexOf('disabled') >= 0, 'Delete is disabled in its menu');
+});
+
+// ---- Include with values, and "Used in" ----
+test('the include syntax: a name, then optional name=value pairs (quotes for spaces)', function () {
+  assertDeepEqual(promptIncParse('Role'), { name: 'Role', args: {}, rest: '' });
+  var p = promptIncParse('Role block who=critic tone="very formal" "my var"=x @Language=German empty=');
+  assertEqual(p.name, 'Role block');
+  assertDeepEqual(p.args, { who: 'critic', tone: 'very formal', 'my var': 'x', '@Language': 'German', empty: '' });
+  assertEqual(promptIncParse('A=B name').name, 'A=B name', 'no whitespace before the =, so it is part of the name');
+});
+
+test('an include passes values down: they win over the included prompt\'s own choice, for that use only', function () {
+  pfresh();
+  const role = pmk({ name: 'Role', template: 'A {{who}} ((note)) [[traits]] {{@Language}}', vars: {
+    who: { type: 'option', options: ['coach', 'critic'], selected: 'coach' }, note: { type: 'text', value: 'own' },
+    traits: { type: 'instruction', options: ['x', 'y'], selected: ['x'] }, '@Language': { type: 'global', selected: '' } } });
+  const host = pmk({ name: 'Host', template: '{{>role who=critic note="two words" traits="calm | direct" @language=German}}\n{{>Role}}' });
+  prompts.push(role, host);
+  assertEqual(buildPromptFinal(host), 'A critic two words • calm\n• direct German\nA coach own • x {{@Language}}', 'the first use is overridden (names ignore case), the second uses Role as it is');
+  assertEqual(role.vars.who.selected, 'coach', 'Role itself is unchanged');
+  host.template = '{{>Role nothere=1}}'; assertEqual(buildPromptFinal(host), 'A coach own • x {{@Language}}', 'a value for a missing variable is ignored');
+  assertDeepEqual(promptIncludes(host)[0].unknown, ['nothere']);
+  assertTrue(promptHighlight(host.template, host.id).indexOf('ph-miss') >= 0, 'and flagged in red');
+  host.template = '{{>Role who=critic}}'; assertTrue(promptHighlight(host.template, host.id).indexOf('ph-miss') < 0);
+});
+
+test('"Used in" lists the prompts that include this one, and follows a rename with the values kept', function () {
+  pfresh();
+  const role = pmk({ id: 'r', name: 'Role', template: 'x', vars: { who: { type: 'option', options: ['a'], selected: 'a' } } }), a = pmk({ id: 'a', name: 'A', template: '{{>Role who=b}}' }), b = pmk({ id: 'b', name: 'B', template: '{{>role}}' }), c = pmk({ id: 'c', name: 'C', template: 'none' });
+  prompts.push(role, a, b, c);
+  assertDeepEqual(promptUsedBy(role).map(function (q) { return q.id; }), ['a', 'b']);
+  assertDeepEqual(promptUsedBy(c), []);
+  b.deletedAt = Date.now(); assertDeepEqual(promptUsedBy(role).map(function (q) { return q.id; }), ['a'], 'a deleted prompt does not count');
+  promptEditorId = 'r'; promptRenameStart(); role.name = 'Persona'; promptRenameCommit();
+  assertEqual(a.template, '{{>Persona who=b}}', 'the rename keeps the values');
+  assertDeepEqual(promptUsedBy(role).map(function (q) { return q.id; }), ['a']);
 });

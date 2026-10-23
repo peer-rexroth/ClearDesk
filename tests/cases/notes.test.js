@@ -952,6 +952,8 @@ test('a slash opens the menu only at the start of a line or after a space, and i
 test('the / menu filters by the start of a word in the name or its keywords, and offers less inside lists and tables', function () {
   var all = NOTE_SLASH_ITEMS.map(function (i) { return i.id; });
   assertDeepEqual(noteSlashFilter('', all).length, NOTE_SLASH_ITEMS.length);
+  assertDeepEqual(noteSlashFilter('', all).map(function (i) { return i.id; }), ['h1', 'h2', 'h3', 'checklist', 'ul', 'ol', 'quote', 'code', 'table', 'hr', 'date'], 'headings, lists, blocks, then the date');
+  assertDeepEqual(NOTE_SLASH_ITEMS.map(function (i) { return i.group; }).filter(function (g, k, a) { return a.indexOf(g) === k; }), ['text', 'list', 'block', 'inline'], 'one separator between each group');
   assertDeepEqual(noteSlashFilter('tab', all).map(function (i) { return i.id; }), ['table']);
   assertDeepEqual(noteSlashFilter('code', all).map(function (i) { return i.id; }), ['code']);
   assertDeepEqual(noteSlashFilter('hr', all).map(function (i) { return i.id; }), ['hr']);

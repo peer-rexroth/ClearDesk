@@ -1,4 +1,4 @@
 .claude/
-.workbench-server.pid
-.workbench-server.log
+.cleardesk-server.pid
+.cleardesk-server.log
 .DS_Store

@@ -11,14 +11,14 @@ test('there is no colour-scheme or wallpaper picker any more', function () {
 
 test('save() writes neither a colorScheme nor a theme into the data blob', function () {
   save();
-  const saved = JSON.parse(localStorage.getItem('mytasks_data_v1'));
+  const saved = JSON.parse(localStorage.getItem('cleardesk_data_v1'));
   assertEqual(saved.colorScheme, undefined);
   assertEqual(saved.theme, undefined, 'theme is a per-device preference now, not synced');
 });
 
 test('load() ignores a colorScheme and a theme left in an older or synced file', function () {
   setThemeMode('light');
-  localStorage.setItem('mytasks_data_v1', JSON.stringify({
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify({
     projects: defaultProjects(), tasks: defaultTasks(), colorScheme: 'dracula', theme: 'dark'
   }));
   load();
@@ -30,12 +30,12 @@ test('setThemeMode switches light and dark, persists it, and does nothing if alr
   setThemeMode('dark');
   assertEqual(currentTheme, 'dark');
   assertEqual(document.documentElement.getAttribute('data-theme'), 'dark');
-  assertEqual(localStorage.getItem('mytasks_theme'), 'dark');
+  assertEqual(localStorage.getItem('cleardesk_theme'), 'dark');
   setThemeMode('dark');
   assertEqual(currentTheme, 'dark');
   setThemeMode('light');
   assertEqual(currentTheme, 'light');
-  assertEqual(localStorage.getItem('mytasks_theme'), 'light');
+  assertEqual(localStorage.getItem('cleardesk_theme'), 'light');
 });
 
 test('the Appearance menu: Light | Dark are always shown (dimmed while Match System is on), SVG icons not Font Awesome', function () {
@@ -62,7 +62,7 @@ test('Auto is the default and follows the system; Light and Dark override it', f
     setThemeMode('auto');
     assertEqual(themePref, 'auto');
     assertEqual(currentTheme, 'dark', 'the system is dark, so Auto is dark');
-    assertEqual(localStorage.getItem('mytasks_theme'), 'auto');
+    assertEqual(localStorage.getItem('cleardesk_theme'), 'auto');
     setThemeMode('light');
     assertEqual(currentTheme, 'light', 'an explicit choice beats the system');
     window.matchMedia = function () { return { matches: false, addEventListener() {} }; };
@@ -72,10 +72,10 @@ test('Auto is the default and follows the system; Light and Dark override it', f
 });
 
 test('an unrecognised saved theme value falls back to Auto', function () {
-  localStorage.setItem('mytasks_theme', 'purple');
+  localStorage.setItem('cleardesk_theme', 'purple');
   themePref = 'dark';
   // the startup logic, as written: only light/dark are honoured
-  const t = localStorage.getItem('mytasks_theme');
+  const t = localStorage.getItem('cleardesk_theme');
   const pref = (t === 'light' || t === 'dark') ? t : 'auto';
   assertEqual(pref, 'auto');
   setThemeMode('light');

@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Workbench">
+<meta name="apple-mobile-web-app-title" content="ClearDesk">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1e1e1c" media="(prefers-color-scheme: dark)">
-<title>Workbench</title>
+<title>ClearDesk</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
@@ -1596,6 +1596,40 @@ const ICONS = {
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
   .pr-tpl textarea { border-radius: inherit; }
+  /* compare prompts: the same transparent-textarea-over-a-painted-copy trick as the template, once per side; each pane scrolls its own wrapper */
+  .pdiff-modal { width: min(1280px, 96vw); height: min(88vh, 900px); max-width: 96vw; padding: 20px; gap: 10px; }
+  .pdiff-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .pdiff-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .modal .pdiff-sel { width: auto; min-width: 0; padding: 6px 12px; font-size: var(--fs-13); }
+  .pdiff-col > .pdiff-sel { width: 100%; }
+  .pdiff-count { font-size: var(--fs-13); color: var(--text-2); min-width: 7em; text-align: center; }
+  .pdiff-panes { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pdiff-col { display: flex; flex-direction: column; gap: 6px; min-height: 0; min-width: 0; }
+  .pdiff-pane { flex: 1; min-height: 0; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); }
+  .pdiff-pane:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
+  .df-wrap { position: relative; min-height: 100%; }
+  .df-hl, .df-ta { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 10px 44px 10px 12px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
+  .df-hl.df-right, .df-ta.df-right { padding: 10px 12px 10px 44px; }
+  .df-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
+  .df-hl .dl { min-height: 1.7em; }
+  .df-hl .dl.del { background: var(--red-bg); }
+  .df-hl .dl.add { background: var(--green-bg); }
+  .df-hl .dl.dcur { box-shadow: inset 3px 0 0 var(--accent); }
+  .df-hl .dl.del mark { background: rgba(255,69,58,.38); }
+  .df-hl .dl.add mark { background: rgba(52,199,89,.42); }
+  .df-hl mark { color: inherit; border-radius: 2px; }
+  .df-ta { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
+  .df-ta::selection { background: var(--accent-tint); }
+  .df-ta:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+  .df-arrows { position: absolute; top: 0; bottom: 0; width: 34px; pointer-events: none; }
+  .df-arr-r { right: 0; }
+  .df-arr-l { left: 0; }
+  .df-arrow { position: absolute; left: 6px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); font-size: var(--fs-13); line-height: 1; pointer-events: auto; }
+  .df-arrow:hover { background: var(--accent); color: var(--on-accent); }
+  .pdiff-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .pdiff-msg { font-size: var(--fs-13); color: var(--text-2); }
+  .pdiff-foot .modal-actions { margin-top: 0; }
+  @media (max-width: 800px) { .pdiff-panes { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } .pdiff-modal { height: 94vh; padding: 14px; } }
   .pr-tpl textarea:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
@@ -1612,6 +1646,9 @@ const ICONS = {
   .pr-inc-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: var(--text); cursor: pointer; }
   .pr-inc-name:hover { text-decoration: underline; }
   .pr-inc.bad .pr-inc-name { color: var(--text-2); cursor: default; text-decoration: none; }
+  .pr-inc-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .pr-inc-sub { font-size: var(--fs-12); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pr-inc-sub.bad { color: var(--red-text); }
   .pr-inc-note { flex: none; font-size: var(--fs-12); color: var(--red-text); }
   .ai-modal { width: 560px; max-width: calc(100vw - 32px); }
   .ai-apps-list { display: flex; flex-direction: column; gap: 8px; }
@@ -2361,7 +2398,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a note moves it to <em>Recently Deleted</em> at the bottom of the sidebar, where it stays for 30 days. Open it there to <em>Restore</em> it or <em>Delete Now</em>; <em>Delete All</em> empties the list. Deleting a note that is already there removes it for good.</span></div>
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
-          <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>The / menu</strong>: type <kbd>/</kbd> at the start of a line (or after a space) to insert a title, heading, quote, code block, divider, table, checklist, list or today's date. Keep typing to narrow the list (<kbd>/ta</kbd> finds Table), <kbd>↑</kbd> <kbd>↓</kbd> move, <kbd>↵</kbd> or <kbd>Tab</kbd> inserts, <kbd>Esc</kbd> closes it and leaves the slash as text. It stays out of code blocks and locked notes.</span></div>
+          <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>The / menu</strong>: type <kbd>/</kbd> at the start of a line (or after a space) to insert a title, heading, checklist, list, quote, code block, table, divider or today's date. Keep typing to narrow the list (<kbd>/ta</kbd> finds Table), <kbd>↑</kbd> <kbd>↓</kbd> move, <kbd>↵</kbd> or <kbd>Tab</kbd> inserts, <kbd>Esc</kbd> closes it and leaves the slash as text. It stays out of code blocks and locked notes.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and print</strong>: <strong>⋯</strong> → <em>Export</em> saves the note as a Markdown file or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. <em>Copy note</em> puts it on the clipboard for pasting into Mail.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
@@ -2395,7 +2432,8 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
-          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case; the Variables panel lists what a prompt includes and opens it with a click. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
+          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case. <strong>Pass values down</strong> with <code>{{&gt;Role who=critic tone="very formal"}}</code>: for that one use, they replace the included prompt's own choices (a checklist takes items split by <code>|</code>, a global variable is set as <code>@Language=German</code>); the included prompt itself stays as it is. The Variables panel lists what a prompt includes (with the values you pass, and which variables it can set) and, under <em>Used In</em>, which other prompts include it, so you can see what a change will affect; a click opens that prompt. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrows-left-right"></i><span><strong>Compare two prompts</strong> with <em>Compare…</em> in the prompt's ⋯ or right-click menu: the prompt you opened is on the left, any other prompt (or blank text to paste into) on the right. Changed lines are red on the left and green on the right, with the changed words marked; choose <em>Lines</em>, <em>Words</em> or <em>Characters</em> for how closely, and <em>Ignore Whitespace</em> to skip spacing. Both sides can be typed in, and the arrow beside a difference moves it across (the left text to the right, or the right to the left); <em>Undo Move</em> takes the last move back, and ↑ ↓ step through the differences. Nothing is changed in your prompts until you choose <em>Save Changes</em>; a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the <em>Open in</em> menu next to <em>Copy Prompt</em> (in a narrow window: <em>Open in</em> in the ⋯ and right-click menus) copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> does it with the first one. <em>Edit Apps…</em> changes the list (a name and a web address each; kept on this device).</span></div>
           <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
@@ -2443,7 +2481,7 @@ const ICONS = {
   <div class="modal about-modal" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
     <button type="button" class="help-close about-close" aria-label="Close" title="Close (Esc)" onclick="closeAllModals()"><i class="fa-solid fa-xmark"></i></button>
     <img class="about-icon" src="icons/icon-192.png" alt="" width="88" height="88">
-    <h3 class="about-name" id="aboutTitle">Workbench</h3>
+    <h3 class="about-name" id="aboutTitle">ClearDesk</h3>
     <div class="about-tag">A local-first workspace for tasks, notes and prompts</div>
     <div class="about-credits">Created by <strong>Peer Rexroth</strong></div>
     <div class="about-fine">Your tasks, notes and prompts stay in this browser. No server, no account.</div>
@@ -2527,6 +2565,34 @@ const ICONS = {
   </div>
 </div>
 
+<!-- Compare prompts: two editable drafts side by side with the differences marked and an arrow on each to move it across -->
+<div class="modal-bg" id="pdfModalBg" onclick="if(event.target===this) pdfRequestClose()">
+  <div class="modal pdiff-modal" role="dialog" aria-modal="true" aria-labelledby="pdfTitle" onkeydown="if(event.key==='Escape'){event.stopPropagation();pdfRequestClose()}">
+    <div class="pdiff-head">
+      <h3 id="pdfTitle">Compare Prompts</h3>
+      <div class="pdiff-tools" role="group" aria-label="Comparison options">
+        <select id="pdfPrec" class="pdiff-sel" aria-label="Precision" title="How exactly changes inside a line are marked" onchange="pdfSetOption('prec', this.value)"><option value="line">Lines</option><option value="word" selected>Words</option><option value="char">Characters</option></select>
+        <button type="button" class="btn btn-sm" id="pdfWsBtn" aria-pressed="false" onclick="pdfSetOption('ws')" title="Ignore differences in spaces and indentation">Ignore Whitespace</button>
+        <button type="button" class="btn btn-sm" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference" aria-label="Previous difference">↑</button>
+        <button type="button" class="btn btn-sm" id="pdfNext" onclick="pdfNav(1)" title="Next difference" aria-label="Next difference">↓</button>
+        <span class="pdiff-count" id="pdfCount" role="status"></span>
+        <button type="button" class="btn btn-sm" id="pdfUndo" onclick="pdfUndo()" title="Undo the last move across">Undo Move</button>
+      </div>
+    </div>
+    <div class="pdiff-panes" id="pdfPanes">
+      <div class="pdiff-col">
+        <select id="pdfSelA" class="pdiff-sel" aria-label="Left prompt" onchange="pdfPick('a', this.value)"></select>
+        <div class="pdiff-pane" id="pdfPaneA" onscroll="pdfScroll('a')"><div class="df-wrap"><div class="df-hl" id="pdfHlA" aria-hidden="true"></div><textarea id="pdfTaA" class="df-ta df-left" spellcheck="false" aria-label="Left text" oninput="pdfInput('a')"></textarea><div class="df-arrows df-arr-r" id="pdfArrA"></div></div></div>
+      </div>
+      <div class="pdiff-col">
+        <select id="pdfSelB" class="pdiff-sel" aria-label="Right prompt" onchange="pdfPick('b', this.value)"></select>
+        <div class="pdiff-pane" id="pdfPaneB" onscroll="pdfScroll('b')"><div class="df-wrap"><div class="df-hl df-right" id="pdfHlB" aria-hidden="true"></div><textarea id="pdfTaB" class="df-ta df-right" spellcheck="false" aria-label="Right text" oninput="pdfInput('b')"></textarea><div class="df-arrows df-arr-l" id="pdfArrB"></div></div></div>
+      </div>
+    </div>
+    <div class="pdiff-foot"><span class="pdiff-msg" id="pdfMsg" role="status"></span><div class="modal-actions" id="pdfActs"></div></div>
+  </div>
+</div>
+
 <!-- AI apps: the pages the Open in button offers (a name and a web address each) -->
 <div class="modal-bg" id="aiAppsModalBg" onclick="if(event.target===this) closeAiAppsModal()">
   <div class="modal sync-modal ai-modal" role="dialog" aria-modal="true" aria-labelledby="aiAppsTitle" onkeydown="if(event.key==='Escape'){event.stopPropagation();closeAiAppsModal()}">
@@ -2546,7 +2612,7 @@ const ICONS = {
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="dataFilesTitle">
     <div class="sync-head">
       <span class="sync-head-icon"><i class="fa-solid fa-folder-open"></i></span>
-      <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one Workbench file</p></div>
+      <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one ClearDesk file</p></div>
     </div>
     <div class="sync-list" id="dataFilesList" role="group" aria-label="Data files"></div>
     <div class="modal-actions"><button type="button" class="btn" onclick="closeDataFilesModal()">Cancel</button></div>
@@ -2557,15 +2623,31 @@ const ICONS = {
 
 <script>
 // ── Constants ─────────────────────────────────────────────────────────────────
-const STORAGE_KEY = 'mytasks_data_v1';
-try{ localStorage.removeItem('mytasks_backups'); }catch(_){}   // the old in-browser daily snapshots are gone; this frees their share of the quota
-const THEME_KEY = 'mytasks_theme';
-const VIEW_KEY = 'mytasks_view';
+// One-time move of this device's saved data to the current key names (an earlier version stored it under other prefixes). Runs before anything is read.
+function migrateLegacyStorage(){
+  try{
+    const old = [];
+    for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && /^(mytasks|workbench)_/.test(k)) old.push(k); }
+    old.forEach(k=>{
+      const v = localStorage.getItem(k), nk = 'cleardesk_' + k.replace(/^(mytasks|workbench)_/, '');
+      if(k==='mytasks_backups'){ localStorage.removeItem(k); return; }     // the long-gone in-browser snapshots: frees their share of the quota
+      if(localStorage.getItem(nk)===null){
+        try{ localStorage.setItem(nk, v); }
+        catch(_){ localStorage.removeItem(k); try{ localStorage.setItem(nk, v); }catch(e){ localStorage.setItem(k, v); return; } }   // no room for both copies: move instead, and put it back if even that fails
+      }
+      localStorage.removeItem(k);
+    });
+  }catch(_){}
+}
+migrateLegacyStorage();
+const STORAGE_KEY = 'cleardesk_data_v1';
+const THEME_KEY = 'cleardesk_theme';
+const VIEW_KEY = 'cleardesk_view';
 // Sidebar collapse — a per-device display preference (localStorage), like the
 // board grouping. With no saved choice it starts collapsed on narrow screens.
 // Picking a nav item on a narrow screen closes it again *without* saving, so a
 // wide window is never affected by what happened on a phone-sized one.
-const SIDEBAR_KEY = 'mytasks_sidebar_collapsed';
+const SIDEBAR_KEY = 'cleardesk_sidebar_collapsed';
 let sidebarCollapsed = false;
 function applySidebarState(){
   document.documentElement.classList.toggle('sidebar-collapsed', sidebarCollapsed);
@@ -2600,7 +2682,7 @@ function collapseSidebarIfNarrow(){
   mirror();
 })();
 // Sidebar width: drag the sidebar's right edge (or use the arrow keys on it); a per-device display preference like the collapse state.
-const SIDEBAR_W_KEY = 'mytasks_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 260, SIDEBAR_W_MAX = 480;   // 260 = the widest the tools bar needs (Reconnect chip + Data / Appearance / Help = 259px), so nothing runs past the edge
+const SIDEBAR_W_KEY = 'cleardesk_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 260, SIDEBAR_W_MAX = 480;   // 260 = the widest the tools bar needs (Reconnect chip + Data / Appearance / Help = 259px), so nothing runs past the edge
 const clampSidebarW = v=>Math.max(SIDEBAR_W_MIN, Math.min(SIDEBAR_W_MAX, Math.round(v)));
 let sidebarW = SIDEBAR_W_DEFAULT;   // the chosen width (the element's own width lags while the .2s transition runs)
 function setSidebarWidth(v, save){
@@ -2637,7 +2719,7 @@ function setSidebarWidth(v, save){
   });
 })();
 // Notes list width: drag the edge between the list and the editor, from 200px (narrower than the 300px default) up to 600px; per-device, like the sidebar's.
-const NOTES_LIST_W_KEY = 'mytasks_noteslist_w', NOTES_LIST_W_DEFAULT = 300, NOTES_LIST_W_MIN = 200, NOTES_LIST_W_MAX = 600;
+const NOTES_LIST_W_KEY = 'cleardesk_noteslist_w', NOTES_LIST_W_DEFAULT = 300, NOTES_LIST_W_MIN = 200, NOTES_LIST_W_MAX = 600;
 const clampNotesListW = v=>Math.max(NOTES_LIST_W_MIN, Math.min(NOTES_LIST_W_MAX, Math.round(v)));
 let notesListW = NOTES_LIST_W_DEFAULT;
 function setNotesListWidth(v, save){
@@ -2716,8 +2798,8 @@ function wireColumnResizer(col, api, widthFromPointer, growKey){
     else if(e.key==='Home' || e.key==='Enter'){ e.preventDefault(); api.set(col.def, true); }
   });
 }
-const PROMPTS_LIST_COL = { key: 'workbench_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
-const PROMPTS_INSP_COL = { key: 'workbench_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
+const PROMPTS_LIST_COL = { key: 'cleardesk_prompts_list_w', cssVar: '--prompts-list-w', def: 300, min: 200, max: 600, bar: 'promptsListResizer' };
+const PROMPTS_INSP_COL = { key: 'cleardesk_prompts_insp_w', cssVar: '--prompts-insp-w', def: 340, min: 260, max: 560, bar: 'prInspResizer' };
 const promptsListW = makeColumnWidth(PROMPTS_LIST_COL), promptsInspW = makeColumnWidth(PROMPTS_INSP_COL);
 wireColumnResizer(PROMPTS_LIST_COL, promptsListW, {
   start(){ const pane = document.querySelector('#promptsMain .notes-list-pane'), rect = pane.getBoundingClientRect(); return { left: rect.left, k: pane.offsetWidth ? rect.width / pane.offsetWidth : 1 }; },
@@ -2727,7 +2809,7 @@ wireColumnResizer(PROMPTS_INSP_COL, promptsInspW, {
   start(){ const split = document.getElementById('prSplit'), rect = split.getBoundingClientRect(), k = split.offsetWidth ? rect.width / split.offsetWidth : 1; return { right: rect.right, k, max: Math.max(PROMPTS_INSP_COL.min, Math.min(PROMPTS_INSP_COL.max, rect.width / k - 380)) }; },   // the template keeps at least 380px
   width(ev, c){ return (c.right - ev.clientX) / c.k; }
 }, 'ArrowLeft');
-const UI_SCALE_KEY = 'mytasks_uiscale';
+const UI_SCALE_KEY = 'cleardesk_uiscale';
 // Four stops: Small, Medium (the default), Large and Extra Large. (Small and Extra Large were taken out once and are back, on request:
 // the text-size scale needs room both ways.) A stored value that is not exactly a stop snaps to the nearest one.
 // Each segment shows the letter A at its own size (glyph, in px) — as in Safari's "aA" menu — and label is its tooltip.
@@ -3482,10 +3564,10 @@ function boardCardHtml(t){
 // a per-device display preference (localStorage), like the sidebar's Tags
 // collapse — it is not part of the synced data blob.
 let boardGroup = 'project';
-try{ boardGroup = localStorage.getItem('mytasks_boardgroup')==='status' ? 'status' : 'project'; }catch(_){}
+try{ boardGroup = localStorage.getItem('cleardesk_boardgroup')==='status' ? 'status' : 'project'; }catch(_){}
 function setBoardGroup(g){
   boardGroup = g==='status' ? 'status' : 'project';
-  try{ localStorage.setItem('mytasks_boardgroup', boardGroup); }catch(_){}
+  try{ localStorage.setItem('cleardesk_boardgroup', boardGroup); }catch(_){}
   render();
 }
 const STATUS_ICONS = { todo:'fa-regular fa-circle', doing:'fa-solid fa-circle-half-stroke', done:'fa-regular fa-circle-check' };
@@ -4238,7 +4320,7 @@ function renderDrawer(){
 // explicit #project in the text beats both. A per-device preference
 // (localStorage), like the board grouping; if the saved project is gone it
 // quietly falls back to Inbox.
-const QUICKADD_PROJECT_KEY = 'mytasks_quickadd_project';
+const QUICKADD_PROJECT_KEY = 'cleardesk_quickadd_project';
 let quickAddProjectId = null;
 try{ quickAddProjectId = localStorage.getItem(QUICKADD_PROJECT_KEY) || null; }catch(_){}
 function quickAddDefaultProjectId(){
@@ -5456,10 +5538,10 @@ function setPriorityFilter(p){
   save(); render();
 }
 let tagsCollapsed = false;
-try{ tagsCollapsed = localStorage.getItem('mytasks_tags_collapsed')==='1'; }catch(_){}
+try{ tagsCollapsed = localStorage.getItem('cleardesk_tags_collapsed')==='1'; }catch(_){}
 function toggleTagsSection(){
   tagsCollapsed = !tagsCollapsed;
-  try{ localStorage.setItem('mytasks_tags_collapsed', tagsCollapsed?'1':'0'); }catch(_){}
+  try{ localStorage.setItem('cleardesk_tags_collapsed', tagsCollapsed?'1':'0'); }catch(_){}
   document.getElementById('tagsSection')?.classList.toggle('collapsed', tagsCollapsed);
 }
 function setTagFilter(tg){
@@ -5614,14 +5696,14 @@ function scPaneKey(e){ if(e.key==='ArrowLeft' && e.target.classList && e.target.
 // ({id,title,body,folderId,createdAt,updatedAt}); `body` is sanitized HTML written in a
 // contenteditable editor. Notes ride along in the same data blob as tasks, so they save,
 // back up, export/import and sync (newer edit of a note wins; deletions are tombstoned).
-const MODE_KEY = 'mytasks_mode', NOTES_FOLDER_KEY = 'mytasks_notes_folder', NOTES_COLLAPSED_KEY = 'mytasks_notes_collapsed', NOTES_SORT_KEY = 'mytasks_notes_sort';
+const MODE_KEY = 'cleardesk_mode', NOTES_FOLDER_KEY = 'cleardesk_notes_folder', NOTES_COLLAPSED_KEY = 'cleardesk_notes_collapsed', NOTES_SORT_KEY = 'cleardesk_notes_sort';
 const NOTES_DEFAULT_FOLDER = 'nf-notes';
 const noteFoldersCollapsed = new Set();   // top-level folders folded shut in the sidebar (per device)
 let appMode = 'tasks', selectedNoteId = null, noteFolderFilter = 'all', noteSearchQuery = '', noteOpenPending = null;   // noteOpenPending: the note that was open when the app was closed (this device), reopened once
 try{
   { const m = localStorage.getItem(MODE_KEY); if(m==='notes' || m==='prompts') appMode = m; }
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
-  noteOpenPending = localStorage.getItem('workbench_notes_open') || null;
+  noteOpenPending = localStorage.getItem('cleardesk_notes_open') || null;
   const savedSort = JSON.parse(localStorage.getItem(NOTES_SORT_KEY) || 'null');
   if(savedSort && ['edited','created','title'].includes(savedSort.key) && ['asc','desc'].includes(savedSort.dir)){ noteSortKey = savedSort.key; noteSortDir = savedSort.dir; }
   const savedCollapsed = JSON.parse(localStorage.getItem(NOTES_COLLAPSED_KEY) || '[]'); if(Array.isArray(savedCollapsed)) savedCollapsed.forEach(x=>{ if(typeof x==='string') noteFoldersCollapsed.add(x); });
@@ -5837,7 +5919,7 @@ function folderDropOk(targetId){
 }
 // A note dragged from the list onto a folder row moves it there (moveNote: undoable, ignores locked notes).
 function handleNoteDragStart(e, id){
-  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-workbench-note', id);
+  draggedNoteId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-cleardesk-note', id);
   e.currentTarget.classList.add('dragging');
 }
 function handleNoteDragEnd(){
@@ -6177,7 +6259,7 @@ function noteExportPrint(id){
   if(!area){ area = document.createElement('div'); area.id = 'notePrintArea'; document.body.appendChild(area); }
   area.innerHTML = noteCopyContent(notes.find(x=>x.id===n.id)).html;
   document.title = noteFileName(n, '').replace(/ $/, '');                                       // the PDF's suggested file name
-  const done = ()=>{ area.innerHTML = ''; document.title = 'Workbench'; window.removeEventListener('afterprint', done); };
+  const done = ()=>{ area.innerHTML = ''; document.title = 'ClearDesk'; window.removeEventListener('afterprint', done); };
   window.addEventListener('afterprint', done);
   window.print();
 }
@@ -6486,7 +6568,7 @@ function renderNotes(){
   if(selectedNoteId && !notes.some(n=>n.id===selectedNoteId)) selectedNoteId = null;
   if(noteOpenPending){ const id = noteOpenPending; noteOpenPending = null; if(!selectedNoteId && vis.some(n=>n.id===id)) selectedNoteId = id; }      // the note you had open (once, at start)
   if(!selectedNoteId && vis.length) selectedNoteId = vis[0].id;      // otherwise the top one (a pinned or the newest note), like Apple Notes
-  rememberOpenItem('workbench_notes_open', selectedNoteId, noteFolderFilter==='trash' || !!noteSearchQuery.trim());
+  rememberOpenItem('cleardesk_notes_open', selectedNoteId, noteFolderFilter==='trash' || !!noteSearchQuery.trim());
   renderNotesSidebar(); renderNotesList(vis); renderNoteEditor();
 }
 
@@ -6683,19 +6765,19 @@ function deleteNoteFolder(id){
 const PROMPT_TRASH_DAYS = 30;
 const PROMPT_TEXT_MAX = 50000;     // characters kept in one ((text)) variable (about 8,000 words); the saved data lives in the browser's ~5 MB of local storage, so this is a limit with room, not unlimited
 const PROMPTS_DEFAULT_FOLDER = 'pf-prompts';   // like Notes' default folder: every prompt lives in a folder; this one always exists and cannot be edited or deleted
-const PROMPT_FOLDER_KEY = 'workbench_prompts_folder', PROMPT_COLLAPSED_KEY = 'workbench_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'workbench_prompts_inspector';
+const PROMPT_FOLDER_KEY = 'cleardesk_prompts_folder', PROMPT_COLLAPSED_KEY = 'cleardesk_prompts_collapsed', PROMPT_INSPECTOR_KEY = 'cleardesk_prompts_inspector';
 let promptFolderFilter = 'all', promptSearchQuery = '', selectedPromptId = null, promptEditorId = null, promptSaveTimer = null;
 let promptMenuId = null, promptFolderMenuId = null, draggedPromptId = null, editingPromptFolderId = null, folderModalKind = null;
 let promptPresetDraft = false, promptVarSig = '';
 let promptFoldersCollapsed = new Set();
 try{ promptFoldersCollapsed = new Set(JSON.parse(localStorage.getItem(PROMPT_COLLAPSED_KEY) || '[]')); }catch(_){}
 try{ const f = localStorage.getItem(PROMPT_FOLDER_KEY); if(f) promptFolderFilter = f; }catch(_){}
-let promptOpenPending = null; try{ promptOpenPending = localStorage.getItem('workbench_prompts_open') || null; }catch(_){}   // the prompt that was open when the app was closed (this device), reopened once
+let promptOpenPending = null; try{ promptOpenPending = localStorage.getItem('cleardesk_prompts_open') || null; }catch(_){}   // the prompt that was open when the app was closed (this device), reopened once
 
 const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
 const promptFolderById = id=>promptFolders.find(f=>f.id===id);
 // The order of the prompts list: the same three keys and the same menu as Notes (per device). Title, A to Z, is the default (Notes keeps Date edited); favorites stay on top whatever the order.
-const PROMPT_SORT_KEY = 'workbench_prompts_sort';
+const PROMPT_SORT_KEY = 'cleardesk_prompts_sort';
 let promptSortKey = 'title', promptSortDir = 'asc';   // the standard order: A to Z (a sort you picked yourself is remembered and wins)
 try{ const sv = JSON.parse(localStorage.getItem(PROMPT_SORT_KEY) || 'null'); if(sv && ['edited','created','title'].includes(sv.key) && ['asc','desc'].includes(sv.dir)){ promptSortKey = sv.key; promptSortDir = sv.dir; } }catch(_){}
 function promptSorter(){
@@ -6732,7 +6814,19 @@ function promptIncludeTarget(name){
   const k = promptIncKey(name);
   return prompts.filter(q=>!promptTrashed(q) && promptIncKey(promptTitle(q))===k).sort((a, b)=>(a.createdAt || 0) - (b.createdAt || 0))[0] || null;
 }
-const promptIncludeNames = p=>[...String(p.template || '').replace(PROMPT_ESC_RE, '').matchAll(PROMPT_INC_RE)].map(m=>m[1]);
+// What is inside {{> … }}: the prompt's name, then optional values for its variables: {{>Role who=critic tone="very formal" @Language=German}}.
+// The arguments start at the first word that looks like name=value; a value or a name with spaces is quoted; a checklist takes its items split by |.
+const PROMPT_ARG_START = /\s+(?:"[^"]*"|[^\s="]+)=/;
+function promptIncParse(inner){
+  inner = String(inner).trim();
+  const m = PROMPT_ARG_START.exec(inner);
+  if(!m) return { name: inner, args: {}, rest: '' };
+  const rest = inner.slice(m.index), args = {};
+  for(const a of rest.matchAll(/(?:"([^"]*)"|([^\s="]+))=(?:"([^"]*)"|(\S*))/g)) args[a[1]!==undefined ? a[1] : a[2]] = a[3]!==undefined ? a[3] : a[4];
+  return { name: inner.slice(0, m.index).trim(), args, rest };
+}
+const promptIncludeSpecs = p=>[...String(p.template || '').replace(PROMPT_ESC_RE, '').matchAll(PROMPT_INC_RE)].map(m=>promptIncParse(m[1]));
+const promptIncludeNames = p=>promptIncludeSpecs(p).map(sp=>sp.name);
 function promptIncludeLoops(q, p, seen){                           // would including q bring p back in (directly or through other prompts)?
   if(q.id===p.id) return true;
   seen = seen || new Set(); if(seen.has(q.id)) return false; seen.add(q.id);
@@ -6740,12 +6834,17 @@ function promptIncludeLoops(q, p, seen){                           // would incl
 }
 function promptIncludes(p){                                        // the distinct prompts this one includes, with whether each one resolves
   const seen = new Set(), out = [];
-  promptIncludeNames(p).forEach(n=>{
-    const k = promptIncKey(n); if(seen.has(k)) return; seen.add(k);
-    const q = promptIncludeTarget(n);
-    out.push({ name: n.trim(), target: q, status: !q ? 'missing' : promptIncludeLoops(q, p) ? 'loop' : 'ok' });
+  promptIncludeSpecs(p).forEach(sp=>{
+    const k = promptIncKey(sp.name) + '|' + sp.rest; if(seen.has(k)) return; seen.add(k);
+    const q = promptIncludeTarget(sp.name), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
+    out.push({ name: sp.name, args: sp.args, rest: sp.rest.trim(), target: q, status: !q ? 'missing' : promptIncludeLoops(q, p) ? 'loop' : 'ok',
+      unknown: q ? Object.keys(sp.args).filter(a=>!have.includes(a.toLowerCase())) : [] });             // values given for a variable the included prompt does not have
   });
   return out;
+}
+// The other prompts that include this one (so you know what a change to it will affect).
+function promptUsedBy(p){
+  return prompts.filter(q=>q.id!==p.id && !promptTrashed(q) && promptIncludes(q).some(i=>i.target && i.target.id===p.id)).sort((a, b)=>promptTitle(a).localeCompare(promptTitle(b), undefined, {sensitivity:'base'}));
 }
 function detectPromptVars(template, existing){
   existing = existing || {};
@@ -6779,17 +6878,25 @@ function promptVarUnfilled(p, k, v){
   if(v.type==='text') return !(v.value || '').trim();
   return false;
 }
-function buildPromptFinal(p, stack){
+function buildPromptFinal(p, stack, overrides){
   const TOKEN = '\x00ESC\x00', escaped = [];
   stack = stack || [p.id];
   let t = String(p.template || '').replace(PROMPT_ESC_RE, (_, ph)=>{ escaped.push(ph); return TOKEN + (escaped.length - 1) + TOKEN; });
-  t = t.replace(PROMPT_INC_RE, (m, name)=>{                         // an included prompt goes in as finished text; one that is missing, would loop or is nested too deep stays as its placeholder
-    const q = promptIncludeTarget(name);
+  t = t.replace(PROMPT_INC_RE, (m, inner)=>{                        // an included prompt goes in as finished text; one that is missing, would loop or is nested too deep stays as its placeholder
+    const sp = promptIncParse(inner), q = promptIncludeTarget(sp.name);
     if(!q || stack.includes(q.id) || stack.length>=PROMPT_INCLUDE_DEPTH) return m;
-    escaped.push(buildPromptFinal(q, stack.concat(q.id)).replace(/\s+$/, ''));
+    escaped.push(buildPromptFinal(q, stack.concat(q.id), sp.args).replace(/\s+$/, ''));      // (its own choices, except the values this include sets)
     return TOKEN + (escaped.length - 1) + TOKEN;
   });
+  const ov = {}; Object.keys(overrides || {}).forEach(k=>{ ov[k.toLowerCase()] = overrides[k]; });      // values passed down by {{>Name key=value}} (names matched ignoring case)
   Object.entries(p.vars || {}).forEach(([k, v])=>{
+    const o = ov[k.toLowerCase()];
+    if(o!==undefined){                                              // a passed value wins over this prompt's own choice, for this one use
+      if(v.type==='instruction') t = t.split(`[[${k}]]`).join(o.split('|').map(x=>x.trim()).filter(Boolean).map(x=>`• ${x}`).join('\n'));
+      else if(v.type==='text') t = t.split(`((${k}))`).join(o);
+      else t = t.split(`{{${k}}}`).join(o);
+      return;
+    }
     if(promptVarUnfilled(p, k, v)) return;                          // nothing chosen or typed: the placeholder stays in the text, so the gap is visible
     if(v.type==='instruction') t = t.split(`[[${k}]]`).join(sortByPromptOptions(Array.isArray(v.selected) ? v.selected : [], v.options || []).map(s=>`• ${s}`).join('\n'));
     else if(v.type==='text') t = t.split(`((${k}))`).join(v.value || '');
@@ -6805,11 +6912,230 @@ function promptHighlight(template, selfId){
   let t = esc(String(template || '')).replace(/\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g, m=>{ keep.push(m); return TOKEN + (keep.length - 1) + TOKEN; });
   const self = selfId ? prompts.find(x=>x.id===selfId) : null;
   t = t.replace(/\{\{@([^}]+)\}\}/g, '<span class="ph ph-glob">{{@$1}}</span>').replace(/\{\{&gt;\s*([^}]+?)\s*\}\}/g, (m, n)=>{
-    const q = promptIncludeTarget(unescHtml(n)), bad = !q || (self && promptIncludeLoops(q, self));
+    const sp = promptIncParse(unescHtml(n)), q = promptIncludeTarget(sp.name), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
+    const bad = !q || (self && promptIncludeLoops(q, self)) || Object.keys(sp.args).some(a=>!have.includes(a.toLowerCase()));   // (a value for a variable the prompt does not have is flagged too)
     return `<span class="ph ph-inc${bad ? ' ph-miss' : ''}">${m}</span>`;
   }).replace(/\{\{(?!@|&gt;)([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
   return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>keep[+i]) + '\n';
 }
+
+// ---- compare two prompts (the diff view) ----
+// The engine is pure (arrays and strings in, plain objects out) so it can be tested without a DOM; the dialog below only paints it.
+const DIFF_WORD_RE = /\s+|[\p{L}\p{N}_]+|[^\s\p{L}\p{N}_]/gu;
+const diffWsKey = s=>s.replace(/\s+/g, ' ').trim();
+// Longest-common-subsequence diff of two arrays, compared through `key`: ops {t:'eq'|'del'|'add', a, b} in order (a / b are indexes). Equal ends are peeled off first; a middle too big for the table is reported as replaced.
+function diffSeq(a, b, key){
+  const ka = key ? a.map(key) : a, kb = key ? b.map(key) : b, ops = [];
+  let s = 0; while(s<a.length && s<b.length && ka[s]===kb[s]) s++;
+  let ea = a.length, eb = b.length; while(ea>s && eb>s && ka[ea-1]===kb[eb-1]){ ea--; eb--; }
+  for(let i=0; i<s; i++) ops.push({ t:'eq', a:i, b:i });
+  const n = ea - s, m = eb - s;
+  if(n*m > 4e6){
+    for(let i=0; i<n; i++) ops.push({ t:'del', a:s+i, b:-1 });
+    for(let j=0; j<m; j++) ops.push({ t:'add', a:-1, b:s+j });
+  } else {
+    const w = m + 1, L = new Uint32Array((n+1)*w);
+    for(let i=n-1; i>=0; i--) for(let j=m-1; j>=0; j--) L[i*w+j] = ka[s+i]===kb[s+j] ? L[(i+1)*w+j+1] + 1 : Math.max(L[(i+1)*w+j], L[i*w+j+1]);
+    let i = 0, j = 0;
+    while(i<n || j<m){
+      if(i<n && j<m && ka[s+i]===kb[s+j]){ ops.push({ t:'eq', a:s+i, b:s+j }); i++; j++; }
+      else if(i<n && (j===m || L[(i+1)*w+j] >= L[i*w+j+1])){ ops.push({ t:'del', a:s+i, b:-1 }); i++; }
+      else { ops.push({ t:'add', a:-1, b:s+j }); j++; }
+    }
+  }
+  for(let k=0; ea+k<a.length; k++) ops.push({ t:'eq', a:ea+k, b:eb+k });
+  return ops;
+}
+// The runs of changed lines: each a half-open range on both sides (an empty range is a pure insertion or deletion).
+function diffHunks(ops){
+  const hunks = []; let h = null, ai = 0, bi = 0;
+  ops.forEach(o=>{
+    if(o.t==='eq'){ h = null; ai = o.a + 1; bi = o.b + 1; return; }
+    if(!h){ h = { aStart:ai, aEnd:ai, bStart:bi, bEnd:bi }; hunks.push(h); }
+    if(o.t==='del'){ ai = o.a + 1; h.aEnd = ai; } else { bi = o.b + 1; h.bEnd = bi; }
+  });
+  return hunks;
+}
+// Inside a changed line pair: which words (or characters) differ. Returns [[text, changed], …] for each side.
+function diffSegments(x, y, precision, ws){
+  const tok = precision==='char' ? s=>Array.from(s) : s=>s.match(DIFF_WORD_RE) || [];
+  const ta = tok(x), tb = tok(y), ops = diffSeq(ta, tb, ws ? (t=>/^\s+$/.test(t) ? ' ' : t) : null);
+  const A = [], B = [], push = (arr, text, ch)=>{ const l = arr[arr.length-1]; if(l && l[1]===ch) l[0] += text; else arr.push([text, ch]); };
+  ops.forEach(o=>{ if(o.t==='eq'){ push(A, ta[o.a], false); push(B, tb[o.b], false); } else if(o.t==='del') push(A, ta[o.a], true); else push(B, tb[o.b], true); });
+  return { a: A, b: B };
+}
+// Everything the view needs for two texts split into lines: the ops, the hunks, and per line (null when unchanged) its hunk number and, for a line that has a partner on the other side, the changed words. o = { precision: 'line'|'word'|'char', ws: ignore whitespace }.
+function diffCompare(A, B, o){
+  o = o || {};
+  const ops = diffSeq(A, B, o.ws ? diffWsKey : null), hunks = diffHunks(ops);
+  const ma = new Array(A.length).fill(null), mb = new Array(B.length).fill(null);
+  hunks.forEach((h, hi)=>{
+    const na = h.aEnd - h.aStart, nb = h.bEnd - h.bStart, k = Math.min(na, nb);
+    for(let i=0; i<na; i++) ma[h.aStart+i] = { h:hi };
+    for(let i=0; i<nb; i++) mb[h.bStart+i] = { h:hi };
+    if(o.precision!=='line') for(let i=0; i<k; i++){ const s = diffSegments(A[h.aStart+i], B[h.bStart+i], o.precision || 'word', o.ws); ma[h.aStart+i].segs = s.a; mb[h.bStart+i].segs = s.b; }
+  });
+  return { ops, hunks, ma, mb };
+}
+// Take one hunk from one side and put it in the other side's place. Returns the two new line arrays.
+function diffMerge(A, B, h, toRight){
+  return toRight ? { a: A, b: B.slice(0, h.bStart).concat(A.slice(h.aStart, h.aEnd), B.slice(h.bEnd)) }
+                 : { a: A.slice(0, h.aStart).concat(B.slice(h.bStart, h.bEnd), A.slice(h.aEnd)), b: B };
+}
+// For the synchronized scrolling: each line's counterpart on the other side (for a changed line, where it would sit).
+function diffLineMap(ops, na, nb){
+  const ab = new Array(na).fill(0), ba = new Array(nb).fill(0); let ai = 0, bi = 0;
+  ops.forEach(o=>{
+    if(o.t==='eq'){ ab[o.a] = o.b; ba[o.b] = o.a; ai = o.a + 1; bi = o.b + 1; }
+    else if(o.t==='del'){ ab[o.a] = bi; ai = o.a + 1; }
+    else { ba[o.b] = ai; bi = o.b + 1; }
+  });
+  return { ab, ba };
+}
+function diffLinesHtml(lines, marks, cur, cls){
+  return lines.map((t, i)=>{
+    const m = marks[i];
+    if(!m) return `<div class="dl">${esc(t)}​</div>`;
+    const body = m.segs ? m.segs.map(([s, ch])=>ch ? `<mark>${esc(s)}</mark>` : esc(s)).join('') : esc(t);
+    return `<div class="dl ${cls}${m.h===cur ? ' dcur' : ''}">${body}​</div>`;
+  }).join('');
+}
+
+// The dialog. Left is the prompt you opened it from, right another prompt (or blank text to paste into). Both sides are editable drafts; nothing reaches a prompt until Save Changes.
+let pdf = null;
+const pdfEl = id=>document.getElementById(id);
+const pdfRO = side=>{ const id = side==='a' ? pdf.aId : pdf.bId, p = id && prompts.find(x=>x.id===id); return !!p && !!p.locked; };
+const pdfChanged = side=>side==='a' ? pdf.a!==pdf.a0 : !!pdf.bId && pdf.b!==pdf.b0;
+function openPromptDiff(id){
+  const p = prompts.find(x=>x.id===id); if(!p || promptTrashed(p)) return;
+  flushPromptEdit();
+  const others = prompts.filter(q=>q.id!==id && !promptTrashed(q)), o = others.find(q=>q.folderId===p.folderId) || others[0];
+  pdf = { aId:id, bId:o ? o.id : '', a:p.template, a0:p.template, b:o ? o.template : '', b0:o ? o.template : '', prec:'word', ws:false, cur:-1, undo:[], confirming:false, res:null };
+  modalReturnFocus = document.activeElement;
+  pdfEl('pdfPrec').value = 'word';
+  pdfEl('pdfModalBg').classList.add('open');
+  pdfFillSelects(); pdfSetText(); renderPromptDiff();
+}
+function pdfFillSelects(){
+  const list = prompts.filter(p=>!promptTrashed(p)).sort((x, y)=>promptTitle(x).localeCompare(promptTitle(y), undefined, {sensitivity:'base'}));
+  const opts = (sel, other, blank)=>(blank ? `<option value="">Blank text (not saved)</option>` : '') + list.map(p=>`<option value="${p.id}"${p.id===sel ? ' selected' : ''}${p.id===other ? ' disabled' : ''}>${esc(promptTitle(p))}</option>`).join('');
+  pdfEl('pdfSelA').innerHTML = opts(pdf.aId, pdf.bId, false); pdfEl('pdfSelB').innerHTML = opts(pdf.bId, pdf.aId, true);
+  pdfEl('pdfSelA').value = pdf.aId; pdfEl('pdfSelB').value = pdf.bId;
+}
+function pdfSetText(){
+  pdfEl('pdfTaA').value = pdf.a; pdfEl('pdfTaB').value = pdf.b;
+  pdfEl('pdfTaA').readOnly = pdfRO('a'); pdfEl('pdfTaB').readOnly = pdfRO('b');
+}
+function pdfPick(side, id){
+  if(!pdf) return;
+  if(pdfChanged(side)){ showToast('Save or undo your changes to this side first', true); pdfFillSelects(); return; }
+  const p = prompts.find(x=>x.id===id);
+  if(side==='a'){ if(!p) return; pdf.aId = id; pdf.a = pdf.a0 = p.template; }
+  else { pdf.bId = p ? id : ''; pdf.b = pdf.b0 = p ? p.template : ''; }
+  pdf.undo = []; pdf.cur = -1;
+  pdfFillSelects(); pdfSetText(); renderPromptDiff(); pdfEl(side==='a' ? 'pdfPaneA' : 'pdfPaneB').scrollTop = 0;
+}
+function pdfInput(side){
+  if(!pdf) return;
+  pdf[side] = pdfEl(side==='a' ? 'pdfTaA' : 'pdfTaB').value.slice(0, 100000);
+  renderPromptDiff();
+}
+function pdfSetOption(kind, v){
+  if(!pdf) return;
+  if(kind==='prec') pdf.prec = v; else pdf.ws = !pdf.ws;
+  const b = pdfEl('pdfWsBtn'); b.classList.toggle('on', pdf.ws); b.setAttribute('aria-pressed', String(pdf.ws));
+  renderPromptDiff();
+}
+function renderPromptDiff(){
+  if(!pdf) return;
+  const A = pdf.a.split('\n'), B = pdf.b.split('\n'), r = pdf.res = diffCompare(A, B, { precision:pdf.prec, ws:pdf.ws });
+  pdf.A = A; pdf.B = B; pdf.map = diffLineMap(r.ops, A.length, B.length);
+  if(pdf.cur>=r.hunks.length) pdf.cur = r.hunks.length - 1;
+  pdfEl('pdfHlA').innerHTML = diffLinesHtml(A, r.ma, pdf.cur, 'del'); pdfEl('pdfHlB').innerHTML = diffLinesHtml(B, r.mb, pdf.cur, 'add');
+  const n = r.hunks.length;
+  pdfEl('pdfCount').textContent = !n ? (pdf.a===pdf.b ? 'Identical' : 'No differences') : pdf.cur>=0 ? `${pdf.cur+1} of ${n}` : `${n} difference${n===1 ? '' : 's'}`;
+  ['pdfPrev', 'pdfNext'].forEach(id=>{ pdfEl(id).disabled = !n; });
+  pdfEl('pdfUndo').disabled = !pdf.undo.length;
+  pdfLayout(); pdfRenderFoot();
+}
+// Where each hunk sits in each pane (measured from the painted lines, so wrapped lines are right), and the arrows placed there.
+function pdfLayout(){
+  if(!pdf || !pdf.res) return;
+  const kids = hl=>hl.children || [], pos = (hl, i)=>{ const c = kids(hl); if(i<c.length) return c[i].offsetTop; const l = c[c.length-1]; return l ? l.offsetTop + l.offsetHeight : 0; };
+  const hlA = pdfEl('pdfHlA'), hlB = pdfEl('pdfHlB'), r = pdf.res;
+  pdf.tops = { a: Array.from(kids(hlA)).map(e=>e.offsetTop), b: Array.from(kids(hlB)).map(e=>e.offsetTop) };
+  pdf.ypos = r.hunks.map(h=>({ a: pos(hlA, h.aStart), b: pos(hlB, h.bStart) }));
+  const arrow = (hi, toRight, y, empty, src)=>`<button type="button" class="df-arrow ${toRight ? 'to-r' : 'to-l'}" style="top:${Math.max(0, y - (empty ? 11 : 0))}px" onmousedown="event.preventDefault()" onclick="pdfMerge(${hi}, ${toRight})" title="${src ? (toRight ? 'Copy this to the right' : 'Copy this to the left') : (toRight ? 'Remove this from the right' : 'Remove this from the left')}" aria-label="${toRight ? 'Copy to the right' : 'Copy to the left'}">${toRight ? '→' : '←'}</button>`;
+  pdfEl('pdfArrA').innerHTML = pdfRO('b') ? '' : r.hunks.map((h, i)=>arrow(i, true, pdf.ypos[i].a, h.aEnd===h.aStart, h.aEnd>h.aStart)).join('');
+  pdfEl('pdfArrB').innerHTML = pdfRO('a') ? '' : r.hunks.map((h, i)=>arrow(i, false, pdf.ypos[i].b, h.bEnd===h.bStart, h.bEnd>h.bStart)).join('');
+}
+function pdfMerge(hi, toRight){
+  if(!pdf || !pdf.res || !pdf.res.hunks[hi] || pdfRO(toRight ? 'b' : 'a')) return;
+  const m = diffMerge(pdf.A, pdf.B, pdf.res.hunks[hi], toRight);
+  pdf.undo.push({ a:pdf.a, b:pdf.b }); pdf.a = m.a.join('\n'); pdf.b = m.b.join('\n');
+  pdfSetText(); renderPromptDiff();
+}
+function pdfUndo(){
+  if(!pdf || !pdf.undo.length) return;
+  const u = pdf.undo.pop(); pdf.a = u.a; pdf.b = u.b; pdfSetText(); renderPromptDiff();
+}
+function pdfNav(d){
+  if(!pdf || !pdf.res || !pdf.res.hunks.length) return;
+  const n = pdf.res.hunks.length;
+  pdf.cur = pdf.cur<0 ? (d>0 ? 0 : n-1) : (pdf.cur + d + n) % n;
+  renderPromptDiff();
+  const y = pdf.ypos[pdf.cur], pane = pdfEl('pdfPaneA'), h = pdf.res.hunks[pdf.cur];
+  const useA = h.aEnd>h.aStart || h.bEnd===h.bStart;
+  const el = pdfEl(useA ? 'pdfPaneA' : 'pdfPaneB');
+  el.scrollTo ? el.scrollTo({ top: Math.max(0, (useA ? y.a : y.b) - 60) }) : (el.scrollTop = Math.max(0, (useA ? y.a : y.b) - 60));
+}
+// One pane scrolled: bring the other to the same place in the text (by the matching line, not by percentage, so changed stretches stay level).
+function pdfScroll(side){
+  if(!pdf || !pdf.tops) return;
+  const src = pdfEl(side==='a' ? 'pdfPaneA' : 'pdfPaneB'), dst = pdfEl(side==='a' ? 'pdfPaneB' : 'pdfPaneA');
+  if(pdf.expect && pdf.expect.el===src && Math.abs(src.scrollTop - pdf.expect.top) < 2){ pdf.expect = null; return; }
+  const ts = pdf.tops[side], td = pdf.tops[side==='a' ? 'b' : 'a'], map = (side==='a' ? pdf.map.ab : pdf.map.ba);
+  if(!ts.length || !td.length) return;
+  const y = src.scrollTop; let i = 0; while(i+1<ts.length && ts[i+1]<=y) i++;
+  const hs = (i+1<ts.length ? ts[i+1] : src.scrollHeight) - ts[i], frac = hs>0 ? Math.min(1, (y - ts[i]) / hs) : 0;
+  const j = Math.min(td.length-1, map[i]), hd = (j+1<td.length ? td[j+1] : dst.scrollHeight) - td[j];
+  dst.scrollTop = td[j] + frac * hd; pdf.expect = { el:dst, top:dst.scrollTop };
+}
+function pdfRenderFoot(){
+  const dirty = pdfChanged('a') || pdfChanged('b'), msg = pdfEl('pdfMsg'), acts = pdfEl('pdfActs');
+  if(pdf.confirming){
+    msg.textContent = 'Discard your changes?';
+    acts.innerHTML = `<button type="button" class="btn" onclick="pdfKeepEditing()">Keep Editing</button><button type="button" class="btn btn-danger" onclick="pdfClose()">Discard</button>`;
+  } else {
+    const n = (pdfChanged('a') ? 1 : 0) + (pdfChanged('b') ? 1 : 0);
+    msg.textContent = dirty ? `Unsaved changes in ${n===2 ? 'both prompts' : 'one prompt'}` : '';
+    acts.innerHTML = `<button type="button" class="btn" onclick="pdfRequestClose()">Close</button><button type="button" class="btn btn-primary" onclick="pdfSave()"${dirty ? '' : ' disabled'}>Save Changes</button>`;
+  }
+}
+function pdfRequestClose(){
+  if(!pdf) return closeAllModals();
+  if(pdfChanged('a') || pdfChanged('b')){ pdf.confirming = true; pdfRenderFoot(); return; }
+  pdfClose();
+}
+function pdfKeepEditing(){ if(pdf){ pdf.confirming = false; pdfRenderFoot(); } }
+function pdfClose(){ pdf = null; closeAllModals(); }
+function pdfSave(){
+  if(!pdf) return;
+  const before = [];
+  [['a', pdf.aId], ['b', pdf.bId]].forEach(([side, id])=>{
+    const p = id && prompts.find(x=>x.id===id); if(!p || p.locked || !pdfChanged(side)) return;
+    before.push({ p, template:p.template, vars:p.vars, updatedAt:p.updatedAt });
+    p.template = pdf[side].slice(0, 100000); p.vars = detectPromptVars(p.template, p.vars); touchPrompt(p);
+  });
+  pdfClose();
+  if(!before.length) return;
+  promptEditorId = null; save(); render();
+  showToast(`Saved ${before.length===2 ? 'both prompts' : 'the prompt'}`, false, ()=>{
+    before.forEach(b=>{ if(prompts.includes(b.p)){ b.p.template = b.template; b.p.vars = b.vars; b.p.updatedAt = b.updatedAt; } });
+    promptEditorId = null; save(); render();
+  });
+}
+if(typeof ResizeObserver==='function'){ const px = document.getElementById('pdfPanes'); if(px) new ResizeObserver(()=>{ if(pdf) pdfLayout(); }).observe(px); }   // wrapped lines move when the window or the dialog changes size
 
 // ---- data integrity ----
 function cleanPromptVars(vars){
@@ -6975,7 +7301,7 @@ function renderPrompts(){
   if(promptOpenPending){ const id = promptOpenPending; promptOpenPending = null; if(!selectedPromptId && vis.some(p=>p.id===id)) selectedPromptId = id; }   // the prompt you had open (once, at start)
   if(selectedPromptId && !vis.some(p=>p.id===selectedPromptId) && !promptSearchQuery.trim()) selectedPromptId = null;
   if(!selectedPromptId && vis.length) selectedPromptId = vis[0].id;
-  rememberOpenItem('workbench_prompts_open', selectedPromptId, promptFolderFilter==='trash' || !!promptSearchQuery.trim());
+  rememberOpenItem('cleardesk_prompts_open', selectedPromptId, promptFolderFilter==='trash' || !!promptSearchQuery.trim());
   renderPromptsSidebar(); renderPromptsList(vis); renderPromptEditor();
 }
 
@@ -7049,10 +7375,11 @@ function promptRenameCommit(){
   const before = [];
   prompts.forEach(q=>{
     if(q.id===p.id || q.locked || promptTrashed(q) || !q.template.includes('{{>')) return;
-    const t = q.template.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, name)=>esc_ || promptIncKey(name)!==promptIncKey(from.title) ? m : `{{>${to}}}`);
+    const t = q.template.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, inner)=>{ const sp = promptIncParse(inner); return esc_ || promptIncKey(sp.name)!==promptIncKey(from.title) ? m : `{{>${to}${sp.rest}}}`; });
     if(t!==q.template){ before.push({ q, template: q.template, vars: q.vars }); q.template = t; q.vars = detectPromptVars(t, q.vars); touchPrompt(q); }
   });
   const n = before.length;
+  { const cur = prompts.find(x=>x.id===promptEditorId); if(cur) renderPromptInspector(cur); }
   if(n){
     save(); renderPromptsList();
     showToast(`Updated the reference in ${n} prompt${n===1 ? '' : 's'}`, false, ()=>{          // Undo puts the old text back (the new name stays)
@@ -7067,13 +7394,20 @@ function commitPromptEdit(){ promptSaveTimer = null; save(); renderPromptsList()
 function touchPrompt(p){ p.updatedAt = Date.now(); }
 
 // ---- the variables panel (an inspector on the right) ----
-const promptSigOf = p=>Object.entries(p.vars || {}).map(([k, v])=>k + ':' + v.type).join('|') + '#' + promptIncludes(p).map(i=>i.name + ':' + i.status + ':' + (i.target ? i.target.id : '')).join('|');
+const promptSigOf = p=>Object.entries(p.vars || {}).map(([k, v])=>k + ':' + v.type).join('|') + '#' + promptIncludes(p).map(i=>i.name + ':' + i.status + ':' + (i.target ? i.target.id : '') + ':' + i.rest).join('|') + '#' + promptUsedBy(p).map(q=>q.id).join(',');
 // The prompts this one includes: a click opens that prompt (to edit the shared text in one place); a missing or looping one is flagged.
 function promptIncludesHtml(p){
-  const inc = promptIncludes(p); if(!inc.length) return '';
-  return `<div class="pr-inc-list"><div class="pr-insp-label">Included Prompts</div>` + inc.map(i=>i.status==='ok'
-    ? `<div class="pr-inc"><i class="fa-regular fa-clone"></i><button type="button" class="pr-inc-name" title="Open ${esc(promptTitle(i.target))}" onclick="selectPrompt('${i.target.id}')">${esc(promptTitle(i.target))}</button></div>`
-    : `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span></div>`).join('') + `</div>`;
+  const inc = promptIncludes(p), used = promptUsedBy(p); if(!inc.length && !used.length) return '';
+  const open = q=>`<button type="button" class="pr-inc-name" title="Open ${esc(promptTitle(q))}" onclick="selectPrompt('${q.id}')">${esc(promptTitle(q))}</button>`;
+  let html = '';
+  if(inc.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Included Prompts</div>` + inc.map(i=>{
+    if(i.status!=='ok') return `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span></div>`;
+    const names = Object.keys(i.target.vars || {}).map(k=>k.replace(/^@/, '@'));
+    const sub = i.unknown.length ? `<span class="pr-inc-sub bad">No variable ${i.unknown.map(esc).join(', ')}</span>` : i.rest ? `<span class="pr-inc-sub">${esc(i.rest)}</span>` : names.length ? `<span class="pr-inc-sub" title="Set one with {{>${esc(promptTitle(i.target))} ${esc(names[0])}=value}}">Can set: ${esc(names.slice(0, 4).join(', '))}${names.length>4 ? '…' : ''}</span>` : '';
+    return `<div class="pr-inc"><i class="fa-regular fa-clone"></i><div class="pr-inc-main">${open(i.target)}${sub}</div></div>`;
+  }).join('') + `</div>`;
+  if(used.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Used In</div>` + used.map(q=>`<div class="pr-inc"><i class="fa-regular fa-clone"></i>${open(q)}</div>`).join('') + `</div>`;
+  return html;
 }
 function renderPromptInspector(p){
   const host = document.getElementById('pInspector'); if(!host) return;
@@ -7206,7 +7540,7 @@ function focusPromptItem(kind, key, idx){
 function promptDragStart(e, kind, i){
   if(e.target.closest && e.target.closest('input')) { e.preventDefault(); return; }
   promptDrag = { kind, key: promptVarKeyOf(e.currentTarget), from: i };
-  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-workbench-pitem', String(i)); }catch(_){}
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-cleardesk-pitem', String(i)); }catch(_){}
   e.currentTarget.classList.add('dragging');
 }
 function promptDropAfter(e, kind){ const r = e.currentTarget.getBoundingClientRect(); return kind==='check' ? e.clientY > r.top + r.height/2 : e.clientX > r.left + r.width/2; }
@@ -7517,7 +7851,7 @@ function copyPrompt(id, onCopied){
   });
 }
 // ---- Open in an AI app: copy the finished prompt, then open the app's page in a new tab (the list is a per-device setting) ----
-const PROMPT_AI_APPS_KEY = 'workbench_prompt_ai_apps';
+const PROMPT_AI_APPS_KEY = 'cleardesk_prompt_ai_apps';
 const DEFAULT_PROMPT_AI_APPS = [{ name:'Claude', url:'https://claude.ai/new' }, { name:'Microsoft Copilot', url:'https://copilot.microsoft.com/' }];
 function aiAppUrlOk(u){ return /^https:\/\/[^\s\/?#]+\.[^\s\/?#]+|^https:\/\/localhost\b/i.test(u) && !/\s/.test(u) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$)/i.test(u); }
 function cleanPromptAiApps(list){                                  // only a name and a safe address (https, or http on this computer); null when it is not a list at all
@@ -7643,9 +7977,9 @@ function deletePromptFolder(id){
 }
 
 // ---- export / import ----
-// A prompts file: { format: 'workbench-prompts', version: 1, exported, folders[{id,name,parentId?}], prompts[…], globals[{name,options}] } — the prompts
+// A prompts file: { format: 'cleardesk-prompts', version: 1, exported, folders[{id,name,parentId?}], prompts[…], globals[{name,options}] } — the prompts
 // (never Recently Deleted ones), the folders that hold them (and their parents) and the global variables they use, so a file is complete on its own.
-const PROMPTS_FILE_FORMAT = 'workbench-prompts';
+const PROMPTS_FILE_FORMAT = 'cleardesk-prompts';
 const promptFileSlug = t=>String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
 function buildPromptsExport(scope, id){                           // scope: 'all' | 'prompt' (one prompt) | 'folder' (a folder and its subfolders)
   let list = prompts.filter(p=>!promptTrashed(p));
@@ -7673,10 +8007,10 @@ function exportPrompts(scope, id){
   if(!data){ showToast('There are no prompts to export', true); return; }
   const day = new Date().toISOString().slice(0, 10), name = scope==='prompt' ? promptFileSlug((prompts.find(p=>p.id===id) || {}).name) : scope==='folder' ? promptFileSlug((promptFolderById(id) || {}).name) : '';
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a');
-  a.href = url; a.download = `workbench-prompt${scope==='prompt' ? '' : 's'}-${name ? name + '-' : ''}${day}.json`; a.click(); URL.revokeObjectURL(url);
+  a.href = url; a.download = `cleardesk-prompt${scope==='prompt' ? '' : 's'}-${name ? name + '-' : ''}${day}.json`; a.click(); URL.revokeObjectURL(url);
   showToast(`Exported ${data.prompts.length} prompt${data.prompts.length===1 ? '' : 's'}`);
 }
-// Merge a prompts file (or a whole Workbench export, which has the same keys) into what is here. A prompt that is already here (same id) is left alone, so importing
+// Merge a prompts file (or a whole ClearDesk export, which has the same keys) into what is here. A prompt that is already here (same id) is left alone, so importing
 // the same file twice changes nothing; folders are matched by name and level; global variables are added only if no variable of that name exists.
 function importPromptsData(data){
   if(!data || typeof data!=='object' || !Array.isArray(data.prompts)) return null;
@@ -7734,6 +8068,7 @@ function promptMenuHtml(id){
     item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
     sep,
     item('fa-regular fa-clone', 'Duplicate', `promptMenuRun('clone')`),
+    item('fa-solid fa-arrows-left-right', 'Compare…', `promptMenuRun('compare')`),
     item('fa-solid fa-arrow-up-from-bracket', 'Export Prompt', `promptMenuRun('export')`),
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
     sep,
@@ -7755,7 +8090,7 @@ function promptMenuRun(kind, arg){
   if(kind==='open') return promptOpenInApp(arg, id);
   if(kind==='apps') return openAiAppsModal();
   if(kind==='copy') copyPrompt(id); else if(kind==='favorite') togglePromptFavorite(id); else if(kind==='lock') togglePromptLock(id);
-  else if(kind==='clone') clonePrompt(id); else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
+  else if(kind==='clone') clonePrompt(id); else if(kind==='compare') openPromptDiff(id); else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
 }
 function promptFolderMenuHtml(id){
   const f = promptFolderById(id); if(!f) return '';
@@ -7877,7 +8212,7 @@ function noteListsInSelection(){
 }
 // The list button's main click re-applies the last bullet style picked from the menu (per-device); numbered styles don't change it.
 let noteBulletKind = 'disc';
-try{ const k = localStorage.getItem('mytasks_note_bullet'); if(k==='disc' || NOTE_UL_STYLES.includes(k)) noteBulletKind = k; }catch(_){}
+try{ const k = localStorage.getItem('cleardesk_note_bullet'); if(k==='disc' || NOTE_UL_STYLES.includes(k)) noteBulletKind = k; }catch(_){}
 const NOTE_OL_NEXT = {decimal:'alpha', alpha:'roman', roman:'decimal'};   // the outline cycle (also in the CSS above)
 function noteListKind(l){
   const ls = l.getAttribute('data-ls');
@@ -8002,7 +8337,7 @@ function noteOpenHref(h){ if(/^(mailto|tel):/i.test(h)) window.location.href = h
 function noteListStyle(kind){
   closeNoteListMenu();
   noteFocusBody();
-  if(kind!=='decimal' && !NOTE_OL_STYLES.includes(kind)){ noteBulletKind = kind; try{ localStorage.setItem('mytasks_note_bullet', kind); }catch(_){} }
+  if(kind!=='decimal' && !NOTE_OL_STYLES.includes(kind)){ noteBulletKind = kind; try{ localStorage.setItem('cleardesk_note_bullet', kind); }catch(_){} }
   const wantOl = kind==='decimal' || kind==='alpha' || kind==='roman', wantTag = wantOl ? 'OL' : 'UL', cmd = wantOl ? 'insertOrderedList' : 'insertUnorderedList';
   let lists = noteListsInSelection();
   if(lists.length && noteCurrentListStyle()===kind){ document.execCommand(cmd, false); onNoteInput(); updateNoteToolbarState(); return; }   // the same style again turns the list off
@@ -8631,18 +8966,18 @@ function openNoteMoreMenu(e){
 }
 window.addEventListener('resize', ()=>{ tblHandlesRefresh(); tblChromeSync(); });
 // ---- the / menu: type "/" at the start of a line (or after a space) to insert a block; keep typing to filter, ↑ ↓ to move, ↵ or Tab to insert, Esc to close ----
-const NOTE_SLASH_ITEMS = [
+const NOTE_SLASH_ITEMS = [   // in the order shown: headings, lists, blocks, then the date; a separator falls between groups
   { group:'text', id:'h1', label:'Title', icon:'<span class="mi slash-glyph" aria-hidden="true">H1</span>', keys:'h1 heading', hint:'#', run:()=>noteBlock('h1') },
   { group:'text', id:'h2', label:'Heading', icon:'<span class="mi slash-glyph" aria-hidden="true">H2</span>', keys:'h2', hint:'##', run:()=>noteBlock('h2') },
   { group:'text', id:'h3', label:'Subheading', icon:'<span class="mi slash-glyph" aria-hidden="true">H3</span>', keys:'h3', hint:'###', run:()=>noteBlock('h3') },
-  { group:'text', id:'quote', label:'Quote', icon:'fa-solid fa-indent', keys:'blockquote', run:()=>noteBlock('blockquote') },
-  { group:'text', id:'code', label:'Code Block', icon:'fa-solid fa-code', keys:'pre snippet', hint:'```', run:()=>noteBlock('pre') },
   { group:'list', id:'checklist', label:'Checklist', icon:'fa-solid fa-list-check', keys:'todo task check', run:()=>noteChecklist() },
   { group:'list', id:'ul', label:'Bulleted List', icon:'fa-solid fa-list-ul', keys:'bullets unordered', run:()=>noteListStyle(noteBulletKind || 'disc') },
   { group:'list', id:'ol', label:'Numbered List', icon:'fa-solid fa-list', keys:'numbers ordered', run:()=>noteListStyle('decimal') },
-  { group:'insert', id:'table', label:'Table', icon:'fa-solid fa-table', keys:'grid rows columns', run:()=>noteTableInsert(3, 3) },
-  { group:'insert', id:'hr', label:'Divider', icon:'fa-solid fa-minus', keys:'hr line rule separator', hint:'---', run:()=>document.execCommand('insertHorizontalRule', false) },
-  { group:'insert', id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) }
+  { group:'block', id:'quote', label:'Quote', icon:'fa-solid fa-indent', keys:'blockquote', run:()=>noteBlock('blockquote') },
+  { group:'block', id:'code', label:'Code Block', icon:'fa-solid fa-code', keys:'pre snippet', hint:'```', run:()=>noteBlock('pre') },
+  { group:'block', id:'table', label:'Table', icon:'fa-solid fa-table', keys:'grid rows columns', run:()=>noteTableInsert(3, 3) },
+  { group:'block', id:'hr', label:'Divider', icon:'fa-solid fa-minus', keys:'hr line rule separator', hint:'---', run:()=>document.execCommand('insertHorizontalRule', false) },
+  { group:'inline', id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) }
 ];
 // What may be inserted where: nothing in a code block; only a date in a table cell; no headings, quotes, code, dividers or tables inside a list item.
 const noteSlashAllowed = node=>noteClosest(node, 'TD') || noteClosest(node, 'TH') ? ['date'] : noteClosest(node, 'LI') ? ['date', 'checklist', 'ul', 'ol'] : NOTE_SLASH_ITEMS.map(i=>i.id);
@@ -8686,7 +9021,7 @@ function noteSlashRender(){
     menu.onmousedown = ev=>ev.preventDefault();                        // the note keeps focus (and its caret) while you pick
     document.body.appendChild(menu);
   }
-  menu.innerHTML = s.items.map((it, i)=>(i && it.group!==s.items[i - 1].group ? '<div class="row-menu-sep" role="separator"></div>' : '')       // related items sit together: text styles, lists, then things to insert
+  menu.innerHTML = s.items.map((it, i)=>(i && it.group!==s.items[i - 1].group ? '<div class="row-menu-sep" role="separator"></div>' : '')       // related items sit together: headings, lists, blocks, then the date
     + `<button type="button" class="row-menu-item${i===s.idx ? ' sel' : ''}" id="noteSlashOpt${i}" role="option" aria-selected="${i===s.idx}" onmouseenter="noteSlashHover(${i})" onclick="noteSlashPick(${i})">${it.icon.startsWith('<span') ? it.icon : menuIconHtml(it.icon)}<span>${esc(it.label)}</span>${it.hint ? `<span class="row-menu-hint">${esc(it.hint)}</span>` : ''}</button>`).join('');
   const r = document.createRange(); r.setStart(s.node, Math.min(s.end, s.node.nodeValue.length)); r.collapse(true);
   let rc = r.getBoundingClientRect(); if(!rc || !rc.height) rc = noteLineOf(s.node).getBoundingClientRect();
@@ -9434,7 +9769,7 @@ function moveGlobalValue(from, to){
 function globalDragStart(e, i){
   if(e.target.closest && e.target.closest('input')){ e.preventDefault(); return; }
   promptDrag = { kind: 'gval', key: globalsSel, from: i };
-  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-workbench-gval', String(i)); }catch(_){}
+  e.dataTransfer.effectAllowed = 'move'; try{ e.dataTransfer.setData('application/x-cleardesk-gval', String(i)); }catch(_){}
   e.currentTarget.classList.add('dragging');
 }
 function globalDragOver(e){
@@ -9973,7 +10308,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `workbench-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
+  downloadBackup(projects, tasks, `cleardesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 // What a chosen .json file is: a prompts file (Export Prompts / Export Prompt / Export Folder) or a full backup (Export All Data).
@@ -9993,7 +10328,7 @@ function handleFileImport(event){
       if(!data.tasks || !data.projects) throw new Error('bad');
       pendingImportData = data;
       document.getElementById('importModalBg').classList.add('open');
-    }catch(err){ showToast('Invalid Workbench file', true); }
+    }catch(err){ showToast('Invalid ClearDesk file', true); }
   };
   reader.readAsText(file);
   event.target.value = '';
@@ -10079,7 +10414,7 @@ function mergeData(data, opts){
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `workbench-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
+    downloadBackup(projects, tasks, `cleardesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
     trashedTasks = pendingImportData.trashedTasks || []; purgedTaskIds = [];
@@ -10119,7 +10454,7 @@ function toggleAllTasksProject(id){
 }
 // ── File System Access API ────────────────────────────────────────────────────
 let fileHandle = null;
-const _FS = { db: 'mytasks-fs', store: 'handles', key: 'linked-file', dirKey: 'linked-dir' };
+const _FS = { db: 'cleardesk-fs', store: 'handles', key: 'linked-file', dirKey: 'linked-dir' };
 function _fsIdb(mode, fn){
   return new Promise((res, rej)=>{
     const req = indexedDB.open(_FS.db, 1);
@@ -10135,6 +10470,23 @@ const _fsGet = ()  => _fsIdb('readonly',  (s,r,j)=>{ const q=s.get(_FS.key);    
 const _fsPut = h   => _fsIdb('readwrite', (s,r,j)=>{ const q=s.put(h,_FS.key);   q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
 const _fsDel = ()  => _fsIdb('readwrite', (s,r,j)=>{ const q=s.delete(_FS.key);  q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
 
+// The linked file's handle used to live in an IndexedDB under another name: copy it across once, then drop the old one.
+async function _fsMigrateLegacy(){
+  try{
+    if(!indexedDB.databases) return;
+    if(!(await indexedDB.databases()).some(d=>d.name==='mytasks-fs')) return;
+    const old = await new Promise((res, rej)=>{ const r = indexedDB.open('mytasks-fs', 1); r.onsuccess = ()=>res(r.result); r.onerror = ()=>rej(r.error); });
+    const vals = await new Promise(res=>{
+      try{ const st = old.transaction('handles', 'readonly').objectStore('handles'), out = {}; let n = 0; const done = ()=>{ if(++n===2) res(out); };
+        ['linked-file', 'linked-dir'].forEach(k=>{ const q = st.get(k); q.onsuccess = ()=>{ out[k] = q.result; done(); }; q.onerror = done; }); }
+      catch(_){ res({}); }
+    });
+    old.close();
+    if(vals['linked-file'] && !(await _fsGet().catch(()=>null))) await _fsPut(vals['linked-file']);
+    if(vals['linked-dir'] && !(await _fsGetK(_FS.dirKey).catch(()=>null))) await _fsPutK(_FS.dirKey, vals['linked-dir']);
+    indexedDB.deleteDatabase('mytasks-fs');
+  }catch(_){}
+}
 let lastSyncedSnapshot = null;
 async function fileSyncWrite(data){
   if(!fileHandle) return;
@@ -10181,13 +10533,13 @@ async function _clearFileLink(){
 // and gain backups once their folder is linked (Data menu -> Daily file backup).
 async function pickDataFolder(){
   if(!window.showDirectoryPicker){ showToast('File linking requires Chrome or Edge', true); return null; }
-  try{ return await window.showDirectoryPicker({id:'workbench-folder', mode:'readwrite'}); }
+  try{ return await window.showDirectoryPicker({id:'cleardesk-folder', mode:'readwrite'}); }
   catch(e){
     if(e.name!=='AbortError') showToast('That folder cannot be used. Pick a folder inside Documents (not Documents itself).', true);
     return null;
   }
 }
-// The folder's .json files that hold Workbench data (a tasks and a projects array), newest first.
+// The folder's .json files that hold ClearDesk data (a tasks and a projects array), newest first.
 async function listDataFiles(dir){
   const out = [];
   for await (const [name, h] of dir.entries()){
@@ -10205,7 +10557,7 @@ async function createNewLinkedFile(){
   const dir = await pickDataFolder(); if(!dir) return;
   pendingNewFileDir = dir;
   document.getElementById('newFileFolder').textContent = `In ${dir.name}. Daily backups go in its Backup subfolder.`;
-  const inp = document.getElementById('newFileName'); inp.value = 'workbench-data';
+  const inp = document.getElementById('newFileName'); inp.value = 'cleardesk-data';
   document.getElementById('newFileError').textContent = '';
   document.getElementById('newFileModalBg').classList.add('open');
   setTimeout(()=>{ inp.focus(); inp.select(); }, 30);
@@ -10238,7 +10590,7 @@ async function linkFile(){
   const dir = await pickDataFolder(); if(!dir) return;
   try{
     const files = await listDataFiles(dir);
-    if(!files.length){ showToast('No Workbench data file in that folder. Use "Create new file" instead.', true); return; }
+    if(!files.length){ showToast('No ClearDesk data file in that folder. Use "Create new file" instead.', true); return; }
     if(files.length===1){ await finishLink(dir, files[0].handle); return; }
     pendingDataFiles = { dir, files };
     document.getElementById('dataFilesFolder').textContent = `${dir.name}: ${files.length} data files`;
@@ -10316,7 +10668,7 @@ let syncBannerHandle = null, syncBannerDismissed = false;
 function showSyncBanner(handle){
   syncBannerHandle = handle || null;
   if(syncBannerDismissed) return;
-  try{ if(sessionStorage.getItem('mytasks_syncbanner_dismissed')==='1') return; }catch(_){}
+  try{ if(sessionStorage.getItem('cleardesk_syncbanner_dismissed')==='1') return; }catch(_){}
   const el = document.getElementById('syncBanner'); if(!el) return;
   el.innerHTML = handle
     ? `<i class="fa-solid fa-triangle-exclamation"></i><span>Sync is paused — <strong>${esc(handle.name)}</strong> needs permission again.</span><button class="btn btn-sm" onclick="openFileSyncModal(syncBannerHandle)">Reconnect</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>`
@@ -10324,7 +10676,7 @@ function showSyncBanner(handle){
   el.classList.add('show');
 }
 function hideSyncBanner(){ const el = document.getElementById('syncBanner'); if(!el) return; el.classList.remove('show'); el.innerHTML = ''; }
-function dismissSyncBanner(){ syncBannerDismissed = true; try{ sessionStorage.setItem('mytasks_syncbanner_dismissed','1'); }catch(_){} hideSyncBanner(); }
+function dismissSyncBanner(){ syncBannerDismissed = true; try{ sessionStorage.setItem('cleardesk_syncbanner_dismissed','1'); }catch(_){} hideSyncBanner(); }
 // One compact status chip, like Milestone's: amber "Link file" when only the
 // browser holds the data, green "Linked" when saved to a file, red "Reconnect"
 // when the browser dropped file permission. Click acts on the state: link
@@ -10366,7 +10718,7 @@ let lastFileBackupDay = null;
 const _fsGetK = k => _fsIdb('readonly',  (s,r,j)=>{ const q=s.get(k);   q.onsuccess=()=>r(q.result); q.onerror=()=>j(q.error); });
 const _fsPutK = (k,h) => _fsIdb('readwrite', (s,r,j)=>{ const q=s.put(h,k); q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
 const _fsDelK = k => _fsIdb('readwrite', (s,r,j)=>{ const q=s.delete(k);   q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
-function fileBackupName(day){ const base = fileHandle ? fileHandle.name.replace(/\.json$/i, '') : 'workbench-data'; return `${base}-${day}.json`; }
+function fileBackupName(day){ const base = fileHandle ? fileHandle.name.replace(/\.json$/i, '') : 'cleardesk-data'; return `${base}-${day}.json`; }
 function fileBackupDue(){ return !!dirHandle && lastFileBackupDay !== todayStr(); }
 async function fileBackupIfDue(){
   if(!fileBackupDue() || backupRunning) return false;
@@ -10421,6 +10773,7 @@ async function initFileSync(){
   if(!window.showOpenFilePicker) return;
   updateFileSyncUI();
   try{
+    await _fsMigrateLegacy();
     const handle = await _fsGet();
     if(!handle){ showSyncBanner(null); return; }
     fileHandle = handle;
@@ -10487,7 +10840,7 @@ const versionStampOf = h=>{ if(!h || !h.get) return ''; return h.get('etag') || 
 let loadedVersionStamp = null, updateBannerDismissed = false;
 function showUpdateBanner(){
   const el = document.getElementById('updateBanner'); if(!el || updateBannerDismissed) return;
-  el.innerHTML = `<i class="fa-solid fa-rotate-right"></i><span>A new version of <strong>Workbench</strong> is ready.</span><button class="btn btn-sm btn-primary" onclick="reloadForUpdate()">Reload</button><button class="icon-btn" onclick="dismissUpdateBanner()" title="Not now" aria-label="Not now"><i class="fa-solid fa-xmark"></i></button>`;
+  el.innerHTML = `<i class="fa-solid fa-rotate-right"></i><span>A new version of <strong>ClearDesk</strong> is ready.</span><button class="btn btn-sm btn-primary" onclick="reloadForUpdate()">Reload</button><button class="icon-btn" onclick="dismissUpdateBanner()" title="Not now" aria-label="Not now"><i class="fa-solid fa-xmark"></i></button>`;
   el.classList.add('show');
 }
 function dismissUpdateBanner(){ updateBannerDismissed = true; const el = document.getElementById('updateBanner'); if(el){ el.classList.remove('show'); el.innerHTML = ''; } }
@@ -10506,7 +10859,7 @@ if(typeof setInterval==='function') setInterval(checkForNewVersion, 60 * 60 * 10
 if('serviceWorker' in navigator && location.protocol !== 'file:'){
   const hadController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(hadController) showUpdateBanner(); });
-  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('workbench: service worker registration failed — offline support unavailable', e)); });
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('sw.js').catch(e=>console.warn('cleardesk: service worker registration failed — offline support unavailable', e)); });
 }
 </script>
 </body>

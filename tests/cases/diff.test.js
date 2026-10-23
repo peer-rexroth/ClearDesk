@@ -1,0 +1,118 @@
+// Prompts: the compare view. The engine (diffSeq / diffHunks / diffCompare / diffMerge) is pure; the dialog is driven through the same functions the buttons call.
+
+function dfLines(s) { return s.split('\n'); }
+function dfOpen(aText, bText, over) {
+  const a = pmk({ name: 'Left', template: aText }), b = pmk({ name: 'Right', template: bText });
+  pfresh(); prompts = [a, b]; selectedPromptId = a.id;
+  openPromptDiff(a.id);
+  if (over) Object.assign(pdf, over);
+  return { a, b };
+}
+
+test('diffSeq finds a minimal edit script and keeps the equal lines in order', function () {
+  const ops = diffSeq(['a', 'b', 'c', 'd'], ['a', 'x', 'c', 'd', 'e']);
+  assertDeepEqual(ops.map(o => o.t), ['eq', 'del', 'add', 'eq', 'eq', 'add']);
+  assertDeepEqual(diffSeq([], []), []);
+  assertDeepEqual(diffSeq(['a'], ['a']).map(o => o.t), ['eq']);
+  assertDeepEqual(diffSeq(['a'], []).map(o => o.t), ['del']);
+  assertDeepEqual(diffSeq([], ['a']).map(o => o.t), ['add']);
+});
+
+test('diffHunks groups changed runs with half-open ranges on both sides', function () {
+  const h = diffHunks(diffSeq(dfLines('a\nb\nc\nd'), dfLines('a\nX\nY\nc\nd\ne')));
+  assertDeepEqual(h, [{ aStart: 1, aEnd: 2, bStart: 1, bEnd: 3 }, { aStart: 4, aEnd: 4, bStart: 5, bEnd: 6 }]);
+  assertDeepEqual(diffHunks(diffSeq(['a', 'b'], ['a', 'b'])), [], 'identical text has no hunks');
+});
+
+test('diffSegments marks only the words that changed, and ignore-whitespace ignores spacing', function () {
+  const s = diffSegments('Write a short summary', 'Write a long summary', 'word', false);
+  assertDeepEqual(s.a, [['Write a ', false], ['short', true], [' summary', false]]);
+  assertDeepEqual(s.b, [['Write a ', false], ['long', true], [' summary', false]]);
+  const c = diffSegments('cat', 'cut', 'char', false);
+  assertDeepEqual(c.a, [['c', false], ['a', true], ['t', false]]);
+  const w = diffSegments('a  b', 'a b', 'word', true);
+  assertFalse(w.a.some(x => x[1]) || w.b.some(x => x[1]), 'only the spacing differs');
+});
+
+test('diffCompare: a changed line pair gets word marks, a lone line none; precision line skips them; ignoring whitespace removes the hunk', function () {
+  const r = diffCompare(dfLines('keep\nold text here\ngone'), dfLines('keep\nnew text here'), { precision: 'word' });
+  assertEqual(r.hunks.length, 1);
+  assertEqual(r.ma[0], null); assertEqual(r.ma[1].h, 0); assertTrue(!!r.ma[1].segs); assertEqual(r.ma[2].segs, undefined, 'the unpaired line is just removed');
+  assertEqual(diffCompare(['a b'], ['a c'], { precision: 'line' }).ma[0].segs, undefined);
+  assertEqual(diffCompare(['a   b'], ['a b'], { precision: 'word', ws: true }).hunks.length, 0);
+  assertEqual(diffCompare(['a   b'], ['a b'], { precision: 'word', ws: false }).hunks.length, 1);
+});
+
+test('diffMerge copies a hunk either way, including a pure insertion and a pure deletion', function () {
+  const A = dfLines('a\nb\nc'), B = dfLines('a\nX\nc\nd'), h = diffCompare(A, B, {}).hunks;
+  assertEqual(h.length, 2);
+  assertEqual(diffMerge(A, B, h[0], true).b.join('\n'), 'a\nb\nc\nd', 'left line replaces the right one');
+  assertEqual(diffMerge(A, B, h[0], false).a.join('\n'), 'a\nX\nc', 'right line replaces the left one');
+  assertEqual(diffMerge(A, B, h[1], false).a.join('\n'), 'a\nb\nc\nd', 'an insertion on the right is added to the left');
+  assertEqual(diffMerge(A, B, h[1], true).b.join('\n'), 'a\nX\nc', 'copying an empty left side removes the right lines');
+  // merging every hunk one way makes the sides equal
+  let a = A, b = B; for (let k = 0; k < 5 && diffCompare(a, b, {}).hunks.length; k++) { const m = diffMerge(a, b, diffCompare(a, b, {}).hunks[0], true); a = m.a; b = m.b; }
+  assertEqual(a.join('\n'), b.join('\n'));
+});
+
+test('diffLineMap gives each line a counterpart for the synchronized scrolling', function () {
+  const A = dfLines('a\nb\nc'), B = dfLines('a\nX\nY\nc'), m = diffLineMap(diffSeq(A, B), 3, 4);
+  assertEqual(m.ab[0], 0); assertEqual(m.ab[2], 3); assertEqual(m.ba[3], 2); assertEqual(m.ba[0], 0);
+});
+
+test('diffLinesHtml escapes the text, marks changed words and flags the current hunk', function () {
+  const r = diffCompare(['<b>x</b> one'], ['<b>x</b> two'], { precision: 'word' });
+  const h = diffLinesHtml(['<b>x</b> one'], r.ma, 0, 'del');
+  assertIncludes(h, '&lt;b&gt;x&lt;/b&gt;'); assertIncludes(h, '<mark>one</mark>'); assertIncludes(h, 'dl del dcur');
+  assertNotIncludes(diffLinesHtml(['<b>x</b> one'], r.ma, -1, 'del'), 'dcur');
+  assertEqual(diffLinesHtml(['same'], [null], -1, 'del'), '<div class="dl">same​</div>');
+});
+
+test('openPromptDiff loads both prompts; editing a side recomputes, arrows move a hunk, Undo Move puts it back', function () {
+  const { a, b } = dfOpen('one\ntwo\nthree', 'one\n2\nthree');
+  assertEqual(pdf.aId, a.id); assertEqual(pdf.bId, b.id);
+  assertEqual(pdf.res.hunks.length, 1);
+  pdfMerge(0, true);
+  assertEqual(pdf.b, 'one\ntwo\nthree'); assertEqual(pdf.res.hunks.length, 0); assertEqual(pdfEl('pdfCount').textContent, 'Identical');
+  pdfUndo();
+  assertEqual(pdf.b, 'one\n2\nthree'); assertEqual(pdf.res.hunks.length, 1);
+  pdf.a = 'one\ntwo\nthree\nfour'; renderPromptDiff();
+  assertEqual(pdf.res.hunks.length, 2, 'typing on a side is compared at once');
+});
+
+test('Save Changes writes only the changed sides to the prompts and Undo restores them; Discard leaves them alone', function () {
+  const { a, b } = dfOpen('alpha', 'beta {{y}}');
+  pdfMerge(0, false);                                       // right line goes to the left: a changes, b does not
+  assertTrue(pdfChanged('a')); assertFalse(pdfChanged('b'));
+  pdfSave();
+  assertEqual(a.template, 'beta {{y}}'); assertEqual(b.template, 'beta {{y}}'); assertEqual(pdf, null);
+  assertDeepEqual(Object.keys(a.vars), ['y'], 'the variables follow the new template');
+  toastUndoAction(); assertEqual(a.template, 'alpha'); assertDeepEqual(Object.keys(a.vars), []);
+  dfOpen('p', 'q'); pdfMerge(0, true); pdfRequestClose();
+  assertTrue(pdf.confirming, 'closing with unsaved changes asks first');
+  pdfKeepEditing(); assertFalse(pdf.confirming);
+  pdfRequestClose(); pdfClose();
+  assertEqual(prompts[1].template, 'q', 'discarding changes nothing');
+});
+
+test('a locked prompt is a read-only side: no arrows into it, no save to it', function () {
+  const { a, b } = dfOpen('x', 'y'); b.locked = true; pdfSetText(); renderPromptDiff();
+  assertEqual(pdfEl('pdfArrA').innerHTML, '', 'no arrow toward the locked right side');
+  assertIncludes(pdfEl('pdfArrB').innerHTML, 'to-l', 'the unlocked left side can still take it');
+  pdfMerge(0, true); assertEqual(pdf.b, 'y', 'the move into a locked side is refused');
+  assertTrue(pdfEl('pdfTaB').readOnly);
+});
+
+test('switching a side with unsaved changes is refused, and the other side cannot be picked for both', function () {
+  const { a, b } = dfOpen('x', 'y'); const c = pmk({ name: 'C', template: 'z' }); prompts.push(c);
+  pdfMerge(0, true);
+  pdfPick('b', c.id); assertEqual(pdf.bId, b.id, 'unsaved changes block the switch');
+  pdfUndo(); pdfPick('b', c.id); assertEqual(pdf.bId, c.id); assertEqual(pdf.b, 'z');
+  pdfPick('b', ''); assertEqual(pdf.bId, ''); assertEqual(pdf.b, '', 'blank text is a scratch side');
+  pdf.b = 'typed'; assertFalse(pdfChanged('b'), 'scratch text is never saved, so it never counts as a change');
+});
+
+test('the Compare… item is in the prompt menu', function () {
+  const p = pmk({}); pfresh(); prompts = [p];
+  assertIncludes(promptMenuHtml(p.id), "promptMenuRun('compare')");
+});

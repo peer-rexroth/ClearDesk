@@ -122,7 +122,7 @@ test('load() migrates old-schema data read from localStorage', function () {
     projects: [{ id: 'proj-inbox', name: 'Inbox', locked: true }],
     tasks: [{ id: 't1', title: 'Legacy task', projectId: 'proj-inbox', subtasks: [{ id: 's1', text: 'old step' }] }]
   };
-  localStorage.setItem('mytasks_data_v1', JSON.stringify(oldData));
+  localStorage.setItem('cleardesk_data_v1', JSON.stringify(oldData));
   load();
   assertEqual(projById('proj-inbox').icon, 'folder');
   assertDeepEqual(tasks[0].subtasks[0].subtasks, []);
@@ -171,4 +171,16 @@ test('merging a file: the newer project order and shown-projects choice win, an 
   mergeData(incoming);
   assertDeepEqual(projects.map(function (p) { return p.id; }), ['proj-inbox', 'b', 'a', 'proj-deleted'], 'older: ours stays');
   assertDeepEqual(allTasksHiddenProjectIds, ['b']);
+});
+
+test('data saved under the older key names is moved to the current ones once, and nothing is lost', function () {
+  ['mytasks_theme', 'workbench_prompts_sort', 'mytasks_backups', 'cleardesk_theme', 'cleardesk_prompts_sort', 'cleardesk_view', 'mytasks_view'].forEach(function (k) { localStorage.removeItem(k); });
+  localStorage.setItem('mytasks_theme', 'dark'); localStorage.setItem('workbench_prompts_sort', '{"key":"title","dir":"asc"}'); localStorage.setItem('mytasks_backups', 'old');
+  localStorage.setItem('mytasks_view', 'board'); localStorage.setItem('cleardesk_view', 'list');
+  migrateLegacyStorage();
+  assertEqual(localStorage.getItem('cleardesk_theme'), 'dark');
+  assertEqual(localStorage.getItem('cleardesk_prompts_sort'), '{"key":"title","dir":"asc"}');
+  assertEqual(localStorage.getItem('cleardesk_view'), 'list', 'a value already stored under the new name is not overwritten');
+  ['mytasks_theme', 'workbench_prompts_sort', 'mytasks_backups', 'mytasks_view'].forEach(function (k) { assertEqual(localStorage.getItem(k), null, k + ' is gone'); });
+  localStorage.removeItem('cleardesk_theme'); localStorage.removeItem('cleardesk_prompts_sort'); localStorage.removeItem('cleardesk_view');
 });

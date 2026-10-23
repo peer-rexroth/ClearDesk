@@ -1,12 +1,12 @@
-# Workbench – UX/UI audit (consistency + Apple HIG)
+# ClearDesk – UX/UI audit (consistency + Apple HIG)
 
-Audit date: 2026-10-20. Read-only: no code was changed. Scope: `workbench.html` (single file, 9,630 lines) in its three modes, **Tasks, Notes and Prompts**, plus the dialogs, menus and the new Global Variables dialog.
+Audit date: 2026-10-20. Read-only: no code was changed. Scope: `cleardesk.html` (single file, 9,630 lines) in its three modes, **Tasks, Notes and Prompts**, plus the dialogs, menus and the new Global Variables dialog.
 
 This report **replaces** the earlier audit (F-01 … F-38, closed out in commit `cc1ec62`; recover it with `git show cc1ec62:ux-ui-audit.md`). Findings here use the prefix **A-**. Items the earlier audit already decided to keep are listed again only where they are still HIG deviations (A-22, A-23, A-24).
 
 **How the evidence was gathered**
 - HIG pages were fetched as Markdown from `developer.apple.com/design/human-interface-guidelines/<page>.md`: sheets, toolbars, context-menus, menus, alerts, modality, buttons, typography, accessibility, color, dark-mode, lists-and-tables, text-fields, sidebars, motion, keyboards, feedback, undo-and-redo, sf-symbols and the-menu-bar. The `inspectors` page returned 404; guidance on inspectors is taken from *toolbars* ("buttons that open nearby inspectors" sit on the trailing edge). Pages fetched later (2026-10-20): layout, popovers, windows, drag-and-drop and icons (findings A-35 to A-41). Pages still **not** fetched: materials, pointing-devices, offering-help; no finding relies on them.
-- Code was read and counted (sizes, radii, colours, handlers). Line numbers refer to the current `workbench.html`.
+- Code was read and counted (sizes, radii, colours, handlers). Line numbers refer to the current `cleardesk.html`.
 - Headless-Chrome screenshots of Prompts mode at 1500, 1100 and 860 px wide confirmed A-01, A-02, A-03, A-04 and A-06, and the Global Variables dialog was checked after the last alignment fix.
 - Anything that needs a real device, a screen reader or a light-theme run is marked **needs visual check** (section 7).
 

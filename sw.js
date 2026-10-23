@@ -1,6 +1,6 @@
-const CACHE_NAME = 'workbench-cache-v3';
+const CACHE_NAME = 'cleardesk-cache-v1';
 const APP_SHELL = [
-  'workbench.html',
+  'cleardesk.html',
   'manifest.json',
   'icons/favicon.svg',
   'icons/icon-192.png',
@@ -16,7 +16,7 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => Promise.all(APP_SHELL.map((url) =>
-        cache.add(url).catch((err) => console.warn('workbench sw: failed to precache', url, err))
+        cache.add(url).catch((err) => console.warn('cleardesk sw: failed to precache', url, err))
       )))
       .then(() => self.skipWaiting())
   );
@@ -38,14 +38,14 @@ self.addEventListener('fetch', (event) => {
   if (req.mode === 'navigate') {
     event.respondWith(
       // no-cache: always revalidate with the server — the plain dev server sends no cache headers, so Chrome's HTTP cache
-      // would otherwise keep handing back an old workbench.html after an edit.
+      // would otherwise keep handing back an old cleardesk.html after an edit.
       fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
           const copy = res.clone();   // clone before returning: cloning later races the page reading the body
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('workbench.html')))
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('cleardesk.html')))
     );
     return;
   }

@@ -9,7 +9,7 @@
 // the merge instead of just being the absence of a fact.
 
 test('deleteTask records a tombstone, and undo clears it again', function () {
-  tasks = [{ id: 't1', title: 'Welcome to workbench', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [] }];
+  tasks = [{ id: 't1', title: 'Welcome to cleardesk', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [] }];
   deleteTask('t1');
   assertTrue(deletedTaskIds.some(x => x.id === 't1'), 'deleting should tombstone the id');
   triggerToastUndo();
@@ -113,7 +113,7 @@ test('reconnectFile() does not resurrect a task that was deleted locally, even i
   deletedTaskIds = [{ id: 't1', deletedAt: Date.now() }];
   const staleJson = JSON.stringify({
     projects: defaultProjects(),
-    tasks: [{ id: 't1', title: 'Welcome to workbench', projectId: 'proj-inbox', updatedAt: Date.now() - 999999, subtasks: [] }]
+    tasks: [{ id: 't1', title: 'Welcome to cleardesk', projectId: 'proj-inbox', updatedAt: Date.now() - 999999, subtasks: [] }]
   });
   fileHandle = {
     name: 'test.json',
@@ -125,10 +125,10 @@ test('reconnectFile() does not resurrect a task that was deleted locally, even i
 });
 
 test('reconnectFile() does not revert a task completed locally, even if the linked file still has it as not-done', async function () {
-  tasks = [{ id: 't1', title: 'Welcome to workbench', projectId: 'proj-inbox', status: 'done', priority: 'medium', completedAt: Date.now(), updatedAt: Date.now(), subtasks: [], tags: [] }];
+  tasks = [{ id: 't1', title: 'Welcome to cleardesk', projectId: 'proj-inbox', status: 'done', priority: 'medium', completedAt: Date.now(), updatedAt: Date.now(), subtasks: [], tags: [] }];
   const staleJson = JSON.stringify({
     projects: defaultProjects(),
-    tasks: [{ id: 't1', title: 'Welcome to workbench', projectId: 'proj-inbox', status: 'todo', updatedAt: Date.now() - 999999, subtasks: [] }]
+    tasks: [{ id: 't1', title: 'Welcome to cleardesk', projectId: 'proj-inbox', status: 'todo', updatedAt: Date.now() - 999999, subtasks: [] }]
   });
   fileHandle = {
     name: 'test.json',

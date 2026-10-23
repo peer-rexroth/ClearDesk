@@ -1,5 +1,5 @@
 #!/bin/bash
-# Runs the workbench.html test suite. No install step: uses osascript -l
+# Runs the cleardesk.html test suite. No install step: uses osascript -l
 # JavaScript (JavaScriptCore), the same engine/approach documented in
 # CLAUDE.md, so there's nothing to `npm install` before this works.
 #
