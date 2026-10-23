@@ -1270,10 +1270,10 @@ const ICONS = {
   .nc-sw:hover { box-shadow: 0 0 0 2px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
-  /* the copy button on a code block: a small Apple-style material chip in its top right corner, shown while the pointer is over the block */
-  .note-code-copy { position: absolute; z-index: 3; width: 26px; height: 26px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 1px solid var(--border-2); background: var(--glass-strong, var(--bg-2)); color: var(--text-2); font-size: var(--fs-12); cursor: default; box-shadow: var(--elev-1); transition: background .12s ease, color .12s ease; }
+  /* the copy button on a code block, as in Claude: a header strip with a quiet "Code" label on the left and a labelled Copy button on the right, always visible (one button per block, in a layer over the note) */
+  .note-code-copy-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
+  .note-code-copy { position: absolute; z-index: 3; height: 24px; padding: 0 9px 0 7px; display: inline-flex; align-items: center; gap: 5px; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); font: 500 var(--fs-12)/1 var(--font); cursor: default; transition: background .12s ease, color .12s ease; }
   .note-code-copy .tb-ico2 { width: 14px; height: 14px; }
-  .note-code-copy[hidden] { display: none; }
   .note-code-copy:hover { background: var(--cap-hover, var(--bg-3)); color: var(--text); }
   .note-code-copy.done { color: var(--green-text, var(--nc-green)); }
   #notePrintArea { display: none; }
@@ -1309,7 +1309,8 @@ const ICONS = {
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
   .note-body code { font-family: var(--mono); font-size: .88em; padding: 1px 6px; border-radius: var(--r-xs); background: var(--bg-3); }
   .note-body pre code { padding: 0; border-radius: 0; background: none; }   /* inside a code block the block is the box: no second, inline-code box behind the text (or behind an empty block's caret) */
-  .note-body pre { font-family: var(--mono); font-size: var(--fs-13); padding: 10px 40px 10px 12px; border-radius: var(--r-s); background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
+  .note-body pre { position: relative; font-family: var(--mono); font-size: var(--fs-13); padding: 36px 12px 10px 12px; border-radius: var(--r-s); background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
+  .note-body pre::before { content: 'Code'; position: absolute; left: 12px; top: 6px; font: 500 var(--fs-12)/24px var(--font); color: var(--text-3); pointer-events: none; user-select: none; }   /* the header strip's label (not part of the text) */
   .note-body hr { border: 0; border-top: 1px solid var(--border-2); margin: 1em 0; }
   /* checklists: a round box drawn on the <li>; clicking in the left 28px ticks it */
   .note-body ul:not(.cl) { list-style-type: "-\00a0\00a0"; }   /* the standard bullet is a hyphen */
@@ -2063,14 +2064,14 @@ const ICONS = {
           <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
         </div>
         <div class="note-scroll">
-          <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyMove(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyLeave()">
+          <div class="note-doc" onmousemove="tblHandlesMove(event)" onmouseleave="tblHandlesLeave()">
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing, or type / for blocks"
                  oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
-                        <button type="button" class="note-code-copy" id="noteCodeCopy" hidden aria-label="Copy code" title="Copy code" onmousedown="event.preventDefault()" onclick="noteCodeCopyClick(event)"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg></button>
+                        <div class="note-code-copy-layer" id="noteCodeCopyLayer"></div>
           </div>
         </div>
       </div>
@@ -6454,6 +6455,7 @@ function renderNoteEditor(){
   const trashed = noteTrashed(n), locked = !!n.locked || trashed;                  // a deleted note is read-only like a locked one
   ed?.classList.toggle('locked', locked); ed?.classList.toggle('trashed', trashed);
   updateNoteToolbarState();                         // the table strip hides on a locked note
+  noteCodeCopyQueue();                              // a code block's Copy button
   body.contentEditable = locked ? 'false' : 'true'; title.readOnly = locked;
   const lockBtn = document.getElementById('noteLockBtn');                          // the lock toggle in the toolbar: amber and closed while the note is locked
   if(lockBtn){
@@ -6689,9 +6691,9 @@ let promptOpenPending = null; try{ promptOpenPending = localStorage.getItem('wor
 
 const promptTrashed = p=>!!p && Number.isFinite(p.deletedAt);
 const promptFolderById = id=>promptFolders.find(f=>f.id===id);
-// The order of the prompts list: the same three keys and the same menu as Notes (per device). Date edited, newest first, is the default (as in Notes).
+// The order of the prompts list: the same three keys and the same menu as Notes (per device). Title, A to Z, is the default (Notes keeps Date edited); favorites stay on top whatever the order.
 const PROMPT_SORT_KEY = 'workbench_prompts_sort';
-let promptSortKey = 'edited', promptSortDir = 'desc';
+let promptSortKey = 'title', promptSortDir = 'asc';   // the standard order: A to Z (a sort you picked yourself is remembered and wins)
 try{ const sv = JSON.parse(localStorage.getItem(PROMPT_SORT_KEY) || 'null'); if(sv && ['edited','created','title'].includes(sv.key) && ['asc','desc'].includes(sv.dir)){ promptSortKey = sv.key; promptSortDir = sv.dir; } }catch(_){}
 function promptSorter(){
   const dir = promptSortDir==='asc' ? 1 : -1;
@@ -8244,7 +8246,7 @@ function tblHandlesHide(){
 function tblHandlesLeave(){ if(tblDragging) return; if(typeof clearTimeout==='function') clearTimeout(tblHandlesTimer); if(typeof setTimeout==='function') tblHandlesTimer = setTimeout(tblHandlesHide, 280); }
 // ---- copy button on a code block ----
 // One floating button (outside the note body, so it is never saved) follows the code block the pointer is over and sits in its top right corner.
-let noteCodeCopyPre = null, noteCodeCopyTimer = null, noteCodeCopyReset = null;
+let noteCodeCopySyncQueued = false;
 function noteWriteText(text){
   if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(()=>true, ()=>noteWriteTextLegacy(text));
   return Promise.resolve(noteWriteTextLegacy(text));
@@ -8255,30 +8257,37 @@ function noteWriteTextLegacy(text){
   let ok = false; try{ ok = document.execCommand('copy'); }catch(_){}
   ta.remove(); return ok;
 }
-function noteCodeCopyShow(pre){
-  const btn = document.getElementById('noteCodeCopy'), doc = btn && btn.parentNode; if(!btn || !doc || !pre) return;
-  noteCodeCopyPre = pre; clearTimeout(noteCodeCopyTimer);
-  const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1, pr = pre.getBoundingClientRect();   // k: the UI-size zoom
-  btn.hidden = false;
-  btn.style.left = Math.round(((pr.right - dr.left) / k - 26 - 7) * 10) / 10 + 'px';
-  btn.style.top = Math.round(((pr.top - dr.top) / k + 7) * 10) / 10 + 'px';
+// One Copy button per code block, kept over the block's header strip: made, moved and removed to match the blocks in the note.
+function noteCodeCopySync(){
+  const body = document.getElementById('noteBody'), layer = document.getElementById('noteCodeCopyLayer'), doc = layer && layer.parentNode; if(!body || !doc) return;
+  const pres = body.offsetParent ? [...body.querySelectorAll('pre')].slice(0, 60) : [];
+  while(layer.children.length > pres.length) layer.lastChild.remove();
+  while(layer.children.length < pres.length){
+    const btn = document.createElement('button'); btn.type = 'button'; btn.className = 'note-code-copy'; btn.title = 'Copy code'; btn.setAttribute('aria-label', 'Copy code');
+    btn.innerHTML = ICO_COPY + '<span>Copy</span>'; btn.onmousedown = ev=>ev.preventDefault();
+    btn.onclick = ev=>noteCodeCopyClick(ev, btn); layer.appendChild(btn);
+  }
+  if(!pres.length) return;
+  const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1;      // k: the UI-size zoom
+  pres.forEach((pre, i)=>{
+    const btn = layer.children[i], pr = pre.getBoundingClientRect(); btn._pre = pre;
+    btn.style.left = Math.round(((pr.right - dr.left) / k - btn.offsetWidth - 6) * 10) / 10 + 'px';
+    btn.style.top = Math.round(((pr.top - dr.top) / k + 6) * 10) / 10 + 'px';
+  });
 }
-function noteCodeCopyHide(){ const btn = document.getElementById('noteCodeCopy'); if(btn){ btn.hidden = true; btn.classList.remove('done'); btn.innerHTML = ICO_COPY; } noteCodeCopyPre = null; }
-function noteCodeCopyMove(e){
-  const t = e.target, btn = document.getElementById('noteCodeCopy');
-  if(btn && btn.contains(t)){ clearTimeout(noteCodeCopyTimer); return; }
-  const pre = t && t.closest ? t.closest('#noteBody pre') : null;
-  if(pre) noteCodeCopyShow(pre); else if(noteCodeCopyPre) noteCodeCopyLeave();
+function noteCodeCopyQueue(){
+  if(noteCodeCopySyncQueued || typeof requestAnimationFrame!=='function') return;
+  noteCodeCopySyncQueued = true; requestAnimationFrame(()=>{ noteCodeCopySyncQueued = false; noteCodeCopySync(); });
 }
-function noteCodeCopyLeave(){ clearTimeout(noteCodeCopyTimer); noteCodeCopyTimer = setTimeout(noteCodeCopyHide, 220); }
-function noteCodeCopyClick(e){
+if(typeof ResizeObserver==='function'){ const nb = document.getElementById('noteBody'); if(nb) new ResizeObserver(noteCodeCopyQueue).observe(nb); }   // the buttons follow the blocks when the note, the window or the sidebar changes size
+function noteCodeCopyClick(e, btn){
   e.preventDefault(); e.stopPropagation();
-  const pre = noteCodeCopyPre, btn = document.getElementById('noteCodeCopy'); if(!pre || !pre.isConnected) return;
+  const pre = btn._pre; if(!pre || !pre.isConnected) return;
   const text = (pre.innerText || pre.textContent).replace(/\n$/, '');
   noteWriteText(text).then(ok=>{
     if(!ok){ showToast('Could not use the clipboard here', true); return; }
-    btn.classList.add('done'); btn.innerHTML = ICO_CHECK; btn.title = 'Copied';
-    clearTimeout(noteCodeCopyReset); noteCodeCopyReset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY; btn.title = 'Copy code'; }, 1400);
+    btn.classList.add('done'); btn.innerHTML = ICO_CHECK + '<span>Copied</span>'; btn.title = 'Copied';
+    clearTimeout(btn._reset); btn._reset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY + '<span>Copy</span>'; btn.title = 'Copy code'; }, 1400);
   });
 }
 function tblHandlesMove(e){
@@ -8736,6 +8745,7 @@ function onNoteInput(e){
   }
   noteEditCount++;
   noteSlashUpdate(e);
+  noteCodeCopyQueue();
   noteEnsureTrailingLine(body);
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
