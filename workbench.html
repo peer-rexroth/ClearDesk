@@ -1270,9 +1270,12 @@ const ICONS = {
   .nc-sw:hover { box-shadow: 0 0 0 2px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
-  /* the copy button on a code block, as in Claude: a header strip with a quiet "Code" label on the left and a labelled Copy button on the right, always visible (one button per block, in a layer over the note) */
+  /* the copy button on a code block, as in Apple's documentation: an icon in the block's top right corner, shown while the pointer is over the block or the caret is in it (always on a touch screen); one button per block, in a layer over the note */
   .note-code-copy-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-  .note-code-copy { position: absolute; z-index: 3; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); cursor: default; transition: background .12s ease, color .12s ease; }   /* icon only */
+  .note-code-copy { position: absolute; z-index: 3; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); cursor: default; opacity: 0; transition: opacity .12s ease, background .12s ease, color .12s ease; }
+  .note-code-copy.show, .note-code-copy:hover, .note-code-copy:focus-visible, .pr-tpl:hover .note-code-copy, .pr-tpl:focus-within .note-code-copy { opacity: 1; }
+  @media (hover: none) { .note-code-copy { opacity: 1; } }
+  @media (pointer: coarse) { .note-code-copy { width: 40px; height: 40px; } .note-body pre { padding-right: 48px; } }   /* a finger needs a bigger target */
   .note-code-copy .tb-ico2 { width: 16px; height: 16px; }
   .note-code-copy:hover { background: var(--cap-hover, var(--bg-3)); color: var(--text); }
   .note-code-copy.done { color: var(--green-text, var(--nc-green)); }
@@ -1309,8 +1312,7 @@ const ICONS = {
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
   .note-body code { font-family: var(--mono); font-size: .88em; padding: 1px 6px; border-radius: var(--r-xs); background: var(--bg-3); }
   .note-body pre code { padding: 0; border-radius: 0; background: none; }   /* inside a code block the block is the box: no second, inline-code box behind the text (or behind an empty block's caret) */
-  .note-body pre { position: relative; font-family: var(--mono); font-size: var(--fs-13); padding: 36px 12px 10px 12px; border-radius: var(--r-s); background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
-  .note-body pre::before { content: 'Code'; position: absolute; left: 12px; top: 6px; font: 500 var(--fs-12)/24px var(--font); color: var(--text-3); pointer-events: none; user-select: none; }   /* the header strip's label (not part of the text) */
+  .note-body pre { font-family: var(--mono); font-size: var(--fs-13); padding: 10px 40px 10px 12px; border-radius: var(--r-s); background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
   .note-body hr { border: 0; border-top: 1px solid var(--border-2); margin: 1em 0; }
   /* checklists: a round box drawn on the <li>; clicking in the left 28px ticks it */
   .note-body ul:not(.cl) { list-style-type: "-\00a0\00a0"; }   /* the standard bullet is a hyphen */
@@ -1586,14 +1588,11 @@ const ICONS = {
   .pr-sub { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .note-row-sub:has(.pr-sub) { display: flex; min-width: 0; }
   /* the template: a transparent field laid over a layer that shows the same text with its placeholders tinted (the layer sets the height) */
-  .pr-tpl { position: relative; margin-top: 22px; border-radius: var(--r-s); background: var(--bg-2); --pr-head: 36px; }
-  .pr-tpl-head { height: var(--pr-head); box-sizing: border-box; padding: 4px 4px 0 14px; display: flex; align-items: center; justify-content: space-between; }   /* the header strip, as on a note's code block: a label and a Copy button */
-  .pr-tpl-name { font: 500 var(--fs-12)/24px var(--font); color: var(--text-3); user-select: none; }
-  .pr-tpl-head .note-code-copy { position: static; }
-  .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
+  .pr-tpl { position: relative; border-radius: var(--r-s); background: var(--bg-2); }
+  .pr-tpl .note-code-copy { top: 5px; right: 5px; }
+  .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 12px 44px 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
   .pr-tpl-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
-  .pr-tpl-hl, .pr-tpl textarea { padding-top: 4px; }   /* the strip above already leaves the room */
-  .pr-tpl textarea { position: absolute; inset: var(--pr-head) 0 0 0; width: 100%; height: calc(100% - var(--pr-head)); resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
+  .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
   .pr-tpl textarea { border-radius: inherit; }
@@ -2068,7 +2067,7 @@ const ICONS = {
           <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
         </div>
         <div class="note-scroll">
-          <div class="note-doc" onmousemove="tblHandlesMove(event)" onmouseleave="tblHandlesLeave()">
+          <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyHover(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyHover(null)">
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
@@ -2126,7 +2125,8 @@ const ICONS = {
               <input type="text" class="note-title" id="pName" placeholder="Prompt name" maxlength="200" aria-label="Prompt name" autocomplete="off" oninput="onPromptNameInput()" onfocus="promptRenameStart()" onblur="promptRenameCommit()" onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('pTemplate').focus()}">
               <div class="note-meta" id="pMeta"></div>
               <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
-              <div class="pr-tpl" id="pTpl"><div class="pr-tpl-head"><span class="pr-tpl-name">Template</span><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the finished prompt" aria-label="Copy the finished prompt" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"><span>Copy</span></button></div><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
+              <div class="pr-section-label"><span>Template</span></div>
+              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the finished prompt" aria-label="Copy the finished prompt" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
             </div>
           </div>
           <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-grip" id="prInspResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Variables panel" aria-valuemin="260" aria-valuemax="560" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="pr-insp-inner" id="pInspector"></div></aside>
@@ -8283,9 +8283,23 @@ function noteCodeCopySync(){
   const dr = doc.getBoundingClientRect(), k = dr.width && doc.offsetWidth ? dr.width / doc.offsetWidth : 1;      // k: the UI-size zoom
   pres.forEach((pre, i)=>{
     const btn = layer.children[i], pr = pre.getBoundingClientRect(); btn._pre = pre;
-    btn.style.left = Math.round(((pr.right - dr.left) / k - btn.offsetWidth - 4) * 10) / 10 + 'px';
-    btn.style.top = Math.round(((pr.top - dr.top) / k + 4) * 10) / 10 + 'px';
+    btn.style.left = Math.round(((pr.right - dr.left) / k - btn.offsetWidth - 5) * 10) / 10 + 'px';
+    btn.style.top = Math.round(((pr.top - dr.top) / k + 5) * 10) / 10 + 'px';
   });
+  noteCodeCopyMark();
+}
+let noteCodeCopyHot = null;                                      // the block under the pointer
+function noteCodeCopyHover(e){
+  const t = e && e.target, has = t && t.closest;
+  if(has && t.closest('#noteCodeCopyLayer')) return;                // over a button: keep what is showing
+  const pre = has ? t.closest('#noteBody pre') : null;
+  if(pre===noteCodeCopyHot) return;
+  noteCodeCopyHot = pre; noteCodeCopyMark();
+}
+function noteCodeCopyMark(){                                       // a block's button shows while the pointer is over the block or the caret is in it
+  const layer = document.getElementById('noteCodeCopyLayer'); if(!layer) return;
+  const sel = window.getSelection ? window.getSelection() : null, own = sel && sel.rangeCount ? noteClosest(sel.anchorNode, 'PRE') : null;
+  [...layer.children].forEach(b=>b.classList.toggle('show', !!b._pre && (b._pre===noteCodeCopyHot || b._pre===own)));
 }
 function noteCodeCopyQueue(){
   if(noteCodeCopySyncQueued || typeof requestAnimationFrame!=='function') return;
@@ -9112,7 +9126,7 @@ document.addEventListener('mousedown', e=>{
   if(pop && pop.classList.contains('open') && !pop.contains(e.target) && !(e.target.closest && e.target.closest('#noteLinkBtn'))) closeNoteLinkBar(false);
 });
 function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
-document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); noteSlashFollow(); } });
+document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); noteSlashFollow(); noteCodeCopyMark(); } });
 window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); flushPromptEdit(); });
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden'){ flushNoteEdit(); flushPromptEdit(); } });
 
