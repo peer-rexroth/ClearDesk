@@ -936,3 +936,25 @@ test('the Pinned filter lists pinned notes from every folder (not deleted ones),
   noteSearchQuery = 'three'; assertDeepEqual(visibleNotes().map(n => n.id), ['n3'], 'a search looks through every note, pinned or not');
   noteSearchQuery = ''; noteFolderFilter = 'all';
 });
+
+// ---- the / menu ----
+test('a slash opens the menu only at the start of a line or after a space, and its text is the filter', function () {
+  assertDeepEqual(noteSlashMatch('/ta', ''), { start: 0, query: 'ta' });
+  assertDeepEqual(noteSlashMatch('see /', ''), { start: 4, query: '' });
+  assertEqual(noteSlashMatch('and/or', ''), null, 'a slash inside a word');
+  assertEqual(noteSlashMatch('1/2', ''), null);
+  assertEqual(noteSlashMatch('http://x', ''), null);
+  assertEqual(noteSlashMatch('/a/b', ''), null, 'a second slash ends it');
+  assertEqual(noteSlashMatch('/x', 'word'), null, 'a slash that follows text from an earlier node of the same line');
+  assertDeepEqual(noteSlashMatch('/x', 'word '), { start: 0, query: 'x' });
+});
+
+test('the / menu filters by the start of a word in the name or its keywords, and offers less inside lists and tables', function () {
+  var all = NOTE_SLASH_ITEMS.map(function (i) { return i.id; });
+  assertDeepEqual(noteSlashFilter('', all).length, NOTE_SLASH_ITEMS.length);
+  assertDeepEqual(noteSlashFilter('tab', all).map(function (i) { return i.id; }), ['table']);
+  assertDeepEqual(noteSlashFilter('code', all).map(function (i) { return i.id; }), ['code']);
+  assertDeepEqual(noteSlashFilter('hr', all).map(function (i) { return i.id; }), ['hr']);
+  assertDeepEqual(noteSlashFilter('zzz', all), []);
+  assertDeepEqual(noteSlashFilter('', ['date']).map(function (i) { return i.id; }), ['date'], 'a table cell only offers the date');
+});

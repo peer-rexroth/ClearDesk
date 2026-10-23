@@ -1615,6 +1615,10 @@ const ICONS = {
   .ai-app-row input.bad { border-color: var(--red-text); }
   .ai-apps-empty { font-size: var(--fs-13); color: var(--text-3); padding: 6px 0; }
   .ai-apps-tools { display: flex; gap: 8px; }
+  .note-slash { min-width: 230px; max-width: 280px; }
+  .note-slash .row-menu-item.sel { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
+  .note-slash .row-menu-item.sel i, .note-slash .row-menu-item.sel .row-menu-hint { color: var(--on-accent); }
+  .note-slash .row-menu-hint { font-family: var(--mono); }
   .row-menu-scroll { max-height: min(60vh, 360px); overflow-y: auto; }
   .pr-tb-mono { font-family: var(--mono); font-weight: 600; font-size: var(--fs-14); letter-spacing: -.02em; }
   /* the variables inspector */
@@ -2351,6 +2355,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a note moves it to <em>Recently Deleted</em> at the bottom of the sidebar, where it stays for 30 days. Open it there to <em>Restore</em> it or <em>Delete Now</em>; <em>Delete All</em> empties the list. Deleting a note that is already there removes it for good.</span></div>
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
+          <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>The / menu</strong>: type <kbd>/</kbd> at the start of a line (or after a space) to insert a title, heading, quote, code block, divider, table, checklist, list or today's date. Keep typing to narrow the list (<kbd>/ta</kbd> finds Table), <kbd>↑</kbd> <kbd>↓</kbd> move, <kbd>↵</kbd> or <kbd>Tab</kbd> inserts, <kbd>Esc</kbd> closes it and leaves the slash as text. It stays out of code blocks and locked notes.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and print</strong>: <strong>⋯</strong> → <em>Export</em> saves the note as a Markdown file or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. <em>Copy note</em> puts it on the clipboard for pasting into Mail.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
@@ -5512,7 +5517,7 @@ function shortcutGroups(){
     { id:'general', label:'General', icon:'fa-solid fa-sliders', rows:[
       ['Show shortcuts', ['?']], ['Close drawer or dialog, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
-      ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
+      ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Insert a block (table, checklist, divider, date…)', ['/']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
       ['Undo typing and formatting', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Undo a delete, move or duplicate (when not typing)', [mod,'Z']],
       ['Bold', [mod,'B']], ['Italic', [mod,'I']], ['Underline', [mod,'U']], ['Add or edit a link', [mod,'K']],
       ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print or save as PDF', [mod,'P']],
@@ -8563,6 +8568,102 @@ function openNoteMoreMenu(e){
   placeRowMenu(menu, r.right - menu.offsetWidth * k, r.bottom + 6, btn);          // the menu's right edge lines up with the button's, clear of the window edge and the scroll bar
 }
 window.addEventListener('resize', ()=>{ tblHandlesRefresh(); tblChromeSync(); });
+// ---- the / menu: type "/" at the start of a line (or after a space) to insert a block; keep typing to filter, ↑ ↓ to move, ↵ or Tab to insert, Esc to close ----
+const NOTE_SLASH_ITEMS = [
+  { id:'h1', label:'Title', icon:'fa-solid fa-font', keys:'h1 heading', hint:'#', run:()=>noteBlock('h1') },
+  { id:'h2', label:'Heading', icon:'fa-solid fa-font', keys:'h2', hint:'##', run:()=>noteBlock('h2') },
+  { id:'h3', label:'Subheading', icon:'fa-solid fa-font', keys:'h3', hint:'###', run:()=>noteBlock('h3') },
+  { id:'quote', label:'Quote', icon:'fa-solid fa-indent', keys:'blockquote', run:()=>noteBlock('blockquote') },
+  { id:'code', label:'Code Block', icon:'fa-solid fa-code', keys:'pre snippet', hint:'```', run:()=>noteBlock('pre') },
+  { id:'hr', label:'Divider', icon:'fa-solid fa-minus', keys:'hr line rule separator', hint:'---', run:()=>document.execCommand('insertHorizontalRule', false) },
+  { id:'table', label:'Table', icon:'fa-solid fa-table', keys:'grid rows columns', run:()=>noteTableInsert(3, 3) },
+  { id:'checklist', label:'Checklist', icon:'fa-solid fa-list-check', keys:'todo task check', run:()=>noteChecklist() },
+  { id:'ul', label:'Bulleted List', icon:'fa-solid fa-list-ul', keys:'bullets unordered', run:()=>noteListStyle(noteBulletKind || 'disc') },
+  { id:'ol', label:'Numbered List', icon:'fa-solid fa-list', keys:'numbers ordered', run:()=>noteListStyle('decimal') },
+  { id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) }
+];
+// What may be inserted where: nothing in a code block; only a date in a table cell; no headings, quotes, code, dividers or tables inside a list item.
+const noteSlashAllowed = node=>noteClosest(node, 'TD') || noteClosest(node, 'TH') ? ['date'] : noteClosest(node, 'LI') ? ['date', 'checklist', 'ul', 'ol'] : NOTE_SLASH_ITEMS.map(i=>i.id);
+// `before` is the text in front of the caret; `lineBefore` the text of the line in front of that text node. A "/" opens the menu only when it starts the line or follows a space,
+// so "and/or", "1/2" and "http://…" never do.
+function noteSlashMatch(before, lineBefore){
+  const m = /(^|\s)\/([^\s\/]*)$/.exec(before); if(!m) return null;
+  if(m[1]==='' && lineBefore && !/\s$/.test(lineBefore)) return null;
+  return { start: m.index + m[1].length, query: m[2] };
+}
+const noteSlashFilter = (query, allowed)=>{
+  const q = String(query || '').toLowerCase();
+  return NOTE_SLASH_ITEMS.filter(i=>allowed.includes(i.id) && (!q || (i.label + ' ' + i.keys).toLowerCase().split(/\s+/).some(w=>w.startsWith(q))));
+};
+let noteSlash = null, noteSlashOff = null;                            // the open menu, and the "/…" the user closed with Esc (it stays closed until that "/" is gone)
+function noteSlashToken(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed) return null;
+  const n = sel.anchorNode;
+  if(!n || n.nodeType!==3 || !body.contains(n) || noteIsLocked(noteEditorId) || noteClosest(n, 'PRE')) return null;
+  const line = noteLineOf(n), r = document.createRange(); r.setStart(line, 0); r.setEnd(n, 0);
+  const m = noteSlashMatch(n.nodeValue.slice(0, sel.anchorOffset), r.toString());
+  return m ? { node: n, start: m.start, end: sel.anchorOffset, query: m.query } : null;
+}
+function noteSlashUpdate(e){
+  const t = noteSlashToken();
+  if(!t){ noteSlashOff = null; noteSlashClose(); return; }
+  if(noteSlashOff && noteSlashOff.node===t.node && noteSlashOff.start===t.start){ noteSlashClose(); return; }
+  if(!noteSlash && !/^(insertText|deleteContent)/.test((e && e.inputType) || '')) return;   // it opens while typing, not after a paste or an undo
+  const items = noteSlashFilter(t.query, noteSlashAllowed(t.node));
+  if(!items.length){ noteSlashClose(); return; }
+  const same = noteSlash && noteSlash.query===t.query;
+  noteSlash = { ...t, items, idx: same ? Math.min(noteSlash.idx, items.length - 1) : 0 };
+  noteSlashRender();
+}
+function noteSlashRender(){
+  const s = noteSlash; if(!s) return;
+  let menu = document.getElementById('noteSlashMenu');
+  if(!menu){
+    menu = document.createElement('div'); menu.id = 'noteSlashMenu'; menu.className = 'row-menu note-slash'; menu.setAttribute('role', 'listbox'); menu.setAttribute('aria-label', 'Insert');
+    menu.onmousedown = ev=>ev.preventDefault();                        // the note keeps focus (and its caret) while you pick
+    document.body.appendChild(menu);
+  }
+  menu.innerHTML = s.items.map((it, i)=>`<button type="button" class="row-menu-item${i===s.idx ? ' sel' : ''}" id="noteSlashOpt${i}" role="option" aria-selected="${i===s.idx}" onmouseenter="noteSlashHover(${i})" onclick="noteSlashPick(${i})">${menuIconHtml(it.icon)}<span>${esc(it.label)}</span>${it.hint ? `<span class="row-menu-hint">${esc(it.hint)}</span>` : ''}</button>`).join('');
+  const r = document.createRange(); r.setStart(s.node, Math.min(s.end, s.node.nodeValue.length)); r.collapse(true);
+  let rc = r.getBoundingClientRect(); if(!rc || !rc.height) rc = noteLineOf(s.node).getBoundingClientRect();
+  placeRowMenu(menu, rc.left, rc.bottom + 6, document.getElementById('noteBody'));
+  const body = document.getElementById('noteBody'); if(body){ body.setAttribute('aria-expanded', 'true'); body.setAttribute('aria-activedescendant', 'noteSlashOpt' + s.idx); }
+}
+function noteSlashHover(i){ if(!noteSlash) return; noteSlash.idx = i; noteSlashMark(); }
+function noteSlashMark(){
+  const s = noteSlash; if(!s) return;
+  document.querySelectorAll('#noteSlashMenu .row-menu-item').forEach((b, i)=>{ b.classList.toggle('sel', i===s.idx); b.setAttribute('aria-selected', String(i===s.idx)); });
+  const body = document.getElementById('noteBody'); if(body) body.setAttribute('aria-activedescendant', 'noteSlashOpt' + s.idx);
+  const cur = document.getElementById('noteSlashOpt' + s.idx); if(cur && cur.scrollIntoView) cur.scrollIntoView({ block: 'nearest' });
+}
+function noteSlashClose(){
+  noteSlash = null;
+  const menu = document.getElementById('noteSlashMenu'); if(menu) menu.classList.remove('open');
+  const body = document.getElementById('noteBody'); if(body){ body.removeAttribute('aria-expanded'); body.removeAttribute('aria-activedescendant'); }
+}
+function noteSlashFollow(){                                           // the caret moved away from the "/…" (an arrow key, a click): close the menu
+  if(!noteSlash) return;
+  const t = noteSlashToken();
+  if(!t || t.node!==noteSlash.node || t.start!==noteSlash.start) noteSlashClose();
+}
+function noteSlashKey(e){
+  const s = noteSlash; if(!s || e.isComposing) return false;
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); s.idx = (s.idx + (e.key==='ArrowDown' ? 1 : s.items.length - 1)) % s.items.length; noteSlashMark(); return true; }
+  if((e.key==='Enter' || e.key==='Tab') && !e.metaKey && !e.ctrlKey && !e.altKey){ e.preventDefault(); noteSlashPick(s.idx); return true; }
+  if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); noteSlashOff = { node: s.node, start: s.start }; noteSlashClose(); return true; }
+  return false;
+}
+function noteSlashPick(i){
+  const s = noteSlash, it = s && s.items[i]; noteSlashClose();
+  if(!it || !s.node.isConnected || noteIsLocked(noteEditorId)) return;
+  noteFocusBody();
+  const r = document.createRange(); r.setStart(s.node, s.start); r.setEnd(s.node, Math.min(s.end, s.node.nodeValue.length));
+  const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('delete', false);                              // the typed "/…" goes (native undo brings it back)
+  it.run(); onNoteInput();
+}
+window.addEventListener('scroll', ()=>{ if(noteSlash) noteSlashRender(); }, true);          // the menu follows the caret while the note scrolls
 function noteChecklist(){
   noteFocusBody();
   const sel = window.getSelection();
@@ -8604,6 +8705,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   noteEditCount++;
+  noteSlashUpdate(e);
   noteEnsureTrailingLine(body);
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
   tblHandlesRefresh();
@@ -8774,6 +8876,7 @@ function noteBackspaceAfterTable(e){
   return true;
 }
 function onNoteKeydown(e){
+  if(noteSlashKey(e)) return;                                                  // the / menu owns ↑ ↓ ↵ Tab Esc while it is open
   if(noteAutoBlockAtEnter(e)) return;                                          // --- / *** / ___ / ``` + Enter
   noteAutoLinkAtSpace(e);                                                      // a web / e-mail address is linked as the space after it is typed
   if(e.key==='Enter' && !e.isComposing && !e.metaKey && !e.ctrlKey){ const sel = window.getSelection(); if(sel && sel.rangeCount) noteAutoLinkLine(noteLineOf(sel.anchorNode)); }   // finish the line (link its addresses) before Enter splits it
@@ -8956,7 +9059,7 @@ document.addEventListener('mousedown', e=>{
   if(pop && pop.classList.contains('open') && !pop.contains(e.target) && !(e.target.closest && e.target.closest('#noteLinkBtn'))) closeNoteLinkBar(false);
 });
 function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
-document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); } });
+document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); noteSlashFollow(); } });
 window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); flushPromptEdit(); });
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden'){ flushNoteEdit(); flushPromptEdit(); } });
 
