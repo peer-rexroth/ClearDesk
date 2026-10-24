@@ -858,7 +858,7 @@ const ICONS = {
     --amber-bg: rgba(255,159,10,.20); --amber-text: #8a4b00;
     --red-bg: rgba(255,69,58,.15); --red-text: #c4281f;
     --green-bg: rgba(52,199,89,.18); --green-text: #1a7a36;
-    --md-dim: var(--text-3); --md-h: #34456b; --md-li: #5a6c8f; --md-code: #8a4a2e; --md-code-bg: rgba(138,74,46,.10); --md-fence: #6b5a45; --md-fence-bg: rgba(60,60,67,.07); --md-quote: #4f6b5a; --md-link: #3f68a8; --md-tag: #b0436a;
+    --md-dim: var(--text-3); --md-h: #3634a3; --md-li: #d30f45; --md-code: #b02e00; --md-code-bg: rgba(255,149,0,.16); --md-fence: #9f3000; --md-fence-bg: rgba(255,149,0,.10); --md-quote: #5c5c61; --md-link: #0040dd; --md-tag: #8944ab; --md-tag-bg: rgba(175,82,222,.14);
     --purple-bg: rgba(175,82,222,.16); --purple-text: #7a2fb0;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
     --radius: var(--r-m); --radius-lg: var(--r-xl); --glass-r-row: var(--r-s); --glass-r-bar: var(--r-l); --glass-r-menu: var(--r-xl);
@@ -878,7 +878,7 @@ const ICONS = {
     --amber-bg: rgba(255,159,10,.26); --amber-text: #ffc566;
     --red-bg: rgba(255,69,58,.26); --red-text: #ff9a92;
     --green-bg: rgba(52,199,89,.26); --green-text: #8ee6a4;
-    --md-dim: var(--text-3); --md-h: #b3c1e2; --md-li: #9fb0d6; --md-code: #e6a883; --md-code-bg: rgba(230,168,131,.14); --md-fence: #d2bf9f; --md-fence-bg: rgba(255,255,255,.055); --md-quote: #8fb09c; --md-link: #8fb4e6; --md-tag: #f08fb0;
+    --md-dim: var(--text-3); --md-h: #9b99ff; --md-li: #ff6482; --md-code: #ffb340; --md-code-bg: rgba(255,159,10,.20); --md-fence: #ffc266; --md-fence-bg: rgba(255,159,10,.12); --md-quote: #aeaeb2; --md-link: #409cff; --md-tag: #da8fff; --md-tag-bg: rgba(191,90,242,.22);
     --purple-bg: rgba(175,82,222,.28); --purple-text: #d6a6f5;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
     --radius: var(--r-m); --radius-lg: var(--r-xl); --glass-r-row: var(--r-s); --glass-r-bar: var(--r-l); --glass-r-menu: var(--r-xl);
@@ -1648,19 +1648,20 @@ const ICONS = {
   .pr-tpl textarea:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
-  /* Markdown / XML-tag colouring of the template: colour (and the weight the variables already use) only, never size, so the painted copy keeps the textarea's metrics. Variables stay filled pills and win over these. */
+  /* Markdown / XML-tag colouring of the template: colour, weight, italic, underline and background only, never size or spacing, so the painted copy keeps the textarea's metrics. Variables stay filled pills and win over these. Apple's accessible system colours; colour is never the only cue (bold headings and markers, chips on tags and code). */
+  .pr-tpl { overflow: hidden; }   /* the code band bleeds to the field's edges, so the rounded corners clip it */
   .pr-tpl-hl .ln { min-height: 1.7em; }
-  .pr-tpl-hl .ln.fence { background: var(--md-fence-bg); }
+  .pr-tpl-hl .ln.fence { background: var(--md-fence-bg); margin: 0 -44px 0 -14px; padding: 0 44px 0 14px; }   /* edge to edge: the negative margin and the padding cancel, so the text does not move */
   .md-dim { color: var(--md-dim); }
-  .md-h { color: var(--md-h); font-weight: 600; }
-  .md-b { font-weight: 600; }
+  .md-h { color: var(--md-h); font-weight: 700; }
+  .md-b { font-weight: 700; }
   .md-i { font-style: italic; }
-  .md-li { color: var(--md-li); font-weight: 600; }
+  .md-li { color: var(--md-li); font-weight: 700; }
   .md-ic { color: var(--md-code); background: var(--md-code-bg); border-radius: 3px; }
   .md-code { color: var(--md-fence); }
-  .md-q { color: var(--md-quote); }
+  .md-q { color: var(--md-quote); font-style: italic; }
   .md-lk { color: var(--md-link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
-  .md-tag { color: var(--md-tag); }
+  .md-tag { color: var(--md-tag); background: var(--md-tag-bg); border-radius: 3px; font-weight: 600; }
   .ph-opt { background: var(--blue-bg); color: var(--blue-text); }
   .ph-ins { background: var(--teal-bg); color: var(--teal-text); }
   .ph-txt { background: var(--amber-bg); color: var(--amber-text); }
