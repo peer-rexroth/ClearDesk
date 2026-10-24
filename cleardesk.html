@@ -52,14 +52,12 @@ const ICONS = {
   "clipboard": "<rect x=\"5.5\" y=\"5\" width=\"13\" height=\"15.5\" rx=\"2.5\"/><path d=\"M9 5v-.8A1.2 1.2 0 0 1 10.2 3h3.6A1.2 1.2 0 0 1 15 4.2V5\"/>",
   "clipboard-check": "<rect x=\"5.5\" y=\"5\" width=\"13\" height=\"15.5\" rx=\"2.5\"/><path d=\"M9 5v-.8A1.2 1.2 0 0 1 10.2 3h3.6A1.2 1.2 0 0 1 15 4.2V5\"/><path d=\"m9.5 14 2 2 3.5-4\"/>",
   "clock": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"M12 7.5V12l3 2\"/>",
-  "clone": "<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5\"/>",
   "code": "<path d=\"m8.5 7-5 5 5 5M15.5 7l5 5-5 5\"/>",
   "compass": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"m15.5 8.5-2 5-5 2 2-5z\"/>",
   "computer-mouse": "<rect x=\"7\" y=\"3.5\" width=\"10\" height=\"17\" rx=\"5\"/><path d=\"M12 3.5v6\"/>",
   "copy": "<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5\"/>",
   "display": "<rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"11.5\" rx=\"2.5\"/><path d=\"M9 20h6M12 16v4\"/>",
   "dollar-sign": "<path d=\"M12 3.5v17M16 8a3.5 3 0 0 0-4-2.2c-2.4 0-4 1-4 2.8 0 4 8 2 8 6 0 1.8-1.8 2.9-4 2.9A4 3 0 0 1 8 16\"/>",
-  "download": "<path d=\"M12 4.5V15M8 11.5l4 4 4-4M5 19.5h14\"/>",
   "dumbbell": "<path d=\"M6.5 8v8M4 10v4M17.5 8v8M20 10v4M6.5 12h11\"/>",
   "ellipsis": "<circle cx=\"5.5\" cy=\"12\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"18.5\" cy=\"12\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/>",
   "ellipsis-vertical": "<circle cx=\"12\" cy=\"5.5\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"12\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/><circle cx=\"12\" cy=\"18.5\" r=\"1.7\" fill=\"currentColor\" stroke=\"none\"/>",
@@ -70,7 +68,7 @@ const ICONS = {
   "filter": "<path d=\"M4 6h16l-6 7v5.5l-4 2V13z\"/>",
   "flag": "<path d=\"M6 20.5V4.5\"/><path d=\"M6 5.5h10.5l-2 3.5 2 3.5H6\"/>",
   "folder": "<path d=\"M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z\"/>",
-  "folder-open": "<path d=\"M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z\"/><path d=\"M12 11.5v5M9.5 14h5\"/>",
+  "folder-open": "<path d=\"M4 18V6.5A2 2 0 0 1 6 4.5h3.6l2 2.2H17A2 2 0 0 1 19 8.7V10\"/><path d=\"M4 18l2.2-6.3A2 2 0 0 1 8.1 10.3h12.1a1.4 1.4 0 0 1 1.3 1.9L19.3 17.6A2 2 0 0 1 17.4 19H6a2 2 0 0 1-2-1z\"/>",
   "folder-plus": "<path d=\"M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z\"/><path d=\"M12 11.5v5M9.5 14h5\"/>",
   "font": "<path d=\"m6 19 6-14 6 14M8.3 14h7.4\"/>",
   "forward-step": "<path d=\"m9 6.5 9 5.5-9 5.5z\"/><path d=\"M5.5 6v12\"/>",
@@ -104,7 +102,6 @@ const ICONS = {
   "palette": "<path d=\"M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.4-1-1.6-1-2.8 0-1 .8-1.7 1.8-1.7H17a3.5 3.5 0 0 0 3.5-3.5C20.5 6.7 16.7 3.5 12 3.5z\"/><path d=\"M7.5 11.5h.01M9.5 7.8h.01M14 7.5h.01\" stroke-width=\"2\"/>",
   "paste": "<rect x=\"5.5\" y=\"5\" width=\"13\" height=\"15.5\" rx=\"2.5\"/><path d=\"M9 5v-.8A1.2 1.2 0 0 1 10.2 3h3.6A1.2 1.2 0 0 1 15 4.2V5\"/><path d=\"M9 12h6M9 15.5h4\"/>",
   "pen": "<path d=\"m15.8 4.7 3.5 3.5L8.2 19.3l-4.4.9.9-4.4z\"/><path d=\"m13.7 6.8 3.5 3.5\"/>",
-  "pen-to-square": "<path d=\"M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4\"/><path d=\"M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z\"/>",
   "phone": "<path d=\"M8 4h2.3l1.4 3.7-1.8 1.3a10.5 10.5 0 0 0 5.1 5.1l1.3-1.8L20 13.7V16a2.4 2.4 0 0 1-2.4 2.4C10.2 18.4 5.6 13.8 5.6 6.4A2.4 2.4 0 0 1 8 4z\"/>",
   "plane": "<path d=\"M20.5 3.5 3.5 10.5l6 2.5 2.5 6zM9.5 13l11-9.5\"/>",
   "plus": "<path d=\"M12 5v14M5 12h14\"/>",
@@ -128,10 +125,12 @@ const ICONS = {
   "triangle-exclamation": "<path d=\"M12 4.5 21 19.5H3z\"/><path d=\"M12 10v4.5\"/><path d=\"M12 17.3h.01\" stroke-width=\"2.2\"/>",
   "undo": "<path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\"/>",
   "redo": "<path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5a5.5 5.5 0 0 0 0 11H13\"/>",
-  "upload": "<path d=\"M12 15V4.5M8 8l4-4 4 4M5 19.5h14\"/>",
   "users": "<circle cx=\"9\" cy=\"8.5\" r=\"3\"/><path d=\"M3.5 19a5.5 5.5 0 0 1 11 0M15.5 5.7a3 3 0 0 1 0 5.6M17 14.2a5.5 5.5 0 0 1 3.5 4.8\"/>",
   "window-maximize": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"3\"/><path d=\"M3.5 9.5h17\"/>",
-  "xmark": "<path d=\"M6 6l12 12M18 6 6 18\" stroke-width=\"2\"/>"
+  "xmark": "<path d=\"M6 6l12 12M18 6 6 18\" stroke-width=\"2\"/>",
+  "braces": "<path d=\"M8.5 4C6.5 4 6 5 6 6.5V9c0 1.2-.8 2-2 3 1.2 1 2 1.8 2 3v2.5C6 19 6.5 20 8.5 20\"/><path d=\"M15.5 4C17.5 4 18 5 18 6.5V9c0 1.2.8 2 2 3-1.2 1-2 1.8-2 3v2.5c0 1.5-.5 2.5-2.5 2.5\"/>",
+  "duplicate": "<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5\"/><path d=\"M14 11.5v5M11.5 14h5\"/>",
+  "arrow-down-to-bracket": "<path d=\"M12 4.5V15M8 11.3l4 4 4-4\"/><path d=\"M6 11.5v6.2a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8v-6.2\"/>",
 };
 (function(){
   try {
@@ -1896,7 +1895,7 @@ const ICONS = {
     <div id="promptsSide">
       <div class="sidebar-section">
         <div class="nav-item" id="pAllNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('all')">
-          <span><i class="fa-regular fa-clone" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Prompts</span>
+          <span><i class="fa-regular fa-braces" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Prompts</span>
           <span class="count" id="pAllCount"></span>
         </div>
         <div class="nav-item" id="pFavNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('favorites')">
@@ -1962,15 +1961,15 @@ const ICONS = {
       <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleLibMenu()" title="Data — export, import, backups" aria-haspopup="menu"><i class="fa-regular fa-hard-drive"></i></button>
       <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
         <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
-          <i class="fa-solid fa-download split-btn-menu-icon"></i>
+          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Export All Data</div><div class="split-btn-menu-desc">Full backup as a .json file</div></div>
         </div>
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
-          <i class="fa-solid fa-upload split-btn-menu-icon"></i>
+          <i class="fa-solid fa-arrow-down-to-bracket split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Import…</div><div class="split-btn-menu-desc">A backup or a prompts file</div></div>
         </div>
         <div class="split-btn-menu-item prompts-only" onclick="exportPrompts('all');closeLibMenu()">
-          <i class="fa-solid fa-download split-btn-menu-icon"></i>
+          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label">Export Prompts</div><div class="split-btn-menu-desc">Prompts as a .json file</div></div>
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
@@ -2008,7 +2007,7 @@ const ICONS = {
           <div class="lib-dropdown tool-dd"><button type="button" class="tool-btn" id="toolDue" onclick="event.stopPropagation();toggleToolMenu('due')" title="Due date" aria-haspopup="menu" disabled><i class="fa-regular fa-calendar"></i></button><div class="split-btn-menu tool-menu" id="toolMenuDue" role="menu"></div></div>
           <div class="lib-dropdown tool-dd"><button type="button" class="tool-btn" id="toolMove" onclick="event.stopPropagation();toggleToolMenu('project')" title="Move to project" aria-haspopup="menu" disabled><i class="fa-regular fa-folder"></i></button><div class="split-btn-menu tool-menu" id="toolMenuProject" role="menu"></div></div>
           <span class="tool-sep"></span>
-          <button type="button" class="tool-btn" id="toolDup" onclick="toolbarAct('duplicate')" title="Duplicate" disabled><i class="fa-regular fa-clone"></i></button>
+          <button type="button" class="tool-btn" id="toolDup" onclick="toolbarAct('duplicate')" title="Duplicate" disabled><i class="fa-regular fa-duplicate"></i></button>
           <button type="button" class="tool-btn tool-danger" id="toolDel" onclick="toolbarAct('delete')" title="Delete" disabled><i class="fa-regular fa-trash-can"></i></button>
         </div>
         <div class="tool-group" id="trashTools" role="toolbar" aria-label="Actions for the selected deleted task">
@@ -2144,7 +2143,7 @@ const ICONS = {
       <div class="note-toolbar note-empty-bar" id="pEmptyBar">
         <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
       </div>
-      <div class="notes-empty" id="pEmpty"><i class="fa-regular fa-clone"></i><div>No Prompt Selected</div></div>
+      <div class="notes-empty" id="pEmpty"><i class="fa-regular fa-braces"></i><div>No Prompt Selected</div></div>
       <div class="note-editor" id="pEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Prompt tools" onmousedown="if(!event.target.closest('select,input,textarea'))event.preventDefault()">
           <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
@@ -2275,12 +2274,12 @@ const ICONS = {
         <div class="help-search-bar"><div class="help-search-field"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="search" id="helpSearch" placeholder="Search" aria-label="Search help (press / to jump here)" autocomplete="off" oninput="helpSearch(this.value)" onkeydown="helpSearchKey(event)"></div></div>
       <div class="help-nav" role="tablist" aria-orientation="vertical" onkeydown="helpTabKey(event)">
         <button type="button" role="tab" id="helpTab-start" class="active" aria-selected="true" tabindex="0" aria-controls="helpPane-start" onclick="setHelpTab('start')"><i class="fa-solid fa-compass"></i><span>Getting started</span></button>
-        <button type="button" role="tab" id="helpTab-edit" aria-selected="false" tabindex="-1" aria-controls="helpPane-edit" onclick="setHelpTab('edit')"><i class="fa-solid fa-pen-to-square"></i><span>Editing in place</span></button>
+        <button type="button" role="tab" id="helpTab-edit" aria-selected="false" tabindex="-1" aria-controls="helpPane-edit" onclick="setHelpTab('edit')"><i class="fa-solid fa-pen"></i><span>Editing in place</span></button>
         <button type="button" role="tab" id="helpTab-nest" aria-selected="false" tabindex="-1" aria-controls="helpPane-nest" onclick="setHelpTab('nest')"><i class="fa-solid fa-list-check"></i><span>Subtasks &amp; repeating</span></button>
         <button type="button" role="tab" id="helpTab-views" aria-selected="false" tabindex="-1" aria-controls="helpPane-views" onclick="setHelpTab('views')"><i class="fa-solid fa-table-columns"></i><span>Views &amp; filters</span></button>
         <button type="button" role="tab" id="helpTab-org" aria-selected="false" tabindex="-1" aria-controls="helpPane-org" onclick="setHelpTab('org')"><i class="fa-regular fa-folder"></i><span>Projects &amp; tags</span></button>
         <button type="button" role="tab" id="helpTab-notes" aria-selected="false" tabindex="-1" aria-controls="helpPane-notes" onclick="setHelpTab('notes')"><i class="fa-regular fa-note-sticky"></i><span>Notes</span></button>
-        <button type="button" role="tab" id="helpTab-prompts" aria-selected="false" tabindex="-1" aria-controls="helpPane-prompts" onclick="setHelpTab('prompts')"><i class="fa-regular fa-clone"></i><span>Prompts</span></button>
+        <button type="button" role="tab" id="helpTab-prompts" aria-selected="false" tabindex="-1" aria-controls="helpPane-prompts" onclick="setHelpTab('prompts')"><i class="fa-regular fa-braces"></i><span>Prompts</span></button>
         <button type="button" role="tab" id="helpTab-look" aria-selected="false" tabindex="-1" aria-controls="helpPane-look" onclick="setHelpTab('look')"><i class="fa-solid fa-circle-half-stroke"></i><span>Appearance</span></button>
         <button type="button" role="tab" id="helpTab-data" aria-selected="false" tabindex="-1" aria-controls="helpPane-data" onclick="setHelpTab('data')"><i class="fa-solid fa-hard-drive"></i><span>Data &amp; sync</span></button>
       </div>
@@ -2390,7 +2389,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-folder-plus"></i><span>Create projects with <strong>+</strong> in the sidebar; each gets an icon. <strong>Inbox</strong> always exists and catches tasks with no project.</span></div>
           <div class="help-row"><i class="fa-solid fa-trash-can"></i><span>Deleting a project moves its <strong>open tasks to Inbox</strong> so they can be triaged; its completed tasks are kept out of the way but still show in All Tasks, My Day, This Week, Overdue and search.</span></div>
-          <div class="help-row"><i class="fa-regular fa-folder-open"></i><span>The <strong>default project</strong> for quick-add is the picker at the right end of the Add a task bar. When you are viewing a project it shows that one (greyed) instead.</span></div>
+          <div class="help-row"><i class="fa-regular fa-folder"></i><span>The <strong>default project</strong> for quick-add is the picker at the right end of the Add a task bar. When you are viewing a project it shows that one (greyed) instead.</span></div>
           </div>
         </div>
         <div class="help-divider"></div>
@@ -2420,7 +2419,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table with the cursor in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction: <strong>+</strong> adds a row below or a column to the right, <strong>−</strong> deletes the current row or column, plus the header-row toggle and delete table. To insert above or to the left, use the table button's menu. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button also offers the same actions, toggles the header row, or deletes the table. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
-          <div class="help-row"><i class="fa-regular fa-clone"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
+          <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Duplicate, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
           <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
           </div>
@@ -2429,7 +2428,7 @@ const ICONS = {
           <div class="help-section-title">Folders &amp; finding notes</div>
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-folder"></i><span><strong>Folders</strong>: <strong>+</strong> beside <em>Folders</em> adds one; hover a folder to edit or delete it. Deleting a folder moves its notes to <em>Notes</em>. Move a note with the folder menu in its toolbar. Deleting, moving or renaming shows an <strong>Undo</strong> toast, and <kbd>⌘Z</kbd> does the same while you are not typing; inside a note, <kbd>⌘Z</kbd> undoes your typing.</span></div>
-          <div class="help-row"><i class="fa-regular fa-folder-open"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows only the notes directly in it, and so does its count; each subfolder has its own list. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
+          <div class="help-row"><i class="fa-regular fa-folder-plus"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows only the notes directly in it, and so does its count; each subfolder has its own list. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
           <div class="help-row"><i class="fa-solid fa-arrows-up-down"></i><span><strong>Reordering folders</strong>: drag a folder up or down within its level, or right-click it and choose <em>Move up</em> / <em>Move down</em>. The order, renames and moves sync between devices like note edits.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of <em>every</em> note, whatever folder you are in, and opens the first result.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Delete</kbd> while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
@@ -2441,7 +2440,7 @@ const ICONS = {
         <div class="help-section">
           <div class="help-section-title">Reusable prompts</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-regular fa-clone"></i><span>Switch to <strong>Prompts</strong> with the curly-braces icon at the top of the sidebar. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
+          <div class="help-row"><i class="fa-regular fa-braces"></i><span>Switch to <strong>Prompts</strong> with the curly-braces icon at the top of the sidebar. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
           <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
@@ -2450,7 +2449,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-arrows-left-right"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right; to compare a different pair, close the window and select again. The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. The sliders button's menu sets how closely changes are marked (<em>Lines</em>, <em>Words</em> or <em>Characters</em>), <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it); the button is tinted while an option other than the default is on. <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the <em>Open in</em> menu next to <em>Copy Prompt</em> (in a narrow window: <em>Open in</em> in the ⋯ and right-click menus) copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> does it with the first one. <em>Edit Apps…</em> changes the list (a name and a web address each; kept on this device).</span></div>
-          <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Clone</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
         </div>
@@ -2461,7 +2460,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-font"></i><span>The <strong>aA</strong> button at the bottom of the sidebar opens <strong>Appearance</strong>: <em>Text size</em> (Medium or Large) and <em>Theme</em> — Light, Dark, or Auto, which follows your system and switches live.</span></div>
           <div class="help-row"><i class="fa-solid fa-display"></i><span>These are <strong>per-device</strong> choices — saved in this browser, not in your data file — so each machine can follow its own system. The same goes for the sidebar state, the board grouping and the default project.</span></div>
-          <div class="help-row"><i class="fa-regular fa-clone"></i><span>The sidebar is frosted glass over a soft backdrop; the list, board and side panel are flat and opaque. With <em>Reduce transparency</em> or <em>Increase contrast</em> on in your system settings the glass becomes solid.</span></div>
+          <div class="help-row"><i class="fa-regular fa-display"></i><span>The sidebar is frosted glass over a soft backdrop; the list, board and side panel are flat and opaque. With <em>Reduce transparency</em> or <em>Increase contrast</em> on in your system settings the glass becomes solid.</span></div>
           </div>
         </div>
       </div>
@@ -2478,7 +2477,7 @@ const ICONS = {
         <div class="help-section">
           <div class="help-section-title">Backups and moving data</div>
           <div class="help-list">
-          <div class="help-row"><i class="fa-solid fa-download"></i><span>The <strong>Data</strong> menu (drive icon, bottom of the sidebar) can <strong>export</strong> a backup file, <strong>import</strong> one — merging with or replacing what you have (a replace backs up first) — and open <strong>Backups</strong>.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span>The <strong>Data</strong> menu (drive icon, bottom of the sidebar) can <strong>export</strong> a backup file, <strong>import</strong> one — merging with or replacing what you have (a replace backs up first) — and open <strong>Backups</strong>.</span></div>
           <div class="help-row"><i class="fa-regular fa-clock"></i><span><strong>Daily snapshots</strong> of the last seven days are kept automatically; pick one under Data → Backups to restore it.</span></div>
           </div>
           <div class="help-tip"><strong>Nothing leaves your machine.</strong> There is no server, no account and no admin rights are needed. Link a file to be safe against clearing browser data.</div>
@@ -2586,15 +2585,15 @@ const ICONS = {
       <h3 id="pdfTitle">Compare Prompts</h3>
       <div class="pdiff-tools" role="toolbar" aria-label="Comparison">
         <span class="tool-group" role="group" aria-label="Differences">
-          <button type="button" class="tool-btn" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference"><i class="fa-solid fa-chevron-up"></i></button>
-          <button type="button" class="tool-btn" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference"><i class="fa-solid fa-chevron-down"></i></button>
+          <button type="button" class="tool-btn" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14.5 6-6 6 6"/></svg></button>
+          <button type="button" class="tool-btn" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9.5 6 6 6-6"/></svg></button>
         </span>
         <span class="pdiff-count" id="pdfCount" role="status"></span>
         <span class="tool-group" role="group" aria-label="Undo">
           <button type="button" class="tool-btn" id="pdfUndo" onclick="pdfUndo()" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
           <button type="button" class="tool-btn" id="pdfRedo" onclick="pdfRedo()" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
         </span>
-        <span class="tool-group"><button type="button" class="tool-btn" id="pdfOpts" onclick="openPdfOptionsMenu(event)" title="Comparison options" aria-label="Comparison options" aria-haspopup="menu"><i class="fa-solid fa-sliders"></i></button></span>
+        <span class="tool-group"><button type="button" class="tool-btn" id="pdfOpts" onclick="openPdfOptionsMenu(event)" title="Comparison options" aria-label="Comparison options" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button></span>
       </div>
     </div>
     <div class="pdiff-sels"><div class="pdiff-name" id="pdfNameA"></div><span></span><div class="pdiff-name" id="pdfNameB"></div></div>
@@ -3450,7 +3449,7 @@ function renderList(){
         ${(t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('')}
         <div class="row-actions">
           ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
-          <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
+          <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-duplicate"></i></button>
           <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
           <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
         </div>
@@ -3566,7 +3565,7 @@ function boardCardHtml(t){
       ${t.dueDate ? '' : `<span class="cell-host editable cell-host-empty" role="button" tabindex="0" title="Set due date" onclick="openCellPop(event,'${t.id}','dueDate')"><span class="badge badge-due-empty"><i class="fa-regular fa-calendar"></i></span></span>`}
       <div class="row-actions">
         ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
-        <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-copy"></i></button>
+        <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-duplicate"></i></button>
         <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
         <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
       </div>
@@ -3947,7 +3946,7 @@ function rowMenuHtml(ids){
   const sub = rowMenuSub;
   const dueQ = [['today','Today'],['tomorrow','Tomorrow'],['week','Next Week'],['clear','Clear']];
   const parts = [];
-  if(n===1) parts.push(item('fa-solid fa-pen-to-square','Open Details','rowMenuRun(\'open\')'));
+  if(n===1) parts.push(item('fa-solid fa-circle-info','Open Details','rowMenuRun(\'open\')'));
   parts.push(item(allDone?'fa-regular fa-circle':'fa-regular fa-circle-check', allDone?'Mark Not Started':'Mark Complete', 'rowMenuRun(\'toggledone\')'));
   parts.push(sep);
   parts.push(sub('fa-regular fa-flag', 'Priority', opts('priority', PRIORITIES, same('priority'), x=>PRIORITY_DOT[x.id])));
@@ -3955,7 +3954,7 @@ function rowMenuHtml(ids){
   parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `rowMenuRun('due',this.value||'clear')`)));
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
-  if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-clone','Duplicate','rowMenuRun(\'duplicate\')'));
+  if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-duplicate','Duplicate','rowMenuRun(\'duplicate\')'));
   parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} Tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'⌫'}));
   return parts.join('');
 }
@@ -4315,7 +4314,7 @@ function renderDrawer(){
     <div class="drawer-footer">
       <span class="meta">Updated ${new Date(t.updatedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
       <div style="display:flex;gap:8px">
-        <button class="btn btn-sm" onclick="duplicateTask('${t.id}')"><i class="fa-regular fa-copy"></i> Duplicate</button>
+        <button class="btn btn-sm" onclick="duplicateTask('${t.id}')"><i class="fa-regular fa-duplicate"></i> Duplicate</button>
         <button class="btn btn-sm btn-danger" onclick="deleteTask('${t.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
       </div>
     </div>
@@ -5634,7 +5633,7 @@ function shortcutGroups(){
       ['Leave a table: go to the line below it', [mod,'↵']], ...(mac ? [] : [['Table options (rows, columns, header) at the caret', ['Shift','F10']]]),
       ['Next cell, adding a row after the last one', ['Tab']], ['Indent a list item', ['Tab']], ['Outdent a list item', [shift,'Tab']],
       ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']] ] },
-    { id:'prompts', label:'Prompts', icon:'fa-regular fa-clone', rows:[
+    { id:'prompts', label:'Prompts', icon:'fa-regular fa-braces', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
       ['Copy the finished prompt', [mod,'↵']], ['Copy and open in the first AI app', [shift,mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
       ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']] ] },
@@ -6309,7 +6308,7 @@ function noteMenuHtml(id, opts){
   const n = notes.find(x=>x.id===id); if(!n) return '';
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
   if(noteTrashed(n)){                                                              // a deleted note: bring it back, copy it, or delete it for good
-    return [item('fa-solid fa-rotate-left', 'Restore', `noteMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy Note', `noteMenuRun('copy')`), sep,
+    return [item('fa-solid fa-rotate-left', 'Restore', `noteMenuRun('restore')`), item('fa-regular fa-copy', 'Copy Note', `noteMenuRun('copy')`), sep,
             item('fa-solid fa-trash', 'Delete Permanently', `noteMenuRun('delete')`, {danger:true})].join('');
   }
   const moveOpts = orderedFolders().map(f=>menuOpt(`noteMenuRun('move','${f.id}')`, {svg: menuSvg('folder'), indent: !!f.parentId}, f.name, f.id===n.folderId)).join('');
@@ -6317,9 +6316,9 @@ function noteMenuHtml(id, opts){
     item('fa-solid fa-thumbtack', n.pinned ? 'Unpin Note' : 'Pin Note', `noteMenuRun('pin')`),
     ...(opts && opts.noLock ? [] : [item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`)]),   // the toolbar has its own lock button
     sep,
-    item('fa-regular fa-clipboard', 'Copy Note', `noteMenuRun('copy')`),
+    item('fa-regular fa-copy', 'Copy Note', `noteMenuRun('copy')`),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
-    item('fa-regular fa-clone', 'Duplicate', `noteMenuRun('clone')`),
+    item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
     sep,
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
@@ -6352,7 +6351,7 @@ function folderMenuHtml(id){
   const f = folderById(id); if(!f) return '';
   const item = rowMenuItem;
   const parts = [item('fa-solid fa-plus', 'New Note Here', `folderMenuRun('new')`)];
-  if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `folderMenuRun('newsub')`));
+  if(!f.parentId) parts.push(item('fa-regular fa-folder-plus', 'New Subfolder', `folderMenuRun('newsub')`));
   const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
   parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
@@ -7515,7 +7514,7 @@ function renderPromptEditor(){
     if(empty){
       empty.style.display = '';
       const none = !prompts.some(x=>!promptTrashed(x)) && promptFolderFilter!=='trash';
-      empty.innerHTML = none ? `<i class="fa-regular fa-clone"></i><div>No Prompts</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="triggerImport()">Import…</button></div>` : '<i class="fa-regular fa-clone"></i><div>No Prompt Selected</div>';
+      empty.innerHTML = none ? `<i class="fa-regular fa-braces"></i><div>No Prompts</div><div class="pr-empty-actions"><button type="button" class="btn btn-primary btn-sm" onclick="createPrompt()">New Prompt</button><button type="button" class="btn btn-sm" onclick="triggerImport()">Import…</button></div>` : '<i class="fa-regular fa-braces"></i><div>No Prompt Selected</div>';
     }
     if(bar) bar.style.display = ''; return;
   }
@@ -7603,9 +7602,9 @@ function promptIncludesHtml(p){
     if(i.status!=='ok') return `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span></div>`;
     const names = Object.keys(i.target.vars || {}).map(k=>k.replace(/^@/, '@'));
     const sub = i.unknown.length ? `<span class="pr-inc-sub bad">No variable ${i.unknown.map(esc).join(', ')}</span>` : i.rest ? `<span class="pr-inc-sub">${esc(i.rest)}</span>` : names.length ? `<span class="pr-inc-sub" title="Set one with {{>${esc(promptTitle(i.target))} ${esc(names[0])}=value}}">Can set: ${esc(names.slice(0, 4).join(', '))}${names.length>4 ? '…' : ''}</span>` : '';
-    return `<div class="pr-inc"><i class="fa-regular fa-clone"></i><div class="pr-inc-main">${open(i.target)}${sub}</div></div>`;
+    return `<div class="pr-inc"><i class="fa-regular fa-braces"></i><div class="pr-inc-main">${open(i.target)}${sub}</div></div>`;
   }).join('') + `</div>`;
-  if(used.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Used In</div>` + used.map(q=>`<div class="pr-inc"><i class="fa-regular fa-clone"></i>${open(q)}</div>`).join('') + `</div>`;
+  if(used.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Used In</div>` + used.map(q=>`<div class="pr-inc"><i class="fa-regular fa-braces"></i>${open(q)}</div>`).join('') + `</div>`;
   return html;
 }
 function renderPromptInspector(p){
@@ -8276,16 +8275,16 @@ function finishPromptsImport(data){
 function promptMenuHtml(id){
   const p = prompts.find(x=>x.id===id); if(!p) return '';
   const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
-  if(promptTrashed(p)) return [item('fa-solid fa-rotate-left', 'Restore', `promptMenuRun('restore')`), item('fa-regular fa-clipboard', 'Copy Prompt', `promptMenuRun('copy')`), sep, item('fa-solid fa-trash', 'Delete Permanently', `promptMenuRun('delete')`, {danger:true})].join('');
+  if(promptTrashed(p)) return [item('fa-solid fa-rotate-left', 'Restore', `promptMenuRun('restore')`), item('fa-regular fa-copy', 'Copy Prompt', `promptMenuRun('copy')`), sep, item('fa-solid fa-trash', 'Delete Permanently', `promptMenuRun('delete')`, {danger:true})].join('');
   const moveOpts = orderedPromptFolders().map(f=>menuOpt(`promptMenuRun('move','${f.id}')`, {svg: menuSvg('folder'), indent: !!f.parentId}, f.name, f.id===p.folderId)).join('');
   const openOpts = getPromptAiApps().map((a, i)=>menuOpt(`promptMenuRun('open',${i})`, {none: true}, a.name, false)).join('') + '<div class="row-menu-sep"></div>' + menuOpt(`promptMenuRun('apps')`, {none: true}, 'Edit Apps…', false);
   return [
-    item('fa-regular fa-clipboard', 'Copy Prompt', `promptMenuRun('copy')`),
+    item('fa-regular fa-copy', 'Copy Prompt', `promptMenuRun('copy')`),
     rowMenuSub('fa-solid fa-arrow-up-right-from-square', 'Open in', openOpts),
     item('fa-regular fa-star', p.favorite ? 'Remove from Favorites' : 'Add to Favorites', `promptMenuRun('favorite')`),
     item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
     sep,
-    item('fa-regular fa-clone', 'Duplicate', `promptMenuRun('clone')`),
+    item('fa-regular fa-duplicate', 'Duplicate', `promptMenuRun('clone')`),
     ...(()=>{ const m = promptCompareMark(), mark = item('fa-solid fa-arrows-left-right', m && m.id===id ? 'Deselect for Compare' : 'Select for Compare', `promptMenuRun('mark')`);
       return m && m.id!==id ? [item('fa-solid fa-arrows-left-right', 'Compare with Selected', `promptMenuRun('compareWith')`), mark] : [mark]; })(),
     item('fa-solid fa-arrow-up-from-bracket', 'Export Prompt', `promptMenuRun('export')`),
@@ -8314,7 +8313,7 @@ function promptMenuRun(kind, arg){
 function promptFolderMenuHtml(id){
   const f = promptFolderById(id); if(!f) return '';
   const item = rowMenuItem, parts = [item('fa-solid fa-plus', 'New Prompt Here', `promptFolderMenuRun('new')`)];
-  if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `promptFolderMenuRun('newsub')`));
+  if(!f.parentId) parts.push(item('fa-regular fa-folder-plus', 'New Subfolder', `promptFolderMenuRun('newsub')`));
   const sibs = f.locked ? [] : promptFolderSibs(f), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `promptFolderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `promptFolderMenuRun('down')`, {off: at===sibs.length-1}));
   parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `promptFolderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true, off:!!f.locked}));
@@ -9829,7 +9828,7 @@ function openPromptIncludeMenu(e){
   const off = !!(p.locked || promptTrashed(p));
   const others = prompts.filter(q=>q.id!==p.id && !promptTrashed(q) && !promptTitle(q).includes('}')).sort((a, b)=>promptTitle(a).localeCompare(promptTitle(b), undefined, {sensitivity:'base'}));
   menu.innerHTML = others.length
-    ? `<div class="row-menu-scroll">` + others.map(q=>rowMenuItem('fa-regular fa-clone', esc(promptTitle(q)), `promptInsertInclude('${q.id}')`, { off })).join('') + `</div>`
+    ? `<div class="row-menu-scroll">` + others.map(q=>rowMenuItem('fa-regular fa-braces', esc(promptTitle(q)), `promptInsertInclude('${q.id}')`, { off })).join('') + `</div>`
     : `<div class="row-menu-hint" style="padding:8px 12px">No other prompts to include yet</div>`;
   menu.classList.add('open');
   placeRowMenu(menu, r.left, r.bottom + 6, btn);

@@ -234,3 +234,23 @@ test('the Undo and Redo buttons follow the stacks', function () {
   pdfUndo(); assertTrue(pdfEl('pdfUndo').disabled); assertFalse(pdfEl('pdfRedo').disabled);
   pdfRedo(); assertFalse(pdfEl('pdfUndo').disabled); assertTrue(pdfEl('pdfRedo').disabled);
 });
+
+// ---- icon vocabulary (one icon per meaning) ----
+test('the icon registry gives every meaning its own drawing; the retired names stay gone', function () {
+  const byDrawing = {};
+  Object.keys(ICONS).forEach(k => { (byDrawing[ICONS[k]] = byDrawing[ICONS[k]] || []).push(k); });
+  const shared = Object.keys(byDrawing).map(d => byDrawing[d]).filter(g => g.length > 1).map(g => g.sort().join('='));
+  assertDeepEqual(shared, ['trash=trash-can'], 'only the documented alias shares a drawing (Copy and Duplicate, Export and Import, folder-open and folder-plus must differ)');
+  ['braces', 'duplicate', 'copy', 'arrow-up-from-bracket', 'arrow-down-to-bracket', 'folder', 'folder-open', 'folder-plus', 'circle-info', 'pen', 'undo', 'redo'].forEach(k => assertTrue(!!ICONS[k], k + ' is drawn'));
+  ['clone', 'download', 'upload', 'pen-to-square'].forEach(k => assertEqual(ICONS[k], undefined, k + ' was retired'));
+});
+
+test('menus use the vocabulary: Copy is two squares, Duplicate is the squares with a plus, never the clipboard', function () {
+  const p = pmk({});
+  pfresh(); prompts = [p]; normalizePrompts();
+  const h = promptMenuHtml(p.id), svg = name => menuSvg(name);
+  assertIncludes(h, svg('copy')); assertIncludes(h, svg('duplicate')); assertNotIncludes(h, svg('clipboard'), 'Copy Prompt is not the clipboard');
+  assertIncludes(h, svg('arrow-up-from-bracket'), 'Export Prompt');
+  assertIncludes(promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER), svg('folder-plus'), 'New Subfolder is the plus folder');
+  assertIncludes(promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER), svg('arrow-up-from-bracket'), 'Export Folder');
+});
