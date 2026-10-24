@@ -1601,11 +1601,12 @@ const ICONS = {
   .pdiff-modal { width: min(1280px, 96vw); height: min(88vh, 900px); max-width: 96vw; padding: 20px; gap: 10px; }
   .pdiff-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .pdiff-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .modal .pdiff-sel { width: auto; min-width: 0; padding: 6px 12px; font-size: var(--fs-13); }
+  .pdiff-tools .tool-group { border: 0; background: var(--cap-fill); height: 32px; padding: 3px; box-sizing: border-box; gap: 2px; }   /* the toolbar capsule, as in the main toolbars */
+  .pdiff-tools .tool-btn { height: 26px; }
+  .pdiff-tools .tool-btn.on { background: var(--cap-on); color: var(--text); }   /* an option other than the default is active (not the amber `.on` of lock / favourite) */
   .pdiff-modal { --pdf-ruler-w: 14px; }
   .pdiff-sels { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 0; padding-right: calc(var(--pdf-ruler-w) + 4px); }
-  .modal .pdiff-sels .pdiff-sel { width: 100%; }
-  html[data-scheme="glass"] .btn.on { background: var(--accent-tint); }   /* the Compare dialog's toggles; must out-rank the Glass .btn fill */
+  .pdiff-name { min-width: 0; padding: 6px 12px 6px 8px; font-size: var(--fs-13); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* the two prompts are fixed (Select for Compare chose them), so they are labels, not pickers */
   /* the aligned view: one grid row per line pair, so wrapped and filler cells keep both sides level */
   .pdiff-viewwrap { flex: 1; min-height: 0; display: flex; gap: 4px; }
   .pdiff-view { flex: 1; min-width: 0; position: relative; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; }
@@ -2444,7 +2445,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case. <strong>Pass values down</strong> with <code>{{&gt;Role who=critic tone="very formal"}}</code>: for that one use, they replace the included prompt's own choices (a checklist takes items split by <code>|</code>, a global variable is set as <code>@Language=German</code>); the included prompt itself stays as it is. The Variables panel lists what a prompt includes (with the values you pass, and which variables it can set) and, under <em>Used In</em>, which other prompts include it, so you can see what a change will affect; a click opens that prompt. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrows-left-right"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right (the lists above each side pick different prompts, or blank text to paste into). The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. <em>Lines</em>, <em>Words</em> or <em>Characters</em> set how closely changes are marked, <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it). <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrows-left-right"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right; to compare a different pair, close the window and select again. The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. The sliders button's menu sets how closely changes are marked (<em>Lines</em>, <em>Words</em> or <em>Characters</em>), <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it); the button is tinted while an option other than the default is on. <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the <em>Open in</em> menu next to <em>Copy Prompt</em> (in a narrow window: <em>Open in</em> in the ⋯ and right-click menus) copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> does it with the first one. <em>Edit Apps…</em> changes the list (a name and a web address each; kept on this device).</span></div>
           <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
@@ -2581,17 +2582,17 @@ const ICONS = {
   <div class="modal pdiff-modal" role="dialog" aria-modal="true" aria-labelledby="pdfTitle" onkeydown="pdfKey(event)">
     <div class="pdiff-head">
       <h3 id="pdfTitle">Compare Prompts</h3>
-      <div class="pdiff-tools" role="group" aria-label="Comparison options">
-        <select id="pdfPrec" class="pdiff-sel" aria-label="Precision" title="How exactly changes inside a line are marked" onchange="pdfSetOption('prec', this.value)"><option value="line">Lines</option><option value="word" selected>Words</option><option value="char">Characters</option></select>
-        <button type="button" class="btn btn-sm" id="pdfWsBtn" aria-pressed="false" onclick="pdfSetOption('ws')" title="Ignore differences in spaces and indentation">Ignore Whitespace</button>
-        <button type="button" class="btn btn-sm" id="pdfFoldBtn" aria-pressed="false" onclick="pdfSetOption('fold')" title="Fold long stretches of unchanged lines">Hide Unchanged</button>
-        <button type="button" class="btn btn-sm" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference">↑</button>
-        <button type="button" class="btn btn-sm" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference">↓</button>
+      <div class="pdiff-tools" role="toolbar" aria-label="Comparison">
+        <span class="tool-group" role="group" aria-label="Differences">
+          <button type="button" class="tool-btn" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference"><i class="fa-solid fa-chevron-up"></i></button>
+          <button type="button" class="tool-btn" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference"><i class="fa-solid fa-chevron-down"></i></button>
+        </span>
         <span class="pdiff-count" id="pdfCount" role="status"></span>
-        <button type="button" class="btn btn-sm" id="pdfUndo" onclick="pdfUndo()" title="Undo the last edit or move (Cmd/Ctrl+Z)">Undo</button>
+        <span class="tool-group"><button type="button" class="tool-btn" id="pdfUndo" onclick="pdfUndo()" title="Undo the last edit or move (Cmd/Ctrl+Z)" aria-label="Undo"><i class="fa-solid fa-rotate-left"></i></button></span>
+        <span class="tool-group"><button type="button" class="tool-btn" id="pdfOpts" onclick="openPdfOptionsMenu(event)" title="Comparison options" aria-label="Comparison options" aria-haspopup="menu"><i class="fa-solid fa-sliders"></i></button></span>
       </div>
     </div>
-    <div class="pdiff-sels"><select id="pdfSelA" class="pdiff-sel" aria-label="Left prompt" onchange="pdfPick('a', this.value)"></select><span></span><select id="pdfSelB" class="pdiff-sel" aria-label="Right prompt" onchange="pdfPick('b', this.value)"></select></div>
+    <div class="pdiff-sels"><div class="pdiff-name" id="pdfNameA"></div><span></span><div class="pdiff-name" id="pdfNameB"></div></div>
     <div class="pdiff-viewwrap">
       <div class="pdiff-view" id="pdfView" aria-label="Differences" onscroll="pdfRulerThumb()" oninput="pdfCellInput(event)" onbeforeinput="pdfCellBefore(event)" onkeydown="pdfCellKey(event)" onpaste="pdfCellPaste(event)" onmousedown="pdfCellDown(event)" ondrop="event.preventDefault()" oncompositionend="pdfRefreshSoon()"></div>
       <div class="pdiff-ruler" id="pdfRuler" aria-hidden="true" onclick="pdfRulerClick(event)"></div>
@@ -7094,7 +7095,7 @@ function diffRowsHtml(rows, A, B, res, cur, ro){
 let pdf = null;
 const pdfEl = id=>document.getElementById(id);
 const pdfRO = side=>{ const id = side==='a' ? pdf.aId : pdf.bId, p = id && prompts.find(x=>x.id===id); return !!p && !!p.locked; };
-const pdfChanged = side=>side==='a' ? pdf.a!==pdf.a0 : !!pdf.bId && pdf.b!==pdf.b0;
+const pdfChanged = side=>side==='a' ? pdf.a!==pdf.a0 : pdf.b!==pdf.b0;
 // "Select for Compare" (as in VS Code's Explorer): one prompt is marked per session, and another prompt's menu then offers Compare with Selected (the only way into the dialog).
 let promptCompareId = null;
 const promptCompareMark = ()=>{ const p = promptCompareId && prompts.find(x=>x.id===promptCompareId); return p && !promptTrashed(p) ? p : null; };
@@ -7103,38 +7104,41 @@ function togglePromptCompareMark(id){
   const p = prompts.find(x=>x.id===id); render();
   showToast(promptCompareId ? `Selected “${promptTitle(p)}” for Compare` : 'Compare selection cleared');
 }
-function openPromptDiff(id, withId){
-  const p = prompts.find(x=>x.id===id); if(!p || promptTrashed(p)) return;
+function openPromptDiff(id, withId){      // both prompts are chosen by Select for Compare / Compare with Selected; the dialog cannot change them
+  const p = prompts.find(x=>x.id===id), o = prompts.find(x=>x.id===withId);
+  if(!p || !o || p===o || promptTrashed(p) || promptTrashed(o)) return;
   flushPromptEdit();
-  const others = prompts.filter(q=>q.id!==id && !promptTrashed(q)), o = (withId && others.find(q=>q.id===withId)) || others.find(q=>q.folderId===p.folderId) || others[0];
-  pdf = { aId:id, bId:o ? o.id : '', a:p.template, a0:p.template, b:o ? o.template : '', b0:o ? o.template : '', prec:'word', ws:false, fold:false, open:new Set(), cur:-1, undo:[], redo:[], burst:false, timer:0, confirming:false, res:null };
+  pdf = { aId:id, bId:o.id, a:p.template, a0:p.template, b:o.template, b0:o.template, prec:'word', ws:false, fold:false, open:new Set(), cur:-1, undo:[], redo:[], burst:false, timer:0, confirming:false, res:null };
   modalReturnFocus = document.activeElement;
-  pdfEl('pdfPrec').value = 'word';
   pdfEl('pdfModalBg').classList.add('open');
-  pdfEl('pdfFoldBtn').classList.remove('on'); pdfEl('pdfFoldBtn').setAttribute('aria-pressed', 'false');
-  pdfFillSelects(); renderPromptDiff();
+  pdfFillNames(); renderPromptDiff();
 }
-function pdfFillSelects(){
-  const list = prompts.filter(p=>!promptTrashed(p)).sort((x, y)=>promptTitle(x).localeCompare(promptTitle(y), undefined, {sensitivity:'base'}));
-  const opts = (sel, other, blank)=>(blank ? `<option value="">Blank text (not saved)</option>` : '') + list.map(p=>`<option value="${p.id}"${p.id===sel ? ' selected' : ''}${p.id===other ? ' disabled' : ''}>${esc(promptTitle(p))}</option>`).join('');
-  pdfEl('pdfSelA').innerHTML = opts(pdf.aId, pdf.bId, false); pdfEl('pdfSelB').innerHTML = opts(pdf.bId, pdf.aId, true);
-  pdfEl('pdfSelA').value = pdf.aId; pdfEl('pdfSelB').value = pdf.bId;
-}
-function pdfPick(side, id){
-  if(!pdf) return;
-  if(pdfChanged(side)){ showToast('Save or undo your changes to this side first', true); pdfFillSelects(); return; }
-  const p = prompts.find(x=>x.id===id);
-  if(side==='a'){ if(!p) return; pdf.aId = id; pdf.a = pdf.a0 = p.template; }
-  else { pdf.bId = p ? id : ''; pdf.b = pdf.b0 = p ? p.template : ''; }
-  pdf.undo = []; pdf.redo = []; pdf.burst = false; pdf.cur = -1;
-  pdf.open = new Set();
-  pdfFillSelects(); renderPromptDiff(); pdfEl('pdfView').scrollTop = 0;
+function pdfFillNames(){
+  [['A', pdf.aId], ['B', pdf.bId]].forEach(([k, id])=>{ const p = prompts.find(x=>x.id===id), el = pdfEl('pdfName' + k), t = p ? promptTitle(p) + (p.locked ? ' (locked)' : '') : ''; el.textContent = t; el.title = t; });
 }
 function pdfSetOption(kind, v){
   if(!pdf) return;
   if(kind==='prec') pdf.prec = v; else if(kind==='fold'){ pdf.fold = !pdf.fold; pdf.open = new Set(); } else pdf.ws = !pdf.ws;
-  [['pdfWsBtn', pdf.ws], ['pdfFoldBtn', pdf.fold]].forEach(([id, on])=>{ const b = pdfEl(id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  const b = pdfEl('pdfOpts'); b.classList.toggle('on', pdf.prec!=='word' || pdf.ws || pdf.fold);
   renderPromptDiff();
+}
+// The options pop-up (Apple's pattern: one menu with a tick on what is on, instead of a row of toggle buttons).
+function pdfOptionsMenuHtml(){
+  const o = (kind, v, label, cur)=>menuOpt(`pdfOptionPick('${kind}','${v || ''}')`, {none: true}, label, cur);
+  return o('prec', 'line', 'Lines', pdf.prec==='line') + o('prec', 'word', 'Words', pdf.prec==='word') + o('prec', 'char', 'Characters', pdf.prec==='char')
+    + '<div class="row-menu-sep"></div>' + o('ws', '', 'Ignore Whitespace', pdf.ws) + o('fold', '', 'Hide Unchanged', pdf.fold);
+}
+function pdfOptionPick(kind, v){ closeRowMenu(); pdfSetOption(kind, v); }
+function openPdfOptionsMenu(e){
+  e.preventDefault(); e.stopPropagation(); if(!pdf) return;
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = pdfOptionsMenuHtml();
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  menu.classList.add('open');
+  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;
+  placeRowMenu(menu, r.right - menu.offsetWidth * k, r.bottom + 6, btn);
 }
 function pdfUnfold(key){ if(pdf){ pdf.open.add(key); renderPromptDiff(); } }
 // `focus` = {side, i, off}: put the caret back in that line after the repaint (the view is rebuilt from the text each time); left out, the caret where it is now is kept.

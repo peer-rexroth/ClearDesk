@@ -4,7 +4,7 @@ function dfLines(s) { return s.split('\n'); }
 function dfOpen(aText, bText, over) {
   const a = pmk({ name: 'Left', template: aText }), b = pmk({ name: 'Right', template: bText });
   pfresh(); prompts = [a, b]; selectedPromptId = a.id;
-  openPromptDiff(a.id);
+  openPromptDiff(a.id, b.id);
   if (over) Object.assign(pdf, over);
   return { a, b };
 }
@@ -123,13 +123,15 @@ test('the aligned view shows line numbers, filler cells and one pair of arrows p
   dfOpen('a\nonly left', 'a'); assertIncludes(pdfEl('pdfView').innerHTML, 'dc filler');
 });
 
-test('switching a side with unsaved changes is refused, and the other side cannot be picked for both', function () {
-  const { a, b } = dfOpen('x', 'y'); const c = pmk({ name: 'C', template: 'z' }); prompts.push(c);
-  pdfMerge(0, true);
-  pdfPick('b', c.id); assertEqual(pdf.bId, b.id, 'unsaved changes block the switch');
-  pdfUndo(); pdfPick('b', c.id); assertEqual(pdf.bId, c.id); assertEqual(pdf.b, 'z');
-  pdfPick('b', ''); assertEqual(pdf.bId, ''); assertEqual(pdf.b, '', 'blank text is a scratch side');
-  pdf.b = 'typed'; assertFalse(pdfChanged('b'), 'scratch text is never saved, so it never counts as a change');
+test('the two prompts are fixed by Select for Compare: no pickers, names as labels, and opening needs two different live prompts', function () {
+  const { a, b } = dfOpen('x', 'y');
+  assertEqual(typeof pdfPick, 'undefined'); assertEqual(typeof pdfFillSelects, 'undefined');
+  assertEqual(pdfEl('pdfNameA').textContent, 'Left'); assertEqual(pdfEl('pdfNameB').textContent, 'Right');
+  b.locked = true; pdfFillNames(); assertEqual(pdfEl('pdfNameB').textContent, 'Right (locked)');
+  pdfClose();
+  openPromptDiff(a.id); assertEqual(pdf, null, 'no second prompt: nothing opens (there is no guessed partner)');
+  openPromptDiff(a.id, a.id); assertEqual(pdf, null, 'a prompt is not compared with itself');
+  b.deletedAt = Date.now(); openPromptDiff(a.id, b.id); assertEqual(pdf, null, 'a deleted prompt cannot be compared');
 });
 
 test('there is no stand-alone Compare… item: comparing starts from Select for Compare', function () {
@@ -212,4 +214,15 @@ test('the overview ruler is repainted with the view and the dialog has no second
   dfOpen('a', 'b');
   assertEqual(typeof pdfSetEdit, 'undefined'); assertEqual(typeof diffLinesHtml, 'undefined'); assertEqual(typeof diffLineMap, 'undefined');
   assertEqual(typeof pdfRulerSync, 'function'); renderPromptDiff(); assertEqual(pdf.res.hunks.length, 1);
+});
+
+test('the comparison options are one pop-up menu with a tick on what is on; picking one applies it and lights the button when it is not the default', function () {
+  dfOpen('a\nb', 'a\nc');
+  let m = pdfOptionsMenuHtml();
+  ['Lines', 'Words', 'Characters', 'Ignore Whitespace', 'Hide Unchanged'].forEach(l => assertIncludes(m, l));
+  assertEqual(m.split('menu-opt current').length - 1, 1, 'only Words is ticked at first');
+  pdfOptionPick('prec', 'char'); assertEqual(pdf.prec, 'char'); assertIncludes(pdfOptionsMenuHtml(), 'current');
+  pdfOptionPick('ws', ''); assertTrue(pdf.ws); pdfOptionPick('fold', ''); assertTrue(pdf.fold);
+  assertEqual(pdfOptionsMenuHtml().split('menu-opt current').length - 1, 3, 'Characters, Ignore Whitespace and Hide Unchanged');
+  assertEqual(typeof pdfEl('pdfPrec'), 'object'); // the old toolbar controls are gone from the code paths, only the menu changes them
 });
