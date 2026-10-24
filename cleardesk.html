@@ -1215,8 +1215,9 @@ const ICONS = {
   .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
   .project-row.sub-folder { padding-left: 44px; }
   .note-row-lock, .note-row-pin { color: var(--text-2); }
+  .note-row-cmp { color: var(--accent); }   /* the prompt marked by Select for Compare */
   .note-row-star { color: var(--amber-text); }
-  .note-row.selected :is(.note-row-lock, .note-row-pin, .note-row-star) { color: inherit; opacity: .9; }
+  .note-row.selected :is(.note-row-lock, .note-row-pin, .note-row-star, .note-row-cmp) { color: inherit; opacity: .9; }
   /* the link popover (Apple style): a small grouped form under the Link button: Text and Link rows, one Done button, Remove Link when editing */
   .note-link-pop { display: none; position: fixed; z-index: 410; width: 320px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 8px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--glass-r-menu); box-shadow: var(--shadow); }
   .note-link-pop.open { display: block; }
@@ -1601,7 +1602,30 @@ const ICONS = {
   .pdiff-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .pdiff-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .modal .pdiff-sel { width: auto; min-width: 0; padding: 6px 12px; font-size: var(--fs-13); }
-  .pdiff-col > .pdiff-sel { width: 100%; }
+  .pdiff-sels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pdiff-sels.view { grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 0; }
+  .pdiff-sels:not(.view) .pdiff-sels-gap { display: none; }
+  .modal .pdiff-sels .pdiff-sel { width: 100%; }
+  .pdiff-panes[hidden], .pdiff-view[hidden], #pdfFoldBtn[hidden] { display: none; }
+  html[data-scheme="glass"] .btn.on { background: var(--accent-tint); }   /* the Compare dialog's toggles; must out-rank the Glass .btn fill */
+  /* the aligned view: one grid row per line pair, so wrapped and filler cells keep both sides level */
+  .pdiff-view { flex: 1; min-height: 0; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; }
+  .dr { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); }
+  .dc { display: flex; gap: 10px; padding: 0 12px 0 8px; min-width: 0; min-height: 1.7em; }
+  .dc .ln { flex: 0 0 4ch; text-align: right; color: var(--text-3); user-select: none; }
+  .dc .tx { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
+  .dc.del { background: var(--red-bg); }
+  .dc.add { background: var(--green-bg); }
+  .dc.del mark { background: rgba(255,69,58,.38); }
+  .dc.add mark { background: rgba(52,199,89,.42); }
+  .dc mark { color: inherit; border-radius: 2px; }
+  .dc.filler { background: repeating-linear-gradient(135deg, transparent 0 6px, var(--hover) 6px 7px); }
+  .dr.dcur .dc:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+  .dm { display: flex; justify-content: center; align-items: flex-start; gap: 4px; padding-top: 2px; }
+  .dm .df-arrow { position: static; }
+  .dr-fold { display: block; width: 100%; padding: 3px 12px; border: 0; background: var(--hover); color: var(--text-2); font-family: var(--font); font-size: var(--fs-12); text-align: center; line-height: 1.7; }
+  .dr-fold:hover { background: var(--pressed); }
+  .pdiff-same { padding: 24px; text-align: center; color: var(--text-2); font-family: var(--font); }
   .pdiff-count { font-size: var(--fs-13); color: var(--text-2); min-width: 7em; text-align: center; }
   .pdiff-panes { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .pdiff-col { display: flex; flex-direction: column; gap: 6px; min-height: 0; min-width: 0; }
@@ -2573,19 +2597,21 @@ const ICONS = {
       <div class="pdiff-tools" role="group" aria-label="Comparison options">
         <select id="pdfPrec" class="pdiff-sel" aria-label="Precision" title="How exactly changes inside a line are marked" onchange="pdfSetOption('prec', this.value)"><option value="line">Lines</option><option value="word" selected>Words</option><option value="char">Characters</option></select>
         <button type="button" class="btn btn-sm" id="pdfWsBtn" aria-pressed="false" onclick="pdfSetOption('ws')" title="Ignore differences in spaces and indentation">Ignore Whitespace</button>
+        <button type="button" class="btn btn-sm" id="pdfFoldBtn" aria-pressed="false" onclick="pdfSetOption('fold')" title="Fold long stretches of unchanged lines">Hide Unchanged</button>
         <button type="button" class="btn btn-sm" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference" aria-label="Previous difference">↑</button>
         <button type="button" class="btn btn-sm" id="pdfNext" onclick="pdfNav(1)" title="Next difference" aria-label="Next difference">↓</button>
         <span class="pdiff-count" id="pdfCount" role="status"></span>
         <button type="button" class="btn btn-sm" id="pdfUndo" onclick="pdfUndo()" title="Undo the last move across">Undo Move</button>
+        <button type="button" class="btn btn-sm" id="pdfEditBtn" aria-pressed="false" onclick="pdfSetEdit()" title="Type in the two texts (the rows no longer line up while you edit)">Edit Text</button>
       </div>
     </div>
-    <div class="pdiff-panes" id="pdfPanes">
+    <div class="pdiff-sels view" id="pdfSels"><select id="pdfSelA" class="pdiff-sel" aria-label="Left prompt" onchange="pdfPick('a', this.value)"></select><span class="pdiff-sels-gap"></span><select id="pdfSelB" class="pdiff-sel" aria-label="Right prompt" onchange="pdfPick('b', this.value)"></select></div>
+    <div class="pdiff-view" id="pdfView" aria-label="Differences"></div>
+    <div class="pdiff-panes" id="pdfPanes" hidden>
       <div class="pdiff-col">
-        <select id="pdfSelA" class="pdiff-sel" aria-label="Left prompt" onchange="pdfPick('a', this.value)"></select>
         <div class="pdiff-pane" id="pdfPaneA" onscroll="pdfScroll('a')"><div class="df-wrap"><div class="df-hl" id="pdfHlA" aria-hidden="true"></div><textarea id="pdfTaA" class="df-ta df-left" spellcheck="false" aria-label="Left text" oninput="pdfInput('a')"></textarea><div class="df-arrows df-arr-r" id="pdfArrA"></div></div></div>
       </div>
       <div class="pdiff-col">
-        <select id="pdfSelB" class="pdiff-sel" aria-label="Right prompt" onchange="pdfPick('b', this.value)"></select>
         <div class="pdiff-pane" id="pdfPaneB" onscroll="pdfScroll('b')"><div class="df-wrap"><div class="df-hl df-right" id="pdfHlB" aria-hidden="true"></div><textarea id="pdfTaB" class="df-ta df-right" spellcheck="false" aria-label="Right text" oninput="pdfInput('b')"></textarea><div class="df-arrows df-arr-l" id="pdfArrB"></div></div></div>
       </div>
     </div>
@@ -6800,8 +6826,54 @@ function promptSortMenuHtml(){
     + o(`setPromptSort('${promptSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest First', promptSortDir===(isTitle ? 'desc' : 'asc'));
 }
 const byNameCI = (a, b)=>String(a.name).localeCompare(String(b.name), undefined, {sensitivity:'base'});
-const topPromptFolders = ()=>promptFolders.filter(f=>!f.parentId).sort((a, b)=>(b.id===PROMPTS_DEFAULT_FOLDER) - (a.id===PROMPTS_DEFAULT_FOLDER) || byNameCI(a, b));   // the default folder first, then by name
-const promptFolderKids = id=>promptFolders.filter(f=>f.parentId===id).sort(byNameCI);
+// Folders carry `order` like Notes folders (drag, Option+Up/Down, Move Up/Down); folders without one (older data) keep their name order until the first move renumbers the level.
+const promptFolderOrd = f=>Number.isFinite(f.order) ? f.order : 0;
+const byOrderThenName = (a, b)=>promptFolderOrd(a) - promptFolderOrd(b) || byNameCI(a, b);
+const topPromptFolders = ()=>promptFolders.filter(f=>!f.parentId).sort((a, b)=>(b.id===PROMPTS_DEFAULT_FOLDER) - (a.id===PROMPTS_DEFAULT_FOLDER) || byOrderThenName(a, b));   // the default folder always first, then by order
+const promptFolderKids = id=>promptFolders.filter(f=>f.parentId===id).sort(byOrderThenName);
+const promptFolderSibs = f=>(f.parentId ? promptFolderKids(f.parentId) : topPromptFolders()).filter(x=>!x.locked);   // the folders that can trade places (never the locked default)
+function promptFolderEndOrder(parentId){
+  const sibs = promptFolders.filter(f=>(f.parentId || '')===(parentId || ''));
+  return sibs.length ? Math.max(...sibs.map(promptFolderOrd)) + 1000 : 1000;
+}
+// Put a folder just before or after a sibling (same level only). Only the moved folder is rewritten, so the reorder is one small, mergeable edit.
+function reorderPromptFolder(id, targetId, before){
+  const f = promptFolderById(id), t = promptFolderById(targetId);
+  if(!f || !t || f.locked || t.locked || f.id===t.id || (f.parentId || '')!==(t.parentId || '')) return false;
+  const sibs = promptFolderSibs(f).filter(x=>x.id!==f.id);
+  let at = sibs.findIndex(x=>x.id===t.id); if(at===-1) return false;
+  if(!before) at++;
+  const prev = sibs[at - 1], next = sibs[at], now = Date.now(), ord = promptFolderOrd;
+  if(prev && next && Math.abs(ord(next) - ord(prev)) < 1e-6){      // no room between the neighbours (or never ordered): renumber the level
+    sibs.splice(at, 0, f); sibs.forEach((x, i)=>{ x.order = (i + 1) * 1000; x.updatedAt = now; });
+  } else {
+    f.order = prev && next ? (ord(prev) + ord(next)) / 2 : next ? ord(next) - 1000 : prev ? ord(prev) + 1000 : 1000;
+    f.updatedAt = now;
+  }
+  save(); render();
+  return true;
+}
+function movePromptFolderBy(id, delta){
+  const f = promptFolderById(id); if(!f || f.locked) return;
+  const sibs = promptFolderSibs(f), i = sibs.findIndex(x=>x.id===id), j = i + delta;
+  if(i===-1 || j<0 || j>=sibs.length) return;
+  reorderPromptFolder(id, sibs[j].id, delta<0);
+}
+function promptFolderRowKey(e, id){      // Option+Up / Option+Down on a focused folder, the same as Move Up / Move Down
+  if(!e.altKey || e.metaKey || e.ctrlKey || (e.key!=='ArrowUp' && e.key!=='ArrowDown')) return;
+  e.preventDefault(); e.stopPropagation();
+  movePromptFolderBy(id, e.key==='ArrowUp' ? -1 : 1);
+}
+let draggedPromptFolderId = null;
+function promptFolderDragStart(e, id){ draggedPromptFolderId = id; e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('application/x-cleardesk-pfolder', id); e.currentTarget.classList.add('dragging'); }
+function promptFolderDragEnd(){
+  draggedPromptFolderId = null;
+  document.querySelectorAll('.project-row.dragging, .project-row.drag-over-top, .project-row.drag-over-bottom, .project-row.drop-into').forEach(el=>el.classList.remove('dragging', 'drag-over-top', 'drag-over-bottom', 'drop-into'));
+}
+function promptFolderDropOk(targetId){
+  const d = promptFolderById(draggedPromptFolderId), t = promptFolderById(targetId);
+  return !!(d && t && !d.locked && !t.locked && d.id!==t.id && (d.parentId || '')===(t.parentId || ''));     // reordering stays inside one level
+}
 const orderedPromptFolders = ()=>{ const out = []; topPromptFolders().forEach(f=>{ out.push(f); promptFolderKids(f.id).forEach(c=>out.push(c)); }); return out; };
 const promptFolderPath = f=>{ const p = f && f.parentId ? promptFolderById(f.parentId) : null; return f ? (p ? `${p.name} / ${f.name}` : f.name) : ''; };
 
@@ -6992,12 +7064,50 @@ function diffLineMap(ops, na, nb){
   });
   return { ab, ba };
 }
+// One line's text, with its changed words marked (a trailing zero-width space keeps an empty line one row tall).
+function diffLineInner(t, m){ return (m && m.segs ? m.segs.map(([s, ch])=>ch ? `<mark>${esc(s)}</mark>` : esc(s)).join('') : esc(t)) + '\u200b'; }
 function diffLinesHtml(lines, marks, cur, cls){
-  return lines.map((t, i)=>{
-    const m = marks[i];
-    if(!m) return `<div class="dl">${esc(t)}​</div>`;
-    const body = m.segs ? m.segs.map(([s, ch])=>ch ? `<mark>${esc(s)}</mark>` : esc(s)).join('') : esc(t);
-    return `<div class="dl ${cls}${m.h===cur ? ' dcur' : ''}">${body}​</div>`;
+  return lines.map((t, i)=>{ const m = marks[i]; return `<div class="dl${m ? ' ' + cls + (m.h===cur ? ' dcur' : '') : ''}">${diffLineInner(t, m)}</div>`; }).join('');
+}
+// The aligned view: one row per line pair. Unchanged lines pair with themselves; inside a hunk the lines pair up by position and the shorter side gets empty filler cells (index -1), so both sides stay level.
+function diffRows(A, B, hunks){
+  const rows = []; let ai = 0, bi = 0;
+  const same = (ae, be)=>{ while(ai<ae && bi<be) rows.push({ a:ai++, b:bi++, h:-1 }); };
+  hunks.forEach((h, hi)=>{
+    same(h.aStart, h.bStart);
+    const na = h.aEnd - h.aStart, nb = h.bEnd - h.bStart, n = Math.max(na, nb);
+    for(let i=0; i<n; i++) rows.push({ a: i<na ? h.aStart + i : -1, b: i<nb ? h.bStart + i : -1, h:hi, first: i===0 });
+    ai = h.aEnd; bi = h.bEnd;
+  });
+  same(A.length, B.length);
+  return rows;
+}
+// Collapse long runs of unchanged rows to `ctx` lines of context each side and one fold row ({k:'fold', n, key}); a key in `open` keeps its run unfolded. The start and end of the text have context on one side only.
+function diffFold(rows, ctx, open){
+  const out = []; let i = 0;
+  while(i<rows.length){
+    if(rows[i].h!==-1){ out.push(rows[i++]); continue; }
+    let j = i; while(j<rows.length && rows[j].h===-1) j++;
+    const head = i===0 ? 0 : ctx, tail = j===rows.length ? 0 : ctx, hide = (j - i) - head - tail, key = rows[i].a;
+    if(hide>1 && !(open && open.has(key))){ for(let k=i; k<i+head; k++) out.push(rows[k]); out.push({ k:'fold', n:hide, key }); for(let k=j-tail; k<j; k++) out.push(rows[k]); }
+    else for(let k=i; k<j; k++) out.push(rows[k]);
+    i = j;
+  }
+  return out;
+}
+// ro = {a, b}: a read-only side gets no arrow into it.
+function diffRowsHtml(rows, A, B, res, cur, ro){
+  const cell = (idx, lines, marks, cls)=>idx<0 ? `<div class="dc filler"><span class="ln"></span><span class="tx"></span></div>`
+    : `<div class="dc${marks[idx] ? ' ' + cls : ''}"><span class="ln">${idx + 1}</span><span class="tx">${diffLineInner(lines[idx], marks[idx])}</span></div>`;
+  return rows.map(r=>{
+    if(r.k==='fold') return `<button type="button" class="dr-fold" onclick="pdfUnfold(${r.key})" title="Show these lines">${r.n} unchanged line${r.n===1 ? '' : 's'}</button>`;
+    let mid = '';
+    if(r.first){
+      const h = res.hunks[r.h], emptyA = h.aEnd===h.aStart, emptyB = h.bEnd===h.bStart;
+      if(!ro.b) mid += `<button type="button" class="df-arrow to-r" onclick="pdfMerge(${r.h}, true)" title="${emptyA ? 'Remove this from the right' : 'Copy this to the right'}" aria-label="${emptyA ? 'Remove from the right' : 'Copy to the right'}">→</button>`;
+      if(!ro.a) mid += `<button type="button" class="df-arrow to-l" onclick="pdfMerge(${r.h}, false)" title="${emptyB ? 'Remove this from the left' : 'Copy this to the left'}" aria-label="${emptyB ? 'Remove from the left' : 'Copy to the left'}">←</button>`;
+    }
+    return `<div class="dr${r.h>=0 ? ' chg' : ''}${r.h>=0 && r.h===cur ? ' dcur' : ''}"${r.h>=0 ? ` data-h="${r.h}"` : ''}>${cell(r.a, A, res.ma, 'del')}<div class="dm">${mid}</div>${cell(r.b, B, res.mb, 'add')}</div>`;
   }).join('');
 }
 
@@ -7006,15 +7116,24 @@ let pdf = null;
 const pdfEl = id=>document.getElementById(id);
 const pdfRO = side=>{ const id = side==='a' ? pdf.aId : pdf.bId, p = id && prompts.find(x=>x.id===id); return !!p && !!p.locked; };
 const pdfChanged = side=>side==='a' ? pdf.a!==pdf.a0 : !!pdf.bId && pdf.b!==pdf.b0;
-function openPromptDiff(id){
+// "Select for Compare" (as in VS Code's Explorer): one prompt is marked per session, and another prompt's menu then offers Compare with it.
+let promptCompareId = null;
+const promptCompareMark = ()=>{ const p = promptCompareId && prompts.find(x=>x.id===promptCompareId); return p && !promptTrashed(p) ? p : null; };
+function togglePromptCompareMark(id){
+  promptCompareId = promptCompareId===id ? null : id;
+  const p = prompts.find(x=>x.id===id); render();
+  showToast(promptCompareId ? `Selected “${promptTitle(p)}” for Compare` : 'Compare selection cleared');
+}
+function openPromptDiff(id, withId){
   const p = prompts.find(x=>x.id===id); if(!p || promptTrashed(p)) return;
   flushPromptEdit();
-  const others = prompts.filter(q=>q.id!==id && !promptTrashed(q)), o = others.find(q=>q.folderId===p.folderId) || others[0];
-  pdf = { aId:id, bId:o ? o.id : '', a:p.template, a0:p.template, b:o ? o.template : '', b0:o ? o.template : '', prec:'word', ws:false, cur:-1, undo:[], confirming:false, res:null };
+  const others = prompts.filter(q=>q.id!==id && !promptTrashed(q)), o = (withId && others.find(q=>q.id===withId)) || others.find(q=>q.folderId===p.folderId) || others[0];
+  pdf = { aId:id, bId:o ? o.id : '', a:p.template, a0:p.template, b:o ? o.template : '', b0:o ? o.template : '', prec:'word', ws:false, fold:false, open:new Set(), edit:false, cur:-1, undo:[], confirming:false, res:null };
   modalReturnFocus = document.activeElement;
   pdfEl('pdfPrec').value = 'word';
   pdfEl('pdfModalBg').classList.add('open');
-  pdfFillSelects(); pdfSetText(); renderPromptDiff();
+  pdfEl('pdfFoldBtn').classList.remove('on'); pdfEl('pdfFoldBtn').setAttribute('aria-pressed', 'false');
+  pdfFillSelects(); pdfSetText(); pdfApplyMode(); renderPromptDiff();
 }
 function pdfFillSelects(){
   const list = prompts.filter(p=>!promptTrashed(p)).sort((x, y)=>promptTitle(x).localeCompare(promptTitle(y), undefined, {sensitivity:'base'}));
@@ -7033,7 +7152,8 @@ function pdfPick(side, id){
   if(side==='a'){ if(!p) return; pdf.aId = id; pdf.a = pdf.a0 = p.template; }
   else { pdf.bId = p ? id : ''; pdf.b = pdf.b0 = p ? p.template : ''; }
   pdf.undo = []; pdf.cur = -1;
-  pdfFillSelects(); pdfSetText(); renderPromptDiff(); pdfEl(side==='a' ? 'pdfPaneA' : 'pdfPaneB').scrollTop = 0;
+  pdf.open = new Set();
+  pdfFillSelects(); pdfSetText(); renderPromptDiff(); pdfEl('pdfPaneA').scrollTop = pdfEl('pdfPaneB').scrollTop = pdfEl('pdfView').scrollTop = 0;
 }
 function pdfInput(side){
   if(!pdf) return;
@@ -7042,21 +7162,33 @@ function pdfInput(side){
 }
 function pdfSetOption(kind, v){
   if(!pdf) return;
-  if(kind==='prec') pdf.prec = v; else pdf.ws = !pdf.ws;
-  const b = pdfEl('pdfWsBtn'); b.classList.toggle('on', pdf.ws); b.setAttribute('aria-pressed', String(pdf.ws));
+  if(kind==='prec') pdf.prec = v; else if(kind==='fold'){ pdf.fold = !pdf.fold; pdf.open = new Set(); } else pdf.ws = !pdf.ws;
+  [['pdfWsBtn', pdf.ws], ['pdfFoldBtn', pdf.fold]].forEach(([id, on])=>{ const b = pdfEl(id); b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
   renderPromptDiff();
 }
+function pdfUnfold(key){ if(pdf){ pdf.open.add(key); renderPromptDiff(); } }
+// Two ways to look at the same drafts: aligned rows (arrows, no typing) or two text panes (typing, not level).
+function pdfApplyMode(){
+  pdfEl('pdfPanes').hidden = !pdf.edit; pdfEl('pdfView').hidden = pdf.edit; pdfEl('pdfFoldBtn').hidden = pdf.edit;
+  pdfEl('pdfSels').classList.toggle('view', !pdf.edit);
+  const b = pdfEl('pdfEditBtn'); b.classList.toggle('on', pdf.edit); b.setAttribute('aria-pressed', String(pdf.edit));
+}
+function pdfSetEdit(){ if(!pdf) return; pdf.edit = !pdf.edit; pdfApplyMode(); pdfSetText(); renderPromptDiff(); }
 function renderPromptDiff(){
   if(!pdf) return;
   const A = pdf.a.split('\n'), B = pdf.b.split('\n'), r = pdf.res = diffCompare(A, B, { precision:pdf.prec, ws:pdf.ws });
   pdf.A = A; pdf.B = B; pdf.map = diffLineMap(r.ops, A.length, B.length);
   if(pdf.cur>=r.hunks.length) pdf.cur = r.hunks.length - 1;
-  pdfEl('pdfHlA').innerHTML = diffLinesHtml(A, r.ma, pdf.cur, 'del'); pdfEl('pdfHlB').innerHTML = diffLinesHtml(B, r.mb, pdf.cur, 'add');
   const n = r.hunks.length;
   pdfEl('pdfCount').textContent = !n ? (pdf.a===pdf.b ? 'Identical' : 'No differences') : pdf.cur>=0 ? `${pdf.cur+1} of ${n}` : `${n} difference${n===1 ? '' : 's'}`;
   ['pdfPrev', 'pdfNext'].forEach(id=>{ pdfEl(id).disabled = !n; });
   pdfEl('pdfUndo').disabled = !pdf.undo.length;
-  pdfLayout(); pdfRenderFoot();
+  if(pdf.edit){ pdfEl('pdfHlA').innerHTML = diffLinesHtml(A, r.ma, pdf.cur, 'del'); pdfEl('pdfHlB').innerHTML = diffLinesHtml(B, r.mb, pdf.cur, 'add'); pdfLayout(); }
+  else {
+    let rows = diffRows(A, B, r.hunks); if(pdf.fold) rows = diffFold(rows, 3, pdf.open);
+    pdfEl('pdfView').innerHTML = n || pdf.a!==pdf.b ? diffRowsHtml(rows, A, B, r, pdf.cur, { a:pdfRO('a'), b:pdfRO('b') }) : '<div class="pdiff-same">The two texts are identical.</div>';
+  }
+  pdfRenderFoot();
 }
 // Where each hunk sits in each pane (measured from the painted lines, so wrapped lines are right), and the arrows placed there.
 function pdfLayout(){
@@ -7084,14 +7216,15 @@ function pdfNav(d){
   const n = pdf.res.hunks.length;
   pdf.cur = pdf.cur<0 ? (d>0 ? 0 : n-1) : (pdf.cur + d + n) % n;
   renderPromptDiff();
-  const y = pdf.ypos[pdf.cur], pane = pdfEl('pdfPaneA'), h = pdf.res.hunks[pdf.cur];
+  if(!pdf.edit){ const v = pdfEl('pdfView'), row = v.querySelector(`[data-h="${pdf.cur}"]`); if(row) v.scrollTop = Math.max(0, row.offsetTop - 60); return; }
+  const y = pdf.ypos[pdf.cur], h = pdf.res.hunks[pdf.cur];
   const useA = h.aEnd>h.aStart || h.bEnd===h.bStart;
   const el = pdfEl(useA ? 'pdfPaneA' : 'pdfPaneB');
   el.scrollTo ? el.scrollTo({ top: Math.max(0, (useA ? y.a : y.b) - 60) }) : (el.scrollTop = Math.max(0, (useA ? y.a : y.b) - 60));
 }
 // One pane scrolled: bring the other to the same place in the text (by the matching line, not by percentage, so changed stretches stay level).
 function pdfScroll(side){
-  if(!pdf || !pdf.tops) return;
+  if(!pdf || !pdf.edit || !pdf.tops) return;
   const src = pdfEl(side==='a' ? 'pdfPaneA' : 'pdfPaneB'), dst = pdfEl(side==='a' ? 'pdfPaneB' : 'pdfPaneA');
   if(pdf.expect && pdf.expect.el===src && Math.abs(src.scrollTop - pdf.expect.top) < 2){ pdf.expect = null; return; }
   const ts = pdf.tops[side], td = pdf.tops[side==='a' ? 'b' : 'a'], map = (side==='a' ? pdf.map.ab : pdf.map.ba);
@@ -7160,6 +7293,7 @@ function normalizePrompts(){
     if(!isSafeId(f.id)) f.id = genId();
     f.name = String(f.name || 'Folder').slice(0,40);
     if(!Number.isFinite(f.updatedAt)) f.updatedAt = 0;
+    if(!Number.isFinite(f.order)) delete f.order;
   });
   if(!promptFolders.some(f=>f.id===PROMPTS_DEFAULT_FOLDER)) promptFolders.unshift({ id: PROMPTS_DEFAULT_FOLDER, name: 'Prompts', locked: true, updatedAt: 0 });
   promptFolders.forEach(f=>{ if(f.id===PROMPTS_DEFAULT_FOLDER){ f.locked = true; delete f.parentId; } else delete f.locked; });
@@ -7252,7 +7386,7 @@ function renderPromptsSidebar(){
     const twisty = sub ? '' : kids.length
       ? `<button type="button" class="folder-twisty" aria-label="${shut ? 'Expand' : 'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();togglePromptFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut ? 'right' : 'down'}"></i></button>`
       : '<span class="folder-twisty-gap"></span>';
-    return `<div class="project-row ${promptFolderFilter===f.id ? 'active' : ''}${sub ? ' sub-folder' : ''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${promptFolderFilter===f.id}" onclick="setPromptFolder('${f.id}')" oncontextmenu="openPromptFolderMenu(event,'${f.id}')" ondragover="promptFolderDragOver(event)" ondragleave="this.classList.remove('drop-into')" ondrop="promptFolderDrop(event,'${f.id}')">
+    return `<div class="project-row ${promptFolderFilter===f.id ? 'active' : ''}${sub ? ' sub-folder' : ''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${promptFolderFilter===f.id}" onclick="setPromptFolder('${f.id}')" oncontextmenu="openPromptFolderMenu(event,'${f.id}')" onkeydown="promptFolderRowKey(event,'${f.id}')"${f.locked ? '' : ` draggable="true" ondragstart="promptFolderDragStart(event,'${f.id}')" ondragend="promptFolderDragEnd()"`} ondragover="promptFolderDragOver(event,'${f.id}')" ondragleave="this.classList.remove('drop-into','drag-over-top','drag-over-bottom')" ondrop="promptFolderDrop(event,'${f.id}')">
       ${twisty}<i class="fa-regular fa-folder picon"></i>
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${total(f)}</span>
@@ -7287,7 +7421,7 @@ function renderPromptsList(vis){
     const sel = p.id===selectedPromptId, sec = anyFav ? (p.favorite ? 'Favorites' : 'Prompts') : '';
     const head = sec && sec!==seen ? `<div class="note-section">${sec==='Favorites' ? '<i class="fa-solid fa-star"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
     return head + `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="${sel ? 0 : -1}" data-id="${p.id}" onclick="selectPrompt('${p.id}')" onkeydown="promptRowKey(event,'${p.id}')" oncontextmenu="openPromptMenu(event,'${p.id}')" draggable="true" ondragstart="draggedPromptId='${p.id}';event.dataTransfer.effectAllowed='move'" ondragend="draggedPromptId=null">
-      <div class="note-row-title"><span class="note-row-name">${esc(promptTitle(p))}</span>${p.favorite || p.locked ? `<span class="note-row-marks">${p.favorite ? '<i class="fa-solid fa-star note-row-star" title="Favorite"></i>' : ''}${p.locked ? '<i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</span>` : ''}</div>
+      <div class="note-row-title"><span class="note-row-name">${esc(promptTitle(p))}</span>${p.favorite || p.locked || p.id===promptCompareId ? `<span class="note-row-marks">${p.id===promptCompareId ? '<i class="fa-solid fa-arrows-left-right note-row-cmp" title="Selected for Compare"></i>' : ''}${p.favorite ? '<i class="fa-solid fa-star note-row-star" title="Favorite"></i>' : ''}${p.locked ? '<i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</span>` : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? p.deletedAt : promptSortKey==='created' ? p.createdAt : p.updatedAt))}</span></div>
     </div>`;
   }).join('');
@@ -7919,8 +8053,27 @@ function saveAiApps(){
   closeAiAppsModal();
 }
 // ---- drag a prompt onto a folder ----
-function promptFolderDragOver(e){ if(!draggedPromptId) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop-into'); }
-function promptFolderDrop(e, folderId){ e.preventDefault(); e.currentTarget.classList.remove('drop-into'); const id = draggedPromptId; draggedPromptId = null; if(id) movePrompt(id, folderId); }
+function promptFolderDragOver(e, folderId){
+  if(draggedPromptFolderId){
+    if(!promptFolderDropOk(folderId)) return;
+    e.preventDefault(); e.stopPropagation();
+    const row = e.currentTarget, rect = row.getBoundingClientRect();
+    row.classList.remove('drag-over-top', 'drag-over-bottom');
+    row.classList.add((e.clientY - rect.top) / rect.height < 0.5 ? 'drag-over-top' : 'drag-over-bottom');
+    return;
+  }
+  if(!draggedPromptId) return; e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop-into');
+}
+function promptFolderDrop(e, folderId){
+  e.preventDefault(); e.currentTarget.classList.remove('drop-into', 'drag-over-top', 'drag-over-bottom');
+  if(draggedPromptFolderId){
+    const id = draggedPromptFolderId, ok = promptFolderDropOk(folderId), rect = e.currentTarget.getBoundingClientRect(), before = (e.clientY - rect.top) / rect.height < 0.5;
+    promptFolderDragEnd();
+    if(ok && reorderPromptFolder(id, folderId, before)) document.querySelector(`#promptsSide .project-row[data-id="${id}"]`)?.classList.add('settle');
+    return;
+  }
+  const id = draggedPromptId; draggedPromptId = null; if(id) movePrompt(id, folderId);
+}
 
 // ---- folders (the Notes folder dialog is reused; folderModalKind says which set it edits) ----
 function openPromptFolderModal(id, parentId){
@@ -7951,7 +8104,7 @@ function savePromptFolderModal(){
       f.name = name; if(newParent) f.parentId = newParent; else delete f.parentId; f.updatedAt = Date.now();
     }
   } else {
-    const f = { id: genId(), name, updatedAt: Date.now() }; if(parent) f.parentId = parent;
+    const f = { id: genId(), name, updatedAt: Date.now(), order: promptFolderEndOrder(parent) }; if(parent) f.parentId = parent;
     promptFolders.push(f); promptFolderFilter = f.id; try{ localStorage.setItem(PROMPT_FOLDER_KEY, f.id); }catch(_){} selectedPromptId = null; promptEditorId = null;
     if(parent && promptFoldersCollapsed.has(parent)){ promptFoldersCollapsed.delete(parent); try{ localStorage.setItem(PROMPT_COLLAPSED_KEY, JSON.stringify([...promptFoldersCollapsed])); }catch(_){} }
   }
@@ -8026,7 +8179,7 @@ function importPromptsData(data){
     const parentSrc = sf.parentId && byId[sf.parentId] && !byId[sf.parentId].parentId ? sf.parentId : null, parent = parentSrc ? resolve(parentSrc) : '';
     const same = promptFolders.find(x=>x.name.toLowerCase()===sf.name.trim().toLowerCase() && (x.parentId || '')===parent);
     if(same){ fmap[sid] = same.id; return same.id; }
-    const nf = { id: isSafeId(String(sf.id)) && !promptFolderById(String(sf.id)) ? String(sf.id) : genId(), name: sf.name.trim().slice(0, 40), updatedAt: now };
+    const nf = { id: isSafeId(String(sf.id)) && !promptFolderById(String(sf.id)) ? String(sf.id) : genId(), name: sf.name.trim().slice(0, 40), updatedAt: now, order: promptFolderEndOrder(parent) };
     if(parent) nf.parentId = parent;
     promptFolders.push(nf); foldersAdded++; fmap[sid] = nf.id; return nf.id;
   };
@@ -8068,6 +8221,8 @@ function promptMenuHtml(id){
     item(p.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', p.locked ? 'Unlock' : 'Lock', `promptMenuRun('lock')`),
     sep,
     item('fa-regular fa-clone', 'Duplicate', `promptMenuRun('clone')`),
+    ...(()=>{ const m = promptCompareMark(), mark = item('fa-solid fa-arrows-left-right', m && m.id===id ? 'Deselect for Compare' : 'Select for Compare', `promptMenuRun('mark')`);
+      return m && m.id!==id ? [item('fa-solid fa-arrows-left-right', `Compare with “${esc(promptTitle(m))}”`, `promptMenuRun('compareWith')`), mark] : [mark]; })(),
     item('fa-solid fa-arrows-left-right', 'Compare…', `promptMenuRun('compare')`),
     item('fa-solid fa-arrow-up-from-bracket', 'Export Prompt', `promptMenuRun('export')`),
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
@@ -8090,12 +8245,14 @@ function promptMenuRun(kind, arg){
   if(kind==='open') return promptOpenInApp(arg, id);
   if(kind==='apps') return openAiAppsModal();
   if(kind==='copy') copyPrompt(id); else if(kind==='favorite') togglePromptFavorite(id); else if(kind==='lock') togglePromptLock(id);
-  else if(kind==='clone') clonePrompt(id); else if(kind==='compare') openPromptDiff(id); else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
+  else if(kind==='clone') clonePrompt(id); else if(kind==='compare') openPromptDiff(id); else if(kind==='mark') togglePromptCompareMark(id); else if(kind==='compareWith'){ const m = promptCompareMark(); if(m) openPromptDiff(m.id, id); } else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
 }
 function promptFolderMenuHtml(id){
   const f = promptFolderById(id); if(!f) return '';
   const item = rowMenuItem, parts = [item('fa-solid fa-plus', 'New Prompt Here', `promptFolderMenuRun('new')`)];
   if(!f.parentId) parts.push(item('fa-regular fa-folder-open', 'New Subfolder', `promptFolderMenuRun('newsub')`));
+  const sibs = f.locked ? [] : promptFolderSibs(f), at = sibs.findIndex(x=>x.id===f.id);
+  if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `promptFolderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `promptFolderMenuRun('down')`, {off: at===sibs.length-1}));
   parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `promptFolderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
 }
@@ -8111,6 +8268,7 @@ function openPromptFolderMenu(e, id){
 function promptFolderMenuRun(kind){
   const id = promptFolderMenuId; closeRowMenu(); if(!id) return;
   if(kind==='new'){ setPromptFolder(id); createPrompt(); } else if(kind==='newsub') openPromptFolderModal(null, id);
+  else if(kind==='up') movePromptFolderBy(id, -1); else if(kind==='down') movePromptFolderBy(id, 1);
   else if(kind==='rename') openPromptFolderModal(id); else if(kind==='export') exportPrompts('folder', id); else if(kind==='delete') deletePromptFolder(id);
 }
 function openPromptListMenu(e){

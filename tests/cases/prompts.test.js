@@ -566,3 +566,29 @@ test('"Used in" lists the prompts that include this one, and follows a rename wi
   assertEqual(a.template, '{{>Persona who=b}}', 'the rename keeps the values');
   assertDeepEqual(promptUsedBy(role).map(function (q) { return q.id; }), ['a']);
 });
+
+test('prompt folders reorder like Notes folders: Move Up / Down, drag before / after, one level, the default folder stays first', function () {
+  pfresh(); promptFolders = [{ id: PROMPTS_DEFAULT_FOLDER, name: 'Prompts', locked: true, updatedAt: 0 }, { id: 'fa', name: 'Alpha', updatedAt: 1 }, { id: 'fb', name: 'Beta', updatedAt: 1 }, { id: 'fc', name: 'Gamma', updatedAt: 1 }, { id: 'fs1', name: 'S1', parentId: 'fa', updatedAt: 1 }, { id: 'fs2', name: 'S2', parentId: 'fa', updatedAt: 1 }];
+  normalizePrompts();
+  const top = () => topPromptFolders().map(f => f.id).join(',');
+  assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fa,fb,fc', 'never ordered: by name, default first');
+  movePromptFolderBy('fc', -1); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fa,fc,fb', 'Move Up');
+  movePromptFolderBy('fc', -1); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fc,fa,fb');
+  movePromptFolderBy('fc', -1); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fc,fa,fb', 'cannot go above the default folder');
+  movePromptFolderBy(PROMPTS_DEFAULT_FOLDER, 1); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fc,fa,fb', 'the default folder does not move');
+  assertFalse(reorderPromptFolder('fb', PROMPTS_DEFAULT_FOLDER, true), 'nothing is dropped before the default folder');
+  assertTrue(reorderPromptFolder('fb', 'fc', true)); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fb,fc,fa', 'drop before');
+  assertTrue(reorderPromptFolder('fb', 'fa', false)); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fc,fa,fb', 'drop after');
+  assertFalse(reorderPromptFolder('fs1', 'fb', true), 'a subfolder stays inside its own level');
+  movePromptFolderBy('fs2', -1); assertEqual(promptFolderKids('fa').map(f => f.id).join(','), 'fs2,fs1');
+  const html = promptFolderMenuHtml('fb'); assertIncludes(html, "promptFolderMenuRun('up')"); assertIncludes(html, "promptFolderMenuRun('down')");
+  assertNotIncludes(promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER), "promptFolderMenuRun('up')");
+});
+
+test('a new prompt folder goes last, an order survives normalizePrompts and a bad order is dropped', function () {
+  pfresh(); promptFolders = [{ id: PROMPTS_DEFAULT_FOLDER, name: 'Prompts', locked: true, updatedAt: 0 }, { id: 'fa', name: 'Zed', order: 1000, updatedAt: 1 }, { id: 'fb', name: 'Alpha', order: 'x', updatedAt: 1 }];
+  normalizePrompts();
+  assertEqual(promptFolderById('fa').order, 1000); assertEqual(promptFolderById('fb').order, undefined);
+  assertEqual(promptFolderEndOrder(''), 2000);
+  assertEqual(topPromptFolders().map(f => f.id).join(','), PROMPTS_DEFAULT_FOLDER + ',fb,fa', 'unordered (0) before ordered 1000; ties by name');
+});

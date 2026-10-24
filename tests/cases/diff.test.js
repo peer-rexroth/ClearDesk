@@ -95,12 +95,44 @@ test('Save Changes writes only the changed sides to the prompts and Undo restore
   assertEqual(prompts[1].template, 'q', 'discarding changes nothing');
 });
 
-test('a locked prompt is a read-only side: no arrows into it, no save to it', function () {
+test('a locked prompt is a read-only side: no arrow into it (aligned view or text panes), no save to it', function () {
   const { a, b } = dfOpen('x', 'y'); b.locked = true; pdfSetText(); renderPromptDiff();
-  assertEqual(pdfEl('pdfArrA').innerHTML, '', 'no arrow toward the locked right side');
-  assertIncludes(pdfEl('pdfArrB').innerHTML, 'to-l', 'the unlocked left side can still take it');
+  assertNotIncludes(pdfEl('pdfView').innerHTML, 'to-r', 'no arrow toward the locked right side');
+  assertIncludes(pdfEl('pdfView').innerHTML, 'to-l', 'the unlocked left side can still take it');
+  pdfSetEdit();
+  assertEqual(pdfEl('pdfArrA').innerHTML, ''); assertIncludes(pdfEl('pdfArrB').innerHTML, 'to-l');
   pdfMerge(0, true); assertEqual(pdf.b, 'y', 'the move into a locked side is refused');
   assertTrue(pdfEl('pdfTaB').readOnly);
+});
+
+test('diffRows lines the two sides up: equal lines pair, a hunk pairs by position and the shorter side gets filler cells', function () {
+  const A = dfLines('a\nb\nc\nd'), B = dfLines('a\nX\nY\nZ\nd'), r = diffCompare(A, B, {}), rows = diffRows(A, B, r.hunks);
+  assertDeepEqual(rows.map(x => [x.a, x.b, x.h]), [[0, 0, -1], [1, 1, 0], [2, 2, 0], [-1, 3, 0], [3, 4, -1]]);
+  assertTrue(rows[1].first); assertFalse(!!rows[2].first);
+  assertEqual(diffRows(['a'], ['a'], []).length, 1);
+  assertEqual(diffRows([], [], []).length, 0);
+});
+
+test('diffFold keeps context around changes, folds the long unchanged run, and leaves a run you opened', function () {
+  const L = n => Array.from({ length: n }, (_, i) => 'l' + i), A = L(20), B = L(20); B[10] = 'changed';
+  const rows = diffRows(A, B, diffCompare(A, B, {}).hunks), f = diffFold(rows, 3, null);
+  const fold = f.filter(x => x.k === 'fold');
+  assertEqual(fold.length, 2); assertEqual(fold[0].n, 7, 'rows 0-6 are folded: 3 of context remain before the change'); assertEqual(fold[1].n, 6); assertEqual(f.length, rows.length - 13 + 2);
+  assertEqual(diffFold(rows, 3, new Set([fold[0].key])).filter(x => x.k === 'fold').length, 1, 'opening a fold unfolds only that run');
+  assertEqual(diffFold(diffRows(['a', 'b'], ['a', 'c'], diffCompare(['a', 'b'], ['a', 'c'], {}).hunks), 3, null).filter(x => x.k === 'fold').length, 0, 'short runs are never folded');
+});
+
+test('the aligned view shows line numbers, filler cells and one pair of arrows per difference; Hide Unchanged folds and a fold opens', function () {
+  const lines = Array.from({ length: 30 }, (_, i) => 'line' + i).join('\n');
+  dfOpen(lines, lines.replace('line15', 'LINE15'));
+  let h = pdfEl('pdfView').innerHTML;
+  assertIncludes(h, '<span class="ln">30</span>'); assertEqual(h.split('df-arrow to-r').length - 1, 1); assertEqual(h.split('df-arrow to-l').length - 1, 1);
+  pdfSetOption('fold'); h = pdfEl('pdfView').innerHTML;
+  assertIncludes(h, 'unchanged lines'); assertNotIncludes(h, '<span class="ln">2</span>');
+  pdfUnfold(pdf.res.hunks.length ? diffFold(diffRows(pdf.A, pdf.B, pdf.res.hunks), 3, null).find(x => x.k === 'fold').key : 0);
+  assertEqual(pdfEl('pdfView').innerHTML.split('class="dr-fold"').length - 1, 1, 'one fold is open, the other still folded');
+  dfOpen('same', 'same'); assertIncludes(pdfEl('pdfView').innerHTML, 'identical');
+  dfOpen('a\nonly left', 'a'); assertIncludes(pdfEl('pdfView').innerHTML, 'dc filler');
 });
 
 test('switching a side with unsaved changes is refused, and the other side cannot be picked for both', function () {
@@ -115,4 +147,26 @@ test('switching a side with unsaved changes is refused, and the other side canno
 test('the Compare… item is in the prompt menu', function () {
   const p = pmk({}); pfresh(); prompts = [p];
   assertIncludes(promptMenuHtml(p.id), "promptMenuRun('compare')");
+});
+
+test('the aligned view marks the current difference only: with none chosen, no row (unchanged rows included) is current', function () {
+  dfOpen('a\nb\nc', 'a\nX\nc');
+  assertNotIncludes(pdfEl('pdfView').innerHTML, 'dcur', 'nothing is current before the first ↑ / ↓');
+  pdfNav(1); assertEqual(pdfEl('pdfView').innerHTML.split('dcur').length - 1, 1, 'exactly the one changed row');
+});
+
+test('Select for Compare / Compare with: the marked prompt is the left side, the one you right-click the right; the mark toggles, shows in the list and ignores trashed prompts', function () {
+  const a = pmk({ name: 'Alpha', template: 'one' }), b = pmk({ name: 'Beta', template: 'two' }), c = pmk({ name: 'Gamma', template: 'three' }); prompts = [a, b, c];
+  assertNotIncludes(promptMenuHtml(b.id), 'Compare with', 'nothing marked yet: only Select for Compare');
+  assertIncludes(promptMenuHtml(b.id), 'Select for Compare');
+  togglePromptCompareMark(a.id); assertEqual(promptCompareId, a.id);
+  assertIncludes(promptMenuHtml(a.id), 'Deselect for Compare'); assertNotIncludes(promptMenuHtml(a.id), 'Compare with', 'no Compare with on the marked prompt itself');
+  assertIncludes(promptMenuHtml(c.id), 'Compare with “Alpha”'); assertIncludes(promptMenuHtml(c.id), 'Select for Compare', 'the mark can be moved');
+  promptMenuId = c.id; promptMenuRun('compareWith');
+  assertEqual(pdf.aId, a.id); assertEqual(pdf.bId, c.id); assertEqual(pdf.b, 'three');
+  pdfClose();
+  promptMenuId = b.id; promptMenuRun('mark'); assertEqual(promptCompareId, b.id, 'marking another prompt moves the mark');
+  promptMenuId = b.id; promptMenuRun('mark'); assertEqual(promptCompareId, null, 'marking the same one again clears it');
+  togglePromptCompareMark(a.id); a.deletedAt = Date.now(); assertEqual(promptCompareMark(), null, 'a trashed prompt is no longer the mark');
+  assertNotIncludes(promptMenuHtml(c.id), 'Compare with'); promptCompareId = null;
 });
