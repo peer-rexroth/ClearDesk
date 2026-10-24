@@ -226,3 +226,11 @@ test('the comparison options are one pop-up menu with a tick on what is on; pick
   assertEqual(pdfOptionsMenuHtml().split('menu-opt current').length - 1, 3, 'Characters, Ignore Whitespace and Hide Unchanged');
   assertEqual(typeof pdfEl('pdfPrec'), 'object'); // the old toolbar controls are gone from the code paths, only the menu changes them
 });
+
+test('the Undo and Redo buttons follow the stacks', function () {
+  dfOpen('x', 'y');
+  assertTrue(pdfEl('pdfUndo').disabled); assertTrue(pdfEl('pdfRedo').disabled);
+  pdfMerge(0, true); assertFalse(pdfEl('pdfUndo').disabled); assertTrue(pdfEl('pdfRedo').disabled);
+  pdfUndo(); assertTrue(pdfEl('pdfUndo').disabled); assertFalse(pdfEl('pdfRedo').disabled);
+  pdfRedo(); assertFalse(pdfEl('pdfUndo').disabled); assertTrue(pdfEl('pdfRedo').disabled);
+});

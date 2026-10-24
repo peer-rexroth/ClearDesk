@@ -126,6 +126,8 @@ const ICONS = {
   "trash": "<path d=\"M4.5 7h15\"/><path d=\"M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7\"/><path d=\"M6.5 7l.8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7\"/><path d=\"M10 11v5M14 11v5\"/>",
   "trash-can": "<path d=\"M4.5 7h15\"/><path d=\"M9.5 7V5.2A1.2 1.2 0 0 1 10.7 4h2.6a1.2 1.2 0 0 1 1.2 1.2V7\"/><path d=\"M6.5 7l.8 11.2A2 2 0 0 0 9.3 20h5.4a2 2 0 0 0 2-1.8L17.5 7\"/><path d=\"M10 11v5M14 11v5\"/>",
   "triangle-exclamation": "<path d=\"M12 4.5 21 19.5H3z\"/><path d=\"M12 10v4.5\"/><path d=\"M12 17.3h.01\" stroke-width=\"2.2\"/>",
+  "undo": "<path d=\"M9 14 4 9l5-5\"/><path d=\"M4 9h10.5a5.5 5.5 0 0 1 0 11H11\"/>",
+  "redo": "<path d=\"m15 14 5-5-5-5\"/><path d=\"M20 9H9.5a5.5 5.5 0 0 0 0 11H13\"/>",
   "upload": "<path d=\"M12 15V4.5M8 8l4-4 4 4M5 19.5h14\"/>",
   "users": "<circle cx=\"9\" cy=\"8.5\" r=\"3\"/><path d=\"M3.5 19a5.5 5.5 0 0 1 11 0M15.5 5.7a3 3 0 0 1 0 5.6M17 14.2a5.5 5.5 0 0 1 3.5 4.8\"/>",
   "window-maximize": "<rect x=\"3.5\" y=\"5\" width=\"17\" height=\"14\" rx=\"3\"/><path d=\"M3.5 9.5h17\"/>",
@@ -2314,7 +2316,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a task (or use its <strong>⋯</strong> button, or the <kbd>Menu</kbd> key / <kbd>Shift</kbd>+<kbd>F10</kbd>) for Open details, Mark complete, then <strong>Priority</strong>, <strong>Status</strong>, <strong>Due</strong> and <strong>Move to</strong> as submenus, then Add subtask, Duplicate and Delete. It acts on the whole selection when you right-click a selected task, and never changes the selection.</span></div>
           <div class="help-row"><i class="fa-regular fa-calendar"></i><span><strong>Due</strong> offers Today, Tomorrow, Next week, Clear — and a <strong>date field</strong> for any other date. The same menu (with the same field) opens from the toolbar’s calendar button and from the Due cell.</span></div>
-          <div class="help-row"><i class="fa-solid fa-rotate-left"></i><span><strong>Undo</strong>: <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> takes back the last edit or delete, and the toast that appears offers <em>Undo</em> too.</span></div>
+          <div class="help-row"><i class="fa-solid fa-undo"></i><span><strong>Undo</strong>: <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> takes back the last edit or delete, and the toast that appears offers <em>Undo</em> too.</span></div>
           </div>
         </div>
       </div>
@@ -2588,7 +2590,10 @@ const ICONS = {
           <button type="button" class="tool-btn" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference"><i class="fa-solid fa-chevron-down"></i></button>
         </span>
         <span class="pdiff-count" id="pdfCount" role="status"></span>
-        <span class="tool-group"><button type="button" class="tool-btn" id="pdfUndo" onclick="pdfUndo()" title="Undo the last edit or move (Cmd/Ctrl+Z)" aria-label="Undo"><i class="fa-solid fa-rotate-left"></i></button></span>
+        <span class="tool-group" role="group" aria-label="Undo">
+          <button type="button" class="tool-btn" id="pdfUndo" onclick="pdfUndo()" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+          <button type="button" class="tool-btn" id="pdfRedo" onclick="pdfRedo()" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+        </span>
         <span class="tool-group"><button type="button" class="tool-btn" id="pdfOpts" onclick="openPdfOptionsMenu(event)" title="Comparison options" aria-label="Comparison options" aria-haspopup="menu"><i class="fa-solid fa-sliders"></i></button></span>
       </div>
     </div>
@@ -7152,7 +7157,7 @@ function renderPromptDiff(focus){
   const n = r.hunks.length;
   pdfEl('pdfCount').textContent = !n ? (pdf.a===pdf.b ? 'Identical' : 'No differences') : pdf.cur>=0 ? `${pdf.cur+1} of ${n}` : `${n} difference${n===1 ? '' : 's'}`;
   ['pdfPrev', 'pdfNext'].forEach(id=>{ pdfEl(id).disabled = !n; });
-  pdfEl('pdfUndo').disabled = !pdf.undo.length;
+  pdfEl('pdfUndo').disabled = !pdf.undo.length; pdfEl('pdfRedo').disabled = !pdf.redo.length;
   const v = pdfEl('pdfView'), top = v.scrollTop;
   let rows = diffRows(A, B, r.hunks); if(pdf.fold) rows = diffFold(rows, 3, pdf.open);
   v.innerHTML = n || pdf.a!==pdf.b ? diffRowsHtml(rows, A, B, r, pdf.cur, { a:pdfRO('a'), b:pdfRO('b') }) : '<div class="pdiff-same">The two texts are identical.</div>';
