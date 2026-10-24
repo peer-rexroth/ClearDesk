@@ -1597,23 +1597,24 @@ const ICONS = {
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
   .pr-tpl textarea { border-radius: inherit; }
-  /* compare prompts: the same transparent-textarea-over-a-painted-copy trick as the template, once per side; each pane scrolls its own wrapper */
+  /* compare prompts: one aligned view, both sides editable in place */
   .pdiff-modal { width: min(1280px, 96vw); height: min(88vh, 900px); max-width: 96vw; padding: 20px; gap: 10px; }
   .pdiff-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .pdiff-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .modal .pdiff-sel { width: auto; min-width: 0; padding: 6px 12px; font-size: var(--fs-13); }
-  .pdiff-sels { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .pdiff-sels.view { grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 0; }
-  .pdiff-sels:not(.view) .pdiff-sels-gap { display: none; }
+  .pdiff-modal { --pdf-ruler-w: 14px; }
+  .pdiff-sels { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); gap: 0; padding-right: calc(var(--pdf-ruler-w) + 4px); }
   .modal .pdiff-sels .pdiff-sel { width: 100%; }
-  .pdiff-panes[hidden], .pdiff-view[hidden], #pdfFoldBtn[hidden] { display: none; }
   html[data-scheme="glass"] .btn.on { background: var(--accent-tint); }   /* the Compare dialog's toggles; must out-rank the Glass .btn fill */
   /* the aligned view: one grid row per line pair, so wrapped and filler cells keep both sides level */
-  .pdiff-view { flex: 1; min-height: 0; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; }
+  .pdiff-viewwrap { flex: 1; min-height: 0; display: flex; gap: 4px; }
+  .pdiff-view { flex: 1; min-width: 0; position: relative; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; }
   .dr { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); }
   .dc { display: flex; gap: 10px; padding: 0 12px 0 8px; min-width: 0; min-height: 1.7em; }
   .dc .ln { flex: 0 0 4ch; text-align: right; color: var(--text-3); user-select: none; }
-  .dc .tx { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
+  .dc .tx { flex: 1; min-width: 0; min-height: 1.7em; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); outline: none; }
+  .dc:has(.tx:focus) { box-shadow: inset 0 0 0 2px var(--focus-ring); }   /* the line being typed in */
+  .pdiff-view[data-selside="a"] .dc.sb, .pdiff-view[data-selside="b"] .dc.sa, .pdiff-view .dm { user-select: none; }   /* a drag selects text on one side only */
   .dc.del { background: var(--red-bg); }
   .dc.add { background: var(--green-bg); }
   .dc.del mark { background: rgba(255,69,58,.38); }
@@ -1627,33 +1628,19 @@ const ICONS = {
   .dr-fold:hover { background: var(--pressed); }
   .pdiff-same { padding: 24px; text-align: center; color: var(--text-2); font-family: var(--font); }
   .pdiff-count { font-size: var(--fs-13); color: var(--text-2); min-width: 7em; text-align: center; }
-  .pdiff-panes { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .pdiff-col { display: flex; flex-direction: column; gap: 6px; min-height: 0; min-width: 0; }
-  .pdiff-pane { flex: 1; min-height: 0; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); }
-  .pdiff-pane:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
-  .df-wrap { position: relative; min-height: 100%; }
-  .df-hl, .df-ta { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 10px 44px 10px 12px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
-  .df-hl.df-right, .df-ta.df-right { padding: 10px 12px 10px 44px; }
-  .df-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
-  .df-hl .dl { min-height: 1.7em; }
-  .df-hl .dl.del { background: var(--red-bg); }
-  .df-hl .dl.add { background: var(--green-bg); }
-  .df-hl .dl.dcur { box-shadow: inset 3px 0 0 var(--accent); }
-  .df-hl .dl.del mark { background: rgba(255,69,58,.38); }
-  .df-hl .dl.add mark { background: rgba(52,199,89,.42); }
-  .df-hl mark { color: inherit; border-radius: 2px; }
-  .df-ta { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
-  .df-ta::selection { background: var(--accent-tint); }
-  .df-ta:focus-visible { box-shadow: none !important; border-color: transparent !important; }
-  .df-arrows { position: absolute; top: 0; bottom: 0; width: 34px; pointer-events: none; }
-  .df-arr-r { right: 0; }
-  .df-arr-l { left: 0; }
-  .df-arrow { position: absolute; left: 6px; width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); font-size: var(--fs-13); line-height: 1; pointer-events: auto; }
+  /* overview ruler: where the differences are in the whole text, beside the scroll bar (click to jump) */
+  .pdiff-ruler { flex: none; position: relative; width: var(--pdf-ruler-w); border-radius: var(--r-xs); background: var(--bg-2); border: 0.5px solid var(--border); overflow: hidden; }
+  .rl-thumb { position: absolute; left: 0; right: 0; background: var(--hover); pointer-events: none; }
+  .rl-mark { position: absolute; left: 2px; right: 2px; min-height: 3px; padding: 0; border: 0; border-radius: 1px; background: var(--accent); }
+  .rl-mark.add { background: var(--green-text); }
+  .rl-mark.del { background: var(--red-text); }
+  .rl-mark.cur { left: 0; right: 0; outline: 1px solid var(--text); }
+  .df-arrow { width: 22px; height: 22px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 999px; background: var(--cap-fill); color: var(--text-2); font-size: var(--fs-13); line-height: 1; pointer-events: auto; }
   .df-arrow:hover { background: var(--accent); color: var(--on-accent); }
   .pdiff-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   .pdiff-msg { font-size: var(--fs-13); color: var(--text-2); }
   .pdiff-foot .modal-actions { margin-top: 0; }
-  @media (max-width: 800px) { .pdiff-panes { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } .pdiff-modal { height: 94vh; padding: 14px; } }
+  @media (max-width: 800px) { .pdiff-modal { height: 94vh; padding: 14px; } }
   .pr-tpl textarea:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
@@ -2457,7 +2444,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case. <strong>Pass values down</strong> with <code>{{&gt;Role who=critic tone="very formal"}}</code>: for that one use, they replace the included prompt's own choices (a checklist takes items split by <code>|</code>, a global variable is set as <code>@Language=German</code>); the included prompt itself stays as it is. The Variables panel lists what a prompt includes (with the values you pass, and which variables it can set) and, under <em>Used In</em>, which other prompts include it, so you can see what a change will affect; a click opens that prompt. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrows-left-right"></i><span><strong>Compare two prompts</strong> with <em>Compare…</em> in the prompt's ⋯ or right-click menu: the prompt you opened is on the left, any other prompt (or blank text to paste into) on the right. Changed lines are red on the left and green on the right, with the changed words marked; choose <em>Lines</em>, <em>Words</em> or <em>Characters</em> for how closely, and <em>Ignore Whitespace</em> to skip spacing. Both sides can be typed in, and the arrow beside a difference moves it across (the left text to the right, or the right to the left); <em>Undo Move</em> takes the last move back, and ↑ ↓ step through the differences. Nothing is changed in your prompts until you choose <em>Save Changes</em>; a locked prompt can be read but not changed.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrows-left-right"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right (the lists above each side pick different prompts, or blank text to paste into). The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. <em>Lines</em>, <em>Words</em> or <em>Characters</em> set how closely changes are marked, <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it). <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the <em>Open in</em> menu next to <em>Copy Prompt</em> (in a narrow window: <em>Open in</em> in the ⋯ and right-click menus) copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> does it with the first one. <em>Edit Apps…</em> changes the list (a name and a web address each; kept on this device).</span></div>
           <div class="help-row"><i class="fa-solid fa-download"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
@@ -2589,31 +2576,25 @@ const ICONS = {
   </div>
 </div>
 
-<!-- Compare prompts: two editable drafts side by side with the differences marked and an arrow on each to move it across -->
+<!-- Compare prompts: two drafts in one aligned view, typed in place, with the differences marked, an arrow on each to move it across and an overview ruler -->
 <div class="modal-bg" id="pdfModalBg" onclick="if(event.target===this) pdfRequestClose()">
-  <div class="modal pdiff-modal" role="dialog" aria-modal="true" aria-labelledby="pdfTitle" onkeydown="if(event.key==='Escape'){event.stopPropagation();pdfRequestClose()}">
+  <div class="modal pdiff-modal" role="dialog" aria-modal="true" aria-labelledby="pdfTitle" onkeydown="pdfKey(event)">
     <div class="pdiff-head">
       <h3 id="pdfTitle">Compare Prompts</h3>
       <div class="pdiff-tools" role="group" aria-label="Comparison options">
         <select id="pdfPrec" class="pdiff-sel" aria-label="Precision" title="How exactly changes inside a line are marked" onchange="pdfSetOption('prec', this.value)"><option value="line">Lines</option><option value="word" selected>Words</option><option value="char">Characters</option></select>
         <button type="button" class="btn btn-sm" id="pdfWsBtn" aria-pressed="false" onclick="pdfSetOption('ws')" title="Ignore differences in spaces and indentation">Ignore Whitespace</button>
         <button type="button" class="btn btn-sm" id="pdfFoldBtn" aria-pressed="false" onclick="pdfSetOption('fold')" title="Fold long stretches of unchanged lines">Hide Unchanged</button>
-        <button type="button" class="btn btn-sm" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference" aria-label="Previous difference">↑</button>
-        <button type="button" class="btn btn-sm" id="pdfNext" onclick="pdfNav(1)" title="Next difference" aria-label="Next difference">↓</button>
+        <button type="button" class="btn btn-sm" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference">↑</button>
+        <button type="button" class="btn btn-sm" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference">↓</button>
         <span class="pdiff-count" id="pdfCount" role="status"></span>
-        <button type="button" class="btn btn-sm" id="pdfUndo" onclick="pdfUndo()" title="Undo the last move across">Undo Move</button>
-        <button type="button" class="btn btn-sm" id="pdfEditBtn" aria-pressed="false" onclick="pdfSetEdit()" title="Type in the two texts (the rows no longer line up while you edit)">Edit Text</button>
+        <button type="button" class="btn btn-sm" id="pdfUndo" onclick="pdfUndo()" title="Undo the last edit or move (Cmd/Ctrl+Z)">Undo</button>
       </div>
     </div>
-    <div class="pdiff-sels view" id="pdfSels"><select id="pdfSelA" class="pdiff-sel" aria-label="Left prompt" onchange="pdfPick('a', this.value)"></select><span class="pdiff-sels-gap"></span><select id="pdfSelB" class="pdiff-sel" aria-label="Right prompt" onchange="pdfPick('b', this.value)"></select></div>
-    <div class="pdiff-view" id="pdfView" aria-label="Differences"></div>
-    <div class="pdiff-panes" id="pdfPanes" hidden>
-      <div class="pdiff-col">
-        <div class="pdiff-pane" id="pdfPaneA" onscroll="pdfScroll('a')"><div class="df-wrap"><div class="df-hl" id="pdfHlA" aria-hidden="true"></div><textarea id="pdfTaA" class="df-ta df-left" spellcheck="false" aria-label="Left text" oninput="pdfInput('a')"></textarea><div class="df-arrows df-arr-r" id="pdfArrA"></div></div></div>
-      </div>
-      <div class="pdiff-col">
-        <div class="pdiff-pane" id="pdfPaneB" onscroll="pdfScroll('b')"><div class="df-wrap"><div class="df-hl df-right" id="pdfHlB" aria-hidden="true"></div><textarea id="pdfTaB" class="df-ta df-right" spellcheck="false" aria-label="Right text" oninput="pdfInput('b')"></textarea><div class="df-arrows df-arr-l" id="pdfArrB"></div></div></div>
-      </div>
+    <div class="pdiff-sels"><select id="pdfSelA" class="pdiff-sel" aria-label="Left prompt" onchange="pdfPick('a', this.value)"></select><span></span><select id="pdfSelB" class="pdiff-sel" aria-label="Right prompt" onchange="pdfPick('b', this.value)"></select></div>
+    <div class="pdiff-viewwrap">
+      <div class="pdiff-view" id="pdfView" aria-label="Differences" onscroll="pdfRulerThumb()" oninput="pdfCellInput(event)" onbeforeinput="pdfCellBefore(event)" onkeydown="pdfCellKey(event)" onpaste="pdfCellPaste(event)" onmousedown="pdfCellDown(event)" ondrop="event.preventDefault()" oncompositionend="pdfRefreshSoon()"></div>
+      <div class="pdiff-ruler" id="pdfRuler" aria-hidden="true" onclick="pdfRulerClick(event)"></div>
     </div>
     <div class="pdiff-foot"><span class="pdiff-msg" id="pdfMsg" role="status"></span><div class="modal-actions" id="pdfActs"></div></div>
   </div>
@@ -5651,6 +5632,9 @@ function shortcutGroups(){
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
       ['Copy the finished prompt', [mod,'↵']], ['Copy and open in the first AI app', [shift,mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
       ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']] ] },
+    { id:'compare', label:'Comparing prompts', icon:'fa-solid fa-arrows-left-right', rows:[
+      ['Next difference', ['F7']], ['Previous difference', [shift,'F7']], ['Next difference (alternative)', [opt,'F5']], ['Save changes to both prompts', [mod,'S']],
+      ['Undo the last edit or move', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Move between lines at their edges', ['↑','↓']], ['Close (asks first when there are changes)', ['Esc']] ] },
     { id:'help', label:'In the Help window', icon:'fa-regular fa-circle-question', rows:[
       ['Switch topic', ['↑','↓']], ['Into the text', ['→']], ['Back to the topics', ['←']], ['Search help', ['/']] ] }
   ];
@@ -7054,21 +7038,16 @@ function diffMerge(A, B, h, toRight){
   return toRight ? { a: A, b: B.slice(0, h.bStart).concat(A.slice(h.aStart, h.aEnd), B.slice(h.bEnd)) }
                  : { a: A.slice(0, h.aStart).concat(B.slice(h.bStart, h.bEnd), A.slice(h.aEnd)), b: B };
 }
-// For the synchronized scrolling: each line's counterpart on the other side (for a changed line, where it would sit).
-function diffLineMap(ops, na, nb){
-  const ab = new Array(na).fill(0), ba = new Array(nb).fill(0); let ai = 0, bi = 0;
-  ops.forEach(o=>{
-    if(o.t==='eq'){ ab[o.a] = o.b; ba[o.b] = o.a; ai = o.a + 1; bi = o.b + 1; }
-    else if(o.t==='del'){ ab[o.a] = bi; ai = o.a + 1; }
-    else { ba[o.b] = ai; bi = o.b + 1; }
-  });
-  return { ab, ba };
+// Replace the text between two (line, offset) positions with `ins` (which may hold line breaks). Returns the new text and where the caret ends up. Enter, paste, and the Backspace / Delete that join two lines are all this one call.
+function pdfSplice(doc, from, to, ins){
+  const L = doc.split('\n'), fi = Math.max(0, Math.min(from.i, L.length - 1)), ti = Math.max(fi, Math.min(to.i, L.length - 1));
+  const head = L[fi].slice(0, from.off), tail = L[ti].slice(to.off), mid = String(ins).split('\n');
+  mid[0] = head + mid[0]; const off = mid[mid.length - 1].length; mid[mid.length - 1] += tail;
+  L.splice(fi, ti - fi + 1, ...mid);
+  return { doc: L.join('\n'), line: fi + mid.length - 1, off };
 }
-// One line's text, with its changed words marked (a trailing zero-width space keeps an empty line one row tall).
-function diffLineInner(t, m){ return (m && m.segs ? m.segs.map(([s, ch])=>ch ? `<mark>${esc(s)}</mark>` : esc(s)).join('') : esc(t)) + '\u200b'; }
-function diffLinesHtml(lines, marks, cur, cls){
-  return lines.map((t, i)=>{ const m = marks[i]; return `<div class="dl${m ? ' ' + cls + (m.h===cur ? ' dcur' : '') : ''}">${diffLineInner(t, m)}</div>`; }).join('');
-}
+// One line's text, with its changed words marked. No placeholder character: the cell is editable, so its text must be exactly the line (an empty line gets its height from CSS).
+function diffLineInner(t, m){ return m && m.segs ? m.segs.map(([s, ch])=>ch ? `<mark>${esc(s)}</mark>` : esc(s)).join('') : esc(t); }
 // The aligned view: one row per line pair. Unchanged lines pair with themselves; inside a hunk the lines pair up by position and the shorter side gets empty filler cells (index -1), so both sides stay level.
 function diffRows(A, B, hunks){
   const rows = []; let ai = 0, bi = 0;
@@ -7095,10 +7074,10 @@ function diffFold(rows, ctx, open){
   }
   return out;
 }
-// ro = {a, b}: a read-only side gets no arrow into it.
+// ro = {a, b}: a read-only side gets no arrow into it and its lines cannot be typed in.
 function diffRowsHtml(rows, A, B, res, cur, ro){
-  const cell = (idx, lines, marks, cls)=>idx<0 ? `<div class="dc filler"><span class="ln"></span><span class="tx"></span></div>`
-    : `<div class="dc${marks[idx] ? ' ' + cls : ''}"><span class="ln">${idx + 1}</span><span class="tx">${diffLineInner(lines[idx], marks[idx])}</span></div>`;
+  const cell = (idx, lines, marks, cls, side)=>idx<0 ? `<div class="dc filler"><span class="ln"></span><span class="tx"></span></div>`
+    : `<div class="dc s${side}${marks[idx] ? ' ' + cls : ''}"><span class="ln">${idx + 1}</span><span class="tx" data-side="${side}" data-i="${idx}" role="textbox" aria-label="${side==='a' ? 'Left' : 'Right'} line ${idx + 1}"${ro[side] ? ' aria-readonly="true"' : ' contenteditable="plaintext-only" spellcheck="false"'}>${diffLineInner(lines[idx], marks[idx])}</span></div>`;
   return rows.map(r=>{
     if(r.k==='fold') return `<button type="button" class="dr-fold" onclick="pdfUnfold(${r.key})" title="Show these lines">${r.n} unchanged line${r.n===1 ? '' : 's'}</button>`;
     let mid = '';
@@ -7107,7 +7086,7 @@ function diffRowsHtml(rows, A, B, res, cur, ro){
       if(!ro.b) mid += `<button type="button" class="df-arrow to-r" onclick="pdfMerge(${r.h}, true)" title="${emptyA ? 'Remove this from the right' : 'Copy this to the right'}" aria-label="${emptyA ? 'Remove from the right' : 'Copy to the right'}">→</button>`;
       if(!ro.a) mid += `<button type="button" class="df-arrow to-l" onclick="pdfMerge(${r.h}, false)" title="${emptyB ? 'Remove this from the left' : 'Copy this to the left'}" aria-label="${emptyB ? 'Remove from the left' : 'Copy to the left'}">←</button>`;
     }
-    return `<div class="dr${r.h>=0 ? ' chg' : ''}${r.h>=0 && r.h===cur ? ' dcur' : ''}"${r.h>=0 ? ` data-h="${r.h}"` : ''}>${cell(r.a, A, res.ma, 'del')}<div class="dm">${mid}</div>${cell(r.b, B, res.mb, 'add')}</div>`;
+    return `<div class="dr${r.h>=0 ? ' chg' : ''}${r.h>=0 && r.h===cur ? ' dcur' : ''}"${r.h>=0 ? ` data-h="${r.h}"` : ''}>${cell(r.a, A, res.ma, 'del', 'a')}<div class="dm">${mid}</div>${cell(r.b, B, res.mb, 'add', 'b')}</div>`;
   }).join('');
 }
 
@@ -7116,7 +7095,7 @@ let pdf = null;
 const pdfEl = id=>document.getElementById(id);
 const pdfRO = side=>{ const id = side==='a' ? pdf.aId : pdf.bId, p = id && prompts.find(x=>x.id===id); return !!p && !!p.locked; };
 const pdfChanged = side=>side==='a' ? pdf.a!==pdf.a0 : !!pdf.bId && pdf.b!==pdf.b0;
-// "Select for Compare" (as in VS Code's Explorer): one prompt is marked per session, and another prompt's menu then offers Compare with it.
+// "Select for Compare" (as in VS Code's Explorer): one prompt is marked per session, and another prompt's menu then offers Compare with Selected (the only way into the dialog).
 let promptCompareId = null;
 const promptCompareMark = ()=>{ const p = promptCompareId && prompts.find(x=>x.id===promptCompareId); return p && !promptTrashed(p) ? p : null; };
 function togglePromptCompareMark(id){
@@ -7128,12 +7107,12 @@ function openPromptDiff(id, withId){
   const p = prompts.find(x=>x.id===id); if(!p || promptTrashed(p)) return;
   flushPromptEdit();
   const others = prompts.filter(q=>q.id!==id && !promptTrashed(q)), o = (withId && others.find(q=>q.id===withId)) || others.find(q=>q.folderId===p.folderId) || others[0];
-  pdf = { aId:id, bId:o ? o.id : '', a:p.template, a0:p.template, b:o ? o.template : '', b0:o ? o.template : '', prec:'word', ws:false, fold:false, open:new Set(), edit:false, cur:-1, undo:[], confirming:false, res:null };
+  pdf = { aId:id, bId:o ? o.id : '', a:p.template, a0:p.template, b:o ? o.template : '', b0:o ? o.template : '', prec:'word', ws:false, fold:false, open:new Set(), cur:-1, undo:[], redo:[], burst:false, timer:0, confirming:false, res:null };
   modalReturnFocus = document.activeElement;
   pdfEl('pdfPrec').value = 'word';
   pdfEl('pdfModalBg').classList.add('open');
   pdfEl('pdfFoldBtn').classList.remove('on'); pdfEl('pdfFoldBtn').setAttribute('aria-pressed', 'false');
-  pdfFillSelects(); pdfSetText(); pdfApplyMode(); renderPromptDiff();
+  pdfFillSelects(); renderPromptDiff();
 }
 function pdfFillSelects(){
   const list = prompts.filter(p=>!promptTrashed(p)).sort((x, y)=>promptTitle(x).localeCompare(promptTitle(y), undefined, {sensitivity:'base'}));
@@ -7141,24 +7120,15 @@ function pdfFillSelects(){
   pdfEl('pdfSelA').innerHTML = opts(pdf.aId, pdf.bId, false); pdfEl('pdfSelB').innerHTML = opts(pdf.bId, pdf.aId, true);
   pdfEl('pdfSelA').value = pdf.aId; pdfEl('pdfSelB').value = pdf.bId;
 }
-function pdfSetText(){
-  pdfEl('pdfTaA').value = pdf.a; pdfEl('pdfTaB').value = pdf.b;
-  pdfEl('pdfTaA').readOnly = pdfRO('a'); pdfEl('pdfTaB').readOnly = pdfRO('b');
-}
 function pdfPick(side, id){
   if(!pdf) return;
   if(pdfChanged(side)){ showToast('Save or undo your changes to this side first', true); pdfFillSelects(); return; }
   const p = prompts.find(x=>x.id===id);
   if(side==='a'){ if(!p) return; pdf.aId = id; pdf.a = pdf.a0 = p.template; }
   else { pdf.bId = p ? id : ''; pdf.b = pdf.b0 = p ? p.template : ''; }
-  pdf.undo = []; pdf.cur = -1;
+  pdf.undo = []; pdf.redo = []; pdf.burst = false; pdf.cur = -1;
   pdf.open = new Set();
-  pdfFillSelects(); pdfSetText(); renderPromptDiff(); pdfEl('pdfPaneA').scrollTop = pdfEl('pdfPaneB').scrollTop = pdfEl('pdfView').scrollTop = 0;
-}
-function pdfInput(side){
-  if(!pdf) return;
-  pdf[side] = pdfEl(side==='a' ? 'pdfTaA' : 'pdfTaB').value.slice(0, 100000);
-  renderPromptDiff();
+  pdfFillSelects(); renderPromptDiff(); pdfEl('pdfView').scrollTop = 0;
 }
 function pdfSetOption(kind, v){
   if(!pdf) return;
@@ -7167,72 +7137,158 @@ function pdfSetOption(kind, v){
   renderPromptDiff();
 }
 function pdfUnfold(key){ if(pdf){ pdf.open.add(key); renderPromptDiff(); } }
-// Two ways to look at the same drafts: aligned rows (arrows, no typing) or two text panes (typing, not level).
-function pdfApplyMode(){
-  pdfEl('pdfPanes').hidden = !pdf.edit; pdfEl('pdfView').hidden = pdf.edit; pdfEl('pdfFoldBtn').hidden = pdf.edit;
-  pdfEl('pdfSels').classList.toggle('view', !pdf.edit);
-  const b = pdfEl('pdfEditBtn'); b.classList.toggle('on', pdf.edit); b.setAttribute('aria-pressed', String(pdf.edit));
-}
-function pdfSetEdit(){ if(!pdf) return; pdf.edit = !pdf.edit; pdfApplyMode(); pdfSetText(); renderPromptDiff(); }
-function renderPromptDiff(){
+// `focus` = {side, i, off}: put the caret back in that line after the repaint (the view is rebuilt from the text each time); left out, the caret where it is now is kept.
+function renderPromptDiff(focus){
   if(!pdf) return;
+  if(focus===undefined) focus = pdfFocusNow();      // the view is rebuilt, so a caret inside it (F7, an option toggle…) has to be put back
+  clearTimeout(pdf.timer); pdf.timer = 0;
   const A = pdf.a.split('\n'), B = pdf.b.split('\n'), r = pdf.res = diffCompare(A, B, { precision:pdf.prec, ws:pdf.ws });
-  pdf.A = A; pdf.B = B; pdf.map = diffLineMap(r.ops, A.length, B.length);
+  pdf.A = A; pdf.B = B;
   if(pdf.cur>=r.hunks.length) pdf.cur = r.hunks.length - 1;
   const n = r.hunks.length;
   pdfEl('pdfCount').textContent = !n ? (pdf.a===pdf.b ? 'Identical' : 'No differences') : pdf.cur>=0 ? `${pdf.cur+1} of ${n}` : `${n} difference${n===1 ? '' : 's'}`;
   ['pdfPrev', 'pdfNext'].forEach(id=>{ pdfEl(id).disabled = !n; });
   pdfEl('pdfUndo').disabled = !pdf.undo.length;
-  if(pdf.edit){ pdfEl('pdfHlA').innerHTML = diffLinesHtml(A, r.ma, pdf.cur, 'del'); pdfEl('pdfHlB').innerHTML = diffLinesHtml(B, r.mb, pdf.cur, 'add'); pdfLayout(); }
-  else {
-    let rows = diffRows(A, B, r.hunks); if(pdf.fold) rows = diffFold(rows, 3, pdf.open);
-    pdfEl('pdfView').innerHTML = n || pdf.a!==pdf.b ? diffRowsHtml(rows, A, B, r, pdf.cur, { a:pdfRO('a'), b:pdfRO('b') }) : '<div class="pdiff-same">The two texts are identical.</div>';
-  }
-  pdfRenderFoot();
+  const v = pdfEl('pdfView'), top = v.scrollTop;
+  let rows = diffRows(A, B, r.hunks); if(pdf.fold) rows = diffFold(rows, 3, pdf.open);
+  v.innerHTML = n || pdf.a!==pdf.b ? diffRowsHtml(rows, A, B, r, pdf.cur, { a:pdfRO('a'), b:pdfRO('b') }) : '<div class="pdiff-same">The two texts are identical.</div>';
+  v.scrollTop = top;
+  if(focus) pdfFocusLine(focus);
+  pdfRulerSync(); pdfRenderFoot();
 }
-// Where each hunk sits in each pane (measured from the painted lines, so wrapped lines are right), and the arrows placed there.
-function pdfLayout(){
-  if(!pdf || !pdf.res) return;
-  const kids = hl=>hl.children || [], pos = (hl, i)=>{ const c = kids(hl); if(i<c.length) return c[i].offsetTop; const l = c[c.length-1]; return l ? l.offsetTop + l.offsetHeight : 0; };
-  const hlA = pdfEl('pdfHlA'), hlB = pdfEl('pdfHlB'), r = pdf.res;
-  pdf.tops = { a: Array.from(kids(hlA)).map(e=>e.offsetTop), b: Array.from(kids(hlB)).map(e=>e.offsetTop) };
-  pdf.ypos = r.hunks.map(h=>({ a: pos(hlA, h.aStart), b: pos(hlB, h.bStart) }));
-  const arrow = (hi, toRight, y, empty, src)=>`<button type="button" class="df-arrow ${toRight ? 'to-r' : 'to-l'}" style="top:${Math.max(0, y - (empty ? 11 : 0))}px" onmousedown="event.preventDefault()" onclick="pdfMerge(${hi}, ${toRight})" title="${src ? (toRight ? 'Copy this to the right' : 'Copy this to the left') : (toRight ? 'Remove this from the right' : 'Remove this from the left')}" aria-label="${toRight ? 'Copy to the right' : 'Copy to the left'}">${toRight ? '→' : '←'}</button>`;
-  pdfEl('pdfArrA').innerHTML = pdfRO('b') ? '' : r.hunks.map((h, i)=>arrow(i, true, pdf.ypos[i].a, h.aEnd===h.aStart, h.aEnd>h.aStart)).join('');
-  pdfEl('pdfArrB').innerHTML = pdfRO('a') ? '' : r.hunks.map((h, i)=>arrow(i, false, pdf.ypos[i].b, h.bEnd===h.bStart, h.bEnd>h.bStart)).join('');
+// ---- typing in the aligned view (each line is its own editable cell) ----
+const pdfCellOf = e=>{ const t = e && e.target; return t && t.closest ? t.closest('.tx[data-side]') : null; };
+function pdfSelOffsets(cell){     // the selection as character offsets inside this cell, or null when it is elsewhere
+  const sel = window.getSelection && window.getSelection(); if(!sel || !sel.rangeCount) return null;
+  const r = sel.getRangeAt(0); if(!cell.contains(r.startContainer) || !cell.contains(r.endContainer)) return null;
+  const pre = document.createRange(); pre.selectNodeContents(cell);
+  pre.setEnd(r.startContainer, r.startOffset); const start = pre.toString().length;
+  pre.setEnd(r.endContainer, r.endOffset); return { start, end: pre.toString().length };
 }
+function pdfSetCaret(cell, off){
+  const w = document.createTreeWalker(cell, NodeFilter.SHOW_TEXT), r = document.createRange(); let n, left = off, last = null;
+  while((n = w.nextNode())){ last = n; if(left<=n.length){ r.setStart(n, left); r.collapse(true); return pdfApplyRange(r); } left -= n.length; }
+  if(last) r.setStart(last, last.length); else r.setStart(cell, 0);
+  r.collapse(true); pdfApplyRange(r);
+}
+const pdfApplyRange = r=>{ const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); };
+function pdfFocusLine(f){
+  const v = pdfEl('pdfView'), c = v.querySelector ? v.querySelector(`.tx[data-side="${f.side}"][data-i="${f.i}"]`) : null;
+  if(!c || c.getAttribute('contenteditable')===null) return false;
+  c.focus({ preventScroll:true }); pdfSetCaret(c, f.off); if(c.scrollIntoView) c.scrollIntoView({ block:'nearest' });
+  return true;
+}
+function pdfFocusNow(){        // where the caret is now, so a repaint can put it back
+  const a = document.activeElement, c = a && a.closest ? a.closest('.tx[data-side]') : null, o = c && pdfSelOffsets(c);
+  return c && o ? { side:c.dataset.side, i:+c.dataset.i, off:o.start } : null;
+}
+function pdfRefresh(){ if(pdf){ pdf.burst = false; renderPromptDiff(pdfFocusNow()); } }
+function pdfRefreshSoon(){ if(!pdf) return; clearTimeout(pdf.timer); pdf.timer = setTimeout(pdfRefresh, 220); }
+const pdfSnap = ()=>{ if(!pdf.burst){ pdf.undo.push({ a:pdf.a, b:pdf.b }); pdf.burst = true; } pdf.redo = []; };   // one Undo step per burst of typing
+function pdfEditAt(side, fi, fo, ti, to, ins){      // a structural edit (Enter, paste, joining two lines): its own Undo step, repainted at once
+  if(pdfRO(side)) return;
+  const r = pdfSplice(pdf[side], { i:fi, off:fo }, { i:ti, off:to }, ins);
+  pdf.burst = false; pdfSnap(); pdf.burst = false;
+  pdf[side] = r.doc.slice(0, 100000);
+  renderPromptDiff({ side, i:r.line, off:r.off });
+}
+function pdfCellBefore(e){
+  const c = pdfCellOf(e); if(!c || !pdf) return;
+  const side = c.dataset.side, i = +c.dataset.i, t = e.inputType, o = pdfSelOffsets(c) || { start:0, end:0 }, len = c.textContent.length, n = pdf[side].split('\n').length;
+  if(t==='historyUndo'){ e.preventDefault(); return pdfUndo(); }
+  if(t==='historyRedo'){ e.preventDefault(); return pdfRedo(); }
+  if(t==='insertParagraph' || t==='insertLineBreak'){ e.preventDefault(); return pdfEditAt(side, i, o.start, i, o.end, '\n'); }
+  if(t==='insertFromDrop' || t==='insertFromPaste' || t==='insertFromPasteAsQuotation') return e.preventDefault();    // paste is taken over in pdfCellPaste
+  if(/^delete.*Backward$/.test(t) && o.start===0 && o.end===0){ e.preventDefault(); if(i>0) pdfEditAt(side, i - 1, pdf[side].split('\n')[i - 1].length, i, 0, ''); return; }
+  if(/^delete.*Forward$/.test(t) && o.start===len && o.end===len){ e.preventDefault(); if(i<n - 1) pdfEditAt(side, i, len, i + 1, 0, ''); return; }
+  pdfSnap();
+}
+function pdfCellInput(e){
+  const c = pdfCellOf(e); if(!c || !pdf) return;
+  const side = c.dataset.side, L = pdf[side].split('\n'); L[+c.dataset.i] = c.textContent;
+  pdf[side] = L.join('\n').slice(0, 100000);
+  if(!e.isComposing) pdfRefreshSoon();
+}
+function pdfCellPaste(e){
+  const c = pdfCellOf(e); if(!c || !pdf) return;
+  e.preventDefault();
+  const text = ((e.clipboardData && e.clipboardData.getData('text/plain')) || '').replace(/\r\n?/g, '\n'), o = pdfSelOffsets(c) || { start:0, end:0 }, i = +c.dataset.i;
+  if(text) pdfEditAt(c.dataset.side, i, o.start, i, o.end, text);
+}
+function pdfCellDown(e){ const c = pdfCellOf(e), v = pdfEl('pdfView'); if(v) v.dataset.selside = c ? c.dataset.side : ''; }
+// Arrow keys step from one line's cell into the next one's at the edges of a line (separate editable cells do not share a caret).
+function pdfCellKey(e){
+  const c = pdfCellOf(e); if(!c || !pdf || e.shiftKey || e.altKey || e.metaKey || e.ctrlKey) return;
+  const o = pdfSelOffsets(c); if(!o || o.start!==o.end) return;
+  const side = c.dataset.side, i = +c.dataset.i, len = c.textContent.length, k = e.key;
+  const edge = up=>{ const sel = window.getSelection(), r = sel.getRangeAt(0).cloneRange(); r.collapse(true); const cr = c.getBoundingClientRect(), rc = r.getClientRects()[0] || r.getBoundingClientRect(); if(!rc || !rc.height) return true; return up ? rc.top - cr.top < rc.height : cr.bottom - rc.bottom < rc.height; };
+  let dir = 0, off = 0;
+  if(k==='ArrowLeft' && o.start===0){ dir = -1; off = Infinity; } else if(k==='ArrowRight' && o.start===len){ dir = 1; off = 0; }
+  else if(k==='ArrowUp' && edge(true)){ dir = -1; off = o.start; } else if(k==='ArrowDown' && edge(false)){ dir = 1; off = o.start; }
+  if(!dir) return;
+  const v = pdfEl('pdfView'); let j = i + dir, t = null;
+  while(j>=0 && j<pdf[side].split('\n').length && !(t = v.querySelector(`.tx[data-side="${side}"][data-i="${j}"]`))) j += dir;    // skip lines a fold is hiding
+  e.preventDefault();
+  if(t && t.getAttribute('contenteditable')!==null){ t.focus({ preventScroll:true }); pdfSetCaret(t, Math.min(off, t.textContent.length)); if(t.scrollIntoView) t.scrollIntoView({ block:'nearest' }); }
+}
+// The dialog's own keys: Esc closes (asking first if there are changes), F7 / Shift+F7 (Alt+F5) step through the differences, Cmd/Ctrl+S saves, Cmd/Ctrl+Z undoes.
+function pdfKey(e){
+  if(!pdf) return;
+  const mod = e.metaKey || e.ctrlKey, k = e.key.length===1 ? e.key.toLowerCase() : e.key;
+  if(k==='Escape'){ e.stopPropagation(); return pdfRequestClose(); }
+  if(k==='F7' || (k==='F5' && e.altKey)){ e.preventDefault(); return pdfNav(e.shiftKey ? -1 : 1); }
+  if(mod && k==='s'){ e.preventDefault(); return pdfSave(); }
+  if(mod && k==='z' && !(e.target && e.target.tagName==='SELECT')){ e.preventDefault(); return e.shiftKey ? pdfRedo() : pdfUndo(); }
+}
+// Everything that changes the text is undoable one step at a time (typing bursts, Enter, paste, joined lines, moves across), with Redo.
 function pdfMerge(hi, toRight){
   if(!pdf || !pdf.res || !pdf.res.hunks[hi] || pdfRO(toRight ? 'b' : 'a')) return;
+  if(pdf.timer) return pdfRefresh();       // typing has not been compared yet, so this arrow may point at the wrong lines: repaint first
   const m = diffMerge(pdf.A, pdf.B, pdf.res.hunks[hi], toRight);
-  pdf.undo.push({ a:pdf.a, b:pdf.b }); pdf.a = m.a.join('\n'); pdf.b = m.b.join('\n');
-  pdfSetText(); renderPromptDiff();
+  pdf.undo.push({ a:pdf.a, b:pdf.b }); pdf.redo = []; pdf.burst = false; pdf.a = m.a.join('\n'); pdf.b = m.b.join('\n');
+  renderPromptDiff();
 }
 function pdfUndo(){
   if(!pdf || !pdf.undo.length) return;
-  const u = pdf.undo.pop(); pdf.a = u.a; pdf.b = u.b; pdfSetText(); renderPromptDiff();
+  pdf.redo.push({ a:pdf.a, b:pdf.b }); const u = pdf.undo.pop(); pdf.a = u.a; pdf.b = u.b; pdfRefresh();
+}
+function pdfRedo(){
+  if(!pdf || !pdf.redo.length) return;
+  pdf.undo.push({ a:pdf.a, b:pdf.b }); const u = pdf.redo.pop(); pdf.a = u.a; pdf.b = u.b; pdfRefresh();
+}
+function pdfGoto(hi){
+  if(!pdf || !pdf.res || !pdf.res.hunks[hi]) return;
+  pdf.cur = hi; renderPromptDiff();
+  const v = pdfEl('pdfView'), row = v.querySelector ? v.querySelector(`[data-h="${hi}"]`) : null;
+  if(row) v.scrollTop = Math.max(0, row.offsetTop - v.clientHeight * 0.3);
 }
 function pdfNav(d){
   if(!pdf || !pdf.res || !pdf.res.hunks.length) return;
+  if(pdf.timer) pdfRefresh();
   const n = pdf.res.hunks.length;
-  pdf.cur = pdf.cur<0 ? (d>0 ? 0 : n-1) : (pdf.cur + d + n) % n;
-  renderPromptDiff();
-  if(!pdf.edit){ const v = pdfEl('pdfView'), row = v.querySelector(`[data-h="${pdf.cur}"]`); if(row) v.scrollTop = Math.max(0, row.offsetTop - 60); return; }
-  const y = pdf.ypos[pdf.cur], h = pdf.res.hunks[pdf.cur];
-  const useA = h.aEnd>h.aStart || h.bEnd===h.bStart;
-  const el = pdfEl(useA ? 'pdfPaneA' : 'pdfPaneB');
-  el.scrollTo ? el.scrollTo({ top: Math.max(0, (useA ? y.a : y.b) - 60) }) : (el.scrollTop = Math.max(0, (useA ? y.a : y.b) - 60));
+  pdfGoto(pdf.cur<0 ? (d>0 ? 0 : n-1) : (pdf.cur + d + n) % n);
 }
-// One pane scrolled: bring the other to the same place in the text (by the matching line, not by percentage, so changed stretches stay level).
-function pdfScroll(side){
-  if(!pdf || !pdf.edit || !pdf.tops) return;
-  const src = pdfEl(side==='a' ? 'pdfPaneA' : 'pdfPaneB'), dst = pdfEl(side==='a' ? 'pdfPaneB' : 'pdfPaneA');
-  if(pdf.expect && pdf.expect.el===src && Math.abs(src.scrollTop - pdf.expect.top) < 2){ pdf.expect = null; return; }
-  const ts = pdf.tops[side], td = pdf.tops[side==='a' ? 'b' : 'a'], map = (side==='a' ? pdf.map.ab : pdf.map.ba);
-  if(!ts.length || !td.length) return;
-  const y = src.scrollTop; let i = 0; while(i+1<ts.length && ts[i+1]<=y) i++;
-  const hs = (i+1<ts.length ? ts[i+1] : src.scrollHeight) - ts[i], frac = hs>0 ? Math.min(1, (y - ts[i]) / hs) : 0;
-  const j = Math.min(td.length-1, map[i]), hd = (j+1<td.length ? td[j+1] : dst.scrollHeight) - td[j];
-  dst.scrollTop = td[j] + frac * hd; pdf.expect = { el:dst, top:dst.scrollTop };
+// ---- the overview ruler: a mark per difference placed by where its rows really are (so wrapped lines count), and a thumb for what is on screen ----
+function pdfRulerSync(){
+  const v = pdfEl('pdfView'), rl = pdfEl('pdfRuler'); if(!v || !rl || !v.querySelectorAll || !pdf.res) return;
+  const H = v.scrollHeight;
+  if(!H){ rl.innerHTML = ''; return; }
+  rl.innerHTML = pdf.res.hunks.map((h, hi)=>{
+    const rows = v.querySelectorAll(`.dr[data-h="${hi}"]`); if(!rows.length) return '';
+    const first = rows[0], last = rows[rows.length - 1], top = first.offsetTop, bottom = last.offsetTop + last.offsetHeight;
+    const kind = h.aEnd===h.aStart ? 'add' : h.bEnd===h.bStart ? 'del' : 'mod';
+    return `<button type="button" class="rl-mark ${kind}${hi===pdf.cur ? ' cur' : ''}" tabindex="-1" style="top:${(top / H * 100).toFixed(2)}%;height:${((bottom - top) / H * 100).toFixed(2)}%" onclick="event.stopPropagation();pdfGoto(${hi})" title="${kind==='add' ? 'Only on the right' : kind==='del' ? 'Only on the left' : 'Changed'}"></button>`;
+  }).join('') + '<div class="rl-thumb" id="pdfRlThumb"></div>';
+  pdfRulerThumb();
+}
+function pdfRulerThumb(){
+  const v = pdfEl('pdfView'), t = pdfEl('pdfRlThumb'); if(!v || !t || !v.scrollHeight) return;
+  const H = v.scrollHeight, show = H > v.clientHeight + 1;
+  t.style.display = show ? '' : 'none'; t.style.top = (v.scrollTop / H * 100) + '%'; t.style.height = (v.clientHeight / H * 100) + '%';
+}
+function pdfRulerClick(e){
+  const v = pdfEl('pdfView'), rl = pdfEl('pdfRuler'), r = rl.getBoundingClientRect(); if(!r.height) return;
+  v.scrollTop = (e.clientY - r.top) / r.height * v.scrollHeight - v.clientHeight / 2;
 }
 function pdfRenderFoot(){
   const dirty = pdfChanged('a') || pdfChanged('b'), msg = pdfEl('pdfMsg'), acts = pdfEl('pdfActs');
@@ -7268,7 +7324,7 @@ function pdfSave(){
     promptEditorId = null; save(); render();
   });
 }
-if(typeof ResizeObserver==='function'){ const px = document.getElementById('pdfPanes'); if(px) new ResizeObserver(()=>{ if(pdf) pdfLayout(); }).observe(px); }   // wrapped lines move when the window or the dialog changes size
+if(typeof ResizeObserver==='function'){ const px = document.getElementById('pdfView'); if(px) new ResizeObserver(()=>{ if(pdf) pdfRulerSync(); }).observe(px); }   // wrapped lines move when the window or the dialog changes size
 
 // ---- data integrity ----
 function cleanPromptVars(vars){
@@ -8222,8 +8278,7 @@ function promptMenuHtml(id){
     sep,
     item('fa-regular fa-clone', 'Duplicate', `promptMenuRun('clone')`),
     ...(()=>{ const m = promptCompareMark(), mark = item('fa-solid fa-arrows-left-right', m && m.id===id ? 'Deselect for Compare' : 'Select for Compare', `promptMenuRun('mark')`);
-      return m && m.id!==id ? [item('fa-solid fa-arrows-left-right', `Compare with “${esc(promptTitle(m))}”`, `promptMenuRun('compareWith')`), mark] : [mark]; })(),
-    item('fa-solid fa-arrows-left-right', 'Compare…', `promptMenuRun('compare')`),
+      return m && m.id!==id ? [item('fa-solid fa-arrows-left-right', 'Compare with Selected', `promptMenuRun('compareWith')`), mark] : [mark]; })(),
     item('fa-solid fa-arrow-up-from-bracket', 'Export Prompt', `promptMenuRun('export')`),
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
     sep,
@@ -8245,7 +8300,7 @@ function promptMenuRun(kind, arg){
   if(kind==='open') return promptOpenInApp(arg, id);
   if(kind==='apps') return openAiAppsModal();
   if(kind==='copy') copyPrompt(id); else if(kind==='favorite') togglePromptFavorite(id); else if(kind==='lock') togglePromptLock(id);
-  else if(kind==='clone') clonePrompt(id); else if(kind==='compare') openPromptDiff(id); else if(kind==='mark') togglePromptCompareMark(id); else if(kind==='compareWith'){ const m = promptCompareMark(); if(m) openPromptDiff(m.id, id); } else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
+  else if(kind==='clone') clonePrompt(id); else if(kind==='mark') togglePromptCompareMark(id); else if(kind==='compareWith'){ const m = promptCompareMark(); if(m) openPromptDiff(m.id, id); } else if(kind==='export') exportPrompts('prompt', id); else if(kind==='move') movePrompt(id, arg); else if(kind==='restore') restorePrompt(id); else if(kind==='delete') deletePrompt(id);
 }
 function promptFolderMenuHtml(id){
   const f = promptFolderById(id); if(!f) return '';

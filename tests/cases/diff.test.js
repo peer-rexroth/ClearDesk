@@ -55,20 +55,7 @@ test('diffMerge copies a hunk either way, including a pure insertion and a pure 
   assertEqual(a.join('\n'), b.join('\n'));
 });
 
-test('diffLineMap gives each line a counterpart for the synchronized scrolling', function () {
-  const A = dfLines('a\nb\nc'), B = dfLines('a\nX\nY\nc'), m = diffLineMap(diffSeq(A, B), 3, 4);
-  assertEqual(m.ab[0], 0); assertEqual(m.ab[2], 3); assertEqual(m.ba[3], 2); assertEqual(m.ba[0], 0);
-});
-
-test('diffLinesHtml escapes the text, marks changed words and flags the current hunk', function () {
-  const r = diffCompare(['<b>x</b> one'], ['<b>x</b> two'], { precision: 'word' });
-  const h = diffLinesHtml(['<b>x</b> one'], r.ma, 0, 'del');
-  assertIncludes(h, '&lt;b&gt;x&lt;/b&gt;'); assertIncludes(h, '<mark>one</mark>'); assertIncludes(h, 'dl del dcur');
-  assertNotIncludes(diffLinesHtml(['<b>x</b> one'], r.ma, -1, 'del'), 'dcur');
-  assertEqual(diffLinesHtml(['same'], [null], -1, 'del'), '<div class="dl">same​</div>');
-});
-
-test('openPromptDiff loads both prompts; editing a side recomputes, arrows move a hunk, Undo Move puts it back', function () {
+test('openPromptDiff loads both prompts; editing a side recomputes, arrows move a hunk, Undo puts it back', function () {
   const { a, b } = dfOpen('one\ntwo\nthree', 'one\n2\nthree');
   assertEqual(pdf.aId, a.id); assertEqual(pdf.bId, b.id);
   assertEqual(pdf.res.hunks.length, 1);
@@ -96,13 +83,14 @@ test('Save Changes writes only the changed sides to the prompts and Undo restore
 });
 
 test('a locked prompt is a read-only side: no arrow into it (aligned view or text panes), no save to it', function () {
-  const { a, b } = dfOpen('x', 'y'); b.locked = true; pdfSetText(); renderPromptDiff();
-  assertNotIncludes(pdfEl('pdfView').innerHTML, 'to-r', 'no arrow toward the locked right side');
-  assertIncludes(pdfEl('pdfView').innerHTML, 'to-l', 'the unlocked left side can still take it');
-  pdfSetEdit();
-  assertEqual(pdfEl('pdfArrA').innerHTML, ''); assertIncludes(pdfEl('pdfArrB').innerHTML, 'to-l');
+  const { a, b } = dfOpen('x', 'y'); b.locked = true; renderPromptDiff();
+  const h = pdfEl('pdfView').innerHTML;
+  assertNotIncludes(h, 'to-r', 'no arrow toward the locked right side');
+  assertIncludes(h, 'to-l', 'the unlocked left side can still take it');
+  assertIncludes(h, 'data-side="a" data-i="0" role="textbox" aria-label="Left line 1" contenteditable', 'the unlocked side is typed in');
+  assertIncludes(h, 'aria-readonly="true"'); assertEqual(h.split('contenteditable').length - 1, 1, 'the locked side has no editable cell');
   pdfMerge(0, true); assertEqual(pdf.b, 'y', 'the move into a locked side is refused');
-  assertTrue(pdfEl('pdfTaB').readOnly);
+  pdfEditAt('b', 0, 0, 0, 1, 'zzz'); assertEqual(pdf.b, 'y', 'typing into a locked side is refused');
 });
 
 test('diffRows lines the two sides up: equal lines pair, a hunk pairs by position and the shorter side gets filler cells', function () {
@@ -144,9 +132,9 @@ test('switching a side with unsaved changes is refused, and the other side canno
   pdf.b = 'typed'; assertFalse(pdfChanged('b'), 'scratch text is never saved, so it never counts as a change');
 });
 
-test('the Compare… item is in the prompt menu', function () {
+test('there is no stand-alone Compare… item: comparing starts from Select for Compare', function () {
   const p = pmk({}); pfresh(); prompts = [p];
-  assertIncludes(promptMenuHtml(p.id), "promptMenuRun('compare')");
+  assertNotIncludes(promptMenuHtml(p.id), 'Compare…'); assertNotIncludes(promptMenuHtml(p.id), "promptMenuRun('compare')");
 });
 
 test('the aligned view marks the current difference only: with none chosen, no row (unchanged rows included) is current', function () {
@@ -161,7 +149,7 @@ test('Select for Compare / Compare with: the marked prompt is the left side, the
   assertIncludes(promptMenuHtml(b.id), 'Select for Compare');
   togglePromptCompareMark(a.id); assertEqual(promptCompareId, a.id);
   assertIncludes(promptMenuHtml(a.id), 'Deselect for Compare'); assertNotIncludes(promptMenuHtml(a.id), 'Compare with', 'no Compare with on the marked prompt itself');
-  assertIncludes(promptMenuHtml(c.id), 'Compare with “Alpha”'); assertIncludes(promptMenuHtml(c.id), 'Select for Compare', 'the mark can be moved');
+  assertIncludes(promptMenuHtml(c.id), 'Compare with Selected'); assertNotIncludes(promptMenuHtml(c.id), 'Alpha', 'the item does not name the selected prompt'); assertIncludes(promptMenuHtml(c.id), 'Select for Compare', 'the mark can be moved');
   promptMenuId = c.id; promptMenuRun('compareWith');
   assertEqual(pdf.aId, a.id); assertEqual(pdf.bId, c.id); assertEqual(pdf.b, 'three');
   pdfClose();
@@ -169,4 +157,59 @@ test('Select for Compare / Compare with: the marked prompt is the left side, the
   promptMenuId = b.id; promptMenuRun('mark'); assertEqual(promptCompareId, null, 'marking the same one again clears it');
   togglePromptCompareMark(a.id); a.deletedAt = Date.now(); assertEqual(promptCompareMark(), null, 'a trashed prompt is no longer the mark');
   assertNotIncludes(promptMenuHtml(c.id), 'Compare with'); promptCompareId = null;
+});
+
+test('pdfSplice is the one editing step: Enter splits, paste inserts lines, Backspace / Delete at a line edge joins, a range is replaced', function () {
+  assertDeepEqual(pdfSplice('abcd\nxy', { i: 0, off: 2 }, { i: 0, off: 2 }, '\n'), { doc: 'ab\ncd\nxy', line: 1, off: 0 });
+  assertDeepEqual(pdfSplice('abcd\nxy', { i: 1, off: 1 }, { i: 1, off: 1 }, 'p\nq\nr'), { doc: 'abcd\nxp\nq\nry', line: 3, off: 1 }, 'a pasted block: the caret ends after it');
+  assertDeepEqual(pdfSplice('ab\ncd', { i: 0, off: 2 }, { i: 1, off: 0 }, ''), { doc: 'abcd', line: 0, off: 2 }, 'Backspace at the start of line 2 joins it to line 1, caret at the seam');
+  assertDeepEqual(pdfSplice('abcd', { i: 0, off: 1 }, { i: 0, off: 3 }, 'X'), { doc: 'aXd', line: 0, off: 2 });
+  assertDeepEqual(pdfSplice('a\nb\nc', { i: 0, off: 1 }, { i: 2, off: 0 }, ''), { doc: 'ac', line: 0, off: 1 }, 'a selection across lines');
+  assertDeepEqual(pdfSplice('', { i: 0, off: 0 }, { i: 0, off: 0 }, 'hi'), { doc: 'hi', line: 0, off: 2 });
+  assertEqual(pdfSplice('a', { i: 9, off: 99 }, { i: 9, off: 99 }, 'b').doc, 'ab', 'positions are clamped');
+});
+
+test('typing in the aligned view: Enter, a paste and a joined line each recompute the diff and are their own Undo step; Redo brings them back', function () {
+  dfOpen('one\ntwo', 'one\ntwo');
+  assertEqual(pdf.res.hunks.length, 0);
+  pdfEditAt('b', 1, 3, 1, 3, '\nthree');                         // Enter + typed text at the end of line 2 (right side)
+  assertEqual(pdf.b, 'one\ntwo\nthree'); assertEqual(pdf.res.hunks.length, 1); assertTrue(pdfChanged('b')); assertFalse(pdfChanged('a'));
+  assertIncludes(pdfEl('pdfView').innerHTML, 'dc filler', 'the left side gets a filler cell for the new line');
+  pdfEditAt('a', 1, 0, 1, 0, 'X');                                // a paste at the start of left line 2
+  assertEqual(pdf.a, 'one\nXtwo');
+  pdfEditAt('b', 0, 3, 1, 0, '');                                 // Delete at the end of line 1 joins line 2 up
+  assertEqual(pdf.b, 'onetwo\nthree');
+  pdfUndo(); assertEqual(pdf.b, 'one\ntwo\nthree'); assertEqual(pdf.a, 'one\nXtwo');
+  pdfUndo(); assertEqual(pdf.a, 'one\ntwo');
+  pdfRedo(); assertEqual(pdf.a, 'one\nXtwo'); pdfRedo(); assertEqual(pdf.b, 'onetwo\nthree'); assertEqual(pdf.redo.length, 0);
+  pdfUndo(); pdfEditAt('b', 0, 0, 0, 0, 'q'); assertEqual(pdf.redo.length, 0, 'a new edit clears Redo');
+});
+
+test('a burst of typing is one Undo step, and the cells hold exactly the line (no placeholder character)', function () {
+  dfOpen('', 'x');
+  assertNotIncludes(pdfEl('pdfView').innerHTML, '\u200b', 'an editable cell holds only the line text');
+  pdfSnap(); pdf.a = 'a'; pdfSnap(); pdf.a = 'ab'; pdfSnap(); pdf.a = 'abc';   // three keystrokes before the repaint
+  assertEqual(pdf.undo.length, 1, 'one step for the burst');
+  pdfUndo(); assertEqual(pdf.a, '', 'Undo takes back the whole burst');
+  pdfSnap(); assertEqual(pdf.undo.length, 1, 'the next typing starts a new step once the view has repainted');
+});
+
+test('the dialog keys: F7 / Shift+F7 (and Alt+F5) step through the differences, Esc asks before discarding, Cmd+S saves, Cmd+Z / Shift+Cmd+Z undo and redo', function () {
+  const { a, b } = dfOpen('a\nb\nc\nd\ne', 'a\nB\nc\nD\ne');
+  const key = (k, o) => pdfKey(Object.assign({ key: k, preventDefault() {}, stopPropagation() {}, target: {} }, o || {}));
+  key('F7'); assertEqual(pdf.cur, 0); key('F7'); assertEqual(pdf.cur, 1); key('F7'); assertEqual(pdf.cur, 0, 'wraps round');
+  key('F7', { shiftKey: true }); assertEqual(pdf.cur, 1, 'Shift+F7 goes back');
+  key('F5', { altKey: true }); assertEqual(pdf.cur, 0);
+  pdfMerge(0, true); assertTrue(pdfChanged('b'));
+  key('z', { metaKey: true }); assertFalse(pdfChanged('b'), 'Cmd+Z undoes');
+  key('z', { ctrlKey: true, shiftKey: true }); assertTrue(pdfChanged('b'), 'Shift+Ctrl+Z redoes');
+  key('Escape'); assertTrue(pdf.confirming, 'Esc with unsaved changes asks first');
+  pdfKeepEditing(); key('s', { metaKey: true });
+  assertEqual(pdf, null); assertEqual(b.template, 'a\nb\nc\nD\ne', 'Cmd+S saved the right side'); assertEqual(a.template, 'a\nb\nc\nd\ne');
+});
+
+test('the overview ruler is repainted with the view and the dialog has no second (pane) mode any more', function () {
+  dfOpen('a', 'b');
+  assertEqual(typeof pdfSetEdit, 'undefined'); assertEqual(typeof diffLinesHtml, 'undefined'); assertEqual(typeof diffLineMap, 'undefined');
+  assertEqual(typeof pdfRulerSync, 'function'); renderPromptDiff(); assertEqual(pdf.res.hunks.length, 1);
 });
