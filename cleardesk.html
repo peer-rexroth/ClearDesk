@@ -6986,7 +6986,7 @@ const unescHtml = x=>String(x).replace(/&quot;/g, '"').replace(/&gt;/g, '>').rep
 // The template field's painted copy: one class per character, then runs of equal class become spans, one block per line (so a code block's band spans the line; the text itself is exactly the template, which is what keeps the copy level with the textarea).
 // Variables first (they always win), then, up to PROMPT_MD_MAX characters, light Markdown and XML-tag colouring. Markdown is read from a copy with the variables blanked, so `**{{tone}}** text` still closes its bold.
 const PROMPT_MD_MAX = 30000;
-function promptHighlight(template, selfId){
+function promptHighlightLines(template, selfId){
   const text = String(template || ''), n = text.length, ph = new Array(n).fill(''), md = new Array(n).fill(''), mask = text.split('');
   const self = selfId ? prompts.find(x=>x.id===selfId) : null, withMd = n <= PROMPT_MD_MAX;
   const re = /\\(?:\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))|\{\{@[^}]+\}\}|\{\{>\s*[^}]+?\s*\}\}|\{\{(?![@>])[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\)/g;
@@ -7040,7 +7040,29 @@ function promptHighlight(template, selfId){
     }
     pos += len + 1;
     return `<div class="ln${fenceLine[li] ? ' fence' : ''}">${html}</div>`;
-  }).join('');
+  });
+}
+const promptHighlight = (template, selfId)=>promptHighlightLines(template, selfId).join('');
+// What changed between two paints, as one splice: keep the unchanged lines at both ends, drop `remove` old lines at `at`, put `insert` there. Typing is one changed line, Enter one inserted line, so the page only touches those (as editors do) instead of rebuilding every line.
+function promptHlPlan(prev, next){
+  const n = prev.length, m = next.length; let a = 0;
+  while(a<n && a<m && prev[a]===next[a]) a++;
+  let b = 0; while(b<n - a && b<m - a && prev[n - 1 - b]===next[m - 1 - b]) b++;
+  return { at: a, remove: n - a - b, insert: next.slice(a, m - b) };
+}
+// Paint the template into the copy under the textarea. Synchronous on purpose: the copy draws the visible text, so deferring it would show a typed character a frame late.
+function paintTemplateHl(template, selfId){
+  const el = document.getElementById('pTplHl'); if(!el) return;
+  const lines = promptHighlightLines(template, selfId), prev = el._hl;
+  if(!prev || typeof el.insertAdjacentHTML!=='function' || !el.children || el.children.length!==prev.length){ el.innerHTML = lines.join(''); el._hl = lines; return; }   // first paint, or something else touched it: rebuild
+  const pl = promptHlPlan(prev, lines);
+  if(pl.remove || pl.insert.length){
+    const kids = el.children;
+    for(let i=0; i<pl.remove; i++) el.removeChild(kids[pl.at]);
+    const html = pl.insert.join(''), next = kids[pl.at];
+    if(html){ if(next) next.insertAdjacentHTML('beforebegin', html); else el.insertAdjacentHTML('beforeend', html); }
+  }
+  el._hl = lines;
 }
 
 // ---- compare two prompts (the diff view) ----
@@ -7592,7 +7614,7 @@ function renderPromptEditor(){
   }
   const name = document.getElementById('pName'), ta = document.getElementById('pTemplate');
   name.readOnly = ro; ta.readOnly = ro;
-  document.getElementById('pTplHl').innerHTML = promptHighlight(ta.value, p.id);
+  paintTemplateHl(ta.value, p.id);
   updatePromptMeta(p);
   const tb = document.getElementById('pTrashBar'); if(tb){ tb.hidden = !trashed; const t = document.getElementById('pTrashText'); if(t && trashed) t.textContent = `Deleted ${new Date(p.deletedAt).toLocaleDateString(undefined, {dateStyle:'medium'})}. It is removed after ${PROMPT_TRASH_DAYS} days.`; }
   const set = (id, fn)=>{ const el = document.getElementById(id); if(el) fn(el); };
@@ -7613,7 +7635,7 @@ function onPromptTemplateInput(){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
   const ta = document.getElementById('pTemplate');
   p.template = ta.value.slice(0,100000);
-  document.getElementById('pTplHl').innerHTML = promptHighlight(p.template, p.id);
+  paintTemplateHl(p.template, p.id);
   p.vars = detectPromptVars(p.template, p.vars);
   p.updatedAt = Date.now();
   const sig = promptSigOf(p);
@@ -7911,7 +7933,7 @@ function renamePromptVar(p, key, text){
   p.template = p.template.replace(new RegExp('(?<!\\\\)' + pair[0] + escapeRegExp(key) + pair[1], 'g'), pair[2] + text + pair[3]);
   const vars = {}; Object.keys(p.vars).forEach(k=>{ vars[k===key ? text : k] = p.vars[k]; }); p.vars = vars;
   (p.presets || []).forEach(ps=>{ if(ps.values && key in ps.values){ ps.values[text] = ps.values[key]; delete ps.values[key]; } });
-  const ta = document.getElementById('pTemplate'); if(ta && promptEditorId===p.id){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template, p.id); }
+  const ta = document.getElementById('pTemplate'); if(ta && promptEditorId===p.id){ ta.value = p.template; paintTemplateHl(p.template, p.id); }
   touchPrompt(p); save(); updatePromptMeta(p); return null;
 }
 function removePromptOption(btn, i){
@@ -9979,7 +10001,7 @@ function renamePromptGlobal(g, name){
     const vars = {}; Object.keys(p.vars).forEach(x=>{ vars[x===k ? newKey : x] = p.vars[x]; }); p.vars = vars;
     (p.presets || []).forEach(ps=>{ if(ps.values && k in ps.values){ ps.values[newKey] = ps.values[k]; delete ps.values[k]; } });
     p.updatedAt = Date.now();
-    if(p.id===promptEditorId){ const ta = document.getElementById('pTemplate'); if(ta){ ta.value = p.template; document.getElementById('pTplHl').innerHTML = promptHighlight(p.template, p.id); } }
+    if(p.id===promptEditorId){ const ta = document.getElementById('pTemplate'); if(ta){ ta.value = p.template; paintTemplateHl(p.template, p.id); } }
   });
   g.name = name; g.updatedAt = Date.now();
 }

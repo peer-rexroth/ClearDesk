@@ -641,3 +641,34 @@ test('past PROMPT_MD_MAX characters the Markdown colouring is skipped, the varia
   assertFalse(h.includes('md-h')); assertIncludes(h, '<span class="ph ph-opt">{{v}}</span>');
   assertEqual(phPlain(h), big);
 });
+
+function phApply(prev, pl) { const out = prev.slice(); out.splice(pl.at, pl.remove, ...pl.insert); return out; }
+
+test('promptHlPlan: a keystroke is one changed line, Enter one inserted line, deleting a line one removed; nothing changed is nothing', function () {
+  const L = ['a', 'b', 'c', 'd', 'e'];
+  assertDeepEqual(promptHlPlan(L, L.slice()), { at: 5, remove: 0, insert: [] }, 'identical paints touch nothing');
+  assertDeepEqual(promptHlPlan(L, ['a', 'b', 'C', 'd', 'e']), { at: 2, remove: 1, insert: ['C'] }, 'typing in line 3');
+  assertDeepEqual(promptHlPlan(L, ['a', 'b', 'c', 'x', 'd', 'e']), { at: 3, remove: 0, insert: ['x'] }, 'Enter adds one line');
+  assertDeepEqual(promptHlPlan(L, ['a', 'b', 'd', 'e']), { at: 2, remove: 1, insert: [] }, 'a line deleted');
+  assertDeepEqual(promptHlPlan(L, ['a', 'b', 'c', 'd', 'e', 'f']), { at: 5, remove: 0, insert: ['f'] }, 'a line added at the end');
+  assertDeepEqual(promptHlPlan([], ['a']), { at: 0, remove: 0, insert: ['a'] }); assertDeepEqual(promptHlPlan(['a'], []), { at: 0, remove: 1, insert: [] });
+  assertDeepEqual(promptHlPlan(L, ['v', 'w']), { at: 0, remove: 5, insert: ['v', 'w'] }, 'a different text replaces everything');
+});
+
+test('applying promptHlPlan to the old lines always gives exactly the new lines (random edits, including a fence opening and closing)', function () {
+  let seed = 7; const rnd = n => (seed = (seed * 1103515245 + 12345) & 0x7fffffff) % n;
+  const words = ['a', '**b**', '`c`', '```', '# h', '{{v}}', '- x', '', '<t>'];
+  for (let k = 0; k < 120; k++) {
+    const doc = Array.from({ length: 1 + rnd(12) }, () => words[rnd(words.length)]);
+    const edited = doc.slice(); const op = rnd(3), i = rnd(edited.length);
+    if (op === 0) edited[i] = words[rnd(words.length)]; else if (op === 1) edited.splice(i, 0, words[rnd(words.length)]); else edited.splice(i, 1);
+    const a = promptHighlightLines(doc.join('\n')), b = promptHighlightLines(edited.join('\n'));
+    assertDeepEqual(phApply(a, promptHlPlan(a, b)), b, JSON.stringify(doc) + ' → ' + JSON.stringify(edited));
+  }
+});
+
+test('opening a code fence recolours the lines below it, so the patch reaches them; one edited line elsewhere changes one line', function () {
+  const src = 'one\ntwo\nthree\nfour', a = promptHighlightLines(src), b = promptHighlightLines('one\n```\ntwo\nthree\nfour'), pl = promptHlPlan(a, b);
+  assertTrue(pl.insert.length >= 3, 'the fence and the now-code lines below it are replaced, not just the new line');
+  const c = promptHighlightLines('one\ntwo\nthree\nfour!'); assertEqual(promptHlPlan(a, c).remove, 1); assertEqual(promptHlPlan(a, c).insert.length, 1);
+});
