@@ -858,6 +858,7 @@ const ICONS = {
     --amber-bg: rgba(255,159,10,.20); --amber-text: #8a4b00;
     --red-bg: rgba(255,69,58,.15); --red-text: #c4281f;
     --green-bg: rgba(52,199,89,.18); --green-text: #1a7a36;
+    --md-dim: var(--text-3); --md-h: #34456b; --md-li: #5a6c8f; --md-code: #8a4a2e; --md-code-bg: rgba(138,74,46,.10); --md-fence: #6b5a45; --md-fence-bg: rgba(60,60,67,.07); --md-quote: #4f6b5a; --md-link: #3f68a8; --md-tag: #b0436a;
     --purple-bg: rgba(175,82,222,.16); --purple-text: #7a2fb0;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
     --radius: var(--r-m); --radius-lg: var(--r-xl); --glass-r-row: var(--r-s); --glass-r-bar: var(--r-l); --glass-r-menu: var(--r-xl);
@@ -877,6 +878,7 @@ const ICONS = {
     --amber-bg: rgba(255,159,10,.26); --amber-text: #ffc566;
     --red-bg: rgba(255,69,58,.26); --red-text: #ff9a92;
     --green-bg: rgba(52,199,89,.26); --green-text: #8ee6a4;
+    --md-dim: var(--text-3); --md-h: #b3c1e2; --md-li: #9fb0d6; --md-code: #e6a883; --md-code-bg: rgba(230,168,131,.14); --md-fence: #d2bf9f; --md-fence-bg: rgba(255,255,255,.055); --md-quote: #8fb09c; --md-link: #8fb4e6; --md-tag: #f08fb0;
     --purple-bg: rgba(175,82,222,.28); --purple-text: #d6a6f5;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
     --radius: var(--r-m); --radius-lg: var(--r-xl); --glass-r-row: var(--r-s); --glass-r-bar: var(--r-l); --glass-r-menu: var(--r-xl);
@@ -1646,6 +1648,19 @@ const ICONS = {
   .pr-tpl textarea:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
+  /* Markdown / XML-tag colouring of the template: colour (and the weight the variables already use) only, never size, so the painted copy keeps the textarea's metrics. Variables stay filled pills and win over these. */
+  .pr-tpl-hl .ln { min-height: 1.7em; }
+  .pr-tpl-hl .ln.fence { background: var(--md-fence-bg); }
+  .md-dim { color: var(--md-dim); }
+  .md-h { color: var(--md-h); font-weight: 600; }
+  .md-b { font-weight: 600; }
+  .md-i { font-style: italic; }
+  .md-li { color: var(--md-li); font-weight: 600; }
+  .md-ic { color: var(--md-code); background: var(--md-code-bg); border-radius: 3px; }
+  .md-code { color: var(--md-fence); }
+  .md-q { color: var(--md-quote); }
+  .md-lk { color: var(--md-link); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+  .md-tag { color: var(--md-tag); }
   .ph-opt { background: var(--blue-bg); color: var(--blue-text); }
   .ph-ins { background: var(--teal-bg); color: var(--teal-text); }
   .ph-txt { background: var(--amber-bg); color: var(--amber-text); }
@@ -2441,7 +2456,7 @@ const ICONS = {
           <div class="help-section-title">Reusable prompts</div>
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-braces"></i><span>Switch to <strong>Prompts</strong> with the curly-braces icon at the top of the sidebar. A prompt is a <strong>template</strong> you reuse: write it once, put <strong>variables</strong> in it, choose their values and <strong>copy</strong> the finished text. Prompts live in <strong>folders</strong> (one level of subfolders, like Notes), and the sidebar also has <em>Favorites</em> and <em>Recently Deleted</em>. <kbd>N</kbd> makes a new prompt.</span></div>
-          <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text.</span></div>
+          <div class="help-row"><i class="fa-solid fa-pen"></i><span><strong>The template</strong> is the monospace field: write the prompt and add placeholders. <code>{{name}}</code> is a <strong>choice</strong> (one option), <code>[[name]]</code> is a <strong>checklist</strong> (any number of items, copied as a bullet list) and <code>((name))</code> is <strong>text</strong> you type each time. The three buttons above the template insert one at the caret (select a word first to use it as the name). Put a backslash in front (<code>\{{name}}</code>) to keep a placeholder as plain text. The field also colours <strong>Markdown</strong> lightly (headings, bold and italic, <code>code</code> and code blocks, lists, quotes, links) and <strong>&lt;tags&gt;</strong>, with the punctuation dimmed; your variables always stay the strongest highlight, even inside a code block. It is only colour, so the text is exactly what you typed and what gets copied.</span></div>
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
@@ -6968,16 +6983,64 @@ function buildPromptFinal(p, stack, overrides){
 }
 // The template with its placeholders tinted (the layer under the editing field).
 const unescHtml = x=>String(x).replace(/&quot;/g, '"').replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+// The template field's painted copy: one class per character, then runs of equal class become spans, one block per line (so a code block's band spans the line; the text itself is exactly the template, which is what keeps the copy level with the textarea).
+// Variables first (they always win), then, up to PROMPT_MD_MAX characters, light Markdown and XML-tag colouring. Markdown is read from a copy with the variables blanked, so `**{{tone}}** text` still closes its bold.
+const PROMPT_MD_MAX = 30000;
 function promptHighlight(template, selfId){
-  const TOKEN = '\u0001', keep = [];
-  let t = esc(String(template || '')).replace(/\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g, m=>{ keep.push(m); return TOKEN + (keep.length - 1) + TOKEN; });
-  const self = selfId ? prompts.find(x=>x.id===selfId) : null;
-  t = t.replace(/\{\{@([^}]+)\}\}/g, '<span class="ph ph-glob">{{@$1}}</span>').replace(/\{\{&gt;\s*([^}]+?)\s*\}\}/g, (m, n)=>{
-    const sp = promptIncParse(unescHtml(n)), q = promptIncludeTarget(sp.name), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
-    const bad = !q || (self && promptIncludeLoops(q, self)) || Object.keys(sp.args).some(a=>!have.includes(a.toLowerCase()));   // (a value for a variable the prompt does not have is flagged too)
-    return `<span class="ph ph-inc${bad ? ' ph-miss' : ''}">${m}</span>`;
-  }).replace(/\{\{(?!@|&gt;)([^}]+)\}\}/g, '<span class="ph ph-opt">{{$1}}</span>').replace(/\[\[([^\]]+)\]\]/g, '<span class="ph ph-ins">[[$1]]</span>').replace(/\(\(([^)]+)\)\)/g, '<span class="ph ph-txt">(($1))</span>');
-  return t.replace(new RegExp(TOKEN + '(\\d+)' + TOKEN, 'g'), (_, i)=>keep[+i]) + '\n';
+  const text = String(template || ''), n = text.length, ph = new Array(n).fill(''), md = new Array(n).fill(''), mask = text.split('');
+  const self = selfId ? prompts.find(x=>x.id===selfId) : null, withMd = n <= PROMPT_MD_MAX;
+  const re = /\\(?:\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))|\{\{@[^}]+\}\}|\{\{>\s*[^}]+?\s*\}\}|\{\{(?![@>])[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\)/g;
+  let m;
+  while((m = re.exec(text))){
+    const s0 = m[0], a = m.index, b = a + s0.length;
+    if(s0[0]==='\\'){ if(withMd) md[a] = 'md-dim'; continue; }      // an escaped placeholder is literal text; its backslash is dimmed
+    let k;
+    if(s0.startsWith('{{@')) k = 'ph-glob';
+    else if(s0.startsWith('{{>')){
+      const sp = promptIncParse(/^\{\{>\s*([^}]+?)\s*\}\}$/.exec(s0)[1]), q = promptIncludeTarget(sp.name), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
+      const bad = !q || (self && promptIncludeLoops(q, self)) || Object.keys(sp.args).some(x=>!have.includes(x.toLowerCase()));   // (a value for a variable the prompt does not have is flagged too)
+      k = 'ph-inc' + (bad ? ' ph-miss' : '');
+    }
+    else if(s0.startsWith('{{')) k = 'ph-opt'; else if(s0.startsWith('[[')) k = 'ph-ins'; else k = 'ph-txt';
+    for(let x=a; x<b; x++){ ph[x] = 'ph ' + k; if(text[x]!=='\n') mask[x] = '\u0001'; }
+  }
+  const lines = text.split('\n'), fenceLine = new Array(lines.length).fill(false);
+  if(withMd){
+    let pos = 0, fence = false;
+    lines.forEach((line, li)=>{
+      const len = line.length, ml = mask.slice(pos, pos + len).join(''), at = pos;
+      const mark = (a, b, c)=>{ for(let x=a; x<b; x++) md[at + x] = md[at + x] ? md[at + x] + ' ' + c : c; };
+      if(/^```/.test(line)){ fence = !fence; fenceLine[li] = true; mark(0, len, 'md-dim'); }
+      else if(fence){ fenceLine[li] = true; mark(0, len, 'md-code'); }
+      else {
+        let r, rest = 0;
+        if((r = /^(#{1,6})(\s+)(.*)$/.exec(ml))){ mark(0, r[1].length, 'md-dim'); mark(r[1].length + r[2].length, len, 'md-h'); rest = len; }
+        else if(/^(-{3,}|\*{3,}|_{3,})\s*$/.test(ml)){ mark(0, len, 'md-dim'); rest = len; }
+        else if((r = /^(>\s?)/.exec(ml))){ mark(0, r[1].length, 'md-dim'); mark(r[1].length, len, 'md-q'); rest = r[1].length; }
+        else if((r = /^(\s*)([-*+]|\d+\.)(\s+)/.exec(ml))){ mark(r[1].length, r[1].length + r[2].length, 'md-li'); rest = r[0].length; }
+        const taken = new Array(len).fill(false), word = c=>/[\p{L}\p{N}]/u.test(c || '');
+        const span = (rx, fn)=>{ let q; while((q = rx.exec(ml))){ const a = q.index, b = a + q[0].length; if(a<rest || taken.slice(a, b).some(Boolean)) continue; if(fn(q, a, b)!==false) for(let x=a; x<b; x++) taken[x] = true; } };
+        span(/`[^`\n]+`/g, (q, a, b)=>{ mark(a, a + 1, 'md-dim'); mark(a + 1, b - 1, 'md-ic'); mark(b - 1, b, 'md-dim'); });
+        span(/<\/?[A-Za-z][\w:-]*(?:\s[^<>\n]*)?>/g, (q, a, b)=>mark(a, b, 'md-tag'));
+        span(/\[([^\]\n]+)\]\(([^)\n]+)\)/g, (q, a, b)=>{ const t = q[1].length; mark(a, a + 1, 'md-dim'); mark(a + 1, a + 1 + t, 'md-lk'); mark(a + 1 + t, b, 'md-dim'); });
+        span(/(\*\*|__)(?=\S)(.+?)\1/g, (q, a, b)=>{ if(/\s$/.test(q[2]) || (q[1]==='__' && (word(ml[a - 1]) || word(ml[b])))) return false; mark(a, a + 2, 'md-dim'); mark(a + 2, b - 2, 'md-b'); mark(b - 2, b, 'md-dim'); });
+        span(/(\*|_)(?=\S)([^*_\n]+?)\1/g, (q, a, b)=>{ if(/\s$/.test(q[2]) || (q[1]==='_' && (word(ml[a - 1]) || word(ml[b])))) return false; mark(a, a + 1, 'md-dim'); mark(a + 1, b - 1, 'md-i'); mark(b - 1, b, 'md-dim'); });
+      }
+      pos += len + 1;
+    });
+  }
+  let pos = 0;
+  return lines.map((line, li)=>{
+    const len = line.length; let html = '', i = 0;
+    while(i<len){
+      const key = ph[pos + i] + '|' + md[pos + i]; let j = i + 1;
+      while(j<len && ph[pos + j] + '|' + md[pos + j]===key) j++;
+      const c = ph[pos + i] || md[pos + i], chunk = esc(line.slice(i, j));
+      html += c ? `<span class="${c}">${chunk}</span>` : chunk; i = j;
+    }
+    pos += len + 1;
+    return `<div class="ln${fenceLine[li] ? ' fence' : ''}">${html}</div>`;
+  }).join('');
 }
 
 // ---- compare two prompts (the diff view) ----

@@ -29,7 +29,7 @@ test('promptHighlight tints placeholders, escapes the text and leaves escaped pl
   const h = promptHighlight('<b> {{a}} [[b]] ((c)) \\{{d}}');
   assertIncludes(h, '&lt;b&gt;');
   assertIncludes(h, '<span class="ph ph-opt">{{a}}</span>'); assertIncludes(h, '<span class="ph ph-ins">[[b]]</span>'); assertIncludes(h, '<span class="ph ph-txt">((c))</span>');
-  assertIncludes(h, '\\{{d}}'); assertFalse(h.includes('ph-opt">{{d}}'));
+  assertIncludes(h, '<span class="md-dim">\\</span>{{d}}', 'the escaped one is literal text with its backslash dimmed'); assertFalse(h.includes('ph-opt">{{d}}'));
 });
 
 test('normalizePrompts repairs the data: ids, fields, folders, variables, one-level folders', function () {
@@ -591,4 +591,53 @@ test('a new prompt folder goes last, an order survives normalizePrompts and a ba
   assertEqual(promptFolderById('fa').order, 1000); assertEqual(promptFolderById('fb').order, undefined);
   assertEqual(promptFolderEndOrder(''), 2000);
   assertEqual(topPromptFolders().map(f => f.id).join(','), PROMPTS_DEFAULT_FOLDER + ',fb,fa', 'unordered (0) before ordered 1000; ties by name');
+});
+
+// The painted copy must hold exactly the template's text (it sits under a textarea; one extra or missing character shifts every line).
+function phPlain(html) {
+  return html.replace(/<div class="ln[^"]*">/g, '').replace(/<\/div>/g, '\n').replace(/\n$/, '').replace(/<[^>]+>/g, '').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'").replace(/&gt;/g, '>').replace(/&lt;/g, '<').replace(/&amp;/g, '&');
+}
+
+test('the painted template is always exactly the template text, whatever the colouring does', function () {
+  pfresh();
+  ['', '\n', 'a\n', '\n\nb', '# H\n\n**b** *i* `c` <t a="1">x</t> [l](u)\n> q\n- li\n1. n\n---\n```js\n{{a}} [[b]] ((c))\n```\ntail', '{{a\nb}} [[x\ny]]', '<&>"\' \\{{x}} {{@g}} {{>Nope k=v}}', 'a_b_c __init__ 2 * 3 * 4', '```\nunclosed {{x}}'].forEach(function (src) {
+    assertEqual(phPlain(promptHighlight(src)), src, JSON.stringify(src));
+  });
+});
+
+test('Markdown colouring: headings, emphasis, code, lists, quotes, links, tags and rules; punctuation dimmed, variables still pills', function () {
+  const h = promptHighlight('# Title\n**bold** and *it* and `code` [a](u)\n> q\n- item\n2. two\n<instructions>\n---');
+  assertIncludes(h, '<span class="md-dim">#</span> <span class="md-h">Title</span>');
+  assertIncludes(h, '<span class="md-dim">**</span><span class="md-b">bold</span><span class="md-dim">**</span>');
+  assertIncludes(h, '<span class="md-i">it</span>'); assertIncludes(h, '<span class="md-ic">code</span>');
+  assertIncludes(h, '<span class="md-lk">a</span>'); assertIncludes(h, 'md-q">q'); assertIncludes(h, '<span class="md-li">-</span>'); assertIncludes(h, '<span class="md-li">2.</span>');
+  assertIncludes(h, '<span class="md-tag">&lt;instructions&gt;</span>'); assertIncludes(h, '<div class="ln"><span class="md-dim">---</span></div>');
+  // a variable inside emphasis stays a pill and does not break the closing marker
+  const v = promptHighlight('**keep {{tone}} here**');
+  assertIncludes(v, '<span class="ph ph-opt">{{tone}}</span>'); assertEqual(v.split('md-dim').length - 1, 2, 'both ** markers are dimmed');
+});
+
+test('a code block: every line is banded, its text is code, and variables inside it are still pills', function () {
+  const h = promptHighlight('before\n```json\n{ "t": "{{tone}}" }\n```\nafter');
+  assertEqual(h.split('ln fence').length - 1, 3, 'the two fences and the line between');
+  assertIncludes(h, '<span class="ph ph-opt">{{tone}}</span>'); assertIncludes(h, 'md-code');
+  assertFalse(/ln fence[^]*after/.test(h.split('after')[0].split('```json')[0]), 'text before the block is not banded');
+  assertIncludes(h, '<div class="ln">after</div>');
+  assertEqual(promptHighlight('```\nopen {{x}}').split('ln fence').length - 1, 2, 'an unclosed block runs to the end');
+});
+
+test('Markdown does not over-reach: snake_case, dunder names, spaced asterisks, hash-tags and loose angle brackets stay plain', function () {
+  ['my_var_name', '2 * 3 * 4', '#todo is not a heading', 'a < b and c > d', 'x_ y_'].forEach(function (src) {
+    const h = promptHighlight(src);
+    assertFalse(/md-(i|b|h|tag)/.test(h), src + ' → ' + h);
+  });
+  assertIncludes(promptHighlight('__init__'), 'md-b');                       // a real Markdown strong, like any renderer
+  assertFalse(/md-b/.test(promptHighlight('my__init__x')), 'but not inside a word');
+});
+
+test('past PROMPT_MD_MAX characters the Markdown colouring is skipped, the variables are not', function () {
+  const big = '# H\n' + 'x '.repeat(PROMPT_MD_MAX) + '{{v}}';
+  const h = promptHighlight(big);
+  assertFalse(h.includes('md-h')); assertIncludes(h, '<span class="ph ph-opt">{{v}}</span>');
+  assertEqual(phPlain(h), big);
 });
