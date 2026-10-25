@@ -793,6 +793,7 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 ## Conventions from this project's history
 
 - Icons: no icon font. The markup keeps Font Awesome class names (`fa-solid fa-trash`, also dynamic ones like `fa-${p.icon}`), and the `ICONS` registry (a `<script id="icons">` in `<head>`, one drawing per name, 24 grid, `currentColor`) writes a `.fa-NAME { --fa: url(...) }` mask rule for each name before first paint, so every `<i class="fa-… fa-NAME">` is drawn as an outline SVG (stroke 2). `MENU_SVG` is the same object, so right-click menus use the same drawings inline. A name with no entry renders nothing. To add an icon, add it to `ICONS`. The test harness prepends that head script to the app script. Sizes come from `font-size` as before.
+- **The checkbox tick animation is deliberately subtle**: `checkPop` is 1.15× over 0.2s (it was 1.35× over 0.3s, which read as a bounce next to text, especially on a board card). It plays only for the box you just ticked (`justCompleted*Id`), never on a re-render or a view switch (checked: nothing on a checkbox animates when switching list / board / mode).
 - New buttons should get `this.blur()` in their `onclick` (or rely on the
   global click listener that blurs any clicked `<button>`) so a lingering
   focus ring doesn't reappear on the next keypress.
