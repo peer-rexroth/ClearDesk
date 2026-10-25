@@ -454,6 +454,7 @@ const ICONS = {
   .subtask-row.dragging, .task-subtask-row.dragging { opacity: 0.4; }
   .subtask-row.drag-over-top, .task-subtask-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .subtask-row.drag-over-bottom, .task-subtask-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
+  .subtask-row.drag-denied, .task-subtask-row.drag-denied { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--danger) 45%, transparent); border-radius: var(--r-s); }   /* a sub-step is over a row it cannot go to */
   .subtask-row .sub-drag-handle { width: 10px; text-align: center; font-size: var(--fs-11); color: var(--text-3); flex-shrink: 0; cursor: grab; opacity: 0; }
   .subtask-row:hover .sub-drag-handle { opacity: 1; }
   .subtask-row .sub-check { width: 16px; height: 16px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
@@ -1998,19 +1999,19 @@ const ICONS = {
       </div>
     </div>
     <div class="sidebar-section">
-      <div class="nav-item" id="allTasksNav" role="button" tabindex="0" aria-pressed="false" onclick="setProjectFilter(null)">
+      <div class="nav-item" id="allTasksNav" oncontextmenu="openSmartViewMenu(event,'all')" role="button" tabindex="0" aria-pressed="false" onclick="setProjectFilter(null)">
         <span><i class="fa-solid fa-inbox lead-ico"></i>All Tasks</span>
         <span class="count" id="allTasksCount"></span>
       </div>
-      <div class="nav-item" id="myDayNav" role="button" tabindex="0" aria-pressed="false" onclick="setMyDayFilter()">
+      <div class="nav-item" id="myDayNav" oncontextmenu="openSmartViewMenu(event,'myday')" role="button" tabindex="0" aria-pressed="false" onclick="setMyDayFilter()">
         <span><i class="fa-solid fa-sun lead-ico"></i>My Day</span>
         <span class="count" id="myDayCount"></span>
       </div>
-      <div class="nav-item" id="thisWeekNav" role="button" tabindex="0" aria-pressed="false" onclick="setThisWeekFilter()">
+      <div class="nav-item" id="thisWeekNav" oncontextmenu="openSmartViewMenu(event,'week')" role="button" tabindex="0" aria-pressed="false" onclick="setThisWeekFilter()">
         <span><i class="fa-solid fa-calendar-week lead-ico"></i>This Week</span>
         <span class="count" id="thisWeekCount"></span>
       </div>
-      <div class="nav-item" id="overdueNav" role="button" tabindex="0" aria-pressed="false" onclick="setOverdueFilter()">
+      <div class="nav-item" id="overdueNav" oncontextmenu="openSmartViewMenu(event,'overdue')" role="button" tabindex="0" aria-pressed="false" onclick="setOverdueFilter()">
         <span><i class="fa-solid fa-triangle-exclamation lead-ico"></i>Overdue</span>
         <span class="count" id="overdueCount"></span>
       </div>
@@ -5245,6 +5246,7 @@ function handleHierarchyDragStart(e, type, subId, stepId){
 function handleHierarchyDragEnd(e){
   draggedItem = null;
   document.querySelectorAll('.subtask-row.dragging,.task-subtask-row.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.querySelectorAll('.subtask-row.drag-denied,.task-subtask-row.drag-denied').forEach(el=>el.classList.remove('drag-denied'));
   document.querySelectorAll('.subtask-row.drag-over-top,.subtask-row.drag-over-bottom,.task-subtask-row.drag-over-top,.task-subtask-row.drag-over-bottom').forEach(el=>el.classList.remove('drag-over-top','drag-over-bottom'));
 }
 function isNoOpHierarchyTarget(targetType, targetSubId, targetStepId){
@@ -5254,6 +5256,7 @@ function isNoOpHierarchyTarget(targetType, targetSubId, targetStepId){
   return false;
 }
 function handleHierarchyDragOver(e, targetType, targetSubId, targetStepId){
+  if(draggedSubstep){ denySubstepDrop(e); return; }   // a sub-step never moves onto a subtask or step row
   if(isNoOpHierarchyTarget(targetType, targetSubId, targetStepId)) return;
   e.preventDefault();
   e.stopPropagation();
@@ -5264,7 +5267,7 @@ function handleHierarchyDragOver(e, targetType, targetSubId, targetStepId){
   row.classList.add(zone==='top' ? 'drag-over-top' : 'drag-over-bottom');
 }
 function handleHierarchyDragLeave(e){
-  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom','drag-denied');
 }
 function handleHierarchyDrop(e, taskId, targetType, targetSubId, targetStepId){
   if(isNoOpHierarchyTarget(targetType, targetSubId, targetStepId)) return;
@@ -5352,10 +5355,19 @@ function handleSubstepDragStart(e, taskId, subId, stepId, substepId){
 function handleSubstepDragEnd(e){
   draggedSubstep = null;
   document.querySelectorAll('.subtask-row.dragging,.task-subtask-row.dragging').forEach(el=>el.classList.remove('dragging'));
+  document.querySelectorAll('.subtask-row.drag-denied,.task-subtask-row.drag-denied').forEach(el=>el.classList.remove('drag-denied'));
   document.querySelectorAll('.subtask-row.drag-over-top,.subtask-row.drag-over-bottom,.task-subtask-row.drag-over-top,.task-subtask-row.drag-over-bottom').forEach(el=>el.classList.remove('drag-over-top','drag-over-bottom'));
 }
+// A sub-step can only be reordered inside its own step; over any other row the pointer shows "not allowed" and the row gets a faint red edge (audit U-28).
+function denySubstepDrop(e){
+  e.preventDefault(); e.stopPropagation();
+  if(e.dataTransfer) e.dataTransfer.dropEffect = 'none';
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
+  e.currentTarget.classList.add('drag-denied');
+}
 function handleSubstepDragOver(e, stepId, substepId){
-  if(!draggedSubstep || draggedSubstep.stepId!==stepId || draggedSubstep.substepId===substepId) return;
+  if(draggedSubstep && draggedSubstep.stepId!==stepId){ denySubstepDrop(e); return; }
+  if(!draggedSubstep || draggedSubstep.substepId===substepId) return;
   e.preventDefault();
   e.stopPropagation();
   const row = e.currentTarget;
@@ -5365,7 +5377,7 @@ function handleSubstepDragOver(e, stepId, substepId){
   row.classList.add(zone==='top' ? 'drag-over-top' : 'drag-over-bottom');
 }
 function handleSubstepDragLeave(e){
-  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom');
+  e.currentTarget.classList.remove('drag-over-top','drag-over-bottom','drag-denied');
 }
 function handleSubstepDrop(e, taskId, subId, stepId, targetSubstepId){
   if(!draggedSubstep || draggedSubstep.stepId!==stepId || draggedSubstep.substepId===targetSubstepId) return;
@@ -6495,6 +6507,34 @@ function projectMenuRun(kind){
   if(kind==='new'){ setProjectFilter(id); document.getElementById('quickAddInput')?.focus(); }
   else if(kind==='edit') openProjectModal(id);
   else if(kind==='delete') deleteProject(id);
+}
+// ---- Right-click menu for the smart views in the sidebar (audit U-22) ----
+// All Tasks, My Day and This Week offer New Task Here; Overdue offers Move All to Today (with Undo) while something is overdue.
+let smartMenuKind = null;
+function smartViewMenuHtml(kind){
+  const item = rowMenuItem;
+  if(kind==='overdue'){
+    const n = tasks.filter(isOverdue).length;
+    return n ? item('fa-solid fa-calendar-day', n===1 ? 'Move to Today' : `Move All ${n} to Today`, `smartViewMenuRun('today')`) : '';
+  }
+  return item('fa-solid fa-plus', 'New Task Here', `smartViewMenuRun('new')`);
+}
+function openSmartViewMenu(e, kind){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const html = smartViewMenuHtml(kind), menu = document.getElementById('rowMenu'); if(!menu) return;
+  if(!html){ closeRowMenu(); return; }   // nothing to offer: no menu (and not the browser's)
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  smartMenuKind = kind;
+  menu.innerHTML = html;
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function smartViewMenuRun(op){
+  const kind = smartMenuKind; closeRowMenu(); smartMenuKind = null;
+  if(!kind) return;
+  if(op==='today'){ bulkSetDueDate(todayStr(), tasks.filter(isOverdue).map(t=>t.id)); return; }
+  if(kind==='all') setProjectFilter(null); else if(kind==='myday') setMyDayFilter(); else if(kind==='week') setThisWeekFilter();
+  document.getElementById('quickAddInput')?.focus();
 }
 function openFolderMenu(e, id){
   if(document.querySelector('.modal-bg.open')) return;

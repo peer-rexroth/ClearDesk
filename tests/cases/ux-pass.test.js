@@ -768,3 +768,28 @@ test('the destructive confirm has no default button, a plain confirm focuses its
   var src = openConfirmModal.toString();
   assertIncludes(src, 'alertdialog'); assertNotIncludes(src, "'confirmModalCancel'", 'Cancel is never made the default');
 });
+
+test('smart views have a right-click menu: New Task Here, and Move All to Today for Overdue (only while something is overdue)', function () {
+  assertIncludes(smartViewMenuHtml('myday'), 'New Task Here'); assertIncludes(smartViewMenuHtml('week'), 'New Task Here'); assertIncludes(smartViewMenuHtml('all'), 'New Task Here');
+  tasks = [{ id: 'od1', title: 'Late', notes: '', projectId: 'proj-inbox', status: 'todo', priority: 'medium', dueDate: '2000-01-01', tags: [], subtasks: [], createdAt: 1, updatedAt: 1 }]; normalizeData();
+  assertIncludes(smartViewMenuHtml('overdue'), 'Move to Today');
+  smartMenuKind = 'overdue'; smartViewMenuRun('today');
+  assertEqual(tasks[0].dueDate, todayStr(), 'the overdue task is due today');
+  assertEqual(smartViewMenuHtml('overdue'), '', 'with nothing overdue the menu offers nothing');
+});
+
+test('dragging a sub-step over a row it cannot move to is refused explicitly (no drop, red edge), and the mark clears on leave', function () {
+  var cls = {}, fakeRow = { getBoundingClientRect: function () { return { top: 0, height: 20 }; }, classList: { add: function (c) { cls[c] = 1; }, remove: function () { for (var i = 0; i < arguments.length; i++) delete cls[arguments[i]]; } } };
+  var ev = { currentTarget: fakeRow, dataTransfer: {}, clientY: 5, prevented: false, preventDefault: function () { this.prevented = true; }, stopPropagation: function () {} };
+  draggedSubstep = { taskId: 't', subId: 's', stepId: 'stepA', substepId: 'x1' };
+  handleSubstepDragOver(ev, 'stepB', 'y1');                     // a sub-step of another step
+  assertTrue(ev.prevented && ev.dataTransfer.dropEffect === 'none' && cls['drag-denied'], 'denied over another step\'s sub-step');
+  cls = {}; ev.prevented = false; ev.dataTransfer = {};
+  handleHierarchyDragOver(ev, 'subtask', 's9');                 // a subtask row
+  assertTrue(ev.prevented && ev.dataTransfer.dropEffect === 'none' && cls['drag-denied'], 'denied over a subtask row');
+  handleHierarchyDragLeave(ev); assertFalse(!!cls['drag-denied'], 'the mark goes when the pointer leaves');
+  cls = {}; ev.prevented = false; ev.dataTransfer = {};
+  handleSubstepDragOver(ev, 'stepA', 'x2');                      // a sibling in the same step: allowed
+  assertTrue(ev.prevented && !cls['drag-denied'], 'siblings in the same step still accept it');
+  draggedSubstep = null;
+});
