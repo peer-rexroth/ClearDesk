@@ -629,3 +629,25 @@ test('the new-version check compares the server headers (ETag first, then Last-M
   dismissUpdateBanner(); assertEqual(el.innerHTML, ''); showUpdateBanner(); assertEqual(el.innerHTML, '', 'once dismissed it stays away this session');
   updateBannerDismissed = false;
 });
+
+test('the task panel is a grouped inspector: rows with a label and a value, a real select over each pop-up row, Due through the shared popover, a quiet Delete', function () {
+  tasks = [{ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'doing', priority: 'high', subtasks: [], tags: [], dueDate: '2030-01-05', repeat: 'weekly', repeatEndDate: '2031-02-03' }];
+  openTask('t1');
+  const h = document.getElementById('drawer').innerHTML;
+  ['Project', 'Status', 'Priority', 'Due', 'Repeat', 'Every', 'On days', 'Ends on', 'After', 'Tags'].forEach(k => assertIncludes(h, '<span class="k">' + k, k + ' is a row'));
+  assertEqual(h.split('class="drow-sel"').length - 1, 4, 'Project, Status, Priority and Repeat each keep a real select');
+  assertIncludes(h, "openCellPop(event,'t1','due')"); assertIncludes(h, 'role="button" tabindex="0" aria-haspopup="menu" aria-label="Due date"');
+  assertIncludes(h, 'class="drow-ov" type="date"'); assertIncludes(h, 'value="2031-02-03"');
+  assertIncludes(h, '<div class="dsec"><span>Subtasks</span>');
+  assertIncludes(h, 'btn-text-danger'); assertNotIncludes(h, 'btn-danger"');
+  assertNotIncludes(h, '<label>Notes</label>'); assertNotIncludes(h, 'resize');
+});
+
+test('the panel rows follow the data: a repeating task shows its details, a plain one does not; an overdue date is flagged', function () {
+  tasks = [{ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'todo', priority: 'low', subtasks: [], tags: [], dueDate: '2000-01-01' }];
+  openTask('t1');
+  let h = document.getElementById('drawer').innerHTML;
+  assertNotIncludes(h, '<span class="k">Every'); assertIncludes(h, 'class="v overdue"');
+  tasks[0].repeat = 'daily'; tasks[0].dueDate = null; renderDrawer(); h = document.getElementById('drawer').innerHTML;
+  assertIncludes(h, '<span class="k">Every'); assertIncludes(h, 'drow-skip'); assertNotIncludes(h, 'class="v overdue"'); assertIncludes(h, '<span class="vt">None</span>');
+});

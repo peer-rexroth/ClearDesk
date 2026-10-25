@@ -4,12 +4,12 @@
 // normalizeData() — a malicious value from an imported/synced file broke
 // out of the attribute the moment that task's drawer was opened.
 
-test('drawer escapes a malicious dueDate before putting it in the date input value attribute', function () {
+test('drawer never puts a malicious dueDate into the markup (the Due row shows formatted, escaped text)', function () {
   tasks = [{ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], dueDate: '"><img src=x onerror=alert(1)>' }];
   openTask('t1');
   const html = document.getElementById('drawer').innerHTML;
   assertNotIncludes(html, '"><img src=x onerror=alert(1)>');
-  assertIncludes(html, '&quot;');
+  assertNotIncludes(html, '<img');
 });
 
 test('drawer escapes a malicious repeatEndDate before putting it in the date input value attribute', function () {

@@ -1131,6 +1131,37 @@ const ICONS = {
   .drawer .subtask-row.done .sub-text { color: var(--text-3); }
   .drawer :is(.task-subtask-add-row, .add-row)::before { width: 16px; height: 16px; }
   /* row controls (indent/outdent) appear on hover or focus only; the expand toggle and delete keep their own behaviour */
+  /* the task panel as a grouped inspector (Reminders / System Settings): label left, value right, hairlines between the rows */
+  .drawer .drawer-body { padding: 8px 16px 12px; gap: 14px; }
+  .dgroup { background: var(--bg-2); border-radius: var(--r-m); }
+  .drow { display: flex; align-items: center; gap: 12px; min-height: 40px; padding: 8px 14px; position: relative; font-size: var(--fs-14); }
+  .drow + .drow::before { content: ""; position: absolute; left: 14px; right: 0; top: 0; height: 1px; background: var(--border); }
+  .drow .k { flex: 1; color: var(--text); display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .drow .v { display: inline-flex; align-items: center; gap: 6px; color: var(--text-2); min-width: 0; max-width: 62%; }
+  .drow .vt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .drow .v.overdue { color: var(--red-text); }
+  .drow .stack { width: 14px; height: 14px; flex: none; color: var(--text-3); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .drow .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+  .drow-sel, .drow-ov { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; font-size: 16px; cursor: default; appearance: none; }   /* the real control, over the whole row */
+  html.kbd-input .drow:has(.drow-sel:focus-visible, .drow-ov:focus-visible) { box-shadow: 0 0 0 3px var(--focus-ring); border-radius: var(--r-m); }
+  .drow.due { cursor: default; }
+  .drow.due .cell-pop { left: auto; right: 0; }
+  .drow.notes { align-items: flex-start; }
+  .drow-notes { width: 100%; border: 0; background: transparent; resize: none; overflow: hidden; font: inherit; line-height: 1.45; color: var(--text); padding: 0; min-height: 52px; outline: none; }
+  .drow-notes::placeholder { color: var(--text-3); }
+  .drow-col { flex-direction: column; align-items: stretch; gap: 8px; }
+  .drow-in { width: 56px; border: 0; background: transparent; text-align: right; font: inherit; color: var(--text-2); padding: 0; outline: none; -moz-appearance: textfield; }
+  .drow-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .drow-in::placeholder { color: var(--text-3); }
+  .drow-skip { position: relative; z-index: 1; border: 0; background: transparent; padding: 2px 6px; border-radius: 999px; color: var(--text-2); font-size: var(--fs-12); font-weight: 600; }
+  .drow-skip:hover { background: var(--hover); }
+  .dsec { display: flex; align-items: baseline; justify-content: space-between; padding: 0 6px 6px; font-size: var(--fs-13); font-weight: 600; color: var(--text-2); }
+  .dsec small { font-weight: 400; color: var(--text-3); font-size: var(--fs-12); margin: 0; }
+  .drawer .drawer-close { width: 26px; height: 26px; border-radius: 50%; background: var(--hover); font-size: var(--ico-12); }
+  .drawer .df-actions { display: flex; gap: 8px; align-items: center; }
+  .drawer .drawer-footer .btn { border-radius: 999px; }
+  html[data-scheme="glass"] .drawer .btn.btn-text-danger { background: transparent; border-color: transparent; box-shadow: none; color: var(--danger); }   /* destructive but quiet: plain red text, as Apple does, instead of a solid red button */
+  html[data-scheme="glass"] .drawer .btn.btn-text-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
   .drawer .subtask-row .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 0; }
   .drawer .subtask-row:is(:hover, :focus-within) .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 1; }   /* same :not() chain as the hide rule, or that out-ranks this */
   .task-subtask-add-row input:focus-visible, .add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
@@ -4179,85 +4210,41 @@ function renderDrawer(){
   const subDone = (t.subtasks||[]).filter(s=>s.done).length;
   const subTotal = (t.subtasks||[]).length;
 
+  // The inspector is grouped rows (label left, value right, hairlines between), as in Reminders / System Settings. Each pop-up row keeps a real <select> laid invisibly over the whole row, so the OS menu, keyboard and screen readers work and the whole row is the click target; the visible value is plain text with the stacked chevrons.
+  const STACK = '<svg class="stack" viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 9.5 3.5-3.5 3.5 3.5M8.5 14.5l3.5 3.5 3.5-3.5"/></svg>';
+  const CAL = '<svg class="stack" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4"/></svg>';
+  const selRow = (label, shown, dot, opts, onchange, extra)=>`<div class="drow"><span class="k">${label}${extra||''}</span><span class="v">${dot ? `<i class="dot" style="background:${dot}"></i>` : ''}<span class="vt">${esc(shown)}</span>${STACK}</span><select class="drow-sel" aria-label="${label}" onchange="${onchange}">${opts}</select></div>`;
+  const projShown = abbreviateName((projById(t.projectId) || {name:''}).name, 24);
+  const statusShown = (STATUSES.find(s=>s.id===t.status) || {label:''}).label, priorityShown = (PRIORITIES.find(p=>p.id===t.priority) || {label:''}).label, repeatShown = (REPEATS.find(r=>r.id===(t.repeat||'none')) || {label:''}).label;
+  const repeating = !!t.repeat && t.repeat!=='none';
   drawer.innerHTML = `
     <div class="drawer-header">
       <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" style="margin-top:6px" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
       <input spellcheck="true" class="title-input" id="drawerTitleInput" value="${esc(t.title)}" oninput="updateTaskFieldLive('${t.id}','title',this.value)" placeholder="Task title">
-      <button class="icon-btn" onclick="closeDrawer()" title="Close"><i class="fa-solid fa-xmark"></i></button>
+      <button class="icon-btn drawer-close" onclick="closeDrawer()" title="Close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="drawer-body">
-      <div class="field">
-        <label>Notes</label>
-        <textarea spellcheck="true" oninput="updateTaskFieldLive('${t.id}','notes',this.value)" placeholder="Add notes…">${esc(t.notes||'')}</textarea>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Project</label>
-          <select onchange="updateTaskField('${t.id}','projectId',this.value)">${projOptions}</select>
-        </div>
-        <div class="field">
-          <label>Status</label>
-          <select onchange="updateTaskField('${t.id}','status',this.value)">${statusOptions}</select>
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Priority</label>
-          <select onchange="updateTaskField('${t.id}','priority',this.value)">${priorityOptions}</select>
-        </div>
-        <div class="field">
-          <label>Due date</label>
-          <input type="date" value="${esc(t.dueDate||'')}" onchange="updateTaskField('${t.id}','dueDate',this.value||null)">
-        </div>
-      </div>
-      <div class="field">
-        <label>Tags</label>
-        <div class="filter-chips">
-          ${TAGS.map(tg=>{ const active=(t.tags||[]).includes(tg.id); const tc=colorOf(tg.color); return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:transparent`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="toggleTaskTag('${t.id}','${tg.id}')">${esc(tg.label)}</div>`; }).join('')}
-        </div>
-      </div>
-      <div class="field-row">
-        <div class="field">
-          <label style="display:flex;justify-content:space-between;align-items:center">
-            <span>Repeat</span>
-            ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="skipOccurrence('${t.id}')" title="Advance to the next occurrence without completing" style="text-transform:none;letter-spacing:normal;font-weight:600;font-size:var(--fs-11);color:var(--text-2)"><i class="fa-solid fa-forward-step"></i> Skip</button>` : ''}
-          </label>
-          <select onchange="updateTaskField('${t.id}','repeat',this.value)">${repeatOptions}</select>
-        </div>
-      </div>
-      ${t.repeat && t.repeat!=='none' ? `
-      <div class="field-row">
-        <div class="field">
-          <label>Every</label>
-          <input type="number" min="1" value="${t.repeatInterval||1}" onchange="updateTaskField('${t.id}','repeatInterval', Math.max(1, parseInt(this.value)||1))">
-        </div>
-        <div class="field">
-          <label>&nbsp;</label>
-          <div style="padding:8px 0;font-size:var(--fs-13);color:var(--text-2)">${repeatUnitLabel(t.repeat, t.repeatInterval)}</div>
-        </div>
-      </div>
-      ${t.repeat==='weekly' ? `
-      <div class="field">
-        <label>On days</label>
-        <div class="weekday-picker">
+      <div class="dgroup"><div class="drow notes"><textarea class="drow-notes" spellcheck="true" rows="1" aria-label="Notes" oninput="updateTaskFieldLive('${t.id}','notes',this.value);drawerGrow(this)" placeholder="Notes">${esc(t.notes||'')}</textarea></div></div>
+      <div class="dgroup">
+        ${selRow('Project', projShown, null, projOptions, `updateTaskField('${t.id}','projectId',this.value)`)}
+        ${selRow('Status', statusShown, STATUS_DOT[t.status], statusOptions, `updateTaskField('${t.id}','status',this.value)`)}
+        ${selRow('Priority', priorityShown, PRIORITY_DOT[t.priority], priorityOptions, `updateTaskField('${t.id}','priority',this.value)`)}
+        <div class="drow due" role="button" tabindex="0" aria-haspopup="menu" aria-label="Due date" onclick="openCellPop(event,'${t.id}','due')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openCellPop(event,'${t.id}','due')}"><span class="k">Due</span><span class="v${isOverdue(t) ? ' overdue' : ''}"><span class="vt">${t.dueDate ? esc(fmtDate(t.dueDate)) : 'None'}</span>${CAL}</span></div>
+        ${selRow('Repeat', repeatShown, null, repeatOptions, `updateTaskField('${t.id}','repeat',this.value)`, repeating ? ` <button class="drow-skip" onclick="skipOccurrence('${t.id}')" title="Advance to the next occurrence without completing"><i class="fa-solid fa-forward-step"></i> Skip</button>` : '')}
+        ${repeating ? `
+        <label class="drow"><span class="k">Every</span><span class="v"><input class="drow-in" type="number" min="1" aria-label="Repeat every" value="${t.repeatInterval||1}" onchange="updateTaskField('${t.id}','repeatInterval', Math.max(1, parseInt(this.value)||1))"><span class="vt">${repeatUnitLabel(t.repeat, t.repeatInterval)}</span></span></label>
+        ${t.repeat==='weekly' ? `<div class="drow drow-col"><span class="k">On days</span><div class="weekday-picker">
           ${[[1,'M'],[2,'T'],[3,'W'],[4,'T'],[5,'F'],[6,'S'],[0,'S']].map(([i,lbl])=>`<button type="button" class="weekday-btn ${(t.repeatWeekdays||[]).includes(i)?'active':''}" onclick="toggleRepeatWeekday('${t.id}',${i})">${lbl}</button>`).join('')}
-        </div>
+        </div></div>` : ''}
+        <div class="drow"><span class="k">Ends on</span><span class="v"><span class="vt">${t.repeatEndDate ? esc(fmtDate(t.repeatEndDate)) : 'Never'}</span>${CAL}</span><input class="drow-ov" type="date" aria-label="Ends on" value="${esc(t.repeatEndDate||'')}" onclick="if(this.showPicker)this.showPicker()" onchange="updateTaskField('${t.id}','repeatEndDate',this.value||null)"></div>
+        <label class="drow"><span class="k">After</span><span class="v"><input class="drow-in" type="number" min="1" placeholder="Never" aria-label="Stop after this many times" value="${t.repeatMaxOccurrences||''}" onchange="updateTaskField('${t.id}','repeatMaxOccurrences', this.value?Math.max(1,parseInt(this.value)):null)">${t.repeatMaxOccurrences ? '<span class="vt">times</span>' : ''}</span></label>
+        ` : ''}
+        <div class="drow drow-col"><span class="k">Tags</span><div class="filter-chips">
+          ${TAGS.map(tg=>{ const active=(t.tags||[]).includes(tg.id); const tc=colorOf(tg.color); return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:transparent`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="toggleTaskTag('${t.id}','${tg.id}')">${esc(tg.label)}</div>`; }).join('')}
+        </div></div>
       </div>
-      ` : ''}
-      <div class="field-row">
-        <div class="field">
-          <label>Ends on</label>
-          <input type="date" value="${esc(t.repeatEndDate||'')}" onchange="updateTaskField('${t.id}','repeatEndDate',this.value||null)">
-        </div>
-        <div class="field">
-          <label>After N times</label>
-          <input type="number" min="1" placeholder="Never" value="${t.repeatMaxOccurrences||''}" onchange="updateTaskField('${t.id}','repeatMaxOccurrences', this.value?Math.max(1,parseInt(this.value)):null)">
-        </div>
-      </div>
-      ` : ''}
-      <div class="field">
-        <label>Subtasks</label>
-        ${subTotal>0?`<div class="subtask-progress">${subDone}/${subTotal} complete</div>`:''}
+      <div class="field dsubs">
+        <div class="dsec"><span>Subtasks</span>${subTotal>0?`<small class="subtask-progress">${subDone} of ${subTotal} complete</small>`:''}</div>
         ${(t.subtasks||[]).map(s=>{
           const stepsOpen = drawerExpandedSubIds.has(s.id);
           const stepCount = (s.subtasks||[]).length;
@@ -4329,13 +4316,16 @@ function renderDrawer(){
     </div>
     <div class="drawer-footer">
       <span class="meta">Updated ${new Date(t.updatedAt).toLocaleDateString(undefined,{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</span>
-      <div style="display:flex;gap:8px">
+      <div class="df-actions">
         <button class="btn btn-sm" onclick="duplicateTask('${t.id}')"><i class="fa-regular fa-duplicate"></i> Duplicate</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteTask('${t.id}')"><i class="fa-solid fa-trash"></i> Delete</button>
+        <button class="btn btn-sm btn-text-danger" onclick="deleteTask('${t.id}')">Delete</button>
       </div>
     </div>
   `;
+  drawer.querySelectorAll && drawer.querySelectorAll('textarea.drow-notes').forEach(drawerGrow);
 }
+// Notes grow with their text (no resize grip, as in Apple's inspectors).
+function drawerGrow(el){ el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 52) + 'px'; }
 
 // ── Task CRUD ─────────────────────────────────────────────────────────────────
 // Quick-add shorthand: !high/!med/!low (or !!, !h, !m, !l), #project, @tag, and
