@@ -198,7 +198,7 @@ const ICONS = {
   body, .topbar, .sidebar, .main, .project-row, .nav-item,
   .modal, .task-list-header, .quickadd,
   input, select, textarea {
-    transition: background-color .2s ease, color .2s ease, border-color .2s ease;
+    transition: background-color var(--dur-base) ease, color var(--dur-base) ease, border-color var(--dur-base) ease;
   }
 
   /* sidebar header / tools bar (the old top bar's contents) are styled in the Apple-style layout block at the end */
@@ -208,7 +208,7 @@ const ICONS = {
   .lib-dropdown { position: relative; display: inline-flex; }
 
   /* buttons */
-  .btn { font-size: var(--fs-13); border: 0.5px solid var(--border-2); border-radius: var(--r-m); padding: 6px 14px; background: transparent; color: var(--text); cursor: default; font-family: var(--font); display: inline-flex; align-items: center; gap: 6px; transition: background 0.1s; white-space: nowrap; }
+  .btn { font-size: var(--fs-13); border: 0.5px solid var(--border-2); border-radius: var(--r-m); padding: 6px 14px; background: transparent; color: var(--text); cursor: default; font-family: var(--font); display: inline-flex; align-items: center; gap: 6px; transition: background var(--dur-fast); white-space: nowrap; }
   .btn:hover { background: var(--bg-2); }
   .btn-primary { background: var(--text); color: var(--bg); border-color: var(--text); }
   .btn-primary:hover { opacity: 0.85; background: var(--text); }
@@ -221,9 +221,9 @@ const ICONS = {
   .icon-btn:hover { background: var(--hover); color: var(--text); }
   .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: var(--r-m); cursor: default; font-size: var(--fs-13); }
   .proj-select-row:hover { background: var(--bg-2); }
-  .proj-select-check { width: 17px; height: 17px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
+  .proj-select-check { width: 17px; height: 17px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
   .proj-select-check.checked { background: var(--accent); border-color: var(--accent); }
-  .proj-select-check i { font-size: var(--gl-9); color: var(--on-accent); opacity: 0; transition: opacity .1s; }
+  .proj-select-check i { font-size: var(--gl-9); color: var(--on-accent); opacity: 0; transition: opacity var(--dur-fast); }
   .proj-select-check.checked i { opacity: 1; }
 
   /* split button */
@@ -261,7 +261,7 @@ const ICONS = {
   .nav-item .count { font-size: var(--fs-11); color: var(--text-3); font-weight: 500; }
 
   .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-  .f-chip { font-size: var(--fs-11); font-weight: 500; padding: 4px 8px; border-radius: 999px; cursor: default; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: all 0.1s; user-select: none; }
+  .f-chip { font-size: var(--fs-11); font-weight: 500; padding: 4px 8px; border-radius: 999px; cursor: default; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: all var(--dur-fast); user-select: none; }
   .f-chip:hover { border-color: var(--border-2); color: var(--text); }
   .f-chip.active { background: var(--bg-3); color: var(--text); }   /* same weight as the pills; the fill alone says "on" (a bold label and an outline said it twice) */
 
@@ -276,7 +276,7 @@ const ICONS = {
   .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
   .note-row.dragging { opacity: .4; }
   @keyframes rowSettle { 0%{ transform: scale(1.03); } 100%{ transform: scale(1); } }
-  .project-row.settle { animation: rowSettle .22s ease-out; }
+  .project-row.settle { animation: rowSettle var(--dur-base) ease-out; }
   .project-row .picon { width: 14px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex-shrink: 0; }
   .project-row .pname { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* while the action capsule is showing, the name gives up the room it needs, so a long name ends in "…" before the capsule instead of running under it */
@@ -347,13 +347,13 @@ const ICONS = {
   .task-row.done .task-title { text-decoration: line-through; color: var(--text-3); }
 
   .task-check-cell { grid-area: check; display: flex; align-items: center; gap: 2px; }
-  .task-checkbox { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color .15s, border-color .15s; }
+  .task-checkbox { width: 19px; height: 19px; border-radius: 50%; border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
   .task-checkbox:hover { border-color: var(--green-text); }
   .task-checkbox.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 3px var(--green-bg); }
-  .task-checkbox i { font-size: var(--gl-10); color: var(--on-accent); opacity: 0; transition: opacity .1s; }
+  .task-checkbox i { font-size: var(--gl-10); color: var(--on-accent); opacity: 0; transition: opacity var(--dur-fast); }
   .task-checkbox.checked i { opacity: 1; }
   @keyframes checkPop { 0%{ transform: scale(1); } 40%{ transform: scale(1.15); } 100%{ transform: scale(1); } }   /* a gentle acknowledgement, not a bounce (it was 1.35 over .3s) */
-  .task-checkbox.pop, .mini-check.pop, .sub-check.pop { animation: checkPop .2s ease-out; }
+  .task-checkbox.pop, .mini-check.pop, .sub-check.pop { animation: checkPop var(--dur-base) ease-out; }
 
   .task-main { grid-area: title; min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .task-title { font-size: var(--fs-14); font-weight: 600; word-break: break-word; }
@@ -373,7 +373,7 @@ const ICONS = {
   #taskList .task-subtask-row .subtask-toggle { position: absolute; left: -21px; top: 50%; transform: translateY(-50%); }
   .sub-hierarchy-btn { opacity: 0; flex-shrink: 0; font-size: var(--gl-10); padding: 2px 4px; }
   .task-subtask-row:hover .sub-hierarchy-btn { opacity: 1; }
-  .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color .15s, border-color .15s; }
+  .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
   .task-subtask-row .mini-check:hover { border-color: var(--green-text); }
   .task-subtask-row .mini-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
   .task-subtask-row .mini-check i { font-size: var(--gl-7); color: var(--on-accent); opacity: 0; }
@@ -411,7 +411,7 @@ const ICONS = {
      clicked, on hover and when focus is inside the row. Invisible rows take no
      clicks (pointer-events), so the capsule never swallows a click on the title. */
   .task-main { position: relative; }
-  .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity .1s ease; }
+  .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity var(--dur-fast) ease; }
   /* the capsule is --bg-3, the same as .icon-btn:hover, so a hovered button used to vanish into it: give it a visible disc */
   .row-actions .icon-btn { border-radius: 999px; padding: 4px 6px; }
   .row-actions .icon-btn:hover, .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); color: var(--text); }
@@ -430,7 +430,7 @@ const ICONS = {
   /* drawer */
   .drawer-overlay { position: fixed; inset: 0; background: var(--scrim-light); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); z-index: 150; display: none; }
   .drawer-overlay.open { display: block; }
-  .drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 420px; max-width: 92vw; background: var(--bg); border-left: 0.5px solid var(--border-2); box-shadow: -10px 0 32px var(--shadow-ink); z-index: 151; transform: translateX(100%); transition: transform 0.2s ease, background-color .2s ease, border-color .2s ease; display: flex; flex-direction: column; }
+  .drawer { position: fixed; top: 0; right: 0; height: 100vh; width: 420px; max-width: 92vw; background: var(--bg); border-left: 0.5px solid var(--border-2); box-shadow: -10px 0 32px var(--shadow-ink); z-index: 151; transform: translateX(100%); transition: transform var(--dur-base) ease, background-color var(--dur-base) ease, border-color var(--dur-base) ease; display: flex; flex-direction: column; }
   .drawer.open { transform: translateX(0); }
   .drawer-header { padding: 14px 16px; border-bottom: 0.5px solid var(--border); display: flex; align-items: flex-start; gap: 10px; }
   .drawer-header input.title-input { flex: 1; border: none; background: transparent; font-size: var(--fs-17); font-weight: 500; color: var(--text); outline: none; font-family: var(--font); padding: 4px 2px; }
@@ -481,7 +481,7 @@ const ICONS = {
   .weekday-btn.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
 
   /* modal */
-  .modal-bg { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity .15s ease, visibility .15s ease; }
+  .modal-bg { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity var(--dur-fast) ease, visibility var(--dur-fast) ease; }
   .modal-bg.open { opacity: 1; visibility: visible; pointer-events: auto; }
   /* Dialog: layout and type here; the surface (background, border, radius, shadow, blur) comes from the Glass rules further down, shared with menus and popovers. */
   .modal { padding: 24px; width: 380px; max-width: 90vw; display: flex; flex-direction: column; gap: 14px; }
@@ -491,7 +491,7 @@ const ICONS = {
   .modal input:focus { border-color: var(--border-2); }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
   .import-options { display: flex; flex-direction: column; gap: 8px; }
-  .import-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--r-m); cursor: default; transition: background 0.1s; }
+  .import-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--r-m); cursor: default; transition: background var(--dur-fast); }
   .import-option:hover { background: var(--bg-2); }
   .import-option-text strong { display: block; font-size: var(--fs-13); font-weight: 500; }
   .import-option-text span { font-size: var(--fs-12); color: var(--text-2); }
@@ -601,7 +601,7 @@ const ICONS = {
   kbd { font-family: var(--mono); font-size: var(--fs-11); background: var(--bg-3); border: 0.5px solid var(--border-2); border-radius: var(--r-xs); padding: 2px 6px; color: var(--text); box-shadow: 0 1px 0 var(--border-2); display: inline-block; line-height: 1.4; }
 
   /* toast */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: var(--r-m); font-size: var(--fs-13); font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: all 0.25s ease; z-index: 300; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: var(--r-m); font-size: var(--fs-13); font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: all var(--dur-base) ease; z-index: 300; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.error { background: var(--red-text); }
   /* ---- classes that replaced inline style="…" literals (audit cleanup) ---- */
@@ -631,11 +631,11 @@ const ICONS = {
     background: var(--text); color: var(--bg); font-size: var(--fs-11); font-weight: 500;
     padding: 4px 8px; border-radius: var(--r-xs); white-space: nowrap;
     opacity: 0; pointer-events: none; z-index: 50;
-    transition: opacity 0.08s ease-out; transition-delay: 0.12s;
+    transition: opacity var(--dur-fast) ease-out; transition-delay: 0.12s;
   }
   [data-tooltip]:hover::after { opacity: 1; }
 
-  .task-row.row-exit { transition: opacity .15s ease-in, transform .15s ease-in; opacity: 0; transform: scale(.97) translateX(6px); pointer-events: none; }
+  .task-row.row-exit { transition: opacity var(--dur-fast) ease-in, transform var(--dur-fast) ease-in; opacity: 0; transform: scale(.97) translateX(6px); pointer-events: none; }
 
   mark.search-highlight { background: var(--amber-bg); color: var(--amber-text); border-radius: var(--r-xs); padding: 0 2px; font-weight: 600; }
 
@@ -783,7 +783,7 @@ const ICONS = {
 
   .sidebar-section-actions { display: inline-flex; gap: 2px; }
   .tags-section .sidebar-section-label { cursor: default; margin-bottom: 8px; }
-  .tags-chevron { font-size: var(--ico-12); transition: transform .15s; }
+  .tags-chevron { font-size: var(--ico-12); transition: transform var(--dur-fast); }
   .tags-section.collapsed .tags-chevron { transform: rotate(-90deg); }
   .tags-section.collapsed .filter-chips { display: none; }
   .tags-section.collapsed .sidebar-section-label { margin-bottom: 0; }
@@ -795,7 +795,7 @@ const ICONS = {
      another row swaps the panel), and with no fixed box-shadow bleeding in
      from just off-screen, the grey strip that used to run down the right
      edge of every screen is gone. Below 800px it floats over the page again. */
-  .drawer { position: relative; top: auto; right: auto; height: auto; width: 0; max-width: none; flex-shrink: 0; overflow: hidden; border-left: 0 solid var(--border-2); box-shadow: none; transform: none; z-index: auto; transition: width .2s ease, background-color .2s ease; }
+  .drawer { position: relative; top: auto; right: auto; height: auto; width: 0; max-width: none; flex-shrink: 0; overflow: hidden; border-left: 0 solid var(--border-2); box-shadow: none; transform: none; z-index: auto; transition: width var(--dur-base) ease, background-color var(--dur-base) ease; }
   .drawer.open { width: 420px; border-left-width: 1px; transform: none; }
   .drawer > * { min-width: 420px; }
   @media (max-width: 800px) {
@@ -917,8 +917,8 @@ const ICONS = {
     --border: rgba(255,255,255,.10); --border-2: rgba(255,255,255,.20);
     --ink-border: var(--border); --ink-border-2: var(--border-2);
   }
-  html[data-scheme="glass"] .drawer { visibility: hidden; transition: width .2s ease, visibility 0s linear .2s; }
-  html[data-scheme="glass"] .drawer.open { visibility: visible; border-left: 1px solid var(--border-2); transition: width .2s ease, visibility 0s; }
+  html[data-scheme="glass"] .drawer { visibility: hidden; transition: width var(--dur-base) ease, visibility 0s linear var(--dur-base); }
+  html[data-scheme="glass"] .drawer.open { visibility: visible; border-left: 1px solid var(--border-2); transition: width var(--dur-base) ease, visibility 0s; }
   html[data-scheme="glass"] .main-toolbar { background: transparent; }
   html[data-scheme="glass"] .quickadd { border-radius: var(--r-l); background: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
   html[data-scheme="glass"] .task-list-header { background: var(--bg); border-radius: 0; border-bottom: 1px solid var(--border); }
@@ -929,7 +929,7 @@ const ICONS = {
   html[data-scheme="glass"]:not([data-theme="dark"]) .board-card:not(.kbd-selected):not(.bulk-selected) { box-shadow: 0 1px 3px var(--glass-lift-1); }   /* light theme: white on near-white needs a whisper of a shadow */
 
   /* pill controls with a springy press */
-  html[data-scheme="glass"] .btn { border-radius: var(--r-m); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px var(--glass-lift-1); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease, box-shadow .15s ease, border-color .15s ease; }
+  html[data-scheme="glass"] .btn { border-radius: var(--r-m); background: var(--bg-3); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px var(--glass-lift-1); transition: transform var(--dur-base) ease-out, background var(--dur-fast) ease, box-shadow var(--dur-fast) ease, border-color var(--dur-fast) ease; }
   html[data-scheme="glass"] .btn:hover { background: var(--hover); }   /* hover darkens the fill; no growing shadow */
   html[data-scheme="glass"] .btn:active, html[data-scheme="glass"] .view-switch-btn:active, html[data-scheme="glass"] .f-chip:active { transform: scale(.94); }
   html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: var(--on-accent); border-color: transparent; box-shadow: none; }   /* a flat accent fill, no coloured glow */
@@ -942,7 +942,7 @@ const ICONS = {
   html[data-scheme="glass"] :is(.sb-head, .sb-tools, .main-toolbar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
   html[data-scheme="glass"] .main-toolbar .view-switch-btn { border-radius: 999px; }
   html[data-scheme="glass"] .view-switch { border-radius: var(--r-m); padding: 4px; gap: 2px; background: var(--bg-2); border: 1px solid var(--glass-edge); }
-  html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: calc(var(--r-m) - 3px); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease; }
+  html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: calc(var(--r-m) - 3px); transition: transform var(--dur-base) ease-out, background var(--dur-fast) ease; }
   html[data-scheme="glass"] .view-switch-btn + .view-switch-btn { border-left-width: 0; }
   html[data-scheme="glass"] .view-switch-btn.active { background: var(--glass-strong); color: var(--text); box-shadow: inset 0 1px 0 var(--glass-rim), 0 2px 8px var(--glass-lift-2); }
   html[data-scheme="glass"] .f-chip { background: var(--bg-3); border-color: var(--glass-edge); }
@@ -982,26 +982,26 @@ const ICONS = {
 
   /* ── Collapsible sidebar, sortable column headers ─────────────────────────── */
   .sidebar-toggle { padding: 6px 8px; }
-  .sidebar { transition: width .2s ease, border-width .2s ease; }
+  .sidebar { transition: width var(--dur-base) ease, border-width var(--dur-base) ease; }
   .sidebar-resizer { position: relative; flex: none; width: 0; z-index: 30; }
   .sidebar-resizer::before { content: ""; position: absolute; top: 0; bottom: 0; left: -4px; width: 9px; cursor: col-resize; }
-  .sidebar-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .sidebar-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; pointer-events: none; }
   .sidebar-resizer:hover::after, .sidebar-resizer:focus-visible::after, html.sidebar-resizing .sidebar-resizer::after { opacity: .7; }
   .sidebar-resizer:focus { outline: none; }
   html.sidebar-resizing, html.sidebar-resizing * { cursor: col-resize !important; user-select: none !important; }
   html.sidebar-resizing .sidebar { transition: none; }
   html.sidebar-collapsed .sidebar-resizer { display: none; }
-  html.sidebar-collapsed .sidebar { width: 0; border-right-width: 0; visibility: hidden; transition: width .2s ease, border-width .2s ease, visibility 0s linear .2s; }
+  html.sidebar-collapsed .sidebar { width: 0; border-right-width: 0; visibility: hidden; transition: width var(--dur-base) ease, border-width var(--dur-base) ease, visibility 0s linear var(--dur-base); }
   @media (max-width: 800px) {
     /* narrow: the sidebar floats over the content instead of squeezing it */
     .sidebar-resizer { display: none; }   /* the floating sidebar on a narrow window keeps its fixed width */
     .sidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 140; width: min(300px, 86vw); box-shadow: 0 0 40px var(--shadow-ink-strong); }
     html.sidebar-collapsed .sidebar { width: min(300px, 86vw); transform: translateX(-100%); box-shadow: none; }
-    .sidebar { transition: transform .2s ease; }
+    .sidebar { transition: transform var(--dur-base) ease; }
   }
   .th-sort { display: flex; align-items: center; gap: 6px; cursor: default; user-select: none; border-radius: var(--r-s); }
   .th-sort:hover { color: var(--text); }
-  .th-arrow { font-size: var(--gl-9); opacity: 0; transition: opacity .12s ease; }
+  .th-arrow { font-size: var(--gl-9); opacity: 0; transition: opacity var(--dur-fast) ease; }
   .th-sort:hover .th-arrow { opacity: .4; }
   .th-sort.active { color: var(--text); }
   .th-sort.active .th-arrow { opacity: 1; }
@@ -1015,7 +1015,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --gl-6: 6px; --gl-7: 7px; --gl-8: 8px; --gl-9: 9px; --gl-10: 10px; --ico-empty: 36px; --ico-empty-s: 30px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: var(--cap-on); --on-accent: #fff; --danger: #d92d20; }
+  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --dur-fast: .12s; --dur-base: .2s; --fs-11: 11px; --gl-6: 6px; --gl-7: 7px; --gl-8: 8px; --gl-9: 9px; --gl-10: 10px; --ico-empty: 36px; --ico-empty-s: 30px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: var(--cap-on); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   html:not(.sel-inactive) .task-row.kbd-selected, html:not(.sel-inactive) .task-row.bulk-selected, html:not(.sel-inactive) .task-row.kbd-selected.bulk-selected, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1054,7 +1054,7 @@ const ICONS = {
   .main-title-wrap { display: flex; flex-direction: column; min-width: 0; }
   .main-subtitle { font-size: var(--fs-12); color: var(--text-3); line-height: 1.3; margin-top: 1px; }
   .tool-group { display: inline-flex; align-items: center; gap: 1px; padding: 2px; border: 1px solid var(--border-2); border-radius: 999px; background: var(--bg); }
-  .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: var(--fs-14); cursor: default; transition: background .12s ease, opacity .12s ease; }
+  .tool-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 32px; height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text); font-size: var(--fs-14); cursor: default; transition: background var(--dur-fast) ease, opacity var(--dur-fast) ease; }
   .tool-btn:hover:not(:disabled) { background: var(--hover); }
   /* the board's fold-all button is a .btn: at rest it is --bg-3 and the Glass .btn hover turns it near-white, so hovering it
      barely changed anything. Darken it instead, like the other toolbar controls do against their own surface. */
@@ -1309,9 +1309,9 @@ const ICONS = {
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
   .note-editor.locked .tbl-handles { display: none; }
-  .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-6); cursor: default; transition: background .12s ease, color .12s ease, border-color .12s ease; }
+  .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-6); cursor: default; transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
   .tbl-colrs { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; z-index: 1; }
-  .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: var(--r-xs); background: var(--accent); opacity: 0; transition: opacity .12s ease; }
+  .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: var(--r-xs); background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; }
   .tbl-colrs:hover::after, .tbl-colrs.active::after { opacity: .75; }
   html.tbl-resizing, html.tbl-resizing * { cursor: col-resize !important; user-select: none; }
   .tbl-plus:hover { background: var(--cap-hover); color: var(--text); }
@@ -1343,7 +1343,7 @@ const ICONS = {
   ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
   /* the copy button on a code block, as in Apple's documentation: an icon in the block's top right corner, shown while the pointer is over the block or the caret is in it (always on a touch screen); one button per block, in a layer over the note */
   .note-code-copy-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
-  .note-code-copy { position: absolute; z-index: 3; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); cursor: default; opacity: 0; transition: opacity .12s ease, background .12s ease, color .12s ease; }
+  .note-code-copy { position: absolute; z-index: 3; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); cursor: default; opacity: 0; transition: opacity var(--dur-fast) ease, background var(--dur-fast) ease, color var(--dur-fast) ease; }
   .note-code-copy.show, .note-code-copy:hover, .note-code-copy:focus-visible, .pr-tpl:hover .note-code-copy, .pr-tpl:focus-within .note-code-copy { opacity: 1; }
   @media (hover: none) { .note-code-copy { opacity: 1; } }
   @media (pointer: coarse) { .note-code-copy { width: 40px; height: 40px; } .note-body pre { padding-right: 48px; } }   /* a finger needs a bigger target */
@@ -1536,7 +1536,7 @@ const ICONS = {
      No box: an empty circle where a checkbox will be, muted placeholder text, a hairline under it that turns accent while typing,
      and a quiet pop-up button for the project on the right. */
   html[data-scheme="glass"] .quickadd { background: transparent; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; box-shadow: none; margin: 10px var(--gutter) 0; padding: 0; gap: 8px; }
-  .quickadd .qa-plus { flex: none; margin-left: 12px; font-size: var(--ico-16); color: var(--text-3); transition: color .12s ease; }   /* the "+" sits at the row's left edge, as it always did */
+  .quickadd .qa-plus { flex: none; margin-left: 12px; font-size: var(--ico-16); color: var(--text-3); transition: color var(--dur-fast) ease; }   /* the "+" sits at the row's left edge, as it always did */
   html[data-scheme="glass"] .quickadd input { padding: 12px 10px 12px 0; font-size: var(--fs-14); }
   .quickadd input::placeholder { color: var(--text-3); }
   html[data-scheme="glass"] .quickadd:has(#quickAddInput:focus) { border-bottom-color: var(--sel-bg); box-shadow: none; }
@@ -1568,7 +1568,7 @@ const ICONS = {
   .tb-ico2 .band { fill: currentColor; fill-opacity: .3; }
   .notes-list-resizer { position: relative; flex: none; width: 0; z-index: 30; }
   .notes-list-resizer::before { content: ""; position: absolute; top: 0; bottom: 0; left: -4px; width: 9px; cursor: col-resize; }
-  .notes-list-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .notes-list-resizer::after { content: ""; position: absolute; top: 0; bottom: 0; left: -1px; width: 2px; background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; pointer-events: none; }
   .notes-list-resizer:hover::after, .notes-list-resizer:focus-visible::after, html.nl-resizing .notes-list-resizer::after { opacity: .7; }
   html.nl-resizing, html.nl-resizing * { cursor: col-resize !important; user-select: none !important; }
   .notes-list-resizer:focus { outline: none; }
@@ -1634,8 +1634,8 @@ const ICONS = {
 
   /* Appearance: "Match System" is the default and the only thing shown; switching it off reveals the Light / Dark override. */
   .ap-match { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 4px 0; background: none; border: 0; color: var(--text); font: inherit; font-size: var(--fs-13); cursor: default; text-align: left; }
-  .ap-switch { position: relative; flex: none; width: 34px; height: 20px; border-radius: 999px; background: var(--cap-hover, var(--bg-3)); transition: background-color .15s ease; }
-  .ap-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--on-accent); box-shadow: 0 1px 2px var(--shadow-ink); transition: transform .15s ease; }
+  .ap-switch { position: relative; flex: none; width: 34px; height: 20px; border-radius: 999px; background: var(--cap-hover, var(--bg-3)); transition: background-color var(--dur-fast) ease; }
+  .ap-switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--on-accent); box-shadow: 0 1px 2px var(--shadow-ink); transition: transform var(--dur-fast) ease; }
   .ap-match[aria-checked="true"] .ap-switch { background: var(--accent); }
   .ap-match[aria-checked="true"] .ap-switch::after { transform: translateX(14px); }
   .ap-override { margin-bottom: 8px; }
@@ -1769,11 +1769,11 @@ const ICONS = {
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
   .pr-split > .note-scroll { flex: 1; min-width: 0; }
   #promptsMain { --list-w: var(--prompts-list-w, 300px); }   /* Prompts keeps its own list width (Notes keeps its own) */
-  .pr-inspector { position: relative; flex: none; width: var(--prompts-insp-w, 340px); max-width: max(260px, calc(100% - 380px)); overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width .24s ease, border-color .24s ease; }
-  .pr-insp-inner { width: var(--prompts-insp-w, 340px); max-width: 100%; height: 100%; overflow-y: auto; padding: 16px 16px 40px; box-sizing: border-box; transition: opacity .18s ease; }
+  .pr-inspector { position: relative; flex: none; width: var(--prompts-insp-w, 340px); max-width: max(260px, calc(100% - 380px)); overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width var(--dur-base) ease, border-color var(--dur-base) ease; }
+  .pr-insp-inner { width: var(--prompts-insp-w, 340px); max-width: 100%; height: 100%; overflow-y: auto; padding: 16px 16px 40px; box-sizing: border-box; transition: opacity var(--dur-fast) ease; }
   .pr-split.insp-closed .pr-inspector { width: 0; border-left-color: transparent; }
   .pr-insp-grip { position: absolute; top: 0; bottom: 0; left: 0; width: 9px; z-index: 5; cursor: col-resize; }
-  .pr-insp-grip::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: var(--accent); opacity: 0; transition: opacity .12s ease; pointer-events: none; }
+  .pr-insp-grip::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 2px; background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; pointer-events: none; }
   .pr-insp-grip:hover::after, .pr-insp-grip:focus-visible::after { opacity: .7; }
   .pr-insp-grip:focus { outline: none; }
   .pr-split.insp-closed .pr-insp-grip { display: none; }
