@@ -490,6 +490,7 @@ parity.
   open the list drops its Project column (`.layout:has(.drawer.open)`) and the
   toast moves left so neither is covered. Under 800px it floats again.
 - **Subtask / step / sub-step have a right-click menu** (audit U-06; `subMenuHtml` / `subMenuRun`, one capture-phase `contextmenu` listener so the task row's own menu does not also open): Mark Complete / Not Done, Rename, Make Subtask / Make Step / Make Step of Subtask Above / Make Sub-step of Step Above (only the moves that are possible), Delete. The row is identified from its checkbox's own `onclick` (`subRowRefFromHandler`: `toggleSubtask` / `toggleSubSubtask` / `toggleSubSubSubtask` and their ids), so list, board card and panel need no extra markup. On a board card only subtasks get it (steps and sub-steps are read-and-tick there, and keep showing the task's menu). A board column header (project columns) opens the project menu. Tags are a fixed list with nothing to rename or delete, so they have no menu by rule.
+- **The task row menu stays as long as it is** (audit U-07, decided: no change; Repeat stays in the menu). Don't trim it without a new decision.
 - **Row menu** (`#rowMenu`: right-click, the row's ⋯ button, or the Menu /
   Shift+F10 key — modelled on Milestone's). Targets the whole selection when
   the row is part of a multi-selection, else that row, and **never changes
