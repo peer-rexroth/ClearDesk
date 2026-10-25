@@ -370,7 +370,7 @@ parity.
   request, so the earlier "no blue" instruction applies to the *browser's* default
   blue outline, not to this ring.
   The quick-add bar rings as a whole (`:has(#quickAddInput:focus-visible)`), the
-  drawer title gets an underline, inputs inside a selected row use white. As in
+  drawer title gets an underline (keyboard focus only; with the mouse it shows just the caret, like the panel's other fields), inputs inside a selected row use white. As in
   Apple's apps a pop-up isn't left ringed after a mouse choice:
   `releaseSelectAfterPointerChange` blurs a `<select>` on `change` only when the
   last input was a pointer (`lastInputWasPointer`), so a keyboard user stepping
@@ -474,6 +474,9 @@ parity.
   an unknown key just falls back to smart. Undated tasks stay last in both
   directions; completed tasks sink either way (`doneLastComparator`). The Sort
   dropdown shows the base key and always picks ascending.
+- **Error toasts stay until dismissed** (audit U-15): `showToast(msg, true)` shows a ✕ (`#toastCloseBtn`, `dismissToast()`) and sets no timer, and hovering / focusing never re-arms one; a later toast replaces it. Success and Undo toasts still time out (2.4 s / 6 s) and are held while the pointer or focus is on them.
+- **Radius tokens have one name each** (audit U-14): `--r-xs 4`, `--r-s 8`, `--r-m 10`, `--r-l 12`, `--r-xl 16`. The old aliases `--radius`, `--radius-lg`, `--glass-r-row`, `--glass-r-bar` and `--glass-r-menu` were removed; use the `--r-*` name.
+- **Dialog button rules** (audit U-03 / U-25 / U-29): a dialog that edits a draft ends *Cancel · Save* (or *Create* when it makes something new: the new-file dialog); a dialog whose changes apply as you go ends in *Done* only and says so (Global Variables: "Saved as you type"); Compare saves only on *Save*. A filled red button appears only inside a confirmation (the confirm dialog's Delete, Import's Replace, Compare's Discard); everywhere else a destructive command is plain red text (the panel's Delete). The sidebar's active row is a neutral `--bg-2` fill (not the accent), so it needs no grey "inactive" state (audit U-17).
 - **Quiet notice bar**: the first-run sync notice is a neutral bar (small amber
   icon, one pill action, ✕), not an amber block.
 - Sidebar order is Projects (with the "projects shown" control beside the +)
@@ -735,9 +738,9 @@ still has one is simply ignored by `load()`).
     later in the file, it used to erase the selected look while the mouse was
     still on the row).
   **Corner radii**: toolbar controls (sidebar header/tools bar, `.main-toolbar`) are
-  capsules like Mail's; everything in the content uses `--radius` (10px), task
-  rows `--glass-r-row` (8px), the quick-add bar `--glass-r-bar` (12px), board
-  columns `--radius-lg` (14px) and menus/modals `--glass-r-menu` (16px); chips and
+  capsules like Mail's; everything in the content uses `--r-m` (10px), task
+  rows `--r-s` (8px), the quick-add bar `--r-l` (12px), board
+  columns and menus/modals `--r-xl` (16px); chips and
   badges stay pills. Change the look by editing those variables, not rules.
   **Select arrows**: Glass replaces the browser's heavy dark dropdown arrow with a thin
   light chevron (`appearance:none` + a data-URI background; one URI per theme because a
@@ -838,6 +841,8 @@ A OneNote/Apple-Notes-style area next to Tasks. `appMode` ('tasks'|'notes', per-
 - **Context menus hide unavailable commands** (HIG, audit U-04; they used to dim them): `rowMenuItem(…, {off:true})` renders nothing (locked folder Edit/Delete, locked project Delete, locked note Move/Delete, Move Up on the first folder), and `tidyMenuSeps(html)` (applied wherever a menu's HTML is set; `tblMenuJoin` does the same for table menus) drops the separators that leave behind. The toolbar's own buttons still disable (a toolbar is not a menu). The note ⋯ toolbar menu is the same list as the note right-click menu (so Pin / Export / Print are reachable without right-click); folders also reorder with Option+Up/Down. Copy Note is ⌃⌘C (Ctrl+Alt+C), not ⌘⇧C (system/Chrome inspect). Checkbox and subtask check circles keep their look but have an invisible ::before that grows the click area to about 28px.
 - **Board tiles have no outline** (Glass): the border is transparent (it keeps the size), the tile is set off from its column by its fill (`--bg` on the column's `--bg-2`), light theme adds a whisper of shadow, and hover lifts the tile with a soft shadow rather than a border or a fill (a filled hover would swallow the grey status pill). Selected tiles stay solid accent.
 - **Scales (F-20, F-31, F-32)**. *Type*: text uses `--fs-11/12/13/14/15/17/22` (`font-size: var(--fs-13)`), nothing in between; icons use `--ico-12/14/16/18`; the only literal sizes left are glyphs inside controls (tick marks, grips, the 6–10px "+"/chevron marks) and the 30px empty-state icons. *Spacing* (padding and gap): 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40 (1px hairlines allowed); odd values (3, 5, 7, 9, 11, 13…) are snapped to the nearest. *Radius*: `--r-xs` 4 (chips, small), `--r-s` 8 (rows, controls), `--r-m` 10 (= `--radius`, cards), `--r-l` 12 (bars), `--r-xl` 16 (menus, dialogs, columns; = `--radius-lg`, `--glass-r-menu`), plus `999px`/`50%` for pills and circles. Don't add one-off values: pick the nearest step. Inline `style="…"` in templates and the JS were not remapped.
+- **Control glyphs and empty-state icons are tokens too (audit U-09 / U-10 / U-13)**: tick marks, chevrons and the table "+" use `--gl-6 … --gl-10` (their `font-size`; the masked icons draw 1.26× that, so a `--gl-8` tick is about 10px on screen and the smallest, the table "+" at `--gl-6`, about 7.6px inside a 12px circle), the empty-state icons `--ico-empty` (36px) and `--ico-empty-s` (30px). Raw `font-size: Npx` is left only where it is deliberate: the 16px of the invisible `<select>` / date overlays in the task panel and of the B I U bar letters, and the mail / print export HTML. **Spacing** in CSS rules was snapped to the 2…40 scale (7→8, 22→24, 5→4/6, 9→8, 18→16, 3→4 …). Not snapped on purpose, because each is a measured reservation or alignment, not a spacing choice: the 76 / 58 / 96 / 104 / 112 / 44 / 48 px side reservations for the row capsule, the copy button and the collapsed-sidebar toggle, the 56–60px scroll room at the foot of panes, the help-row icon offsets (565, 527), the drawer's 18px handle column, the toolbar buttons' 18 / 22px padding and the 3px capsule insets. About 90 inline `style="…"` attributes in the templates still hold literals (44 with px values): they were not remapped.
+- **Pin (Notes) and Favorite (Prompts) stay two words** (audit U-21, decided to keep): Notes pins a note to the top and has a Pinned filter; Prompts marks a favorite and has a Favorites filter. Don't unify them.
 - **Fonts and weights**: one family (`--font`, the system stack; `--mono` for code). No serif anywhere (the toolbar's italic *I* is the system italic). Weights are 400 (default), 500, 600, 700 only.
 - **Cursors**: the arrow on every button and control; the hand only on links (note links, Help topic jumps, `a[href]`) via one rule at the end of the stylesheet. Don't add `cursor: pointer` to controls.
 - **Small hit areas**: controls under 20px keep their look and get an invisible `::before` (subtask/step toggles, hierarchy buttons, sortable headers, the Tags label); the list-style arrow in the Notes toolbar is 22px wide. Checkbox circles do the same (about 28px).
