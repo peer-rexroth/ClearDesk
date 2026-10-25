@@ -196,7 +196,7 @@ const ICONS = {
   html, body { height: 100%; }
   body { font-family: var(--font); background: var(--bg-2); color: var(--text); font-size: var(--fs-15); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
   body, .topbar, .sidebar, .main, .project-row, .nav-item,
-  .modal, .task-list-header, .quickadd, .bulk-bar,
+  .modal, .task-list-header, .quickadd,
   input, select, textarea {
     transition: background-color .2s ease, color .2s ease, border-color .2s ease;
   }
@@ -333,11 +333,6 @@ const ICONS = {
   .quickadd i { color: var(--text-3); margin-left: 10px; font-size: var(--ico-16); }
   .quickadd input { flex: 1; border: none; padding: 8px 10px; font-size: var(--fs-14); background: transparent; color: var(--text); outline: none; font-family: var(--font); }
 
-  .bulk-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--purple-bg); border: 0.5px solid var(--purple-text); border-width: 0; border-radius: var(--radius); margin: 0 20px; padding: 0 10px; max-height: 0; opacity: 0; overflow: hidden; transition: max-height .18s ease, opacity .15s ease, padding .18s ease, margin .18s ease, border-width .18s ease; }
-  .bulk-bar.show { max-height: 110px; opacity: 1; margin: 10px 20px 0; padding: 8px 10px; border-width: 0.5px; }
-  .bulk-bar .bulk-count { font-size: var(--fs-12); font-weight: 600; color: var(--purple-text); margin-right: 4px; }
-  .bulk-bar select, .bulk-bar input[type=date] { font-size: var(--fs-12); border: 0.5px solid var(--border-2); border-radius: var(--radius); padding: 6px 8px; background: var(--bg); color: var(--text); font-family: var(--font); }
-  .task-row.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
 
   .task-list { flex: 1; overflow-y: auto; overflow-x: auto; padding: 0 calc(var(--gutter) - 10px) 20px; }   /* rows have 10px of their own padding, so their content starts at the gutter */
   .task-list.is-empty { display: flex; flex-direction: column; }
@@ -352,7 +347,6 @@ const ICONS = {
   .task-row:hover .row-actions { opacity: 1; }
   .task-row.kbd-selected { background: var(--bg); border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
   .task-row.kbd-selected .row-actions { opacity: 1; }
-  .task-row.kbd-selected.bulk-selected { background: var(--purple-bg); border-color: var(--purple-text); box-shadow: 0 0 0 1px var(--purple-text); }
   .task-row.done .task-title { text-decoration: line-through; color: var(--text-3); }
 
   .task-check-cell { grid-area: check; display: flex; align-items: center; gap: 2px; }
@@ -430,7 +424,7 @@ const ICONS = {
   .subtask-toggle, .sub-step-toggle { border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; }
   /* chevrons are small (16px), so the disc is grown with a ring and made stronger than the other icon buttons' */
   .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 20%, transparent); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: var(--sel-fill-hover); box-shadow: 0 0 0 3px var(--sel-halo); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: var(--sel-fill-hover); box-shadow: 0 0 0 3px var(--sel-halo); }
 
   .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 60px 20px; color: var(--text-3); }   /* same stack as .notes-empty: icon above the text, both centred */
   .empty-state i { font-size: 36px; opacity: .4; }
@@ -683,8 +677,6 @@ const ICONS = {
   .board-col-header .count { font-size: var(--fs-12); }
   .board-card-title { font-size: var(--fs-14); }
   .board-card { border-width: 1px; box-shadow: var(--shadow); }
-  .bulk-bar { border-width: 1px; box-shadow: var(--shadow); }
-  .bulk-bar .bulk-count, .bulk-bar select, .bulk-bar input[type=date] { font-size: var(--fs-13); }
   .split-btn-menu { box-shadow: var(--shadow); }
   .split-btn-menu-label { font-size: var(--fs-13); }
   .split-btn-menu-desc { font-size: var(--fs-12); }
@@ -825,9 +817,6 @@ const ICONS = {
   .row-menu-chip.current { border-color: var(--border-2); background: var(--bg-2); }
   .row-menu-chip i { color: var(--text-3); font-size: var(--ico-16); }
 
-  .sel-chip { display: inline-flex; align-items: center; gap: 6px; height: 28px; padding: 0 12px; border: 1px solid var(--purple-text); border-radius: var(--r-xl); background: transparent; color: var(--purple-text); font-size: var(--fs-13); font-weight: 600; font-family: var(--font); cursor: default; }
-  .sel-chip:hover { background: var(--purple-bg); }
-  .sel-chip i { font-size: var(--ico-14); opacity: .8; }
 
   /* ── Glass (Apple "Liquid Glass" / Mail-style) — the app's only look ─────────
      Modelled on Apple Mail: the CHROME is glass and the CONTENT is flat. The
@@ -935,7 +924,7 @@ const ICONS = {
   html[data-scheme="glass"] .icon-btn { border-radius: var(--radius); }
   /* capsules: controls that live in the toolbars, as in Mail; everything in the
      content stays at --radius */
-  html[data-scheme="glass"] :is(.sb-head, .sb-tools, .main-toolbar, .bulk-bar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
+  html[data-scheme="glass"] :is(.sb-head, .sb-tools, .main-toolbar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
   html[data-scheme="glass"] .main-toolbar .view-switch-btn { border-radius: 999px; }
   html[data-scheme="glass"] .view-switch { border-radius: var(--radius); padding: 4px; gap: 2px; background: var(--bg-2); border: 1px solid var(--glass-edge); }
   html[data-scheme="glass"] .view-switch-btn { background: transparent; border-radius: calc(var(--radius) - 3px); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .15s ease; }
@@ -945,7 +934,6 @@ const ICONS = {
   html[data-scheme="glass"] .main-toolbar select { border-radius: var(--radius); background: var(--bg-3); border-color: var(--glass-edge); }
   html[data-scheme="glass"] .field input[type=text], html[data-scheme="glass"] .field input[type=date], html[data-scheme="glass"] .field input[type=number], html[data-scheme="glass"] .field textarea, html[data-scheme="glass"] .field select,
   html[data-scheme="glass"] .modal input, html[data-scheme="glass"] .modal select { background: var(--bg-2); border: 1px solid var(--glass-edge); border-radius: var(--radius); }
-  html[data-scheme="glass"] .sel-chip { background: var(--bg-3); }
 
   /* menus, modals, toast, banner */
   html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .row-menu-flyout, .note-link-pop, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: var(--glass-r-menu); box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
@@ -960,8 +948,8 @@ const ICONS = {
      pill's right edge, so Glass draws a light, thin one (appearance:none keeps the
      native popup list). Must come after every Glass rule that sets the `background`
      shorthand (it would reset these). Two data-URIs because a data-URI can't read CSS variables. */
-  html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .quickadd-project, html[data-scheme="glass"] .field select, html[data-scheme="glass"] .modal select, html[data-scheme="glass"] .bulk-bar select, html[data-scheme="glass"] .note-select { -webkit-appearance: none; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%2315161b' stroke-opacity='.45' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 12px 8px; }
-  html[data-scheme="glass"][data-theme="dark"] .main-toolbar select, html[data-scheme="glass"][data-theme="dark"] .quickadd-project, html[data-scheme="glass"][data-theme="dark"] .field select, html[data-scheme="glass"][data-theme="dark"] .modal select, html[data-scheme="glass"][data-theme="dark"] .bulk-bar select, html[data-scheme="glass"][data-theme="dark"] .note-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%23f5f6fa' stroke-opacity='.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+  html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .quickadd-project, html[data-scheme="glass"] .field select, html[data-scheme="glass"] .modal select, html[data-scheme="glass"] .note-select { -webkit-appearance: none; appearance: none; padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%2315161b' stroke-opacity='.45' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; background-size: 12px 8px; }
+  html[data-scheme="glass"][data-theme="dark"] .main-toolbar select, html[data-scheme="glass"][data-theme="dark"] .quickadd-project, html[data-scheme="glass"][data-theme="dark"] .field select, html[data-scheme="glass"][data-theme="dark"] .modal select, html[data-scheme="glass"][data-theme="dark"] .note-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1.5 1.5l4.5 4.5 4.5-4.5' fill='none' stroke='%23f5f6fa' stroke-opacity='.6' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
 
   /* toolbar capsules sit a step lighter than the content (Mail: white capsules); background-color
      only, so the chevron image above is not reset */
@@ -1012,40 +1000,40 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --on-accent: #fff; --danger: #d92d20; }
+  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --fs-11: 11px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: color-mix(in srgb, var(--text) 13%, transparent); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
-  .task-row.kbd-selected, .task-row.bulk-selected, .task-row.kbd-selected.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected) {
+  html:not(.sel-inactive) .task-row.kbd-selected, html:not(.sel-inactive) .task-row.bulk-selected, html:not(.sel-inactive) .task-row.kbd-selected.bulk-selected, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
     --text: #fff; --text-2: rgba(255,255,255,.94); --text-3: rgba(255,255,255,.85); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
   }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: var(--sel-fill) !important; color: var(--on-accent) !important; }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: var(--sel-line-strong); box-shadow: none; }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: var(--on-accent); border-color: var(--on-accent); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked i { color: var(--sel-bg); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: var(--sel-fill-hover); color: var(--on-accent); box-shadow: 0 0 0 2px var(--sel-halo); }   /* same hover language as the pills below: translucent white, white content */
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: var(--sel-fill) !important; color: var(--on-accent) !important; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: var(--sel-line-strong); box-shadow: none; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: var(--on-accent); border-color: var(--on-accent); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked i { color: var(--sel-bg); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: var(--sel-fill-hover); color: var(--on-accent); box-shadow: 0 0 0 2px var(--sel-halo); }   /* same hover language as the pills below: translucent white, white content */
   /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
      the cell says "pop-up button" the way a native one does — a small chevron on the pill,
      shown on the selected row/card only so the rest of the list stays calm. (The pill grows
      by the chevron's width when its row is selected; the columns are wide enough that
      nothing else moves.) */
   .task-cell.editable, .cell-host.editable { cursor: default; }
-  :is(.task-row.kbd-selected .task-cell.editable, .board-card:is(.kbd-selected, .bulk-selected) .cell-host.editable) .badge:not(.cell-pop .badge)::after {
+  html:not(.sel-inactive) :is(.task-row.kbd-selected .task-cell.editable, .board-card:is(.kbd-selected, .bulk-selected) .cell-host.editable) .badge:not(.cell-pop .badge)::after {
     content: ""; flex-shrink: 0; width: 8px; height: 8px; margin-left: 2px; opacity: .9;
     background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath d='M1.4 2.7L4 5.3l2.6-2.6' fill='none' stroke='%23fff' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 8px 8px no-repeat;
   }
   /* hovering an editable cell in a selected row brightens just its pill, not the whole cell box */
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge:not(.cell-pop .badge) { background: var(--sel-fill-hover) !important; filter: none; box-shadow: 0 0 0 3px var(--sel-halo); }
-  .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: var(--on-accent); background: var(--sel-fill-hover); border-radius: 999px; box-shadow: 0 0 0 4px var(--sel-halo); }
-  .board-card:is(.kbd-selected, .bulk-selected) .board-card-priority-icon { color: var(--on-accent); }
+  html:not(.sel-inactive) .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .badge:not(.cell-pop .badge) { background: var(--sel-fill-hover) !important; filter: none; box-shadow: 0 0 0 3px var(--sel-halo); }
+  html:not(.sel-inactive) .task-row:is(.kbd-selected, .bulk-selected) .task-cell.editable:hover .task-cell-empty { color: var(--on-accent); background: var(--sel-fill-hover); border-radius: 999px; box-shadow: 0 0 0 4px var(--sel-halo); }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .board-card-priority-icon { color: var(--on-accent); }
   /* the Glass card style (html[data-scheme] .board-card) out-ranks .board-card:is(.kbd-selected, .bulk-selected), so restate the fill at higher specificity */
-  html[data-scheme="glass"] .board-card:is(.kbd-selected, .bulk-selected) { background: var(--sel-bg); border-color: var(--sel-bg); }
+  html[data-scheme="glass"]:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) { background: var(--sel-bg); border-color: var(--sel-bg); }
   /* Inline inputs (add subtask, rename) inside a selected row: white text on a white
      field was invisible. Give them a translucent-white field with white text. */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *) { background: var(--sel-fill); color: var(--on-accent); border-color: var(--sel-line); caret-color: var(--on-accent); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, textarea):not(.cell-pop *)::placeholder { color: var(--sel-text-3); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check { background: transparent; border-color: var(--sel-line-strong); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked { background: var(--on-accent); border-color: var(--on-accent); box-shadow: none; }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *) { background: var(--sel-fill); color: var(--on-accent); border-color: var(--sel-line); caret-color: var(--on-accent); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, textarea):not(.cell-pop *)::placeholder { color: var(--sel-text-3); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check { background: transparent; border-color: var(--sel-line-strong); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked { background: var(--on-accent); border-color: var(--on-accent); box-shadow: none; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
 
   /* ── Selection toolbar (a capsule group that acts on the selection) ─────── */
   .main-title-wrap { display: flex; flex-direction: column; min-width: 0; }
@@ -1099,7 +1087,7 @@ const ICONS = {
   .quickadd:has(#quickAddInput:focus-visible) { border-color: var(--focus-edge); box-shadow: 0 0 0 3px var(--focus-ring); }
   .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 var(--focus-ring) !important; border-color: transparent !important; border-radius: 0; }
   /* inside a selected (blue) row the neutral ring would vanish: use white */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):focus-visible { border-color: var(--on-accent) !important; box-shadow: 0 0 0 3px var(--sel-halo-strong) !important; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):focus-visible { border-color: var(--on-accent) !important; box-shadow: 0 0 0 3px var(--sel-halo-strong) !important; }
 
   /* ── Ghost row: inline "add subtask / step / sub-step" fields ──────────────────
      No box, no dashed border: the field looks like one more line in the list — a
@@ -1166,19 +1154,24 @@ const ICONS = {
   .drawer .subtask-row:is(:hover, :focus-within) .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 1; }   /* same :not() chain as the hide rule, or that out-ranks this */
   .task-subtask-add-row input:focus-visible, .add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
   /* on the solid selection colour */
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row::before { border-color: var(--sel-line-strong); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row:focus-within { background: var(--sel-fill); }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row input { background: transparent; border-color: transparent; }
-  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row::before { border-color: var(--sel-line-strong); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row:focus-within { background: var(--sel-fill); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row input { background: transparent; border-color: transparent; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
 
   .task-row:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
   /* Inline rename fields are quiet, like the ghost add rows: a soft tint and the caret/selected text are the indicator. The
      boxed field with the global 3px focus halo (white on the blue row) read as a heavy bar across the whole row. */
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input) { border: 0 !important; border-radius: var(--r-s); padding: 1px 6px; background: var(--bg-3); box-shadow: none !important; outline: none !important; }
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input):is(:focus, :focus-visible) { border: 0 !important; box-shadow: none !important; outline: none !important; }
-  html[data-scheme="glass"] :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) :is(.task-subtask-text-input, .task-title-input) { background: var(--sel-fill); }
+  html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) :is(.task-subtask-text-input, .task-title-input) { background: var(--sel-fill); }
   .task-subtask-text-input { max-width: 420px; }   /* a rename field should be a field, not a bar across the whole row */
-  .task-row.kbd-selected .row-actions, .board-card:is(.kbd-selected, .bulk-selected) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }
+  html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }
+  /* with several rows selected the toolbar and the right-click menu act on all of them, so the per-row capsule (which would act on one row) is hidden on the selected rows */
+  /* The selection is the accent colour only while its list is the active area (as in Finder, Mail and Notes); with focus in the task panel, the editor, the sidebar, search or another window it is a neutral grey and everything inside the row looks as it does unselected. html.sel-inactive is kept by the focus-zone code (selZoneOf). */
+  html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) { background: var(--sel-inactive); border-color: var(--sel-inactive); box-shadow: none; }
+  html.sel-inactive .note-row.selected { background: var(--sel-inactive); }
+  html.multi-sel :is(.task-row, .board-card):is(.bulk-selected) .row-actions { display: none; }
   /* Board cards get the same hover language as list rows: a grey fill on hover (the Glass card border rule used to cancel
      the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
   html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg); border-color: transparent; box-shadow: 0 2px 10px var(--shadow-ink); }   /* hover lifts the tile instead of outlining it (a filled hover would swallow the status pill) */
@@ -1188,7 +1181,7 @@ const ICONS = {
   .cell-host-empty { opacity: 0; }
   .board-card:is(:hover, :focus-within, .kbd-selected) .cell-host-empty, .cell-host-empty:focus-within { opacity: 1; }
   .badge-due-empty { background: var(--bg-3); color: var(--text-2); border: 0; min-height: 24px; }   /* the same filled pill, and the same height, as the other badges, not a dashed outline */
-  .board-card:is(.kbd-selected, .bulk-selected) .badge-due-empty { background: var(--sel-fill) !important; color: var(--on-accent); min-height: 24px; }   /* as tall as the status pill, which carries a chevron while selected */
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .badge-due-empty { background: var(--sel-fill) !important; color: var(--on-accent); min-height: 24px; }   /* as tall as the status pill, which carries a chevron while selected */
 
   /* the Task cell keeps the capsule's width free so a long title wraps before it
      instead of running underneath; long unbroken words may break anywhere */
@@ -1224,13 +1217,13 @@ const ICONS = {
   .note-row { display: flex; flex-direction: column; gap: 2px; padding: 8px 12px; border-radius: var(--r-m); cursor: default; }
   .note-row:hover:not(.selected) { background: var(--bg-2); }
   .note-row:focus-visible { outline: none; }
-  .note-row.selected { background: var(--sel-bg); color: var(--on-accent); }
+  html:not(.sel-inactive) .note-row.selected { background: var(--sel-bg); color: var(--on-accent); }
   .note-row-title { display: flex; align-items: center; gap: 6px; font-size: var(--fs-14); font-weight: 600; }
   .note-row-name { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .note-row-marks { flex: none; display: inline-flex; align-items: center; gap: 4px; font-size: var(--ico-14); font-weight: 400; }   /* pin / favorite / lock: one right-aligned column of glyphs on the title line */
   .note-row-sub { display: flex; gap: 8px; min-width: 0; font-size: var(--fs-12); color: var(--text-3); }
   .note-row-date { flex-shrink: 0; color: var(--text-2); }
-  .note-row.selected :is(.note-row-sub, .note-row-date) { color: var(--sel-text-2); }
+  html:not(.sel-inactive) .note-row.selected :is(.note-row-sub, .note-row-date) { color: var(--sel-text-2); }
   .notes-editor-pane { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
   .notes-empty { margin: auto; display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--text-3); font-size: var(--fs-14); }
   .notes-empty i { font-size: 36px; opacity: .4; }
@@ -1252,7 +1245,7 @@ const ICONS = {
   .note-row-lock, .note-row-pin { color: var(--text-2); }
   .note-row-cmp { color: var(--accent); }   /* the prompt marked by Select for Compare */
   .note-row-star { color: var(--amber-text); }
-  .note-row.selected :is(.note-row-lock, .note-row-pin, .note-row-star, .note-row-cmp) { color: inherit; opacity: .9; }
+  html:not(.sel-inactive) .note-row.selected :is(.note-row-lock, .note-row-pin, .note-row-star, .note-row-cmp) { color: inherit; opacity: .9; }
   /* the link popover (Apple style): a small grouped form under the Link button: Text and Link rows, one Done button, Remove Link when editing */
   .note-link-pop { display: none; position: fixed; z-index: 410; width: 320px; max-width: calc(100vw - 32px); box-sizing: border-box; padding: 8px; background: var(--bg); border: 1px solid var(--border-2); border-radius: var(--glass-r-menu); box-shadow: var(--shadow); }
   .note-link-pop.open { display: block; }
@@ -1728,7 +1721,7 @@ const ICONS = {
   /* Recently Deleted (Tasks): replaces the list, board, quick-add and the selection tools while it is open */
   .task-trash-list { display: none; flex: 1; min-height: 0; overflow-y: auto; padding: 6px 10px 16px; }
   html.task-trash .task-trash-list { display: block; }
-  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, .bulk-bar, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, #sortSelect, #collapseAllBtnBoard) { display: none !important; }
+  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, #sortSelect, #collapseAllBtnBoard) { display: none !important; }
   #trashTools { display: none; }
   html.task-trash #trashTools { display: inline-flex; }
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
@@ -2093,7 +2086,6 @@ const ICONS = {
         </select>
       </div>
     </div>
-    <div class="bulk-bar" id="bulkBar"></div>
     <div class="quickadd">
       <i class="fa-solid fa-plus qa-plus" aria-hidden="true"></i>
       <input spellcheck="true" type="text" id="quickAddInput" placeholder="Add a task" oninput="updateQuickAddPreview()" onkeydown="quickAddTask(event)">
@@ -3286,10 +3278,9 @@ function render(){
   if(appMode==='prompts'){ renderPrompts(); return; }
   renderSidebar();
   document.documentElement.classList.toggle('task-trash', trashFilter);
-  if(trashFilter){ renderTaskTrash(); renderDrawer(); renderBulkBar(); return; }
+  if(trashFilter){ renderTaskTrash(); renderDrawer(); return; }
   if(viewMode==='board'){ renderBoard(); } else { renderList(); }
   renderDrawer();
-  renderBulkBar();
   updateViewModeUI();
 }
 function updateViewModeUI(){
@@ -3837,7 +3828,7 @@ function openTask(id){
   if(hadInlineAdd){ if(viewMode==='board'){ renderBoard(); } else { renderList(); } }
   else paintSelection();
 }
-function closeDrawer(){ activeTaskId = null; renderDrawer(); }
+function closeDrawer(){ activeTaskId = null; renderDrawer(); setSelZone('list'); }
 
 // ── Bulk selection ────────────────────────────────────────────────────────────
 // Repaint the selection classes on the rows/cards that already exist. Changing
@@ -3850,10 +3841,37 @@ function paintSelection(){
     el.classList.toggle('kbd-selected', id===kbdSelectedTaskId);
     el.classList.toggle('bulk-selected', selectedTaskIds.has(id));
   });
-  renderBulkBar();
   updateSelectionToolbar();
 }
+// A Shift-click selects a range of rows, and the browser would also start (or extend) its own text selection across them: pale highlights over titles and badges, and a washed-out action capsule. Stop it where it starts (the mouse-down); handleRowClick clears any that is already there.
+function rowShiftMouseDown(e){
+  if(!e.shiftKey || !e.target || !e.target.closest) return;
+  if(!e.target.closest('.task-row, .board-card') || e.target.closest('input, textarea, select, [contenteditable="true"]')) return;
+  e.preventDefault();
+}
+document.addEventListener('mousedown', rowShiftMouseDown, true);
+// Where focus is decides whether the selection is the accent colour or neutral grey (see html.sel-inactive). The list is "active" while the pointer or keyboard is in it; the task panel, the editor, the sidebar, search and the quick-add field are "other", and so is another window. Menus and dialogs borrow focus for a moment and leave the state as it was.
+let selZone = 'list', selWinActive = (typeof document.hasFocus==='function') ? document.hasFocus() : true;
+function selZoneOf(el){
+  if(!el || !el.closest) return null;
+  if(el.closest('.modal-bg, #rowMenu, .cell-pop, .tool-menu, .split-btn-menu, #toast')) return null;
+  if(el.closest('#drawer, .sidebar, .quickadd, .notes-editor-pane')) return 'other';
+  if(el.closest('.main, .notes-list-pane')) return 'list';
+  return null;
+}
+// Typing in any text field (an inline rename, the add-subtask field Tab opens, a note title…) also takes the selection's focus, wherever that field is; it comes back with the field.
+function selEditing(){ const a = document.activeElement; return !!(a && a.closest && a.closest('input, textarea, select, [contenteditable="true"]')); }
+function applySelActive(){ document.documentElement.classList.toggle('sel-inactive', !(selWinActive && selZone==='list' && !selEditing())); }
+function setSelZone(z){ if(z && z!==selZone){ selZone = z; applySelActive(); } }
+document.addEventListener('mousedown', e=>setSelZone(selZoneOf(e.target)), true);
+document.addEventListener('focusin', e=>{ setSelZone(selZoneOf(e.target)); applySelActive(); }, true);
+document.addEventListener('focusout', ()=>setTimeout(applySelActive, 0), true);   // after the focus has landed somewhere else (or nowhere)
+document.addEventListener('keydown', e=>{ if((e.key==='ArrowUp' || e.key==='ArrowDown') && !(e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]'))) setSelZone('list'); }, true);   // arrows with no field focused move the list's selection
+if(window.addEventListener){ window.addEventListener('blur', ()=>{ selWinActive = false; applySelActive(); }); window.addEventListener('focus', ()=>{ selWinActive = true; applySelActive(); }); }
+applySelActive();
+function clearNativeSelection(){ const sel = window.getSelection && window.getSelection(); if(sel && sel.rangeCount && !sel.isCollapsed && sel.removeAllRanges) sel.removeAllRanges(); }
 function handleRowClick(e, id){
+  if(e.shiftKey || e.ctrlKey || e.metaKey) clearNativeSelection();
   if(e.shiftKey && lastClickedTaskId){
     const ids = viewMode==='board' ? [...document.querySelectorAll('.board-card')].map(c=>c.dataset.id) : getVisibleListTasks().tasks.map(t=>t.id);
     const a = ids.indexOf(lastClickedTaskId), b = ids.indexOf(id);
@@ -3931,6 +3949,8 @@ function toolbarAct(kind, value){
 function updateSelectionToolbar(){
   const sub = document.getElementById('mainSubtitle'); if(sub) sub.textContent = mainSubtitleText();
   const ids = selectionIds(), n = ids.length;
+  document.documentElement.classList.toggle('multi-sel', n>1);
+  applySelActive();   // runs after every render and key / click: catches a field that left the page without a blur event
   const set = (id, o)=>{ const b = document.getElementById(id); if(!b) return; b.disabled = !!o.off; if(o.title) b.title = o.title; };
   const allDone = n>0 && ids.every(id=>(tasks.find(t=>t.id===id)||{}).status==='done');
   set('toolDone',     { off: n===0, title: allDone ? 'Mark not started' : n>1 ? `Mark ${n} complete` : 'Mark complete' });
@@ -3999,6 +4019,8 @@ function rowMenuHtml(ids){
   parts.push(sub('fa-regular fa-flag', 'Priority', opts('priority', PRIORITIES, same('priority'), x=>PRIORITY_DOT[x.id])));
   parts.push(sub('fa-regular fa-circle-dot', 'Status', opts('status', STATUSES, same('status'), x=>STATUS_DOT[x.id])));
   parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `rowMenuRun('due',this.value||'clear')`)));
+  const curRepeat = ts.every(t=>(t.repeat||'none')===(ts[0].repeat||'none')) ? (ts[0].repeat||'none') : null;
+  parts.push(sub('fa-solid fa-repeat', 'Repeat', opts('repeat', REPEATS, curRepeat, ()=>({none:true}))));
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
   if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-duplicate','Duplicate','rowMenuRun(\'duplicate\')'));
@@ -4065,6 +4087,7 @@ function rowMenuRun(kind, value){
   else if(kind==='priority'){ ids.length===1 ? updateTaskField(ids[0],'priority',value) : bulkSetPriority(value, ids); }
   else if(kind==='status'){ ids.length===1 ? updateTaskField(ids[0],'status',value) : bulkSetStatus(value, ids); }
   else if(kind==='project'){ ids.length===1 ? updateTaskField(ids[0],'projectId',value) : bulkMoveProject(value, ids); }
+  else if(kind==='repeat'){ ids.length===1 ? updateTaskField(ids[0],'repeat',value) : bulkSetRepeat(value, ids); }
   else if(kind==='due'){
     const v = value==='today' ? today : value==='tomorrow' ? isoAddDays(today,1) : value==='week' ? isoAddDays(today,7) : /^\d{4}-\d{2}-\d{2}$/.test(value||'') ? value : null;   // an ISO date comes from the menus' date field; anything else clears
     ids.length===1 ? updateTaskField(ids[0],'dueDate',v) : bulkSetDueDate(v, ids);
@@ -4081,35 +4104,6 @@ function rowMenuRun(kind, value){
   else if(kind==='delete'){ ids.length===1 ? deleteTask(ids[0]) : bulkDelete(ids); }
 }
 function clearSelection(){ selectedTaskIds.clear(); paintSelection(); }
-function renderBulkBar(){
-  const bar = document.getElementById('bulkBar'); if(!bar) return;
-  if(selectedTaskIds.size===0){ bar.classList.remove('show'); bar.innerHTML=''; return; }
-  bar.classList.add('show');
-  const statusOpts = STATUSES.map(s=>`<option value="${s.id}">${esc(s.label)}</option>`).join('');
-  const priorityOpts = PRIORITIES.map(p=>`<option value="${p.id}">${esc(p.label)}</option>`).join('');
-  const projectOpts = visibleProjects().map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join('');
-  const repeatOpts = REPEATS.map(r=>`<option value="${r.id}">${esc(r.label)}</option>`).join('');
-  const n = selectedTaskIds.size;
-  bar.innerHTML = `
-    <button type="button" class="sel-chip" onclick="clearSelection()" title="Clear the selection (Esc)">${n} selected <i class="fa-solid fa-xmark"></i></button>
-    <select onchange="if(this.value)bulkSetStatus(this.value); this.value='';">
-      <option value="">Set status…</option>${statusOpts}
-    </select>
-    <select onchange="if(this.value)bulkSetPriority(this.value); this.value='';">
-      <option value="">Set priority…</option>${priorityOpts}
-    </select>
-    <select onchange="if(this.value)bulkMoveProject(this.value); this.value='';">
-      <option value="">Move to…</option>${projectOpts}
-    </select>
-    <input type="date" onchange="bulkSetDueDate(this.value)" title="Set due date for selected tasks">
-    <button class="btn btn-sm" onclick="bulkSetDueDate(null)" title="Clear due date"><i class="fa-solid fa-calendar-xmark"></i></button>
-    <select onchange="if(this.value)bulkSetRepeat(this.value); this.value='';">
-      <option value="">Set repeat…</option>${repeatOpts}
-    </select>
-    <button class="btn btn-sm" onclick="bulkSetStatus('done')" title="Mark the selected tasks complete"><i class="fa-regular fa-circle-check"></i> Complete</button>
-    <button class="btn btn-sm btn-danger" onclick="bulkDelete()"><i class="fa-solid fa-trash"></i> Delete</button>
-  `;
-}
 function bulkSetStatus(status, idsArg){
   const ids = idsArg ? [...idsArg] : [...selectedTaskIds];
   const prev = ids.map(id=>{ const t=tasks.find(x=>x.id===id); return t?{id, status:t.status, completedAt:t.completedAt}:null; }).filter(Boolean);
@@ -4434,12 +4428,14 @@ function updateQuickAddPreview(){
 }
 // ArrowDown out of the quick-add field selects the first task; ArrowUp from the first task goes back in (like Mail's search field).
 function selectFirstTaskFromQuickAdd(){
+  setSelZone('list');
   const first = viewMode==='board' ? (getBoardColumns().find(c=>c.tasks.length)||{tasks:[]}).tasks[0] : getVisibleListTasks().tasks[0];
   const input = document.getElementById('quickAddInput'); if(input && input.blur) input.blur();
   if(!first) return;
   selectTaskInList(first.id);
 }
 function selectTaskInList(id){
+  setSelZone('list');
   selectedTaskIds.clear(); kbdSelectedTaskId = id; lastClickedTaskId = id;
   paintSelection();
   const el = document.querySelector(`.task-row[data-id="${id}"], .board-card[data-id="${id}"]`);
@@ -6047,7 +6043,7 @@ function setAppMode(mode){
   if(mode===appMode) return;
   if(appMode==='notes'){ flushNoteEdit(); removeIfEmptyNote(selectedNoteId); }
   if(appMode==='prompts'){ flushPromptEdit(); promptEditorId = null; }
-  appMode = mode;
+  appMode = mode; selZone = 'list'; applySelActive();
   try{ localStorage.setItem(MODE_KEY, mode); }catch(_){}
   applyAppMode(); render();
 }
@@ -10303,7 +10299,6 @@ document.addEventListener('keydown', e=>{
     closeCellPop(); closeRowMenu(); closeToolMenus(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
     closeAllModals(); closeDrawer(); inlineAddSubtaskTaskId=null; inlineAddParentSubId=null; inlineAddParentStepId=null; renamingTaskId=null; renamingSubtask=null; renamingSubSubtask=null; renamingSubSubSubtask=null; selectedTaskIds.clear(); kbdSelectedTaskId=null;
     if(viewMode==='board'){ renderBoard(); } else { renderList(); }
-    renderBulkBar();
     const el = document.activeElement;
     if(el && (el.id==='quickAddInput' || el.id==='searchInput')) el.blur();
     return;
@@ -10346,7 +10341,7 @@ document.addEventListener('keydown', e=>{
     const ids = getVisibleListTasks().tasks.map(t=>t.id);
     if(ids.length){
       selectedTaskIds = new Set(ids);
-      renderList(); renderBulkBar();
+      renderList();
     }
     return;
   }

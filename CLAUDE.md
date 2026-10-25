@@ -331,7 +331,7 @@ parity.
   same way.
 - **Selection changes never rebuild the list.** `paintSelection()` toggles
   `kbd-selected`/`bulk-selected` on the rows/cards that already exist (then
-  refreshes the bulk bar and toolbar); `handleRowClick`, `clearSelection` and
+  refreshes the selection toolbar); `handleRowClick`, `clearSelection` and
   `openTask` use it. A rebuild repaints every row (a visible flash), drops the
   hover state under the cursor for a frame, and loses scroll/focus. `openTask`
   also skips rebuilding the panel when it already shows that task, and only
@@ -342,6 +342,9 @@ parity.
   highlighted while the new one fades in). Selection and hover must be instant,
   as in Mail. Don't call `renderList()` just to move the highlight. Note the global Escape handler
   does still rebuild the list.
+- **The selection is the accent colour only while its list is the active area** (as in Finder, Mail and Notes), in Tasks, Notes and Prompts alike. `selZoneOf(el)` classifies where the pointer or keyboard is: the task list (`.main`) and the notes / prompts list (`.notes-list-pane`) are `list`; the task panel (`#drawer`), the sidebar, the quick-add field and the note / prompt editor (`.notes-editor-pane`) are `other`; menus, dialogs and the toast return `null` (the state stays as it was). `mousedown` and `focusin` (capture) set `selZone`; ArrowUp / ArrowDown with no text field focused hand it back to the list; `closeDrawer()`, `selectTaskInList()`, `selectFirstTaskFromQuickAdd()` and `setAppMode()` set it to `list`; window blur / focus is tracked too. `applySelActive()` puts `html.sel-inactive` on when the window is not active or the zone is not `list`. **Inactive is just a neutral fill** (`--sel-inactive`, 13% of `--text`) with every inside-the-row look unselected (dark text, coloured priority / status pills, normal checkboxes, normal capsule): all the white-on-blue descendant rules are prefixed `html:not(.sel-inactive)` and one `html.sel-inactive :is(.task-row…, .board-card…, .note-row.selected)` rule sets the grey, so a new selected-state rule needs that prefix. Checked with real mouse / keyboard events: click the list = blue, click into the panel / editor = grey, click back = blue, Escape closes the panel = blue. Not done: the sidebar's own active row. The earlier alternative, "solid on the task's own line only, subtasks on a tint", was built, judged against this one and removed; its CSS is not kept in the repo.
+- **No per-row capsule on a multi-selection**: `updateSelectionToolbar()` sets `html.multi-sel` when two or more are selected, and `html.multi-sel :is(.task-row, .board-card).bulk-selected .row-actions { display: none }` hides it on the selected rows (its Duplicate / Delete act on one row, while the toolbar and right-click menu act on the selection). An unselected row still shows its own.
+- **Shift-click does not start a text selection** (`rowShiftMouseDown`, a capture-phase `mousedown`; `clearNativeSelection` in `handleRowClick`): the browser's own range selection used to paint pale highlights over titles and badges and wash out the capsule.
 - **Selection toolbar + counts**: a capsule group in `.main-toolbar` (Complete,
   Priority ▾, Due ▾, Move ▾ | Duplicate, Delete) acts on `selectionIds()` —
   the multi-selection if any, else the single selected row — through the same
@@ -402,6 +405,7 @@ parity.
   same tag looked different in the sidebar than on a task row. Inactive chips stay neutral, so the fill alone says
   "on". Same in the sidebar, the filter popover and the detail panel.
 - **The task panel is a grouped inspector** (Reminders / System Settings style, not a web form): `renderDrawer` builds `.dgroup` blocks of `.drow` rows (label `.k` left, value `.v` right, hairlines between, no boxes, sentence-case labels, no resize grip). Notes is a borderless auto-growing textarea (`drawerGrow`); Project / Status / Priority / Repeat each keep a **real `<select>` (`.drow-sel`) laid invisibly over the whole row** (so the OS menu, keyboard and screen readers work and the row is the click target) while the visible value is plain text with the stacked chevrons (`STACK`); Status and Priority show their dot (`STATUS_DOT` / `PRIORITY_DOT`). **Due opens the shared cell popover** (`openCellPop(event, id, 'due')` on the row; `.drow.due .cell-pop` opens right-aligned), not the browser's date control; "Ends on" shows text with an invisible `type=date` over the row (`.drow-ov`, `showPicker()`), so no raw "tt.mm.jjjj" ever shows. Repeat details (Every / On days / Ends on / After) are extra rows only while a task repeats; Skip sits beside the Repeat label above the select overlay (`z-index`). Tags are chips under their label. The Subtasks block below is the unchanged list-style markup (drag, promote / demote, Tab chains) under a sentence-case header with "N of M complete". Footer: Duplicate as a pill, **Delete as plain red text** (`.btn-text-danger`), no solid red button. A malicious `dueDate` never reaches the markup (the row shows formatted, escaped text); `repeatEndDate` is still `esc()`d into its input's value. Keep new fields as rows, not boxes.
+- **There is no multi-select bar.** An old purple bar above the list (white native selects, a raw date field, a solid red Delete, the count repeated a third time, and the one place where multi-selection was not the solid accent blue) duplicated the selection toolbar and was removed (`renderBulkBar` and its CSS are gone). Multi-selection is the same solid accent as a single one; the count is in the subtitle ("2 selected"); everything runs through the toolbar capsule and the right-click menu (`selectionIds()` / `rowMenuRun`, which call the `bulk*` helpers). The one thing only the bar could do, **Repeat**, is now a *Repeat* submenu in the right-click menu for one or many tasks (`rowMenuRun('repeat', id)`; the ✓ shows the shared value); Status is in that menu too, and *Clear* is in both Due menus. Don't add a second surface for acting on the selection.
 - **Detail panel add fields.** The panel's add inputs live inside `.field`, whose boxed-input
   rule (`.field input[type=text]`, plus the Glass copy) out-ranks the ghost style, so they showed as
   bordered boxes beside a ghost row. A `.drawer`-scoped rule at higher specificity restores the ghost
@@ -474,7 +478,7 @@ parity.
 - **Row menu** (`#rowMenu`: right-click, the row's ⋯ button, or the Menu /
   Shift+F10 key — modelled on Milestone's). Targets the whole selection when
   the row is part of a multi-selection, else that row, and **never changes
-  the selection** (so no bulk bar pops in and shoves the list down). Actions
+  the selection** (so nothing pops in and shoves the list down). Actions
   go through `rowMenuRun`, which reuses `updateTaskField` for one task and the
   `bulk*` helpers for several; those helpers take an optional explicit id
   list for exactly this reason. It is `position:fixed` on `<body>`, so
@@ -718,7 +722,7 @@ still has one is simply ignored by `load()`).
     `.task-row:hover:not(.kbd-selected):not(.bulk-selected)` (same specificity,
     later in the file, it used to erase the selected look while the mouse was
     still on the row).
-  **Corner radii**: toolbar controls (sidebar header/tools bar, `.main-toolbar`, bulk bar) are
+  **Corner radii**: toolbar controls (sidebar header/tools bar, `.main-toolbar`) are
   capsules like Mail's; everything in the content uses `--radius` (10px), task
   rows `--glass-r-row` (8px), the quick-add bar `--glass-r-bar` (12px), board
   columns `--radius-lg` (14px) and menus/modals `--glass-r-menu` (16px); chips and

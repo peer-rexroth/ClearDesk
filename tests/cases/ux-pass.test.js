@@ -651,3 +651,67 @@ test('the panel rows follow the data: a repeating task shows its details, a plai
   tasks[0].repeat = 'daily'; tasks[0].dueDate = null; renderDrawer(); h = document.getElementById('drawer').innerHTML;
   assertIncludes(h, '<span class="k">Every'); assertIncludes(h, 'drow-skip'); assertNotIncludes(h, 'class="v overdue"'); assertIncludes(h, '<span class="vt">None</span>');
 });
+
+test('the multi-select bar is gone: no render function, and Repeat (the one thing only it could set) is in the right-click menu for one or many tasks', function () {
+  assertEqual(typeof renderBulkBar, 'undefined');
+  const mk = (id, extra) => Object.assign({ id, title: id, projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], dueDate: '2030-01-05', createdAt: 1, updatedAt: 1 }, extra || {});
+  tasks = [mk('a'), mk('b', { repeat: 'daily' })];
+  const h = rowMenuHtml(['a', 'b']);
+  assertIncludes(h, '>Repeat<'); assertIncludes(h, "rowMenuRun('repeat','weekly')"); assertIncludes(h, "rowMenuRun('repeat','none')");
+  const flyout = html => { const i = html.indexOf('<span>Repeat</span>'); return html.slice(i, html.indexOf('</div></div>', i)); };
+  assertNotIncludes(flyout(h), 'menu-opt current', 'two tasks that differ show no ✓ in the Repeat list');
+  rowMenuIds = ['a', 'b']; rowMenuRun('repeat', 'weekly');
+  assertEqual(tasks[0].repeat, 'weekly'); assertEqual(tasks[1].repeat, 'weekly', 'one choice applies to the whole selection');
+  rowMenuIds = ['a']; rowMenuRun('repeat', 'none'); assertEqual(tasks[0].repeat, 'none'); assertEqual(tasks[1].repeat, 'weekly', 'a single task changes alone');
+  const one = rowMenuHtml(['b']); assertIncludes(flyout(one), "menu-opt current\" role=\"menuitem\" onclick=\"rowMenuRun('repeat','weekly')", 'one task shows its own repeat ticked (b is weekly by now)'); assertNotIncludes(flyout(one), 'no-tick');
+});
+
+test('a Shift-click on a row or card does not start the browser\'s own text selection; other clicks and text fields are left alone', function () {
+  const ev = (o, inside) => { const e = { shiftKey: !!o.shift, defaultPrevented: false, preventDefault() { this.defaultPrevented = true; }, target: { closest: sel => inside.some(s => sel.indexOf(s) !== -1) ? {} : null } }; return e; };
+  let e = ev({ shift: true }, ['.task-row']); rowShiftMouseDown(e); assertTrue(e.defaultPrevented, 'Shift-click on a task row');
+  e = ev({ shift: true }, ['.board-card']); rowShiftMouseDown(e); assertTrue(e.defaultPrevented, 'and on a board card');
+  e = ev({ shift: false }, ['.task-row']); rowShiftMouseDown(e); assertFalse(e.defaultPrevented, 'a plain press is untouched (text can still be selected / dragged)');
+  e = ev({ shift: true }, []); rowShiftMouseDown(e); assertFalse(e.defaultPrevented, 'outside the list nothing changes');
+  e = ev({ shift: true }, ['.task-row', 'input']); rowShiftMouseDown(e); assertFalse(e.defaultPrevented, 'a rename field inside a row keeps Shift+click for selecting its text');
+});
+
+test('the per-row action capsule is hidden on the selected rows only while several are selected: the multi-sel flag follows the selection size', function () {
+  const mk = id => ({ id, title: id, projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], createdAt: 1, updatedAt: 1 });
+  tasks = [mk('a'), mk('b'), mk('c')];
+  const on = () => document.documentElement.classList.contains('multi-sel');
+  selectedTaskIds = new Set(['a']); kbdSelectedTaskId = 'a'; updateSelectionToolbar(); assertFalse(on(), 'one selected: the capsule stays');
+  selectedTaskIds = new Set(['a', 'b']); updateSelectionToolbar(); assertTrue(on(), 'two selected: hidden on them');
+  selectedTaskIds = new Set(); kbdSelectedTaskId = 'c'; updateSelectionToolbar(); assertFalse(on(), 'selection cleared: back');
+});
+
+test('the selection is accent only while its list is the active area: zones from where the pointer / focus is, grey otherwise', function () {
+  const el = (...zones) => ({ closest: sel => sel.split(',').map(x => x.trim()).some(x => zones.indexOf(x) !== -1) ? {} : null });
+  assertEqual(selZoneOf(el('.main')), 'list', 'the task list');
+  assertEqual(selZoneOf(el('.notes-list-pane')), 'list', 'the notes / prompts list');
+  assertEqual(selZoneOf(el('#drawer')), 'other', 'the task panel');
+  assertEqual(selZoneOf(el('.notes-editor-pane')), 'other', 'the note / prompt editor');
+  assertEqual(selZoneOf(el('.sidebar')), 'other', 'the sidebar (search, projects)');
+  assertEqual(selZoneOf(el('.main', '.quickadd')), 'other', 'the quick-add field lives inside .main but is not the list');
+  assertEqual(selZoneOf(el('.main', '.modal-bg')), null, 'a dialog leaves the state as it was');
+  assertEqual(selZoneOf(el('.main', '#rowMenu')), null, 'so does a menu');
+  assertEqual(selZoneOf(el()), null); assertEqual(selZoneOf(null), null);
+  const inactive = () => document.documentElement.classList.contains('sel-inactive');
+  selZone = 'list'; selWinActive = true; applySelActive(); assertFalse(inactive(), 'list active, window active');
+  setSelZone('other'); assertTrue(inactive(), 'focus moved to the panel');
+  setSelZone(null); assertTrue(inactive(), 'an unknown target changes nothing');
+  setSelZone('list'); assertFalse(inactive(), 'back in the list');
+  selWinActive = false; applySelActive(); assertTrue(inactive(), 'another window is active');
+  selWinActive = true; applySelActive(); assertFalse(inactive());
+  selectTaskInList; setSelZone('other'); closeDrawer(); assertFalse(inactive(), 'closing the panel hands the selection back to the list');
+});
+
+test('typing in a text field turns the selection grey even inside the list, and it comes back when the field is gone', function () {
+  const inactive = () => document.documentElement.classList.contains('sel-inactive');
+  const field = { closest: sel => sel.indexOf('input') !== -1 ? {} : null }, none = { closest: () => null };
+  selZone = 'list'; selWinActive = true;
+  document.activeElement = none; applySelActive(); assertFalse(inactive(), 'nothing focused: the list is active');
+  document.activeElement = field; applySelActive(); assertTrue(inactive(), 'a rename / add-subtask field has focus');
+  document.activeElement = none; updateSelectionToolbar(); assertFalse(inactive(), 'the field is gone (a re-render removes it with no blur): blue again');
+  document.activeElement = { closest: sel => sel.indexOf('[contenteditable="true"]') !== -1 ? {} : null }; applySelActive(); assertTrue(inactive(), 'the note body counts too');
+  document.activeElement = none; applySelActive();
+});
