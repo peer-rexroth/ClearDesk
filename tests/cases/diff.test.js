@@ -241,7 +241,7 @@ test('the icon registry gives every meaning its own drawing; the retired names s
   Object.keys(ICONS).forEach(k => { (byDrawing[ICONS[k]] = byDrawing[ICONS[k]] || []).push(k); });
   const shared = Object.keys(byDrawing).map(d => byDrawing[d]).filter(g => g.length > 1).map(g => g.sort().join('='));
   assertDeepEqual(shared, ['trash=trash-can'], 'only the documented alias shares a drawing (Copy and Duplicate, Export and Import, folder-open and folder-plus must differ)');
-  ['braces', 'duplicate', 'copy', 'arrow-up-from-bracket', 'arrow-down-to-bracket', 'folder', 'folder-open', 'folder-plus', 'circle-info', 'pen', 'undo', 'redo'].forEach(k => assertTrue(!!ICONS[k], k + ' is drawn'));
+  ['braces', 'duplicate', 'copy', 'arrow-up-from-bracket', 'arrow-down-to-bracket', 'folder', 'folder-open', 'folder-plus', 'circle-info', 'pen', 'undo', 'redo', 'diff'].forEach(k => assertTrue(!!ICONS[k], k + ' is drawn'));
   ['clone', 'download', 'upload', 'pen-to-square'].forEach(k => assertEqual(ICONS[k], undefined, k + ' was retired'));
 });
 
@@ -253,4 +253,14 @@ test('menus use the vocabulary: Copy is two squares, Duplicate is the squares wi
   assertIncludes(h, svg('arrow-up-from-bracket'), 'Export Prompt');
   assertIncludes(promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER), svg('folder-plus'), 'New Subfolder is the plus folder');
   assertIncludes(promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER), svg('arrow-up-from-bracket'), 'Export Folder');
+});
+
+test('Compare has its own icon (the diff square) in the menus, the shortcuts group and the list mark; arrows-left-right stays for "distribute evenly"', function () {
+  const a = pmk({ name: 'Alpha' }), b = pmk({ name: 'Beta' }); pfresh(); prompts = [a, b];
+  assertIncludes(promptMenuHtml(a.id), menuSvg('diff'), 'Select for Compare');
+  togglePromptCompareMark(a.id);
+  assertIncludes(promptMenuHtml(b.id), menuSvg('diff'), 'Compare with Selected');
+  assertNotIncludes(promptMenuHtml(b.id), menuSvg('arrows-left-right'), 'no swap arrows in the prompt menu any more');
+  assertEqual(shortcutGroups().find(g => g.id === 'compare').icon, 'fa-solid fa-diff');
+  promptCompareId = null;
 });
