@@ -1561,7 +1561,7 @@ const ICONS = {
   html[data-scheme="glass"].sidebar-collapsed .main-toolbar, html[data-scheme="glass"].sidebar-collapsed .notes-list-head { padding-left: 112px !important; }
   /* the floating toggle and the collapsed file-status chip are round 36px buttons like the compose button, icons dead centre */
   html[data-scheme="glass"] #fileSyncMini .file-chip { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; gap: 0; border: 0; border-radius: 50%; background: var(--cap-fill); }
-  #fileSyncMini .file-chip i { margin: 0; width: auto; line-height: 1; }
+  #fileSyncMini .file-chip i { margin: 0; width: 1em; line-height: 1; }   /* 1em, not auto: a masked icon has no content, so auto collapsed it to nothing and the button was an empty circle */
   html[data-scheme="glass"] #sbFloat { top: 8px; }
   html[data-scheme="glass"] #sbFloat .btn-icon { width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; background: var(--cap-fill); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; }
   html[data-scheme="glass"] #sbFloat .btn-icon:hover, html[data-scheme="glass"] #fileSyncMini .file-chip:hover { background: var(--cap-hover); }
@@ -1858,6 +1858,8 @@ const ICONS = {
   .pr-check:hover .pr-check-x, .pr-check:focus-within .pr-check-x { opacity: 1; }
   .pr-add-item { align-self: flex-start; border: 0; background: none; color: var(--text-3); font: inherit; font-size: var(--fs-13); padding: 4px 0; cursor: default; }
   .pr-add-item:hover { color: var(--text); }
+  .pr-text-clear[hidden] { display: none; }
+  .pr-text-clear { margin-top: 2px; }
   .pr-textfield { display: block; width: 100%; border: 1px solid var(--border); border-radius: var(--r-m); padding: 8px 12px; font: inherit; font-size: var(--fs-14); line-height: 1.45; background: var(--bg); color: var(--text); box-sizing: border-box; resize: none; overflow: hidden; }
   .pr-count { font-size: var(--fs-12); color: var(--text-3); text-align: right; margin-top: 4px; }
   .pr-count:empty { display: none; }
@@ -7873,7 +7875,7 @@ function renderPromptInspector(p){
       html += `<div class="pr-checks">` + (v.options || []).map((o, i)=>{ const on = (v.selected || []).includes(o); return `<div class="pr-check${on ? ' on' : ''}" role="checkbox" aria-checked="${on}" tabindex="0" onclick="togglePromptItem(this,${i},event)"${locked ? '' : promptReorderAttrs('check', i) + ` ondblclick="startPromptRename(this,'option',${i})" title="Double-click to rename"`} oncontextmenu="openPromptItemMenu(event,'option',${i})" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();togglePromptItem(this,${i})}else promptItemKey(event,'option',${i})"><span class="box"><i class="fa-solid fa-check"></i></span><span class="pr-check-text">${esc(o)}</span>${locked ? '' : `<button type="button" class="icon-btn pr-check-x" title="Remove item" aria-label="Remove ${esc(o)}" onclick="event.stopPropagation();removePromptOption(this,${i})"><i class="fa-solid fa-xmark"></i></button>`}</div>`; }).join('')
         + (locked ? '' : `<button type="button" class="pr-add-item" onclick="startPromptAddOption(this)"><i class="fa-solid fa-plus"></i> Add item</button>`) + `</div>`;
     } else {
-      html += `<textarea class="pr-textfield" rows="1" maxlength="${PROMPT_TEXT_MAX}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>${esc(v.value || '')}</textarea><div class="pr-count" aria-live="polite"></div>`;
+      html += `<textarea class="pr-textfield" rows="1" maxlength="${PROMPT_TEXT_MAX}" placeholder="Type here…" aria-label="${esc(k)}" oninput="setPromptText(this)"${promptTrashed(p) ? ' disabled' : ''}>${esc(v.value || '')}</textarea><div class="pr-count" aria-live="polite"></div>${promptTrashed(p) ? '' : `<button type="button" class="pr-add-item pr-text-clear" onclick="clearPromptText(this)"${v.value ? '' : ' hidden'}>Clear</button>`}`;
     }
     html += `</div>`;
   });
@@ -7889,6 +7891,8 @@ function growPromptText(el){
   const h = el.scrollHeight || 0, max = 260;
   if(h) el.style.height = Math.min(h + 2, max) + 'px';
   el.style.overflowY = h > max ? 'auto' : 'hidden';
+  const clr = el.parentElement && el.parentElement.querySelector ? el.parentElement.querySelector('.pr-text-clear') : null;
+  if(clr) clr.hidden = !el.value;                                   // Clear is offered only while there is something to clear
   const c = el.nextElementSibling;
   if(c && c.classList && c.classList.contains('pr-count')){
     const n = (el.value || '').length, near = n >= PROMPT_TEXT_MAX * .9;
@@ -7935,6 +7939,11 @@ function togglePromptItem(el, i, ev){
   const o = c.v.options[i], sel = c.v.selected || [];
   c.v.selected = sel.includes(o) ? sel.filter(x=>x!==o) : [...sel, o];
   touchPrompt(c.p); save(); refreshPromptSelection(c.p);
+}
+// Empties a text variable and puts the cursor back in it (a locked prompt still allows it, like typing a value).
+function clearPromptText(btn){
+  const f = btn && btn.closest ? btn.closest('.pr-var').querySelector('.pr-textfield') : null; if(!f) return;
+  f.value = ''; setPromptText(f); if(f.focus) f.focus();
 }
 function setPromptText(input){
   const c = promptVarOf(input); if(!c || !c.v) return;

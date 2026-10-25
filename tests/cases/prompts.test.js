@@ -673,3 +673,14 @@ test('opening a code fence recolours the lines below it, so the patch reaches th
   assertTrue(pl.insert.length >= 3, 'the fence and the now-code lines below it are replaced, not just the new line');
   const c = promptHighlightLines('one\ntwo\nthree\nfour!'); assertEqual(promptHlPlan(a, c).remove, 1); assertEqual(promptHlPlan(a, c).insert.length, 1);
 });
+
+test('a text variable has a Clear button that shows only while there is text, and it empties the value', function () {
+  pfresh(); var p = pmk({ template: 'Reply: ((note))' }); p.vars = detectPromptVars(p.template, {}); p.vars['note'].value = 'some long text';
+  prompts.push(p); promptEditorId = p.id; renderPromptInspector(p);
+  var html = document.getElementById('pInspector').innerHTML;
+  assertIncludes(html, 'clearPromptText(this)', 'the Clear button is rendered under the text field');
+  assertNotIncludes(html.slice(html.indexOf('pr-text-clear') - 40, html.indexOf('pr-text-clear') + 80), ' hidden', 'visible while the variable has a value');
+  p.vars['note'].value = ''; renderPromptInspector(p);
+  html = document.getElementById('pInspector').innerHTML;
+  assertIncludes(html.slice(html.indexOf('pr-text-clear') - 10, html.indexOf('pr-text-clear') + 100), 'hidden', 'hidden when the field is empty');
+});
