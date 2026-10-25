@@ -1156,6 +1156,7 @@ const ICONS = {
   /* in the list and on board cards the ghost circle of the add-subtask row lines up with the real subtask circles above it: the same 16px, and the row starts 2px left so that circle (inside the row's 2px padding) sits on their column while the focus tint, which is the row, starts on the card's edge like the title checkbox and the pills */
   :is(.task-row, .board-card) .task-subtask-add-row { margin-left: -2px; }
   :is(.task-row, .board-card) .task-subtask-add-row::before { width: 16px; height: 16px; }
+  :is(.task-row, .board-card) .task-subtask-add-row:focus-within { background: transparent; }   /* no tint while typing: the caret and the placeholder say it, and on the grey selected card the tint was a hard-edged pale bar */
   /* on the solid selection colour */
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row::before { border-color: var(--sel-line-strong); }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row:focus-within { background: var(--sel-fill); }
