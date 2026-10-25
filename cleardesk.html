@@ -7846,16 +7846,16 @@ function renderPromptInspector(p){
     host.innerHTML = html + promptIncludesHtml(p) + promptInspectorFoot(); return;
   }
   const hasPickable = entries.some(([, v])=>v.type!=='text');
-  if(hasPickable){
+  {   // a prompt with only text variables still shows the row, with just Clear (it empties every field); saved presets need a choice to store
     html += `<div class="pr-insp-label">Presets</div><div class="pr-presets">`;
     html += `<button type="button" class="pr-chip${promptPresetMatches(p, null) ? ' on' : ''}" onclick="applyPromptPreset(-1)">Clear</button>`;
-    (p.presets || []).forEach((ps, i)=>{
+    if(hasPickable) (p.presets || []).forEach((ps, i)=>{
       const on = promptPresetMatches(p, ps);
       html += locked
         ? `<button type="button" class="pr-chip${on ? ' on' : ''}" title="${esc(ps.name)}" onclick="applyPromptPreset(${i},event)">${esc(ps.name)}</button>`
         : `<span class="pr-chip-wrap has-x${on ? ' on' : ''}"${promptReorderAttrs('preset', i)} title="${esc(ps.name)} — double-click to rename" ondblclick="startPromptRename(this,'preset',${i})" oncontextmenu="openPromptItemMenu(event,'preset',${i})"><button type="button" class="pr-chip${on ? ' on' : ''}" onclick="applyPromptPreset(${i},event)" onkeydown="promptItemKey(event,'preset',${i})">${esc(ps.name)}</button><button type="button" class="pr-chip-x" tabindex="-1" title="Delete preset" aria-label="Delete preset ${esc(ps.name)}" onclick="deletePromptPreset(${i})"><i class="fa-solid fa-xmark"></i></button></span>`;
     });
-    if(!locked) html += promptPresetDraft
+    if(!locked && hasPickable) html += promptPresetDraft
       ? `<input type="text" class="pr-chip-input" id="pPresetInput" placeholder="Preset name" maxlength="60" aria-label="Preset name" onkeydown="promptPresetKey(event)" onblur="promptPresetKey({key:'Enter'})">`
       : `<button type="button" class="pr-chip add" onclick="startPromptPresetSave()"><i class="fa-solid fa-plus"></i> Save as Preset…</button>`;
     html += `</div>`;
@@ -8114,7 +8114,7 @@ function startPromptAddOption(btn){
 // ---- presets: named sets of the choices and checklists (text variables are never part of one: they are typed for each use) ----
 function promptPresetMatches(p, preset){
   const keys = Object.keys(p.vars || {}).filter(k=>p.vars[k].type!=='text');
-  if(!preset) return keys.length > 0 && keys.every(k=>{ const v = p.vars[k]; return v.type==='instruction' ? !(v.selected && v.selected.length) : v.selected===''; }) && Object.values(p.vars).filter(v=>v.type==='text').every(v=>!v.value);
+  if(!preset) return Object.keys(p.vars || {}).length > 0 && keys.every(k=>{ const v = p.vars[k]; return v.type==='instruction' ? !(v.selected && v.selected.length) : v.selected===''; }) && Object.values(p.vars).filter(v=>v.type==='text').every(v=>!v.value);
   const pk = Object.keys(preset.values || {}).filter(k=>p.vars[k] && p.vars[k].type!=='text');
   if(pk.length!==keys.length) return false;
   return pk.every(k=>{ const v = p.vars[k], val = preset.values[k]; if(v.type!=='instruction') return v.selected===val; const a = v.selected || [], b = Array.isArray(val) ? val : []; return a.length===b.length && a.every(x=>b.includes(x)); });

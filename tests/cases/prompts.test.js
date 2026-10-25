@@ -684,3 +684,14 @@ test('a text variable has a Clear button that shows only while there is text, an
   html = document.getElementById('pInspector').innerHTML;
   assertIncludes(html.slice(html.indexOf('pr-text-clear') - 10, html.indexOf('pr-text-clear') + 100), 'hidden', 'hidden when the field is empty');
 });
+
+test('a prompt with only text variables shows the Presets row with just Clear (no saved presets, no Save as Preset), and Clear empties the fields', function () {
+  pfresh(); var p = pmk({ template: 'Reply: ((note))' }); p.vars = detectPromptVars(p.template, {}); p.vars.note.value = 'abc'; p.presets = [{ name: 'Old', values: {} }];
+  prompts.push(p); promptEditorId = p.id; renderPromptInspector(p);
+  var html = document.getElementById('pInspector').innerHTML;
+  assertIncludes(html, 'applyPromptPreset(-1)', 'the Clear chip is there');
+  assertNotIncludes(html, 'Save as Preset', 'nothing to save without a choice'); assertNotIncludes(html, 'Old', 'and a stale saved preset is not listed');
+  assertFalse(promptPresetMatches(p, null), 'Clear is not "on" while the field has text');
+  applyPromptPreset(-1);
+  assertEqual(p.vars.note.value, '', 'Clear empties the text field'); assertTrue(promptPresetMatches(p, null), 'and the chip then shows as on');
+});
