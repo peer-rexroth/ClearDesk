@@ -4788,6 +4788,7 @@ function addSubtask(taskId){
   t.subtasks.push({id:genId(), text, done:false, subtasks:[]});
   t.updatedAt = Date.now();
   save(); render();
+  document.getElementById('newSubtaskInput')?.focus();   // the panel repaints with a fresh, empty field: keep typing, as in the step and sub-step fields
 }
 function toggleSubtask(taskId, subId){
   const t = tasks.find(x=>x.id===taskId); if(!t) return;

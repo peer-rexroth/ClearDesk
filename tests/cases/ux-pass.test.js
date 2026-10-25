@@ -715,3 +715,12 @@ test('typing in a text field turns the selection grey even inside the list, and 
   document.activeElement = { closest: sel => sel.indexOf('[contenteditable="true"]') !== -1 ? {} : null }; applySelActive(); assertTrue(inactive(), 'the note body counts too');
   document.activeElement = none; applySelActive();
 });
+
+test('adding a subtask in the task panel leaves the cursor in the (new, empty) add field, as steps and sub-steps already do', function () {
+  tasks = [{ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], createdAt: 1, updatedAt: 1 }];
+  openTask('t1');
+  const input = document.getElementById('newSubtaskInput'); let focused = 0; input.focus = () => { focused++; }; input.value = 'First';
+  addSubtask('t1');
+  assertEqual(tasks[0].subtasks.map(s => s.text).join(), 'First'); assertEqual(focused, 1, 'focus goes back to the add field');
+  input.value = '   '; addSubtask('t1'); assertEqual(tasks[0].subtasks.length, 1, 'an empty entry adds nothing'); 
+});
