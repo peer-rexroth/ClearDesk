@@ -2883,16 +2883,14 @@ wireColumnResizer(PROMPTS_INSP_COL, promptsInspW, {
   width(ev, c){ return (c.right - ev.clientX) / c.k; }
 }, 'ArrowLeft');
 const UI_SCALE_KEY = 'cleardesk_uiscale';
-// Six stops: Small, Medium (the default), Large, Extra Large, Extra Extra Large (150) and Maximum (200, the HIG's minimum enlargement). (Small and Extra Large were taken out once and are back, on request:
+// Four stops: Small, Medium (the default), Large and Extra Large. (Small and Extra Large were taken out once and are back, on request:
 // the text-size scale needs room both ways.) A stored value that is not exactly a stop snaps to the nearest one.
 // Each segment shows the letter A at its own size (glyph, in px) — as in Safari's "aA" menu — and label is its tooltip.
 const UI_SCALE_STEPS = [
   { pct: 90,  label: 'Small',       glyph: 12 },
   { pct: 100, label: 'Medium',      glyph: 14 },
   { pct: 115, label: 'Large',       glyph: 18 },
-  { pct: 130, label: 'Extra Large', glyph: 22 },
-  { pct: 150, label: 'Extra Extra Large', glyph: 25 },
-  { pct: 200, label: 'Maximum', glyph: 28 }   // the HIG asks for at least 200% enlargement
+  { pct: 130, label: 'Extra Large', glyph: 22 }
 ];
 const UI_SCALE_DEFAULT = 100;
 // Index into UI_SCALE_STEPS of whichever stop is closest to pct — this is

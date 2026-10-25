@@ -693,8 +693,8 @@ still has one is simply ignored by `load()`).
   the only thing shown) — switching it off reveals the **Light | Dark** override (thin outlined sun / crescent-moon icons, `ICON_SUN`/`ICON_MOON`),
   and switching it back on returns to `'auto'`. Behaviour is unchanged (`themePref` is still `'light'|'dark'|'auto'`); the switch just keeps the
   override out of the way, as Apple's guidance prefers following the system.
-  Text size (also saved in the synced data) offers **Small 90%, Medium 100% (default), Large 115%, Extra Large 130%, Extra Extra Large 150% and Maximum 200%** (`UI_SCALE_STEPS`), shown as six ever larger "A"s (each segment's `glyph` is its font size, like Safari's "aA" menu; the full name is the tooltip);
-  `clampUiScale` snaps any other saved value to the nearest stop. **Six stops since audit U-08**: Small 90, Medium 100, Large 115, Extra Large 130, Extra Extra Large 150 and Maximum 200 (the HIG asks for at least 200% enlargement); at 150–200% the window is effectively under 800 CSS px, so the narrow-window layout applies.
+  Text size (also saved in the synced data) offers **Small 90%, Medium 100% (default), Large 115% and Extra Large 130%** (`UI_SCALE_STEPS`), shown as four ever larger "A"s (each segment's `glyph` is its font size, like Safari's "aA" menu; the full name is the tooltip);
+  `clampUiScale` snaps any other saved value to the nearest of the four. (150% and 200% stops were added for audit U-08 and removed again at the user's request: four stops it is; the HIG's 200% remains an accepted deviation, browser zoom covers it.)
 - **`<html data-scheme="glass">`** is set in the markup and is now only a
   styling hook: every Glass selector is written `html[data-scheme="glass"] …`,
   and it is not toggled by script. Rewriting those to bare `html …` would lower
