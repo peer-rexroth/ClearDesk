@@ -603,6 +603,22 @@ const ICONS = {
   .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: var(--r-m); font-size: var(--fs-13); font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: all 0.25s ease; z-index: 300; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.error { background: var(--red-text); }
+  /* ---- classes that replaced inline style="…" literals (audit cleanup) ---- */
+  .lead-ico { width: 14px; color: var(--text-3); margin-right: 6px; }   /* the small icon before a sidebar row's label */
+  #uiScaleMenu { left: auto; right: 0; min-width: 210px; }
+  .task-list-header .th-sort[data-col="status"] { margin-left: -4px; }
+  .task-list-header .th-sort[data-col="due"] { margin-left: -8px; }
+  #folderParentField { margin-top: 12px; }
+  .modal.modal-w360 { width: 360px; }
+  .modal p.modal-sub { font-size: var(--fs-12); color: var(--text-3); margin-top: -8px; }
+  #allTasksProjectsList { display: flex; flex-direction: column; gap: 1px; max-height: 320px; overflow-y: auto; }
+  .due-repeat-ico { color: var(--text-3); font-size: var(--ico-14); margin-left: 4px; }
+  .task-subtasks.ind-21 { margin-left: 21px; }   /* one level in: a measured alignment (circle centre under the parent's), not a spacing step */
+  .task-subtasks.ind-24 { margin-left: 24px; }
+  .task-subtasks.ind-28 { margin-left: 28px; }   /* the board card's first level: the title's text column */
+  .drawer-header .task-checkbox { margin-top: 6px; }
+  .pop-svg.pop-indent { margin-left: 14px; }
+  .row-menu-hint.row-menu-empty { padding: 8px 12px; }
   .toast-close { background: none; border: none; color: inherit; opacity: .8; padding: 0 0 0 6px; margin: 0; font-size: var(--ico-14); display: inline-flex; align-items: center; cursor: default; }
   .toast-close:hover { opacity: 1; }
   .toast-undo { background: none; border: none; color: inherit; font: inherit; font-weight: 700; text-decoration: underline; cursor: default; padding: 0; margin-left: 2px; }
@@ -1936,11 +1952,11 @@ const ICONS = {
     <div id="notesSide">
       <div class="sidebar-section">
         <div class="nav-item" id="allNotesNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('all')">
-          <span><i class="fa-regular fa-note-sticky" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Notes</span>
+          <span><i class="fa-regular fa-note-sticky lead-ico"></i>All Notes</span>
           <span class="count" id="allNotesCount"></span>
         </div>
         <div class="nav-item" id="pinnedNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('pinned')">
-          <span><i class="fa-solid fa-thumbtack" style="width:14px;color:var(--text-3);margin-right:6px"></i>Pinned</span>
+          <span><i class="fa-solid fa-thumbtack lead-ico"></i>Pinned</span>
           <span class="count" id="pinnedCount"></span>
         </div>
       </div>
@@ -1952,7 +1968,7 @@ const ICONS = {
       </div>
       <div class="sidebar-section">
         <div class="nav-item" id="trashNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('trash')">
-          <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
+          <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
           <span class="count" id="trashCount"></span>
         </div>
       </div>
@@ -1960,11 +1976,11 @@ const ICONS = {
     <div id="promptsSide">
       <div class="sidebar-section">
         <div class="nav-item" id="pAllNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('all')">
-          <span><i class="fa-regular fa-braces" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Prompts</span>
+          <span><i class="fa-regular fa-braces lead-ico"></i>All Prompts</span>
           <span class="count" id="pAllCount"></span>
         </div>
         <div class="nav-item" id="pFavNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('favorites')">
-          <span><i class="fa-regular fa-star" style="width:14px;color:var(--text-3);margin-right:6px"></i>Favorites</span>
+          <span><i class="fa-regular fa-star lead-ico"></i>Favorites</span>
           <span class="count" id="pFavCount"></span>
         </div>
       </div>
@@ -1976,26 +1992,26 @@ const ICONS = {
       </div>
       <div class="sidebar-section">
         <div class="nav-item" id="pTrashNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('trash')">
-          <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
+          <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
           <span class="count" id="pTrashCount"></span>
         </div>
       </div>
     </div>
     <div class="sidebar-section">
       <div class="nav-item" id="allTasksNav" role="button" tabindex="0" aria-pressed="false" onclick="setProjectFilter(null)">
-        <span><i class="fa-solid fa-inbox" style="width:14px;color:var(--text-3);margin-right:6px"></i>All Tasks</span>
+        <span><i class="fa-solid fa-inbox lead-ico"></i>All Tasks</span>
         <span class="count" id="allTasksCount"></span>
       </div>
       <div class="nav-item" id="myDayNav" role="button" tabindex="0" aria-pressed="false" onclick="setMyDayFilter()">
-        <span><i class="fa-solid fa-sun" style="width:14px;color:var(--text-3);margin-right:6px"></i>My Day</span>
+        <span><i class="fa-solid fa-sun lead-ico"></i>My Day</span>
         <span class="count" id="myDayCount"></span>
       </div>
       <div class="nav-item" id="thisWeekNav" role="button" tabindex="0" aria-pressed="false" onclick="setThisWeekFilter()">
-        <span><i class="fa-solid fa-calendar-week" style="width:14px;color:var(--text-3);margin-right:6px"></i>This Week</span>
+        <span><i class="fa-solid fa-calendar-week lead-ico"></i>This Week</span>
         <span class="count" id="thisWeekCount"></span>
       </div>
       <div class="nav-item" id="overdueNav" role="button" tabindex="0" aria-pressed="false" onclick="setOverdueFilter()">
-        <span><i class="fa-solid fa-triangle-exclamation" style="width:14px;color:var(--text-3);margin-right:6px"></i>Overdue</span>
+        <span><i class="fa-solid fa-triangle-exclamation lead-ico"></i>Overdue</span>
         <span class="count" id="overdueCount"></span>
       </div>
     </div>
@@ -2014,7 +2030,7 @@ const ICONS = {
     </div>
     <div class="sidebar-section task-trash-nav">
       <div class="nav-item" id="taskTrashNav" role="button" tabindex="0" aria-pressed="false" onclick="setTaskTrashFilter()">
-        <span><i class="fa-regular fa-trash-can" style="width:14px;color:var(--text-3);margin-right:6px"></i>Recently Deleted</span>
+        <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
         <span class="count" id="taskTrashCount"></span>
       </div>
     </div>
@@ -2045,7 +2061,7 @@ const ICONS = {
     </div>
     <div class="lib-dropdown" id="uiScaleDropdown">
       <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleUiScaleMenu()" title="Appearance — text size and theme" aria-haspopup="menu"><span class="aa-ico" aria-hidden="true"><span class="aa-s">A</span><span class="aa-l">A</span></span></button>
-      <div class="split-btn-menu" id="uiScaleMenu" style="left:auto;right:0;min-width:210px"></div>
+      <div class="split-btn-menu" id="uiScaleMenu"></div>
     </div>
     <div class="lib-dropdown" id="helpDropdown">
       <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about" aria-haspopup="menu"><i class="fa-regular fa-circle-question"></i></button>
@@ -2121,7 +2137,7 @@ const ICONS = {
     </div>
     <div class="quickadd-preview" id="quickAddPreview"></div>
     <div class="task-list" id="taskListWrap">
-      <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span class="th-sort" data-col="alpha" role="button" tabindex="0" onclick="sortByColumn('alpha')" title="Sort by task name">Task<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="project" role="button" tabindex="0" onclick="sortByColumn('project')" title="Sort by project">Project<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="priority" role="button" tabindex="0" onclick="sortByColumn('priority')" title="Sort by priority">Priority<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="status" role="button" tabindex="0" style="margin-left:-4px" onclick="sortByColumn('status')" title="Sort by status">Status<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="due" role="button" tabindex="0" style="margin-left:-8px" onclick="sortByColumn('due')" title="Sort by due date">Due<i class="th-arrow fa-solid fa-chevron-up"></i></span></div>
+      <div class="task-list-header"><button class="icon-btn subtask-toggle" onclick="toggleCollapseAllTasks();this.blur()" title="Collapse/expand all subtasks"><i class="fa-solid fa-angles-down" id="collapseAllIcon"></i></button><span class="th-sort" data-col="alpha" role="button" tabindex="0" onclick="sortByColumn('alpha')" title="Sort by task name">Task<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="project" role="button" tabindex="0" onclick="sortByColumn('project')" title="Sort by project">Project<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="priority" role="button" tabindex="0" onclick="sortByColumn('priority')" title="Sort by priority">Priority<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="status" role="button" tabindex="0" onclick="sortByColumn('status')" title="Sort by status">Status<i class="th-arrow fa-solid fa-chevron-up"></i></span><span class="th-sort" data-col="due" role="button" tabindex="0" onclick="sortByColumn('due')" title="Sort by due date">Due<i class="th-arrow fa-solid fa-chevron-up"></i></span></div>
       <div id="taskList"></div>
     </div>
     <div class="board" id="board" style="display:none"></div>
@@ -2295,7 +2311,7 @@ const ICONS = {
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="folderModalTitle">
     <h3 id="folderModalTitle">New Folder</h3>
     <input spellcheck="true" type="text" id="folderNameInput" placeholder="Folder name" maxlength="40" onkeydown="if(event.key==='Enter') saveFolderModal()">
-    <div class="field" id="folderParentField" style="margin-top:12px"><label for="folderParentSelect">Location</label><select id="folderParentSelect" aria-label="Location"></select></div>
+    <div class="field" id="folderParentField"><label for="folderParentSelect">Location</label><select id="folderParentSelect" aria-label="Location"></select></div>
     <div class="modal-actions">
       <button class="btn" onclick="closeAllModals()">Cancel</button>
       <button class="btn btn-primary" onclick="saveFolderModal()">Save</button>
@@ -2567,10 +2583,10 @@ const ICONS = {
 
 <!-- All Tasks projects modal -->
 <div class="modal-bg" id="allTasksProjectsModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" style="width:360px" role="dialog" aria-modal="true" aria-labelledby="allTasksProjectsTitle">
+  <div class="modal modal-w360" role="dialog" aria-modal="true" aria-labelledby="allTasksProjectsTitle">
     <h3 id="allTasksProjectsTitle">Projects shown</h3>
-    <p style="font-size:var(--fs-12);color:var(--text-3);margin-top:-8px">Choose which projects' tasks show up in the All Tasks list and as board columns.</p>
-    <div id="allTasksProjectsList" style="display:flex;flex-direction:column;gap:1px;max-height:320px;overflow-y:auto"></div>
+    <p class="modal-sub">Choose which projects' tasks show up in the All Tasks list and as board columns.</p>
+    <div id="allTasksProjectsList"></div>
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeAllModals()">Done</button></div>
   </div>
 </div>
@@ -3498,7 +3514,7 @@ function renderList(){
       dueCell = `<span class="badge badge-due ${overdue?'overdue':isToday?'today':''}"><i class="fa-regular fa-calendar"></i> ${fmtDate(t.dueDate)}</span>`;
     }
     if(t.repeat && t.repeat!=='none'){
-      dueCell += `<i class="fa-solid fa-repeat" style="color:var(--text-3);font-size:var(--ico-14);margin-left:5px" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
+      dueCell += `<i class="fa-solid fa-repeat due-repeat-ico" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
     }
     return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
       <div class="task-check-cell">
@@ -3533,7 +3549,7 @@ function renderList(){
           <button class="icon-btn sub-hierarchy-btn" onclick="event.stopPropagation();demoteSubtaskToStep('${t.id}','${s.id}')" title="Make this a step of the subtask above"><i class="fa-solid fa-indent"></i></button>
           <button class="icon-btn sub-hierarchy-btn" onclick="event.stopPropagation();deleteSubtask('${t.id}','${s.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
         </div>
-        ${(((s.subtasks||[]).length>0 && !collapsedSubIds.has(s.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id))?`<div class="task-subtasks" style="margin-left:21px">${(s.subtasks||[]).map(ss=>`
+        ${(((s.subtasks||[]).length>0 && !collapsedSubIds.has(s.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id))?`<div class="task-subtasks ind-21">${(s.subtasks||[]).map(ss=>`
           <div class="task-subtask-row ${ss.done?'done':''}" draggable="true"
             ondragstart="handleHierarchyDragStart(event,'step','${s.id}','${ss.id}')" ondragend="handleHierarchyDragEnd(event)"
             ondragover="handleHierarchyDragOver(event,'step','${s.id}','${ss.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','step','${s.id}','${ss.id}')">
@@ -3546,7 +3562,7 @@ function renderList(){
             <button class="icon-btn sub-hierarchy-btn" onclick="event.stopPropagation();promoteStepToSubtask('${t.id}','${s.id}','${ss.id}')" title="Make this its own subtask"><i class="fa-solid fa-outdent"></i></button>
             <button class="icon-btn sub-hierarchy-btn" onclick="event.stopPropagation();deleteSubSubtask('${t.id}','${s.id}','${ss.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
           </div>
-          ${(((ss.subtasks||[]).length>0 && !collapsedSubSubIds.has(ss.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id && inlineAddParentStepId===ss.id))?`<div class="task-subtasks" style="margin-left:21px">${(ss.subtasks||[]).map(sss=>`
+          ${(((ss.subtasks||[]).length>0 && !collapsedSubSubIds.has(ss.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id && inlineAddParentStepId===ss.id))?`<div class="task-subtasks ind-21">${(ss.subtasks||[]).map(sss=>`
             <div class="task-subtask-row ${sss.done?'done':''}" draggable="true"
               ondragstart="handleSubstepDragStart(event,'${t.id}','${s.id}','${ss.id}','${sss.id}')" ondragend="handleSubstepDragEnd(event)"
               ondragover="handleSubstepDragOver(event,'${ss.id}','${sss.id}')" ondragleave="handleSubstepDragLeave(event)" ondrop="handleSubstepDrop(event,'${t.id}','${s.id}','${ss.id}','${sss.id}')">
@@ -3602,7 +3618,7 @@ function boardCardHtml(t){
         ${tagChips?`<div class="board-card-tags">${tagChips}</div>`:''}
       </div>
     </div>
-    ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks" style="margin-left:28px">${t.subtasks.map(s=>`
+    ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks ind-28">${t.subtasks.map(s=>`
       <div class="task-subtask-row ${s.done?'done':''}">
         <div class="mini-check ${s.done?'checked':''} ${s.id===justCompletedSubId?'pop':''}" role="checkbox" aria-checked="${s.done}" aria-label="Mark subtask done" tabindex="0" onclick="event.stopPropagation();toggleSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-check"></i></div>
         ${renamingSubtask && renamingSubtask.taskId===t.id && renamingSubtask.subId===s.id
@@ -3610,13 +3626,13 @@ function boardCardHtml(t){
           : `<span onclick="event.stopPropagation()" ondblclick="event.stopPropagation();startRenameSubtask('${t.id}','${s.id}','board')">${highlightMatch(s.text, searchQuery)}</span>`}
         ${(s.subtasks||[]).length>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleSubCollapse('${s.id}');this.blur()" title="${collapsedSubIds.has(s.id)?'Expand':'Collapse'} steps"><i class="fa-solid fa-chevron-${collapsedSubIds.has(s.id)?'right':'down'}"></i></button>`:''}
       </div>
-      ${(((s.subtasks||[]).length>0 && !collapsedSubIds.has(s.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id))?`<div class="task-subtasks" style="margin-left:21px">${s.subtasks.map(ss=>`
+      ${(((s.subtasks||[]).length>0 && !collapsedSubIds.has(s.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id))?`<div class="task-subtasks ind-21">${s.subtasks.map(ss=>`
         <div class="task-subtask-row ${ss.done?'done':''}">
           <div class="mini-check ${ss.done?'checked':''} ${ss.id===justCompletedSubSubId?'pop':''}" role="checkbox" aria-checked="${ss.done}" aria-label="Mark subtask done" tabindex="0" onclick="event.stopPropagation();toggleSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-check"></i></div>
           <span onclick="event.stopPropagation()">${highlightMatch(ss.text, searchQuery)}</span>
           ${(ss.subtasks||[]).length>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleSubSubCollapse('${ss.id}');this.blur()" title="${collapsedSubSubIds.has(ss.id)?'Expand':'Collapse'} sub-steps"><i class="fa-solid fa-chevron-${collapsedSubSubIds.has(ss.id)?'right':'down'}"></i></button>`:''}
         </div>
-        ${(ss.subtasks||[]).length>0 && !collapsedSubSubIds.has(ss.id)?`<div class="task-subtasks" style="margin-left:21px">${ss.subtasks.map(sss=>`
+        ${(ss.subtasks||[]).length>0 && !collapsedSubSubIds.has(ss.id)?`<div class="task-subtasks ind-21">${ss.subtasks.map(sss=>`
           <div class="task-subtask-row ${sss.done?'done':''}">
             <div class="mini-check ${sss.done?'checked':''} ${sss.id===justCompletedSubSubSubId?'pop':''}" role="checkbox" aria-checked="${sss.done}" aria-label="Mark sub-step done" tabindex="0" onclick="event.stopPropagation();toggleSubSubSubtask('${t.id}','${s.id}','${ss.id}','${sss.id}')"><i class="fa-solid fa-check"></i></div>
             <span onclick="event.stopPropagation()">${highlightMatch(sss.text, searchQuery)}</span>
@@ -4250,7 +4266,7 @@ function renderDrawer(){
   const repeating = !!t.repeat && t.repeat!=='none';
   drawer.innerHTML = `
     <div class="drawer-header">
-      <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" style="margin-top:6px" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
+      <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
       <input spellcheck="true" class="title-input" id="drawerTitleInput" value="${esc(t.title)}" oninput="updateTaskFieldLive('${t.id}','title',this.value)" placeholder="Task title">
       <button class="icon-btn drawer-close" onclick="closeDrawer()" title="Close" aria-label="Close"><i class="fa-solid fa-xmark"></i></button>
     </div>
@@ -4294,7 +4310,7 @@ function renderDrawer(){
             <button class="icon-btn sub-del" title="Delete" aria-label="Delete" onclick="deleteSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-trash"></i></button>
           </div>
           ${stepsOpen ? `
-          <div class="task-subtasks" style="margin-left:24px">
+          <div class="task-subtasks ind-24">
             ${(s.subtasks||[]).map(ss=>{
               const subStepsOpen = drawerExpandedStepIds.has(ss.id);
               const subStepCount = (ss.subtasks||[]).length;
@@ -4314,7 +4330,7 @@ function renderDrawer(){
                 <button class="icon-btn sub-del" title="Delete" aria-label="Delete" onclick="deleteSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-trash"></i></button>
               </div>
               ${subStepsOpen ? `
-              <div class="task-subtasks" style="margin-left:24px">
+              <div class="task-subtasks ind-24">
                 ${(ss.subtasks||[]).map(sss=>`
                   <div class="subtask-row ${sss.done?'done':''}" draggable="true"
                     ondragstart="handleSubstepDragStart(event,'${t.id}','${s.id}','${ss.id}','${sss.id}')" ondragend="handleSubstepDragEnd(event)"
@@ -5510,7 +5526,7 @@ const STATUS_DOT = { todo:'var(--text-2)', doing:'var(--purple-text)', done:'var
 // One row anatomy for every menu (cell popovers, right-click menu, toolbar dropdowns):
 // tick column, optional colour dot or icon, plain text. lead = {dot} | {icon} | null.
 function popOptInner(lead, label){
-  const l = !lead || lead.none ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg" aria-hidden="true"${lead.indent ? ' style="margin-left:14px"' : ''}>${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
+  const l = !lead || lead.none ? '' : typeof lead==='string' ? `<span class="pop-dot" style="background:${lead}"></span>` : lead.svg ? `<span class="pop-svg${lead.indent ? ' pop-indent' : ''}" aria-hidden="true">${lead.svg}</span>` : lead.glyph ? `<span class="pop-glyph${/^[0-9a-z]/i.test(lead.glyph) ? '' : ' sym'}" aria-hidden="true">${esc(lead.glyph)}</span>` : `<i class="fa-solid fa-${lead.icon||'folder'} pop-icon"${lead.indent ? ' style="margin-left:14px"' : ''}></i>`;
   return `<span class="pop-check" aria-hidden="true"><i class="fa-solid fa-check"></i></span>${l}<span class="pop-label">${esc(label)}</span>`;
 }
 function menuOpt(fn, lead, label, current){ return `<button type="button" class="row-menu-item menu-opt${current?' current':''}${lead?'':' no-tick'}" role="menuitem" onclick="${fn}">${popOptInner(lead, label)}</button>`; }
@@ -9998,7 +10014,7 @@ function openPromptIncludeMenu(e){
   const others = prompts.filter(q=>q.id!==p.id && !promptTrashed(q) && !promptTitle(q).includes('}')).sort((a, b)=>promptTitle(a).localeCompare(promptTitle(b), undefined, {sensitivity:'base'}));
   menu.innerHTML = others.length
     ? `<div class="row-menu-scroll">` + others.map(q=>rowMenuItem('fa-regular fa-braces', esc(promptTitle(q)), `promptInsertInclude('${q.id}')`, { off })).join('') + `</div>`
-    : `<div class="row-menu-hint" style="padding:8px 12px">No other prompts to include yet</div>`;
+    : `<div class="row-menu-hint row-menu-empty">No other prompts to include yet</div>`;
   menu.classList.add('open');
   placeRowMenu(menu, r.left, r.bottom + 6, btn);
 }
