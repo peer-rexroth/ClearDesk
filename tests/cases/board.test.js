@@ -88,3 +88,23 @@ test('boardCardHtml hides a step\'s sub-steps when collapsedSubSubIds has that s
   const html = boardCardHtml(t);
   assertNotIncludes(html, 'Hidden sub-step');
 });
+
+test('the board tile is title-first: one secondary line (status only when in progress, flag for high, date, repeat), tag chips, no pill row or tag strips', function () {
+  const mk = x => Object.assign({ id: 't1', title: 'A long title for the leadership team', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], dueDate: null, repeat: 'none', createdAt: 1, updatedAt: 1 }, x || {});
+  let h = boardCardHtml(mk());
+  assertNotIncludes(h, 'board-card-sec', 'a plain card has no secondary line at all'); assertNotIncludes(h, 'board-card-meta'); assertNotIncludes(h, 'tagstrip'); assertNotIncludes(h, 'badge-status', 'the default status is not labelled');
+  h = boardCardHtml(mk({ priority: 'high', dueDate: '2030-03-04', repeat: 'weekly', status: 'doing', tags: [TAGS[0].id] }));
+  const sec = h.slice(h.indexOf('board-card-sec'), h.indexOf('board-card-tags'));
+  assertIncludes(sec, 'sec-status'); assertIncludes(sec, 'board-card-priority-icon'); assertIncludes(sec, 'sec-due'); assertIncludes(sec, 'sec-repeat');
+  assertIncludes(h, 'badge badge-tag', 'tags are chips');
+  boardGroup = 'status'; assertNotIncludes(boardCardHtml(mk({ status: 'doing' })), 'sec-status', 'in the status-grouped board the column already says it'); boardGroup = 'project';
+  assertIncludes(boardCardHtml(mk({ dueDate: '2000-01-01' })), 'sec-due overdue', 'an overdue date is red');
+});
+
+test('the board tile\'s hover capsule keeps every action reachable: Change status always, Set due date only while there is no date, Skip only for repeating tasks', function () {
+  const mk = x => Object.assign({ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], dueDate: null, repeat: 'none', createdAt: 1, updatedAt: 1 }, x || {});
+  const caps = h => h.slice(h.indexOf('class="row-actions"'));
+  let c = caps(boardCardHtml(mk())); assertIncludes(c, 'title="Change status"'); assertIncludes(c, 'title="Set due date"'); assertNotIncludes(c, 'Skip to next occurrence');
+  c = caps(boardCardHtml(mk({ dueDate: '2030-03-04', repeat: 'daily' }))); assertNotIncludes(c, 'title="Set due date"', 'a card with a date edits it by clicking the date'); assertIncludes(c, 'Skip to next occurrence');
+  assertIncludes(c, "openCellPop(event,'t1','status')");
+});

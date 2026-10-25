@@ -316,18 +316,14 @@ const ICONS = {
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
   .show-more-row { text-align: center; color: var(--text-2); font-size: var(--fs-12); font-weight: 500; padding: 8px; cursor: default; border-radius: var(--radius); }
   .show-more-row:hover { background: var(--bg-2); color: var(--text); }
-  .board-card { background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: default; display: flex; flex-direction: column; gap: 8px; }
+  .board-card { position: relative; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 8px 10px; cursor: default; display: flex; flex-direction: column; gap: 8px; }
   .board-card:hover { border-color: var(--border-2); }
   .board-card.dragging { opacity: .4; }
   .board-card:is(.kbd-selected, .bulk-selected) { border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
-  .board-card-tagstrips { display: flex; gap: 4px; }
-  .board-card-tagstrips .tagstrip { height: 4px; width: 26px; border-radius: var(--r-xs); flex-shrink: 0; }
   .board-card-top { display: flex; align-items: flex-start; gap: 8px; }
-  .board-card-top .badge-due { flex-shrink: 0; }
-  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-14); flex-shrink: 0; margin-top: 2px; }
+  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-12); flex-shrink: 0; }
   .board-card-title { font-size: var(--fs-13); font-weight: 600; flex: 1; word-break: break-word; }
   .board-card.done .board-card-title { text-decoration: line-through; color: var(--text-3); }
-  .board-card-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 
   .quickadd { display: flex; align-items: center; gap: 8px; margin: 12px 20px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 2px; }
   .quickadd i { color: var(--text-3); margin-left: 10px; font-size: var(--ico-16); }
@@ -730,7 +726,6 @@ const ICONS = {
   /* keep a Due flyout open while its date field has focus: the browser's date popup is outside the flyout, so the pointer leaves it */
   .row-menu-sub:focus-within > .row-menu-flyout { display: flex; }
   .cell-pop-date { margin-top: 4px; width: 100%; font-size: var(--fs-14); font-family: var(--font); border: 1px solid var(--border-2); border-radius: var(--r-s); padding: 6px 8px; background: var(--bg-2); color: var(--text); }
-  .board-card-meta .cell-host .cell-pop { top: auto; bottom: calc(100% + 6px); }
   .cell-pop.fixed { position: fixed; }   /* on a board card: placed by openCellPop against the window so the column's scroll area cannot clip it */
   /* the Due cell is the last column (and a card's due pill sits at the card's right edge): a menu wider than the cell must grow
      leftwards, or it runs under the scroll container's edge and is clipped */
@@ -1182,13 +1177,26 @@ const ICONS = {
   /* Board cards get the same hover language as list rows: a grey fill on hover (the Glass card border rule used to cancel
      the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
   html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg); border-color: transparent; box-shadow: 0 2px 10px var(--shadow-ink); }   /* hover lifts the tile instead of outlining it (a filled hover would swallow the status pill) */
-  .board-card-meta { position: relative; min-height: 24px; }
   .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
-  .board-card .row-actions { right: 0; }
-  .cell-host-empty { opacity: 0; }
-  .board-card:is(:hover, :focus-within, .kbd-selected) .cell-host-empty, .cell-host-empty:focus-within { opacity: 1; }
-  .badge-due-empty { background: var(--bg-3); color: var(--text-2); border: 0; min-height: 24px; }   /* the same filled pill, and the same height, as the other badges, not a dashed outline */
-  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .badge-due-empty { background: var(--sel-fill) !important; color: var(--on-accent); min-height: 24px; }   /* as tall as the status pill, which carries a chevron while selected */
+  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; }   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
+  /* the tile: title first, one quiet secondary line, then the tags */
+  .board-card-top { gap: 9px; }
+  .board-card-top .task-checkbox { margin-top: 0; }
+  .board-card-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  .board-card-titlerow { display: flex; align-items: flex-start; gap: 6px; }
+  .board-card-titlerow .board-card-title { flex: 1; min-width: 0; }
+  .board-card-titlerow .subtask-toggle { flex: none; margin: -1px -4px 0 0; }
+  .board-card-sec { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; font-size: var(--fs-12); color: var(--text-2); }
+  .board-card-sec .sec-host { padding: 1px 4px; margin: -1px -4px; border-radius: var(--r-xs); }
+  .board-card-sec .sec-host:hover { background: var(--hover); }
+  .sec-due, .sec-status { display: inline-flex; align-items: center; gap: 5px; }
+  .sec-due i { font-size: var(--ico-12); }
+  .sec-due.overdue { color: var(--red-text); } .sec-due.today { color: var(--amber-text); }
+  .sec-status { font-weight: 600; color: var(--purple-text); }
+  .sec-status .sdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .sec-repeat { font-size: var(--ico-12); color: var(--text-3); }
+  .board-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) :is(.sec-due, .sec-status, .sec-repeat) { color: var(--sel-text-2); }   /* white on the accent, as the pills are */
 
   /* the Task cell keeps the capsule's width free so a long title wraps before it
      instead of running underneath; long unbroken words may break anywhere */
@@ -3558,26 +3566,31 @@ function renderList(){
 // ── Board view ────────────────────────────────────────────────────────────────
 function boardCardHtml(t){
   const subTotal = (t.subtasks||[]).length;
-  let dueBadge = '';
+  // Apple-style tile: the title gets the width; everything else is one quiet secondary line (status only when it is not the default, a flag for high priority, the date, a repeat mark) and the tags. Status / due stay clickable (same popovers as before); the status and "set due date" buttons are also in the hover capsule so nothing becomes unreachable.
+  const sec = [];
+  if(t.status==='doing' && boardGroup!=='status') sec.push(`<span class="cell-host editable sec-host" role="button" tabindex="0" title="Change status" onclick="openCellPop(event,'${t.id}','status')"><span class="sec-status"><i class="sdot"></i>${statusLabel(t.status)}</span></span>`);
+  if(t.priority==='high') sec.push(`<i class="fa-solid fa-flag board-card-priority-icon" title="High priority"></i>`);
   if(t.dueDate){
-    const overdue = isOverdue(t);
-    const isToday = t.dueDate === todayStr();
-    dueBadge = `<span class="cell-host editable" role="button" tabindex="0" title="Change due date" onclick="openCellPop(event,'${t.id}','dueDate')"><span class="badge badge-due ${overdue?'overdue':isToday?'today':''}"><i class="fa-regular fa-calendar"></i> ${fmtDate(t.dueDate)}</span></span>`;
+    const overdue = isOverdue(t), isToday = t.dueDate === todayStr();
+    sec.push(`<span class="cell-host editable sec-host" role="button" tabindex="0" title="Change due date" onclick="openCellPop(event,'${t.id}','dueDate')"><span class="sec-due ${overdue?'overdue':isToday?'today':''}"><i class="fa-regular fa-calendar"></i> ${fmtDate(t.dueDate)}</span></span>`);
   }
-  const tagStrips = (t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="tagstrip" style="background:${tc.dot}" title="${esc(tg.label)}"></span>`; }).join('');
-  const priorityIcon = t.priority==='high' ? `<i class="fa-solid fa-flag board-card-priority-icon" title="High priority"></i>` : '';
+  if(t.repeat && t.repeat!=='none') sec.push(`<i class="fa-solid fa-repeat sec-repeat" title="Repeats: ${esc(repeatSummary(t))}"></i>`);
+  const tagChips = (t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('');
   return `<div class="board-card ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" draggable="true"
       ondragstart="handleCardDragStart(event,'${t.id}')" ondragend="handleCardDragEnd(event)"
       onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
-    ${tagStrips?`<div class="board-card-tagstrips">${tagStrips}</div>`:''}
     <div class="board-card-top">
       <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
-      ${renamingTaskId===t.id
-        ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInputBoard" style="flex:1" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-        : `<div class="board-card-title"><span class="board-card-title-text" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span></div>`}
-      ${priorityIcon}
-      ${dueBadge}
-      ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:''}
+      <div class="board-card-main">
+        <div class="board-card-titlerow">
+          ${renamingTaskId===t.id
+            ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInputBoard" style="flex:1" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
+            : `<div class="board-card-title"><span class="board-card-title-text" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span></div>`}
+          ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:''}
+        </div>
+        ${sec.length?`<div class="board-card-sec">${sec.join('')}</div>`:''}
+        ${tagChips?`<div class="board-card-tags">${tagChips}</div>`:''}
+      </div>
     </div>
     ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks" style="margin-left:2px">${t.subtasks.map(s=>`
       <div class="task-subtask-row ${s.done?'done':''}">
@@ -3605,15 +3618,13 @@ function boardCardHtml(t){
     `).join('')}${inlineAddSubtaskTaskId===t.id && !inlineAddParentSubId?`<div class="task-subtask-add-row" onclick="event.stopPropagation()">
       <input spellcheck="true" type="text" id="inlineSubtaskInputBoard" placeholder="Add a subtask and press Enter…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubtask('${t.id}')} else if(event.key==='Tab'){event.preventDefault(); if(!event.shiftKey){indentInlineSubtaskInput('${t.id}');}}">
     </div>`:''}</div>`:''}
-    <div class="board-card-meta">
-      <span class="cell-host editable" role="button" tabindex="0" title="Change status" onclick="openCellPop(event,'${t.id}','status')"><span class="badge badge-status-${t.status}">${statusLabel(t.status)}</span></span>
-      ${t.dueDate ? '' : `<span class="cell-host editable cell-host-empty" role="button" tabindex="0" title="Set due date" onclick="openCellPop(event,'${t.id}','dueDate')"><span class="badge badge-due-empty"><i class="fa-regular fa-calendar"></i></span></span>`}
-      <div class="row-actions">
-        ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
-        <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-duplicate"></i></button>
-        <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-        <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
-      </div>
+    <div class="row-actions">
+      ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
+      <button class="icon-btn" onclick="openCellPop(event,'${t.id}','status')" title="Change status" aria-haspopup="menu"><i class="${STATUS_ICONS[t.status]||STATUS_ICONS.todo}"></i></button>
+      ${t.dueDate ? '' : `<button class="icon-btn" onclick="openCellPop(event,'${t.id}','dueDate')" title="Set due date" aria-haspopup="menu"><i class="fa-regular fa-calendar"></i></button>`}
+      <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-duplicate"></i></button>
+      <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
+      <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
     </div>
   </div>`;
 }

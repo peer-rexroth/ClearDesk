@@ -384,10 +384,18 @@ parity.
   the per-surface overrides can out-rank it.
 - **Board cards share the list row's hover behaviour.** A card fills grey on hover (the Glass
   `.board-card` border rule used to cancel the base border change, so cards had *no* hover feedback), and shows
-  the same `.row-actions` capsule (Duplicate, Delete, ⋯; Skip for repeating tasks) at the right of the meta row
-  on hover/focus/selection — absolutely positioned there so it never changes card height. A card without a due
-  date shows a dashed calendar chip (`.cell-host-empty`) next to the status pill on hover/selection, which opens
-  the same Due menu. Still deliberately different: tags as colour strips, priority as a flag, no subtask hover controls.
+  the same `.row-actions` capsule (Skip for repeating tasks, Change status, Set due date while there is no date,
+  Duplicate, Delete, ⋯) on hover/focus/selection, floating in the card's **bottom-right corner** (absolutely
+  positioned, so it never changes card height and only covers what is under it while you point at the card).
+  **The tile is Apple-style, title first** (`boardCardHtml`): checkbox, then `.board-card-main` = the title (full width,
+  the subtask chevron at its right edge), **one quiet secondary line** `.board-card-sec` (12px, secondary colour; only
+  what applies: status text with a dot *only when In Progress* and not when the board is grouped by Status, a red flag
+  for high priority, the date with a calendar icon — red when overdue, amber when today — and a repeat mark), then the tags as
+  chips (`.badge.badge-tag`, as in the list). The default status is not labelled (nobody writes "Not Started"), and there is
+  no pill row, no tag strips and no dashed empty-date chip any more: the status text and the date are still clickable
+  (`.sec-host`, the same cell popovers), and the capsule's buttons cover a card with a default status or no date. A long
+  title now gets about 232px of the 302px card (it had about 130px beside the flag, date chip and chevron).
+  Still deliberately different from the list: no subtask hover controls.
   **Clicking is identical in both views**: a card uses `handleRowClick` on *click* (it used to select on
   mousedown through `selectBoardCard`, which had no modifier support), so plain click selects, Cmd/Ctrl-click
   extends and Shift-click selects a range (in on-screen card order on the board), double-click opens the panel,
