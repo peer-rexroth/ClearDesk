@@ -117,3 +117,10 @@ test('a scrolling board column makes its cards ignore the pointer (no hover repa
   const other = { classList: { contains: () => false, add() { throw new Error('touched'); } } };
   boardScrollHover({ target: other }); boardScrollHover({ target: null });   // any other scroll (the list, a panel, the page) is left alone
 });
+
+test('board subtasks are indented to the title\'s text column (28px = the checkbox column), and a step is a further 21px in', function () {
+  const t = { id: 't1', title: 'Parent', projectId: 'proj-inbox', status: 'todo', priority: 'medium', tags: [], dueDate: null, repeat: 'none', createdAt: 1, updatedAt: 1, subtasks: [{ id: 's1', text: 'Sub', done: false, subtasks: [{ id: 'ss1', text: 'Step', done: false, subtasks: [] }] }] };
+  const h = boardCardHtml(t);
+  assertIncludes(h, '<div class="task-subtasks" style="margin-left:28px">', 'the first level');
+  assertIncludes(h, '<div class="task-subtasks" style="margin-left:21px">', 'steps step in from there');
+});
