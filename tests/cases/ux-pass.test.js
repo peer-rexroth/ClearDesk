@@ -724,3 +724,15 @@ test('adding a subtask in the task panel leaves the cursor in the (new, empty) a
   assertEqual(tasks[0].subtasks.map(s => s.text).join(), 'First'); assertEqual(focused, 1, 'focus goes back to the add field');
   input.value = '   '; addSubtask('t1'); assertEqual(tasks[0].subtasks.length, 1, 'an empty entry adds nothing'); 
 });
+
+test('the panel\'s Notes box grows by script only where the browser cannot do it in CSS, and never measures while the panel is being built', function () {
+  const el = { style: {}, scrollHeight: 140 }, was = DRAWER_FIELD_SIZING;
+  DRAWER_FIELD_SIZING = true; drawerGrow(el); assertEqual(el.style.height, undefined, 'with field-sizing the script leaves it alone');
+  DRAWER_FIELD_SIZING = false; drawerGrow(el); assertEqual(el.style.height, '140px', 'otherwise it measures when asked (typing, or the frame after a rebuild)');
+  el.scrollHeight = 10; drawerGrow(el); assertEqual(el.style.height, '52px', 'and never goes under the minimum');
+  let reads = 0; const probe = { style: {}, get scrollHeight() { reads++; return 80; } };
+  tasks = [{ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], createdAt: 1, updatedAt: 1 }];
+  document.getElementById('drawer').querySelectorAll = () => [probe]; openTask('t1');
+  assertEqual(reads, 0, 'renderDrawer itself does not read the layout (that is what made switching tasks slow)');
+  DRAWER_FIELD_SIZING = was;
+});

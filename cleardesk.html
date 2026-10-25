@@ -313,6 +313,7 @@ const ICONS = {
   .board-col-title .picon { flex-shrink: 0; }
   .board-col-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .board-col-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 40px; }
+  .board-col-body.is-scrolling .board-card { pointer-events: none; }   /* no hover repaints while the column scrolls (see boardScrollHover) */
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
   .show-more-row { text-align: center; color: var(--text-2); font-size: var(--fs-12); font-weight: 500; padding: 8px; cursor: default; border-radius: var(--radius); }
   .show-more-row:hover { background: var(--bg-2); color: var(--text); }
@@ -1126,12 +1127,14 @@ const ICONS = {
   .drow .stack { width: 14px; height: 14px; flex: none; color: var(--text-3); fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .drow .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
   .drow-sel, .drow-ov { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; font-size: 16px; cursor: default; appearance: none; }   /* the real control, over the whole row */
-  html.kbd-input .drow:has(.drow-sel:focus-visible, .drow-ov:focus-visible) { box-shadow: 0 0 0 3px var(--focus-ring); border-radius: var(--r-m); }
+  html.kbd-input .drow:has(.drow-sel:focus-visible, .drow-ov:focus-visible, .drow-notes:focus-visible, .drow-in:focus-visible) { box-shadow: 0 0 0 3px var(--focus-ring); border-radius: var(--r-m); }
+  .drow-notes:focus-visible, .drow-in:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the global field ring is a hard square inside a rounded row: with the mouse these fields show only the caret (as the note body does), and by keyboard the whole rounded row is ringed (the line above) */
   .drow.due { cursor: default; }
   .drow.due .cell-pop { left: auto; right: 0; }
   .drow.notes { align-items: flex-start; }
   .drow-notes { width: 100%; border: 0; background: transparent; resize: none; overflow: hidden; font: inherit; line-height: 1.45; color: var(--text); padding: 0; min-height: 52px; outline: none; }
   .drow-notes::placeholder { color: var(--text-3); }
+  @supports (field-sizing: content) { .drow-notes { field-sizing: content; } }   /* grows with its text with no script (and no forced layout) */
   .drow-col { flex-direction: column; align-items: stretch; gap: 8px; }
   .drow-in { width: 56px; border: 0; background: transparent; text-align: right; font: inherit; color: var(--text-2); padding: 0; outline: none; -moz-appearance: textfield; }
   .drow-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
@@ -3868,6 +3871,13 @@ function rowShiftMouseDown(e){
   e.preventDefault();
 }
 document.addEventListener('mousedown', rowShiftMouseDown, true);
+// While a board column scrolls the card under a still pointer changes every frame, and each change repaints a blurred hover shadow and fades a capsule in. Cards ignore the pointer while their column is moving (not during a card drag), so those repaints stay out of the scroll; hover is back 140ms after it stops.
+function boardScrollHover(e){
+  const t = e && e.target; if(!t || !t.classList || !t.classList.contains('board-col-body') || draggingTaskId) return;
+  t.classList.add('is-scrolling'); clearTimeout(t._scrollT);
+  t._scrollT = setTimeout(()=>t.classList.remove('is-scrolling'), 140);
+}
+document.addEventListener('scroll', boardScrollHover, { capture: true, passive: true });
 // Where focus is decides whether the selection is the accent colour or neutral grey (see html.sel-inactive). The list is "active" while the pointer or keyboard is in it; the task panel, the editor, the sidebar, search and the quick-add field are "other", and so is another window. Menus and dialogs borrow focus for a moment and leave the state as it was.
 let selZone = 'list', selWinActive = (typeof document.hasFocus==='function') ? document.hasFocus() : true;
 function selZoneOf(el){
@@ -4334,10 +4344,14 @@ function renderDrawer(){
       </div>
     </div>
   `;
-  drawer.querySelectorAll && drawer.querySelectorAll('textarea.drow-notes').forEach(drawerGrow);
+  if(!DRAWER_FIELD_SIZING && drawer.querySelectorAll){      // measured in the next frame, never here: reading scrollHeight in the middle of an update forces a whole-page layout (it doubled the cost of switching tasks)
+    const grow = ()=>drawer.querySelectorAll('textarea.drow-notes').forEach(drawerGrow);
+    if(typeof requestAnimationFrame==='function') requestAnimationFrame(grow); else grow();
+  }
 }
-// Notes grow with their text (no resize grip, as in Apple's inspectors).
-function drawerGrow(el){ el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 52) + 'px'; }
+// Notes grow with their text (no resize grip, as in Apple's inspectors). Where the browser has field-sizing the box does it in CSS and this never runs; elsewhere it measures when you type and one frame after the panel is built.
+let DRAWER_FIELD_SIZING = typeof CSS!=='undefined' && !!CSS.supports && CSS.supports('field-sizing', 'content');
+function drawerGrow(el){ if(DRAWER_FIELD_SIZING) return; el.style.height = 'auto'; el.style.height = Math.max(el.scrollHeight, 52) + 'px'; }
 
 // ── Task CRUD ─────────────────────────────────────────────────────────────────
 // Quick-add shorthand: !high/!med/!low (or !!, !h, !m, !l), #project, @tag, and

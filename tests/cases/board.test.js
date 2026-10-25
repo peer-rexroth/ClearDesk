@@ -108,3 +108,12 @@ test('the board tile\'s hover capsule keeps every action reachable: Change statu
   c = caps(boardCardHtml(mk({ dueDate: '2030-03-04', repeat: 'daily' }))); assertNotIncludes(c, 'title="Set due date"', 'a card with a date edits it by clicking the date'); assertIncludes(c, 'Skip to next occurrence');
   assertIncludes(c, "openCellPop(event,'t1','status')");
 });
+
+test('a scrolling board column makes its cards ignore the pointer (no hover repaints), but not during a card drag', function () {
+  const col = { classList: { _s: new Set(), add(c) { this._s.add(c); }, remove(c) { this._s.delete(c); }, contains(c) { return this._s.has(c); } } };
+  col.classList.add('board-col-body');
+  boardScrollHover({ target: col }); assertTrue(col.classList.contains('is-scrolling'), 'scrolling: cards ignore the pointer'); clearTimeout(col._scrollT); col.classList.remove('is-scrolling');
+  draggingTaskId = 't1'; boardScrollHover({ target: col }); assertFalse(col.classList.contains('is-scrolling'), 'a drag keeps its drop targets'); draggingTaskId = null;
+  const other = { classList: { contains: () => false, add() { throw new Error('touched'); } } };
+  boardScrollHover({ target: other }); boardScrollHover({ target: null });   // any other scroll (the list, a panel, the page) is left alone
+});
