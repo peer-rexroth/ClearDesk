@@ -7842,7 +7842,7 @@ function renderPromptInspector(p){
   const kindClass = t=>t==='option' ? 'ph-opt' : t==='instruction' ? 'ph-ins' : t==='global' ? 'ph-glob' : 'ph-txt';
   let html = `<div class="pr-insp-head"><span>Variables</span><span class="pr-insp-tools"><span class="pr-insp-sub">${entries.length} in this prompt</span><button type="button" class="icon-btn" title="Global Variables…" aria-label="Global Variables" onclick="openPromptGlobalsModal()"><i class="fa-solid fa-globe"></i></button></span></div>`;
   if(!entries.length){
-    html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time, and <span class="ph ph-glob">{{@global}}</span> takes its options from the Global Variables list. The buttons above insert one.</div>`;
+    html += `<div class="pr-insp-empty">Put a placeholder in the template and it appears here: <span class="ph ph-opt">{{choice}}</span> picks one option, <span class="ph ph-ins">[[checklist]]</span> picks any number, <span class="ph ph-txt">((text))</span> is typed each time, <span class="ph ph-glob">{{@global}}</span> takes its options from the Global Variables list, and <span class="ph ph-inc">{{&gt;Prompt}}</span> adds another prompt's finished text, so prompts can be chained. The buttons above insert one.</div>`;
     host.innerHTML = html + promptIncludesHtml(p) + promptInspectorFoot(); return;
   }
   const hasPickable = entries.some(([, v])=>v.type!=='text');
