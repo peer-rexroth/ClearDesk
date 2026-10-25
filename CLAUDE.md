@@ -198,7 +198,7 @@ parity.
   renames, **F2** also renames the keyboard-selected task, and right-click / ⋯
   opens the row menu. Modifier clicks multi-/range-select as before. The
   drawer is still the docked side panel (see below), so once it is open,
-  ↑/↓ move the selection and the panel together.
+  ↑/↓ move the selection and the panel together (**in the board too**: `handleBoardKeyNav` used to return as soon as the panel was open, so the arrows did nothing there; only the arrow keys pass now, Enter / Space / Tab / F2 stay off while it is open). They do not work while the cursor is in one of the panel's own fields or selects (arrows belong to the field); click the list or the panel's background, or press Esc, to hand them back.
 - **Priority, Status and Due cells are inline-editable** (`openCellPop` /
   `pickCell`): the popover is appended *inside* the clicked cell and positioned
   with CSS (`position:absolute`), not from `getBoundingClientRect()`, because

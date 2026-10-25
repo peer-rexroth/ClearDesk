@@ -3752,7 +3752,7 @@ function handleBoardKeyNav(e){
   if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='ArrowLeft' && e.key!=='ArrowRight' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='F2') return;
   if(isTypingTarget(document.activeElement)) return;
   if(document.querySelector('.modal-bg.open')) return;
-  if(activeTaskId) return;
+  if(activeTaskId && !e.key.startsWith('Arrow')) return;   // with the panel open the arrows still move the selection (and the panel), as in the list
   if(e.key==='F2'){
     if(kbdSelectedTaskId){ e.preventDefault(); startRenameTask(kbdSelectedTaskId); }
     return;
@@ -3829,6 +3829,7 @@ function handleBoardKeyNav(e){
     if(prevId){ document.querySelector(`.board-card[data-id="${prevId}"]`)?.classList.remove('kbd-selected'); }
     document.querySelector(`.board-card[data-id="${kbdSelectedTaskId}"]`)?.classList.add('kbd-selected');
   }
+  if(activeTaskId) openTask(kbdSelectedTaskId);   // the side panel follows the selection
   document.querySelector(`.board-card[data-id="${kbdSelectedTaskId}"]`)?.scrollIntoView({block:'nearest'});
 }
 function setViewMode(mode){

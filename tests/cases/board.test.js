@@ -124,3 +124,17 @@ test('board subtasks are indented to the title\'s text column (28px = the checkb
   assertIncludes(h, '<div class="task-subtasks" style="margin-left:28px">', 'the first level');
   assertIncludes(h, '<div class="task-subtasks" style="margin-left:21px">', 'steps step in from there');
 });
+
+test('board arrow keys keep working with the task panel open: they move the selection and the panel together', function () {
+  tasks = ['a', 'b'].map(function (n, i) { return { id: 'bk' + n, title: n, notes: '', projectId: 'proj-inbox', status: 'todo', priority: 'medium', dueDate: null, tags: [], subtasks: [], createdAt: i, updatedAt: i }; });
+  normalizeData(); viewMode = 'board'; render();
+  var col = getBoardColumns().find(function (c) { return c.tasks.length === 2; }), first = col.tasks[0].id, second = col.tasks[1].id;
+  kbdSelectedTaskId = first; openTask(first);
+  var evt = { key: 'ArrowDown', preventDefault: function () {}, stopPropagation: function () {} };
+  handleBoardKeyNav(evt);
+  assertEqual(kbdSelectedTaskId, second, 'the selection moved down');
+  assertEqual(activeTaskId, second, 'and the panel followed it');
+  var enter = { key: 'Enter', preventDefault: function () {}, stopPropagation: function () {} };
+  handleBoardKeyNav(enter);
+  assertEqual(activeTaskId, second, 'other keys are still ignored while the panel is open');
+});
