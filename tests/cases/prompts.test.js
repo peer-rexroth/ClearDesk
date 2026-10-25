@@ -528,7 +528,7 @@ test('the default Prompts folder always exists, is first, cannot be edited or de
   promptFolderFilter = 'all'; createPrompt();
   assertEqual(prompts[prompts.length - 1].folderId, PROMPTS_DEFAULT_FOLDER, 'a new prompt (from All Prompts) goes into it');
   var del = promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER).split('<button').filter(function (b) { return b.indexOf("promptFolderMenuRun('delete')") >= 0; })[0] || '';
-  assertTrue(del.indexOf('disabled') >= 0, 'Delete is disabled in its menu');
+  assertEqual(del, '', 'Delete is left out of its menu');
 });
 
 // ---- Include with values, and "Used in" ----
@@ -581,7 +581,8 @@ test('prompt folders reorder like Notes folders: Move Up / Down, drag before / a
   assertTrue(reorderPromptFolder('fb', 'fa', false)); assertEqual(top(), PROMPTS_DEFAULT_FOLDER + ',fc,fa,fb', 'drop after');
   assertFalse(reorderPromptFolder('fs1', 'fb', true), 'a subfolder stays inside its own level');
   movePromptFolderBy('fs2', -1); assertEqual(promptFolderKids('fa').map(f => f.id).join(','), 'fs2,fs1');
-  const html = promptFolderMenuHtml('fb'); assertIncludes(html, "promptFolderMenuRun('up')"); assertIncludes(html, "promptFolderMenuRun('down')");
+  const html = promptFolderMenuHtml('fa'); assertIncludes(html, "promptFolderMenuRun('up')"); assertIncludes(html, "promptFolderMenuRun('down')");
+  assertNotIncludes(promptFolderMenuHtml('fb'), "promptFolderMenuRun('down')", 'the last folder cannot move down, so the item is left out');
   assertNotIncludes(promptFolderMenuHtml(PROMPTS_DEFAULT_FOLDER), "promptFolderMenuRun('up')");
 });
 

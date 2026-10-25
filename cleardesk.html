@@ -2277,7 +2277,7 @@ const ICONS = {
 
 <!-- Confirm modal -->
 <div class="modal-bg" id="confirmModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalBody">
+  <div class="modal" role="alertdialog" tabindex="-1" style="outline:none" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalBody">
     <h3 id="confirmModalTitle">Delete?</h3>
     <p id="confirmModalBody"></p>
     <div class="modal-actions">
@@ -2320,8 +2320,8 @@ const ICONS = {
     <p>Merge the imported file into your current tasks and projects, or replace everything with the file's contents? Replacing automatically downloads a backup of your current data first.</p>
     <div class="modal-actions">
       <button class="btn" onclick="closeAllModals()">Cancel</button>
-      <button class="btn" onclick="applyImport('merge')">Merge</button>
       <button class="btn btn-danger" onclick="applyImport('replace')">Replace</button>
+      <button class="btn btn-primary" onclick="applyImport('merge')">Merge</button>
     </div>
   </div>
 </div>
@@ -2883,14 +2883,16 @@ wireColumnResizer(PROMPTS_INSP_COL, promptsInspW, {
   width(ev, c){ return (c.right - ev.clientX) / c.k; }
 }, 'ArrowLeft');
 const UI_SCALE_KEY = 'cleardesk_uiscale';
-// Four stops: Small, Medium (the default), Large and Extra Large. (Small and Extra Large were taken out once and are back, on request:
+// Six stops: Small, Medium (the default), Large, Extra Large, Extra Extra Large (150) and Maximum (200, the HIG's minimum enlargement). (Small and Extra Large were taken out once and are back, on request:
 // the text-size scale needs room both ways.) A stored value that is not exactly a stop snaps to the nearest one.
 // Each segment shows the letter A at its own size (glyph, in px) — as in Safari's "aA" menu — and label is its tooltip.
 const UI_SCALE_STEPS = [
   { pct: 90,  label: 'Small',       glyph: 12 },
   { pct: 100, label: 'Medium',      glyph: 14 },
   { pct: 115, label: 'Large',       glyph: 18 },
-  { pct: 130, label: 'Extra Large', glyph: 22 }
+  { pct: 130, label: 'Extra Large', glyph: 22 },
+  { pct: 150, label: 'Extra Extra Large', glyph: 25 },
+  { pct: 200, label: 'Maximum', glyph: 28 }   // the HIG asks for at least 200% enlargement
 ];
 const UI_SCALE_DEFAULT = 100;
 // Index into UI_SCALE_STEPS of whichever stop is closest to pct — this is
@@ -3698,7 +3700,7 @@ function renderBoard(){
       ? `<div class="show-more-row" onclick="toggleShowAllCompletedProject('${p.id}')">${expanded?'Show fewer completed':`Show ${col.hiddenCount} more completed`}</div>`
       : '';
     return `<div class="board-col${dimmed?' dimmed':''}" data-project="${p.id}" ondragover="handleBoardDragOver(event,'${p.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDrop(event,'${p.id}')">
-      <div class="board-col-header"><span class="board-col-title" title="${esc(p.name)}"><i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
+      <div class="board-col-header" oncontextmenu="openProjectMenu(event,'${p.id}')"><span class="board-col-title" title="${esc(p.name)}"><i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
       <div class="board-col-body">
         ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
         ${showMoreRow}
@@ -4030,7 +4032,8 @@ const MENU_SVG = ICONS;   // the shared registry from the head script (it is als
 const menuSvg = name=>MENU_SVG[name] ? `<svg class="mi" viewBox="0 0 24 24" aria-hidden="true">${MENU_SVG[name]}</svg>` : '';
 const menuIconHtml = icon=>{ if(!icon) return ''; if(icon.startsWith('<svg')) return icon; return menuSvg(icon.split(' ').pop().replace(/^fa-/, '')) || `<i class="${icon}"></i>`; };
 const MENU_CHEVRON = menuSvg('chevron-right');
-const rowMenuItem = (icon, label, fn, o={})=>`<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}">${menuIconHtml(icon)}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+// An unavailable command is left out, not dimmed (HIG: a context menu shows only what applies). tidyMenuSeps then removes the separators it leaves behind.
+const rowMenuItem = (icon, label, fn, o={})=>o.off ? '' : `<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}">${menuIconHtml(icon)}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
 const rowMenuSub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)">${menuIconHtml(icon)}<span>${text}</span><span class="row-menu-hint">${MENU_CHEVRON}</span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
 function rowMenuHtml(ids){
   const n = ids.length;
@@ -4086,7 +4089,7 @@ function showRowMenu(id, x, y, measureEl){
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   rowMenuIds = (selectedTaskIds.has(id) && selectedTaskIds.size>1) ? [...selectedTaskIds] : [id];
   const menu = document.getElementById('rowMenu'); if(!menu) return;
-  menu.innerHTML = rowMenuHtml(rowMenuIds);
+  menu.innerHTML = tidyMenuSeps(rowMenuHtml(rowMenuIds));
   placeRowMenu(menu, x, y, measureEl);
 }
 function openRowMenu(e, id){
@@ -5638,8 +5641,9 @@ function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger 
   modalTarget = { action };
   modalReturnFocus = document.activeElement;
   document.getElementById('confirmModalBg').classList.add('open');
-  // The safe choice is the default: a destructive confirmation focuses Cancel (so Return cancels); a plain confirmation focuses its button.
-  const dflt = document.getElementById(danger ? 'confirmModalCancel' : 'confirmModalBtn'); if(dflt && dflt.focus){ dflt.focus(); if(document.activeElement!==dflt) requestAnimationFrame(()=>dflt.focus()); }
+  // HIG (alerts): never make Cancel the default. A destructive confirmation has NO default button (focus goes to the dialog, so Return does nothing and Esc cancels); a plain confirmation focuses its button.
+  const dlg = document.querySelector('#confirmModalBg [role="alertdialog"]');
+  const dflt = danger ? dlg : document.getElementById('confirmModalBtn'); if(dflt && dflt.focus){ const f = ()=>{ if(document.activeElement!==dflt && document.getElementById('confirmModalBg').classList.contains('open')) dflt.focus(); }; f(); requestAnimationFrame(f); setTimeout(f, 250); }   // the dialog is hidden until its fade starts, so a first focus() can be ignored
 }
 function confirmModalAction(){
   if(modalTarget && modalTarget.action) modalTarget.action();
@@ -6370,7 +6374,7 @@ function openNoteMenu(e, id){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   noteMenuId = id; folderMenuId = null;
-  menu.innerHTML = noteMenuHtml(id);
+  menu.innerHTML = tidyMenuSeps(noteMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
 function noteMenuRun(kind, value){
@@ -6397,6 +6401,59 @@ function folderMenuHtml(id){
   return parts.join('');
 }
 // Right-click menu of a project in the Tasks sidebar (the Notes folders have one too): the same builder pattern, title-style labels, danger last.
+// ---- Right-click menu for a subtask, step or sub-step (list, board card, task panel) ----
+// One delegated listener (capture, so the task row's own menu does not also open). The row is identified from its own checkbox handler
+// (toggleSubtask / toggleSubSubtask / toggleSubSubSubtask), the same ids every surface already writes, so no markup had to change.
+// On a board card only subtasks get a menu, as only they can be renamed or deleted there.
+let subMenuCtx = null;
+function subRowRefFromHandler(src){
+  const m = /toggle(Sub(?:Sub){0,2})task\(([^)]*)\)/.exec(String(src||'')); if(!m) return null;
+  const ids = (m[2].match(/'([^']*)'/g)||[]).map(x=>x.slice(1, -1));
+  const level = m[1].length/3;
+  return ids.length===level+1 ? { level, ids } : null;
+}
+function subRowNode(ref){
+  const t = tasks.find(x=>x.id===ref.ids[0]); if(!t) return null;
+  let list = t.subtasks||[], node = null, idx = -1;
+  for(let i=1; i<ref.ids.length; i++){ idx = list.findIndex(x=>x.id===ref.ids[i]); node = idx<0 ? null : list[idx]; if(!node) return null; list = node.subtasks||[]; }
+  return { task:t, node, idx };
+}
+function subMenuHtml(ref, surface){
+  const f = subRowNode(ref); if(!f) return '';
+  const item = rowMenuItem, L = ref.level, board = surface==='board';
+  const parts = [item('fa-regular fa-circle-check', f.node.done ? 'Mark Not Done' : 'Mark Complete', `subMenuRun('toggle')`), item('fa-solid fa-pen', 'Rename', `subMenuRun('rename')`)];
+  if(!board){
+    const move = [];
+    if(L>=2) move.push(item('fa-solid fa-outdent', L===2 ? 'Make Subtask' : 'Make Step', `subMenuRun('promote')`));
+    if(L<=2 && f.idx>0) move.push(item('fa-solid fa-indent', L===1 ? 'Make Step of Subtask Above' : 'Make Sub-step of Step Above', `subMenuRun('demote')`));
+    if(move.length) parts.push('<div class="row-menu-sep"></div>', ...move);
+  }
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-trash', 'Delete', `subMenuRun('delete')`, {danger:true, hint:'⌫'}));
+  return tidyMenuSeps(parts.join(''));
+}
+function subMenuRun(kind){
+  const c = subMenuCtx; closeRowMenu(); if(!c) return;
+  const [a, b, c3, d] = c.ref.ids, L = c.ref.level;
+  if(kind==='toggle')  return L===1 ? toggleSubtask(a, b) : L===2 ? toggleSubSubtask(a, b, c3) : toggleSubSubSubtask(a, b, c3, d);
+  if(kind==='rename')  return L===1 ? startRenameSubtask(a, b, c.surface) : L===2 ? startRenameSubSubtask(a, b, c3, c.surface) : startRenameSubSubSubtask(a, b, c3, d, c.surface);
+  if(kind==='delete')  return L===1 ? deleteSubtask(a, b) : L===2 ? deleteSubSubtask(a, b, c3) : deleteSubSubSubtask(a, b, c3, d);
+  if(kind==='promote') return L===2 ? promoteStepToSubtask(a, b, c3) : promoteSubSubtaskToStep(a, b, c3, d);
+  if(kind==='demote')  return L===1 ? demoteSubtaskToStep(a, b) : demoteStepToSubSubtask(a, b, c3);
+}
+document.addEventListener('contextmenu', e=>{
+  const row = e.target.closest && e.target.closest('.task-subtask-row, .subtask-row'); if(!row) return;
+  if(e.target.closest('input, textarea, select') || document.querySelector('.modal-bg.open')) return;
+  const cb = row.querySelector(':scope > [role="checkbox"]') || row.querySelector('[role="checkbox"]');
+  const ref = cb && subRowRefFromHandler(cb.getAttribute('onclick')); if(!ref) return;
+  const surface = row.closest('.board-card') ? 'board' : row.closest('#drawer') ? 'drawer' : 'list';
+  if(surface==='board' && ref.level>1) return;
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  e.preventDefault(); e.stopPropagation();
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  subMenuCtx = { ref, surface };
+  menu.innerHTML = subMenuHtml(ref, surface);
+  placeRowMenu(menu, e.clientX, e.clientY, row);
+}, true);
 let projectMenuId = null;
 function projectMenuHtml(id){
   const p = projById(id); if(!p) return '';
@@ -6411,7 +6468,7 @@ function openProjectMenu(e, id){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   projectMenuId = id; folderMenuId = null; noteMenuId = null;
-  menu.innerHTML = projectMenuHtml(id);
+  menu.innerHTML = tidyMenuSeps(projectMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
 function projectMenuRun(kind){
@@ -6427,7 +6484,7 @@ function openFolderMenu(e, id){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   folderMenuId = id; noteMenuId = null;
-  menu.innerHTML = folderMenuHtml(id);
+  menu.innerHTML = tidyMenuSeps(folderMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
 function folderMenuRun(kind){
@@ -8408,7 +8465,7 @@ function openPromptMenu(e, id){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptMenuId = id; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = promptMenuHtml(id);
+  menu.innerHTML = tidyMenuSeps(promptMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
 function promptMenuRun(kind, arg){
@@ -8434,7 +8491,7 @@ function openPromptFolderMenu(e, id){
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptFolderMenuId = id; promptMenuId = null; noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = promptFolderMenuHtml(id);
+  menu.innerHTML = tidyMenuSeps(promptFolderMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
 function promptFolderMenuRun(kind){
@@ -8870,7 +8927,8 @@ const tblHeadCol = table=>table.rows.length>1 && [...table.rows].slice(1).every(
 //   Insert (row above/below, column left/right)  |  Header toggle(s)  |  [Cut / Copy]  |  Delete (the selection first, then Delete table)
 // A state (header on) is a ✓ at the right; delete items are red; icons are the same everywhere (minus for a row/column, outline trash can for the table).
 const tblMenuSep = '<div class="row-menu-sep"></div>';
-const tblMenuJoin = groups=>groups.filter(g=>g.length).map(g=>g.join('')).join(tblMenuSep);
+const tblMenuJoin = groups=>groups.map(g=>g.filter(Boolean)).filter(g=>g.length).map(g=>g.join('')).join(tblMenuSep);
+function tidyMenuSeps(html){ const SEP = '<div class="row-menu-sep"></div>'; return String(html).split(SEP).filter(x=>x.trim()!=='').join(SEP); }
 const tblTick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
 // Header row / column icon: a rounded frame (half strength) whose first row / column is filled in solid, as a header looks in the table. Same size, colour and
 // class as the insert icons, so the table menus read as one set.
@@ -8902,7 +8960,7 @@ function toggleNoteTableMenu(){
   if(wasOpen) return;
   noteTablePicker = { r: 0, c: 0, rows: 8, cols: 8 };
   const whole = tblWholeSelected(); if(whole) tblMenuRef = { table: whole, r: 0, c: 0 };     // what tblTableRun acts on
-  m.innerHTML = noteTableMenuHtml();
+  m.innerHTML = tidyMenuSeps(noteTableMenuHtml());
   m.classList.add('open');
 }
 function closeNoteTableMenu(){ document.getElementById('noteTableMenu')?.classList.remove('open'); }
@@ -9130,7 +9188,7 @@ function tblShowMenuAt(x, y, measureEl){
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu();
   tblMenuRef = { table, r: sel.kind==='row' ? sel.a : 0, c: sel.kind==='col' ? sel.a : 0, a: sel.a, b: sel.b };
   noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = tblGripMenuHtml(sel.kind, sel, table);
+  menu.innerHTML = tidyMenuSeps(tblGripMenuHtml(sel.kind, sel, table));
   placeRowMenu(menu, x, y, measureEl);
 }
 // Click a grip: just SELECT that column / row (accent outline and tab). Its options appear on right-click, never on the click itself.
@@ -9197,7 +9255,7 @@ function tblShowTableMenuAt(x, y, measureEl){
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu(); closeNoteTableMenu(); closeNoteListMenu();
   tblMenuRef = { table, r: 0, c: 0 };
   noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = tblTableMenuHtml(table);
+  menu.innerHTML = tidyMenuSeps(tblTableMenuHtml(table));
   placeRowMenu(menu, x, y, measureEl);
 }
 function tblTableRun(op){
@@ -9288,7 +9346,7 @@ function openNoteMoreMenu(e){
   const menu = document.getElementById('rowMenu'), id = noteEditorId; if(!menu || !id) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   noteMenuId = id; folderMenuId = null;
-  menu.innerHTML = noteMenuHtml(id, {noLock:true});
+  menu.innerHTML = tidyMenuSeps(noteMenuHtml(id, {noLock:true}));
   const btn = e.currentTarget, r = btn.getBoundingClientRect();
   menu.classList.add('open');                                                    // to measure its real width (it is not a fixed 220px: the hint text and the text size change it)
   const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;

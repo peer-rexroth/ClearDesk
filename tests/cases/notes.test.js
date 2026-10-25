@@ -371,11 +371,10 @@ test('the note right-click menu offers lock, duplicate, move and delete (and dis
   assertIncludes(h, 'disabled');
 });
 
-test('the folder right-click menu: the default folder shows Edit and Delete dimmed, a normal folder offers them', function () {
+test('the folder right-click menu: the default folder hides Edit and Delete (unavailable items are left out), a normal folder offers them', function () {
   noteFolders.push({ id: 'f-work', name: 'Work' });
   const d = folderMenuHtml(NOTES_DEFAULT_FOLDER);
-  assertIncludes(d, 'Edit'); assertIncludes(d.slice(d.indexOf('Edit') - 500, d.indexOf('Edit')), 'disabled');
-  assertNotIncludes(folderMenuHtml('f-work').slice(folderMenuHtml('f-work').indexOf('Edit') - 500, folderMenuHtml('f-work').indexOf('Edit')), 'disabled');
+  assertNotIncludes(d, 'Edit'); assertNotIncludes(d, 'Delete'); assertNotIncludes(d, 'disabled');
   assertIncludes(folderMenuHtml('f-work'), 'Edit');
   assertIncludes(folderMenuHtml('f-work'), 'Delete');
 });

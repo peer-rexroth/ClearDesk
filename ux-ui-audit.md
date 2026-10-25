@@ -1,29 +1,28 @@
 # ClearDesk – UX/UI audit (consistency + Apple HIG)
 
-Audit date: 2026-10-20. Read-only: no code was changed. Scope: `cleardesk.html` (single file, 9,630 lines) in its three modes, **Tasks, Notes and Prompts**, plus the dialogs, menus and the new Global Variables dialog.
+Audit date: 2026-10-25. **Read-only: no application code was changed.** Scope: `cleardesk.html` (11,195 lines, one file) in its three modes (Tasks, Notes, Prompts), its dialogs, menus, popovers and the Compare view.
 
-This report **replaces** the earlier audit (F-01 … F-38, closed out in commit `cc1ec62`; recover it with `git show cc1ec62:ux-ui-audit.md`). Findings here use the prefix **A-**. Items the earlier audit already decided to keep are listed again only where they are still HIG deviations (A-22, A-23, A-24).
+This report **replaces** the previous audit (A-01 … A-41, which is committed; recover it with `git show HEAD:ux-ui-audit.md`). Findings here use the prefix **U-**. Items the previous audit closed (narrow-window Prompts layout, undoable deletes, Recently Deleted for Tasks, toast live region, icon vocabulary) were re-checked against the code and are **not** repeated unless a gap is left.
 
 **How the evidence was gathered**
-- HIG pages were fetched as Markdown from `developer.apple.com/design/human-interface-guidelines/<page>.md`: sheets, toolbars, context-menus, menus, alerts, modality, buttons, typography, accessibility, color, dark-mode, lists-and-tables, text-fields, sidebars, motion, keyboards, feedback, undo-and-redo, sf-symbols and the-menu-bar. The `inspectors` page returned 404; guidance on inspectors is taken from *toolbars* ("buttons that open nearby inspectors" sit on the trailing edge). Pages fetched later (2026-10-20): layout, popovers, windows, drag-and-drop and icons (findings A-35 to A-41). Pages still **not** fetched: materials, pointing-devices, offering-help; no finding relies on them.
-- Code was read and counted (sizes, radii, colours, handlers). Line numbers refer to the current `cleardesk.html`.
-- Headless-Chrome screenshots of Prompts mode at 1500, 1100 and 860 px wide confirmed A-01, A-02, A-03, A-04 and A-06, and the Global Variables dialog was checked after the last alignment fix.
-- Anything that needs a real device, a screen reader or a light-theme run is marked **needs visual check** (section 7).
+- HIG pages fetched as Markdown on 2026-10-25 from `developer.apple.com/design/human-interface-guidelines/<page>.md`: **sheets, context-menus, alerts, typography, accessibility, the-menu-bar**. The summary of the *typography* and *menu bar* pages was read from the saved page (only the tables and section headings were used). Pages that earlier audits fetched (modality, menus, toolbars, buttons, color, lists-and-tables, layout, popovers, windows, drag-and-drop, motion, feedback, undo-and-redo, icons) were **not re-fetched**; where a finding leans on one of them it says so and cites the URL.
+- Code was searched and counted with `grep` on the current file (counts below are exact for the patterns named). Line numbers refer to the current `cleardesk.html`.
+- **No screenshots were taken in this audit and the app was not run.** Everything about computed colour, rendered size, hover look or focus order is therefore listed in section 7 as *needs visual check*.
 
 ---
 
 ## 1. Summary
 
-**Platform and stack.** An installable web app (PWA) used mainly in macOS desktop browsers, so the macOS HIG applies. Plain HTML/CSS/vanilla JS in one file, no framework, no build step. One visual scheme ("Glass", light and dark). System font stack, one inline-SVG icon registry (`ICONS`, drawn at 12/14/16/18 px). Design tokens for colour, type, radius, spacing and icon size are in place. A test suite (`tests/`, 314 tests) and `CLAUDE.md` document the rest.
+**Platform and stack.** An installable web app (PWA) used mainly in desktop Chrome/Edge on macOS, so the macOS HIG applies. Plain HTML/CSS/vanilla JS in one file, no framework, no build step. One look ("Glass", light and dark), a single inline-SVG icon registry (`ICONS`, drawn at 12/14/16/18 px), system font stack, and design tokens for colour, type (`--fs-11…22`), radius (`--r-xs…xl`), icon size and elevation.
 
-**Overall assessment.** The token work from the last audit holds: only 6 colour literals remain outside token definitions, there are 7 type steps and a 5-step radius ladder, one icon family, one focus style, one close path for 12 dialogs, and reduced-motion is respected. What is left falls into two groups. (1) **Prompts, the newest mode, does not yet adapt to narrow windows**, and its toolbar is the busiest in the app. (2) **The three modes grew at different times**, so the same job has different words and different safety nets (Duplicate/Clone, Pin/Favorite, a Delete that asks first in Tasks but not in Notes or Prompts).
+**Overall assessment.** Token discipline is strong: 211 `font-size` declarations use a type token against about 30 literals (mostly 6–10 px control glyphs); radii are 101 token uses against a handful of 1–6 px literals plus 29 pill (`999px`); only 24 lines carry hex colours outside token definitions and almost all of those are deliberate (theme-color meta, print CSS, e-mail export HTML). Delete is now undoable in all three modes, dialogs close through one function, all 15 dialogs carry `role` and `aria-modal`, and reduced-motion is respected. What is left is mostly **structural**: dialogs come in three different shells and do not agree on button wording or which button is default; context menus were added feature by feature, so some objects (subtasks, steps, tags) have none; several deliberate web-oriented departures from the HIG (dim instead of hide, shortcut hints in context menus, Cancel as the default in a delete confirm) are documented in `CLAUDE.md` but still deviate; and the web platform limits text scaling (90–130 %) and localisation (English only).
 
 **The 5 most important issues**
-1. **A-01 – Prompts layout breaks in narrower windows.** With the Variables panel open at 1100 px the template column is about 140 px wide and words break mid-word; at 860 px the panel runs past the window edge. (High)
-2. **A-07 / A-09 – Delete is inconsistent.** Six dialogs ask for confirmation while saying "You can undo this from the toast", which the HIG advises against; Notes and Prompts delete without asking, and Tasks, Notes and Prompts disagree on whether a deleted item can be recovered. (Medium)
-3. **A-02 – The Prompts toolbar wraps onto two or three rows** instead of shrinking or overflowing; Notes has container queries for this, Prompts does not. (Medium)
-4. **A-31 / A-32 – Feedback is not accessible enough:** the toast has no live region, and it disappears after 2.4 s (6 s with Undo) even while the pointer or focus is on it. (Medium)
-5. **A-33 – Hover-only remove buttons (18 px) and table grips (12–14 px) are under the macOS 20 × 20 pt minimum.** (Medium)
+1. **U-01 / U-02 – Dialog buttons are not consistent or HIG-ordered.** The destructive confirm focuses Cancel (the HIG says do not make Cancel the default); the Import dialog puts the destructive *Replace* in the trailing/default slot; confirm buttons are *Save*, *Create*, *Done* or *Merge/Replace* depending on the dialog. (Medium)
+2. **U-06 – Context-menu coverage is uneven.** Tasks, notes, prompts, folders and table parts have one; subtasks/steps/sub-steps (list, board, panel), tags and board columns do not. (Medium)
+3. **U-27 – The Compare view is a modal sheet for a repeat-edit-and-observe task**, which the HIG says belongs in a panel or window. (Medium, large effort)
+4. **U-08 – Text size tops out at 130 %** (the HIG asks for at least 200 %); browser zoom is the only way beyond. (Medium)
+5. **U-04 – Context menus dim unavailable items instead of hiding them**, contrary to the context-menu page (a previously decided exception). (Medium, small effort if reversed)
 
 ---
 
@@ -31,166 +30,128 @@ This report **replaces** the earlier audit (F-01 … F-38, closed out in commit 
 
 | ID | Root cause | Related findings | Recommended fix | Effort |
 |---|---|---|---|---|
-| RC1 | The three-pane layout (sidebar 300 + list 300 + inspector 340) has no priority order for narrowing; only Notes has container queries | 3 (A-01, A-02, A-40) | Give Prompts a collapse order: the inspector becomes an overlay below about 1100 px, then the list narrows, then the sidebar collapses; set a minimum editor width; add the container queries Notes has | M |
-| RC2 | The Prompts toolbar was built by adding controls to the Notes bar rather than against the HIG toolbar anatomy | 4 (A-03 – A-06) | At most three groups (leading: new, undo/redo; centre: insert; trailing: ⋯, Copy, inspector); move Favorite and Lock into ⋯ or one capsule; drop the ring borders; dim undo/redo as Notes does | M |
-| RC3 | Deletion, undo and confirmation were designed per mode | 3 (A-07 – A-09) | One rule: recoverable deletes (anything with Undo or Recently Deleted) never ask; only permanent, un-undoable deletes get an alert | M |
-| RC4 | One menu component (`rowMenuItem`, line 3623) serves both pull-down menus and right-click menus, which the HIG treats differently | 3 (A-10 – A-12) | Add a `context` option that hides instead of dims and omits shortcut hints; keep dimming in ⋯ menus | S |
-| RC5 | Vocabulary drifted between modes built at different times | 2 (A-13, A-14) | Pick one word per concept (Duplicate; Pin or Favorite) and rename in menus, Help and the shortcut sheet | S |
-| RC6 | Features add their own small components without a catalogue (quiet-add controls, popovers, empty states, dialog footers) | 9 (A-15 – A-20, A-38, A-41, A-42) | Add a short component list to CLAUDE.md (one add control, one empty state, one popover base) and migrate when a screen is next touched | M–L |
-| RC7 | Web-platform limits and earlier "keep" decisions | 7 (A-21 – A-26, A-39) | Document as accepted; revisit A-21 (text size) first | – |
-| RC8 | No tokens for motion, and no rule against one-off sizes and inline styles | 4 (A-27 – A-30) | Add `--dur-fast/base/slow` and an easing token; replace the one-off `calc()` sizes; move inline `style=` into classes when a template is touched | M |
-| RC9 | Transient and hover-only UI was not checked against accessibility guidance | 3 (A-31 – A-33) | `role="status"` and `aria-live`; pause the toast timer on hover/focus; enlarge hit areas with a `::before` | S |
-| RC10 | Shortcuts were chosen to avoid browser conflicts, not HIG semantics | 1 (A-34) | Choose from keys the HIG leaves free; keep one meaning per key across modes | S |
-| RC11 | Icons were picked per feature without checking Apple's standard set or reusing one drawing for one concept | 3 (A-35 – A-37) | Keep a short icon list in CLAUDE.md (Duplicate, Copy, Filter, mode icons) and swap the three outliers | S |
+| R1 | Inline `style="…"` and local literals bypass the tokens (91 inline styles, 44 with px/hex literals; ~30 literal `font-size`s; off-scale paddings 3/5/7/9/18/21/22 px) | U-09, U-10, U-13 | Move inline styles into classes using tokens; add a `--sp-*` spacing scale and lint for literals in a test | M |
+| R2 | Three dialog shells (plain `.modal`, settings-style Help/Shortcuts, `.sync-modal`) and no shared "button row" contract | U-01, U-02, U-03, U-27, U-29 | One `dialogButtons({cancel, primary, danger})` builder that fixes order, labels, default focus and Escape | M |
+| R3 | Documented web-oriented exceptions to the HIG (dim not hide, hints in context menus, Cancel-default) | U-01, U-04, U-05 | Decide per exception: keep and record the reason in the HIG-deviation list, or revert | S |
+| R4 | Context menus were added per feature, not from a coverage rule | U-06, U-22 | Rule: every selectable object with commands gets a context menu built from the shared builders | M |
+| R5 | Web-platform limits (no menu bar, zoom-based text scale, English strings in code) | U-08, U-20, U-24 | Offer 150 %/200 % steps; move strings to a table before any translation | L |
+| R6 | Motion and hit-area values tuned locally per component | U-11, U-12, U-16 | One motion table (3 durations, 2 easings) and one `.hit` utility for sub-20 px controls | M |
+| R7 | Terms grew per mode | U-21 | Glossary of terms (see section 6) | S |
 
 ---
 
-## 3. Quick wins (High or Medium, effort S)
+## 3. Quick wins (High or Medium severity, Effort S)
 
-| ID | Finding | Fix |
+| ID | What | Why it is small |
 |---|---|---|
-| A-07 | Six undoable deletes ask for confirmation and also show Undo | Remove the confirmation for task, project, folder and global-variable deletes; keep the Undo toast; keep alerts only for permanent deletes **Fixed 2026-10-20.** |
-| A-13 | "Duplicate" in Tasks, "Clone" in Notes and Prompts | Rename Clone to Duplicate (menus, Help, tests, toast) **Fixed 2026-10-20.** |
-| A-31 | The toast is not announced to screen readers | Add `role="status" aria-live="polite"` to `#toast` (errors: `role="alert"`) **Fixed 2026-10-20.** |
-| A-32 | Toast timeout ignores hover and focus | Pause `toastHideTimer` on hover and focus-within; keep 6 s for Undo **Fixed 2026-10-20.** |
-| A-33 | 18 px remove badges and 12–14 px table grips | Add a `::before` that grows the hit area to at least 20 × 20 (already done for checkboxes) **Fixed 2026-10-20.** |
+| U-02 | Reorder / restyle the Import dialog so the destructive *Replace* is not the trailing default; make *Merge* the default | one button row (lines 2322–2324) |
+| U-04 | Hide, rather than dim, unavailable context-menu items (keep dimmed only Cut/Copy/Paste-style items) | `rowMenuItem` has one `o.off` switch (line 4033); decision already documented, so this is a policy call |
 
 ---
 
 ## 4. Inventory
 
-Counts come from the current file. "Tokens" are CSS custom properties.
-
-### Component duplication and design-system drift
-| Variant | Where | Count |
-|---|---|---|
-| Push buttons `.btn` (radius 10 px, 0.5 px border, 6 × 14 padding) | dialogs, bars | many |
-| Toolbar capsule buttons `.tool-btn` (pill, 32 × 28) | task, note and prompt bars | many |
-| Round toolbar buttons `.note-more-btn`, `.note-new-btn`, `.note-lock-btn` (circle with ring) | Notes and Prompts bars | 3 to 5 per bar |
-| Pills and chips `.pr-chip`, `.pr-pill`, `.f-chip`, `.badge` | Prompts panel, filters, tasks | 4 styles |
-| Square +/− bar buttons `.pr-g-bar-btn` | Global Variables dialog | 4 |
-| Quiet add controls: `.pr-add-item`, `.pr-chip.add`, `.pr-pill.add`, `.pr-g-link`, sidebar "+" | Prompts, sidebar | 5 |
-| Popover and menu surfaces: `#rowMenu`, `.cell-pop`, `.split-btn-menu` (help, filter, tool, colour), `.qa-popup`, `#noteLinkPop` | 1698, 1838, 1866, 1900, 1945, 5133–5143 | 6 |
-| Inline `style="…"` attributes | markup and JS templates | 93 (12 set a font size) |
-| Colour literals outside token definitions | CSS | 6 (print rules, 3 `--cap-*` fallbacks, a comment) |
-
-### Background colours and surfaces
-Tokens `--bg`, `--bg-2`, `--bg-3`, glass variants for chrome, opaque neutral values scoped on `.main` and `.drawer`, `--wall` behind the sidebar. Light and dark define the same variables. No raw hex backgrounds except print. Accent: `--accent` with `--accent-hover` and `--accent-tint`. Tints: blue, teal, amber, purple and red as `-bg`/`-text` pairs.
-
-### Modals (12 dialogs, all `role="dialog"` or `alertdialog`)
-Global Variables (2053), Confirm (alertdialog), Folder, Project, Import, Help, About, Projects shown (2345), Shortcuts, File sync, New file, Data files. Footers: Cancel + primary (Folder, Project, Import, New file, Confirm); Done only (Global Variables, Projects shown); Cancel only (Data files); none (Help, About, Shortcuts). One close path (`closeModal`); Esc and a click on the backdrop close all of them.
-
-### Context menus (right-click)
-Task row and card, project row (Tasks), note row, note folder, note body (links, table grips, whole table), prompt row, prompt folder, prompt option, preset and checklist item (3 kinds). No right-click on: Global Variables rows and values, sidebar tags (none found in code), the prompt template (the browser's own menu).
-
-### Placement of controls
-Every pane has a 52 px bar. Tasks: title and selection capsule. Notes: new, style, undo/redo, B I U S, blocks, spacer, lock, ⋯. Prompts: new, undo/redo, insert ×4, spacer, favorite, lock, ⋯, Copy Prompt, inspector toggle. The primary button (Copy Prompt) is on the trailing side and the inspector toggle is last.
-
-### Navigation
-Sidebar mode switch (Tasks | Notes | Prompts), sidebar lists, collapsible sidebar (⌥⌘S), selection is a solid accent row everywhere.
-
-### Forms and validation
-Single-line fields in dialogs (folder name, project name, file name, variable name, link) and inline renames. Duplicate names are refused with a toast (Prompts options, presets and global names).
-
-### Lists and tables
-Task list (sortable headers, solid-accent selection), notes list, prompts list (same `.note-row`), sidebar rows. Truncation: `text-overflow: ellipsis` plus a tooltip (`tipIfTruncated`, `title` on pills).
-
-### Empty, loading and error states
-Empty-state variants: `.empty-state`, `.board-empty`, `.notes-empty`, `.notes-list-empty`, `.pr-empty-actions`, `.pr-insp-empty`, `.pr-g-detail-empty`, `.pr-g-empty-list`, `.task-cell-empty` (9). Loading indicators: none (all data is local). Errors: a toast with a warning icon, or an inline red hint (link popover).
-
-### Feedback and notifications
-Toast (one element, 90 call sites, 24 with Undo, 2.4 s or 6 s), sync banner (dismissable, per session), inline hints, 12 dialogs of which one is an `alertdialog`; 12 `openConfirmModal` calls.
-
-### Destructive actions and undo
-Confirm and Undo: delete task(s) (3815, 4313), project (4761), note folder (6392), prompt folder (7143), global variable (8596). Confirm only (permanent): delete a note or prompt permanently, delete all (6266, 6301, 7063, 7087), unlink file (9507). Undo toast only: notes and prompts moved to Recently Deleted, preset delete.
+Counts come from `grep` on the current file unless stated.
 
 ### Typography
-Text sizes: `--fs-11` ×26, `--fs-12` ×55, `--fs-13` ×55, `--fs-14` ×32, `--fs-15` ×15, `--fs-17` ×8, `--fs-22` ×7. One-offs: `calc(var(--fs-13) * .96)` (1574), `* .88`, `.88em`, `.92em`; glyph sizes of 6–10 px (218, 224, 356, 377, 382, 390, 464, 992, 1117, 1209, 1502). Weights: 500 ×21, 600 ×34, 700 ×14 (400 is the default). One sans family (`--font`) and `--mono` for code and templates.
+| Variant | Where | Uses |
+|---|---|---|
+| `--fs-11` … `--fs-22` (11, 12, 13, 14, 15, 17, 22 px) | all text | 26 / 58 / 62 / 33 / 15 / 9 / 7 (+1 inline) |
+| Literal sizes 6–10 px | tick marks, chevrons, table "+" and grips (e.g. lines 220, 226, 353, 379, 387, 1292, 1570, 1572) | ~25 declarations |
+| Literal 13–22 px | inline `style=` and a few rules (16 px ×4, 14 px ×2, 13/15/17/20/22 px ×1 each) | ~11 |
+| Literal 30/36 px | empty-state icons | 3 |
+| Weights | 400 ×2, 500 ×21, 600 ×38, 700 ×22 | 83 |
+| Families | `--font` (system stack), `--mono` | 2 |
+
+### Radius
+| Variant | Uses |
+|---|---|
+| `--radius` (10) 33, `--r-xs` (4) 29, `--r-s` (8) 21, `--r-m` (10) 9, `--r-l` (12) 4, `--glass-r-menu` 2, `--radius-lg`/`--glass-r-row`/`--glass-r-bar` 1 each | 101 |
+| `999px` pills | 29 |
+| Literals 1–3 px (scroll thumbs, table handles) | 8 |
+| Literal 6 px | 1 |
+
+`--radius` and `--r-m` are the same value (10) under two names, 42 uses combined.
+
+### Colours
+| Variant | Where | Count |
+|---|---|---|
+| Hex outside token definitions | `theme-color` meta (2), print CSS (1), mail/copy export HTML (~18), focus-ring comment text | 24 lines, all documented as deliberate |
+| Surface tokens | `--bg`, `--bg-2`, `--bg-3`, `--glass-strong`, defined twice for the normal and the reduced-transparency path (lines 956–961) | – |
+| Accent / selection | `--accent`, `--sel-*`, `--sel-inactive` | – |
+
+### Dialogs and modal types
+| Type | Instances |
+|---|---|
+| `role="dialog"` | 14 |
+| `role="alertdialog"` | 1 (confirm) |
+| Shells | plain `.modal` (folder, project, import, new file, data-file chooser), `.sync-modal` (link file, AI apps), settings-style (Help, Shortcuts, About), custom sheets (Global Variables, Compare) |
+| Non-modal popovers | cell popovers, `#rowMenu`, tool menus, link popover, `/` menu |
+| Button rows | `.modal-actions`, right-aligned, Cancel then primary (lines 2283–2691) |
+
+### Context menus
+19 `oncontextmenu` sites: task row (list and board), project row, task-trash row, notes folder, note row, note body (links), prompt folder, prompt row, prompt items (option, preset, variable), table (grips, whole table). None for: subtask/step/sub-step rows, tags, board column headers, the sidebar's smart views.
 
 ### Icons
-One source: the `ICONS` registry (outline SVG, 24 grid, stroke 2, `currentColor`), drawn as masks (`.fa-NAME`) and inline (`svg.mi` 16, `.tb-ico2` 18). Sizes 12/14/16/18 via `--ico-*`. No icon font, no emoji. Filled variants are not used (selection is expressed by colour).
+One registry (`ICONS` / `MENU_SVG`, outline, 24 grid, stroke 2) drawn as masks for `.fa-NAME`, plus inline `.tb-ico2` SVGs; drawn sizes 12/14/16/18. No second icon set.
 
-### Hover and interaction states
-105 hover rules: background 64, colour 39, opacity 23, box-shadow 16, border-colour 8, filter 4. One focus ring (`--focus-ring`). Cursor: `default` ×60, `pointer` ×2 (links), `col-resize` ×7, `text` ×4, `grab` ×1.
-
-### Tooltips
-161 `title` attributes (native tooltips, no custom delay) and 110 `aria-label`s.
-
-### Spacing and layout
-Single-value padding rules use 2, 4, 6, 8, 12, 16 and 24 px (a defined scale); `--gutter` is 20 px. Widths: sidebar 300 (200–480), notes and prompts list 300 (200–600), inspector 340 fixed, note column at most 900.
-
-### Shapes and depth
-Radii: `--r-xs` 4 (×28), `--r-s` 8 (×18), `--r-m`/`--radius` 10 (×34 + 6), `--r-l` 12, `--r-xl` 16, 999px ×25, 50% ×19. Elevation tokens `--elev-1/2/3`. Hairlines 0.5–1 px in `--border`.
+### Feedback
+| Type | Where |
+|---|---|
+| Toast (live region, Undo, 2.4 s / 6 s with Undo, held on hover/focus) | `showToast` line 10598, `armToastTimer` 10612 |
+| Banners | `#syncBanner`, `#updateBanner` (lines 11003–11004, 11172) |
+| Inline messages | Compare `#pdfMsg`, link popover hint, file-name validation |
+| Confirm dialog | permanent delete, delete all, unlink |
 
 ### Motion
-Transition durations: .08 s, .1 s ×6, .12 s ×8, .15 s ×8, .18 s ×2, .2 s ×8, .24 s, .25 s, .35 s ×2 (9 values). One `prefers-reduced-motion: reduce` block collapses all of them.
+Transition durations in use: .08, .1, .12, .15, .2, .25, .35 s (7 values); easings: `ease`, `ease-out`, one spring `cubic-bezier(.34,1.56,.64,1)`; `checkPop` 0.2 s. Reduced-motion/transparency/contrast media queries: 3.
 
-### Drag and drop
-Tasks reorder, subtasks and steps reorder, notes and prompts drag onto folders (`.drop-into` highlight, Undo toast), folders reorder. The same highlight class serves both folder lists.
+### Hover / state vocabulary
+Row hover: `--bg-2` fill; selected row: solid accent (grey when focus is elsewhere); pills: brightness + halo; board tile: shadow lift; hidden controls: opacity reveal; toolbar capsules: `--cap-hover`; cursor: arrow on controls, hand on 3 link rules.
 
-### Keyboard
-Return and Esc in dialogs, ↑↓ in lists, F2 rename, Delete, ⌘↵ Copy Prompt, ⌥⌘I inspector, ⌥⌘S sidebar, ⌃⌘C Copy Note, ⌘K link, the shortcut sheet on **?**.
+### Tooltips
+169 `title="…"` attributes (native browser tooltips), 177 `aria-label`s. No custom tooltip component.
 
-### Accessibility
-Dialog roles and names on all 12 dialogs; custom checkboxes with `role="checkbox"`; reduced-motion; secondary text calculated at 4.5:1 or better in the last audit. No live region on the toast.
-
-### Wording
-Menu labels are title-style; an ellipsis marks commands that need input ("Edit Values…", "Create it…", "Save as Preset…"). Terms that differ by mode: Duplicate / Clone, Pin / Favorite.
+### Empty / loading / error states
+Empty states exist in all three modes (icon + title-style label). No loading states needed (local data); the only waiting state is the file-link flow. Errors are toasts with `role="alert"`.
 
 ---
 
 ## 5. Findings
 
-Type: **I** inconsistency, **H** HIG deviation, **B** both. HIG pages are under `https://developer.apple.com/design/human-interface-guidelines/`. Effort S / M / L as defined in the brief.
+Severity: High = breaks expectation/usability/accessibility; Medium = visible inconsistency; Low = polish. HIG base URL: `https://developer.apple.com/design/human-interface-guidelines/`.
 
-| ID | Category | Finding | Type | Locations | HIG reference | Severity | Effort | RC | Recommendation |
+| ID | Category | Finding | Type | Locations | HIG reference | Sev. | Effort | Root | Recommendation |
 |---|---|---|---|---|---|---|---|---|---|
-| A-01 | Window / layout | Prompts has no narrowing order. Sidebar (300) + list (300) + inspector (340, fixed) leave the editor about 140 px at a 1100 px window (the template wraps mid-word, the title is cut to "Create is"); at 860 px the Variables panel runs past the window edge. The inspector only auto-opens at 1300 px or wider on load, but it can be opened at any width. Notes does not have this problem. | B | `.pr-split` 1586, `.pr-inspector` 1588, `togglePromptInspector` 6988–6998; screenshots `n1100.png`, `n860.png` | `sidebars` ("automatically hiding and revealing a sidebar when its container window resizes"), `toolbars` | **High** | M | RC1 | Make the inspector an overlay on the editor's right edge below about 1100 px; set a minimum editor width (about 420 px); collapse in the order inspector, list width, sidebar **Fixed 2026-10-20.** |
-| A-02 | Toolbars | At 1100 px the Prompts toolbar wraps onto a second row (⋯, Copy Prompt, inspector toggle); at 860 px it takes three rows and the `{{ }}` buttons stack their braces. Notes has container queries (1495–1498) that shrink its bar; Prompts has about twice the controls and no rule. | B | markup 1993–2012, CSS 1495–1498; `n1100.png`, `n860.png` | `toolbars` ("avoid layouts that cause toolbar items to overflow by default"; the system adds an overflow menu) | Medium | M | RC1 | Collapse the four insert buttons into one "Insert Variable" pop-up button below about 900 px; move Favorite and Lock into ⋯ at the same breakpoint **Fixed 2026-10-20.** |
-| A-03 | Toolbars | The Prompts toolbar has eight separate controls in about six groups (new, undo/redo, insert ×4, favorite, lock, ⋯, Copy, inspector). | H | 1993–2012; `tb.png` | `toolbars` ("aim for a maximum of three" groups) | Low | M | RC2 | Leading: new and undo/redo. Centre: insert. Trailing: ⋯ (holding Favorite and Lock), Copy Prompt, inspector toggle |
-| A-04 | Toolbars | Compose, ⋯, Favorite, Lock and the inspector toggle are circles with a ring; the HIG asks for symbols without borders because the bar already provides the container. The same ring is used in Notes, so it is consistent but not HIG. | H | `.note-new-btn` 1432, `.note-more-btn` and `.note-lock-btn` 1492 | `toolbars` ("Prefer system-provided symbols without borders") | Low | M | RC2 | Drop the ring and keep the hover fill; keep a fill only for a toggled state **Fixed 2026-10-20:** the round bar buttons keep the soft fill of the capsule groups but have no ring or rim. |
-| A-05 | Toolbars | Notes dims Undo and Redo when there is nothing to undo (`disabled`, updated from `queryCommandEnabled`); in Prompts they are always active. | I | Notes 1935 and 8063; Prompts 1996–1997 and 7013 | `undo-and-redo` | Low | S | RC2 | Track the textarea's undo state and set `disabled` as Notes does |
-| A-06 | Toolbars / colour | Favorite and Lock fill amber when on, next to a solid-blue Copy Prompt: three tinted controls in one bar. | H | `.note-more-btn.on` 1493; `tb.png` | `toolbars` ("Reduce the use of toolbar backgrounds and tinted controls"), `color` | Low | S | RC2 | Show the "on" state through the symbol (filled star, closed lock) on the neutral capsule; keep colour for the primary action |
-| A-07 | Alerts / undo | Six deletes show a confirmation dialog **and** say "You can undo this from the toast". The HIG says not to alert for common, undoable actions. Notes and Prompts do not ask. | B | 3815, 4313, 4761, 6392, 7143, 8596 | `alerts` ("Avoid displaying alerts for common, undoable actions"), `feedback` | Medium | S | RC3 | Remove the confirmation for these; keep the 6 s Undo toast. Keep alerts only for permanent deletes (6266, 6301, 7063, 7087) and Unlink (9507) **Fixed 2026-10-20.** |
-| A-08 | Alerts | A destructive confirmation focuses **Cancel**, so Return cancels. The HIG says not to make Cancel the default button; if nothing should be the default, give no button the default. The earlier audit (F-08) chose this on purpose. | H | `openConfirmModal` 5251–5258 | `alerts` ("you don't want to make a Cancel button the default button") | Low | S | RC3 | Either focus neither button, or accept the deviation and keep it documented |
-| A-09 | Destructive actions | "Delete" means three things: in Tasks it asks, then removes with Undo; in Notes and Prompts it does not ask and moves the item to Recently Deleted for 30 days; "Delete Permanently" asks. People cannot predict whether a delete can be recovered. | I | Tasks 3647 and 3815; Notes 5966; Prompts 7173; the 30-day purge in `normalizeNotes` and `normalizePrompts` | `feedback`, `undo-and-redo` | Medium | M | RC3 | Either give Tasks a Recently Deleted list like the other modes, or drop its confirmation (A-07) and describe it consistently **Fixed 2026-10-20.** |
-| A-10 | Context menus | Unavailable items are dimmed in right-click menus (18 `off:` uses, for example a locked note or prompt shows Delete dimmed with "Unlock First"). The HIG says menus dim, **context menus hide**. The same `rowMenuItem` renders both ⋯ menus and right-click menus. Earlier finding F-12 chose dimming everywhere. | H | `rowMenuItem` 3623, 5966, 7173 | `context-menus` ("Hide unavailable menu items, don't dim them"), `menus` | Low | S | RC4 | In right-click menus omit unavailable items; keep dimmed items in ⋯ pull-down menus |
-| A-11 | Context menus | Keyboard shortcuts (⌫, F2 and others) are shown in right-click menus. The HIG puts them in the menu-bar menus; this web app has no menu bar, so the menu is the only place they are discoverable. | H | 3647, 5966, 7173 | `context-menus` ("Show keyboard shortcuts in your app's main menus, not in context menus") | Low | S | RC4 | Accept (no menu bar) and note it in CLAUDE.md, or show the shortcuts only in the shortcut sheet |
-| A-12 | Menus | The "insert global variable" menu puts the same globe icon on every item. | H | `openPromptGlobalInsertMenu` around 8532 | `menus` (icons for every item in a group or none; none if no icon clearly represents the item) | Low | S | RC4 | Drop the per-item icons; keep the globe on the toolbar button only |
-| A-13 | Wording | The same command is **Duplicate** in Tasks and **Clone** in Notes and Prompts (also the "Clone removed" toast and Help rows). Apple's standard word is Duplicate. | B | 3582 and 3646 against 5962, 7170 and Help 2260 | `menus`, `keyboards` (standard commands) | Medium | S | RC5 | Rename Clone to Duplicate everywhere, including Help, tests and the toast **Fixed 2026-10-20.** |
-| A-14 | Wording | Notes use **Pin / Pinned** (thumbtack, floats to the top); Prompts use **Favorite / Favorites** (star, filter only). They are different features but fill the same slot and look alike. | I | Notes menu 5962 area ("Pin Note"); Prompts menu 7170 area ("Favorite") | `sf-symbols` (one symbol per action) | Low | S | RC5 | Keep both only if the difference is intended; otherwise use Pin in both |
-| A-15 | Modals | Two dialogs offer only **Done** while applying changes live (Global Variables, Projects shown). The HIG says a Done button should be paired with Cancel or Back; a dialog that applies live is closer to "Close". | H | 2053, 2345 | `sheets` ("Provide an alternative to the Done button") | Low | S | RC6 | Label the button "Close", or make the dialog transactional with a Cancel |
-| A-16 | Context menus | Right-click exists on every list item except inside the Global Variables dialog (rows and values rename only by double-click or F2) and on sidebar tags (none found in code). | I | dialog rows, `renderGlobalsModal` around 8560 | `context-menus` ("Support context menus consistently throughout your app") | Low | S | RC6 | Add Rename and Delete context menus to the dialog's rows and values; check the tags |
-| A-17 | Colour | Purple is the Prompts colour for global variables, a tag colour (`CAT_COLORS`) and the bulk-selection tint in one rule. | I | `.task-row.kbd-selected.bulk-selected` 349; `.ph-glob` | `color` ("Avoid using the same color to mean different things") | Low | S | RC6 | Needs visual check; if the bulk tint is still reachable, move it to the accent |
-| A-18 | Components | Five different "add something" controls: the `+ Save as Preset…` chip, the round `+` pill, the "Add item" link, the "Edit Values…" link and the sidebar "+". Each has its own padding, colour and hover. | I | `.pr-add-item`, `.pr-chip.add`, `.pr-pill.add`, `.pr-g-link` (1587–1620) | `buttons` | Low | M | RC6 | One quiet-add class with a text variant and an icon variant |
-| A-19 | Components | Six popover and menu surfaces are implemented separately (`#rowMenu`, `.cell-pop`, `.split-btn-menu` ×4, `.qa-popup`, `#noteLinkPop`); they look aligned but placement, outside-click and focus code is repeated. | I | 1698, 1838, 1866, 1900, 1945, 5133 | `menus` | Medium | L | RC6 | Move placement and dismissal into one helper over time |
-| A-20 | Empty states | Nine empty-state variants in three layouts (icon and text, plain text, text and actions). | I | `.empty-state`, `.board-empty`, `.notes-empty`, `.pr-insp-empty`, `.pr-g-detail-empty` and more | – (consistency; no specific HIG page) | Low | M | RC6 | One empty-state component with an optional icon and an optional action row; review the wording per screen |
-| A-21 | Typography / accessibility | The text-size control stops at 130 %. The HIG asks that people can enlarge text by at least 200 %. Browser zoom works, so the platform meets the need, not the app. | H | `UI_SCALE_STEPS` 2552 | `accessibility` ("enlarge text by at least 200 percent") | Medium | M | RC7 | **Kept by decision (2026-10-20): not to be changed.** Was: add a 150 % and a 200 % step, or state in Help that browser zoom is the route |
-| A-22 | Appearance | App-level Light, Dark and Match System. The HIG says to avoid an app-specific appearance setting; mitigated by "Match System" as the default (earlier F-18). | H | Appearance popover | `dark-mode` ("Avoid offering an app-specific appearance setting") | Low | – | RC7 | Accepted; keep Match System as the default |
-| A-23 | Colour | The accent is a fixed blue; a browser cannot read the system accent colour reliably (earlier F-17). | H | `--accent` | `color` (app accent colours) | Low | – | RC7 | Accepted web limit |
-| A-24 | Modality | Dialogs are centred cards, not window-attached sheets (earlier F-07). | H | `.modal` | `sheets` (macOS) | Low | – | RC7 | Accepted web limit |
-| A-25 | Navigation | Sync status, Data, Appearance and Help sit at the bottom of the sidebar, and in Notes and Prompts so does Recently Deleted. | H | `.sb-tools`, `#trashNav` | `sidebars` ("Avoid putting critical information or actions at the bottom of a sidebar") | Low | S | RC7 | Needs visual check; in a browser tab the bottom edge is always visible, so probably acceptable |
-| A-26 | Localization | All UI text is hard-coded English. Dates use `toLocale*` (2852, 4004, 6090–6093, 6173), but dialog and menu strings cannot be translated and +30 % string length was not tested. | H | whole file | – (localisation guidance not fetched) | Low | L | RC7 | By design for now; keep new strings in one place where possible |
-| A-27 | Typography | One-off sizes bypass the scale: `calc(var(--fs-13) * .96)` for the template field, `* .88`, `.88em` and `.92em` for code chips, and glyph sizes of 6–10 px inside controls. macOS minimum text size is 10 pt; the smallest ones are icon glyphs, not text. | B | 1574 and the `.88`/`.92` rules; 218, 224, 356, 377, 382, 390, 464, 992, 1117, 1209, 1502 | `typography` (macOS default 13, minimum 10) | Low | S | RC8 | Use `--fs-13` or `--fs-12`; needs visual check for the glyph sizes |
-| A-28 | Design system | 93 inline `style=` attributes, 12 of them setting font sizes; the "Projects shown" dialog is built from inline styles while the other dialogs use classes. | I | 2342–2345, 1838, 1866 | – (consistency; no specific HIG page) | Low | M | RC8 | Move to classes when a template is next touched |
-| A-29 | Motion | Nine different transition durations (.08 to .35 s) and no easing token. | I | CSS `transition:` rules | `motion` ("brevity and precision") | Low | M | RC8 | `--dur-fast` .1 s, `--dur-base` .18 s, `--dur-slow` .25 s |
-| A-30 | Hover | Hover feedback mixes methods: background (64 rules), colour (39), opacity (23), box-shadow (16), and `filter: brightness` on the status pills. | I | 105 `:hover` rules | `buttons` | Low | M | RC8 | Needs visual check; background for rows and controls, opacity only for revealed controls |
-| A-31 | Feedback / accessibility | The toast has no `role="status"` or `aria-live`, so VoiceOver does not announce "Moved to Recently Deleted · Undo" or error messages. | H | `#toast` 2428, `showToast` 9146 | `accessibility`, `feedback` ("Make sure all feedback is accessible") | Medium | S | RC9 | `role="status" aria-live="polite"`; errors `role="alert"` **Fixed 2026-10-20.** |
-| A-32 | Feedback | 90 toast call sites: 66 plain, 24 with Undo. They hide after 2.4 s (6 s with Undo) even while the pointer or focus is on them. The HIG asks to confirm only significant actions and to minimise time-boxed UI. | B | `showToast` 9146–9156 | `feedback`, `accessibility` ("Minimize use of time-boxed interface elements") | Medium | S | RC9 | Pause the timer on hover and focus-within; review the plain success toasts and drop the routine ones **Fixed 2026-10-20.** |
-| A-33 | Accessibility | Hover-only remove badges are 18 × 18 px; table grips and "+" are 12–14 px. The HIG minimum control size on macOS is 20 × 20 pt (28 default). Checkboxes already have a grown hit area; these do not. | H | `.pr-pill-x` and `.pr-chip-x` 1611, `.tbl-plus` 1232, `.tbl-grip.tbl` 1502 | `accessibility` (control sizes) | Medium | S | RC9 | A `::before` with `inset: -4px`; keep the look **Fixed 2026-10-20.** |
-| A-34 | Keyboard | ⌃⌘C is Copy Note; the HIG lists ⌃⌘C as "Copy the formatting settings" and says to avoid Control as a modifier. ⌘B is Bold in Notes but toggles the sidebar in Tasks. | H | `shortcutGroups` (shortcut sheet) | `keyboards` | Low | S | RC10 | Pick a free ⌥⌘ combination for Copy Note; keep ⌘B for Bold only |
-| A-35 | Icons | The two-squares "clone" drawing means three things: Duplicate (toolbar button, menus), the Prompts mode (All Prompts row, "No prompt selected" and the mode's empty state) and a decoration on some Help rows. Apple's Duplicate is `plus.square.on.square`; an icon should stand for one concept. | B | Duplicate 1861; All Prompts 1759; empty state 1991, 6769; Help rows | `icons` ("expresses a single concept"), `menus` (standard icons) | Medium | S | RC11 | Give Prompts its own icon (for example a text page) and keep the two-squares glyph for Duplicate only |
-| A-36 | Icons | Copy is a clipboard in the right-click and ⋯ menus (Copy Note, Copy Prompt) but two sheets on the Copy Prompt button. Apple's Copy is `document.on.document`; the clipboard is Paste. | B | `promptMenuHtml` 7170 area, note menu 5962 area, `#pCopyBtn` | `icons` (standard icons: Copy, Paste) | Low | S | RC11 | Use the two-sheets glyph for Copy everywhere |
-| A-37 | Icons | Filter is a funnel; Apple's standard Filter symbol is three lines of decreasing width (`line.3.horizontal.decrease`). | H | `#filterBtn` 1880 area | `icons` (standard icons: Filter) | Low | S | RC11 | Swap the drawing in `ICONS` |
-| A-38 | Popovers | The link popover closes on a click outside without applying what was typed. The HIG says to always save work when a nonmodal popover closes by itself and to discard only on an explicit Cancel. | H | `closeNoteLinkBar` 8522, outside-click handling | `popovers` ("Always save work when automatically closing a nonmodal popover") | Low | S | RC6 | Apply a valid address when the popover is dismissed by clicking away; Esc stays "cancel" |
-| A-39 | Windows | Help, Shortcuts and About imitate a window's chrome (a round close control where the traffic lights sit, System Settings layout) inside a page overlay. The HIG says not to create custom window UI that only approximates the system's. | H | Help/About dialogs (CLAUDE.md "Help is laid out like macOS System Settings") | `windows` ("Avoid creating custom window UI") | Low | S | RC7 | Keep the layout, but use a plain Close button in the dialog's own footer or title row |
-| A-40 | Layout | In a pane of 330 px or less the Prompts toolbar drops the Insert menu altogether, so there is no toolbar way to add a variable (typing the braces still works). The HIG says to change how much is visible with space, not what the app can do. | H | container query `max-width: 330px` | `layout` ("Keep functionality the same as size classes change") | Low | S | RC1 | Keep the menu and give up the Copy label or undo instead; or move Insert into ⋯ |
-| A-41 | Drag and drop | Reordering projects in the Tasks sidebar is drag-only; folders in Notes have Move Up / Move Down and ⌥↑ / ⌥↓. | H | `handleProjectDragStart`, `projectMenuHtml` | `drag-and-drop` ("Offer alternative ways to accomplish drag-and-drop actions") | Low | S | RC6 | Add Move Up / Move Down to the project's right-click menu |
-| A-42 | Dialogs | The Global Variables dialog shows its Values +/− bar even when no variable exists (both buttons greyed) above an empty-state message. | I | `#globalsModalBg` main pane | `lists-and-tables` (empty states) | Low | S | RC6 | Hide the right-hand bar until a variable is selected |
-
-**Counts:** 42 findings. High 1, Medium 10, Low 31. Type: HIG deviation 22, Inconsistency 12, Both 8. Eight were fixed on 2026-10-20 (A-01, A-02, A-04, A-07, A-09, A-13, A-31, A-32, A-33); A-21 is kept by decision.
-
-**Checked and conforming** (no finding): menu labels in title-style capitalisation, an ellipsis for commands that need input, undo and redo shortcuts ⌘Z and ⇧⌘Z, ⌥⌘I for the inspector, the inspector toggle on the trailing edge, `cursor: default` on controls (hand only on links), one focus ring, reduced-motion support, one close path for dialogs, dialog roles and names, no hard-coded colours outside tokens, one icon family with a size scale, ellipsis plus tooltip on truncated rows, solid-accent selection in every list.
+| U-01 | Modals / destructive | A destructive confirm moves focus to **Cancel** so Return cancels (`dflt = danger ? confirmModalCancel : confirmModalBtn`). The HIG says never make Cancel the default; to stop reflexive Return, make **no** button default. | HIG deviation | line 5642; buttons 2284–2285; `CLAUDE.md` "Dialogs" | `alerts` ("Note that you don't want to make a Cancel button the default button") | Low | S | R3 | Focus neither button (or the dialog) for destructive confirms; keep Esc = Cancel. |
+| U-02 | Modal button placement | Import dialog row is *Cancel · Merge · Replace*: the trailing/default slot holds the destructive *Replace* (red). The less risky *Merge* sits in the middle. | Both | lines 2322–2324 | `alerts` (default button trailing; destructive style marks an unintended destructive action; keep a safe choice) | Medium | S | R2 | Order *Cancel · Replace · Merge* (Merge trailing and default), or make Replace a text-style danger and move it left. |
+| U-03 | Modal button wording | Same role, different words: *Save* (folder, project), *Create* (new file), *Done* (AI apps, Global Variables, About-style), *Merge/Replace* (import). *Done* alone with no Cancel in Global Variables and the data-file chooser has only *Cancel*. | Both | lines 2274, 2297–2298, 2310–2311, 2571, 2638, 2679, 2691 | `sheets` (Done pairs with Cancel; Cancel dismisses without saving) | Low | S | R2 | Rule: dialogs that edit a draft use *Cancel + Save/Create*; dialogs whose changes apply live use *Done* only; say so in a comment next to each. |
+| U-04 | Context menus | Unavailable commands are **dimmed**, not hidden (locked folder/project/note/prompt, table Header toggles, Move up/down). | HIG deviation (decided exception) | `rowMenuItem` `o.off`, line 4033; `CLAUDE.md` "Menus dim, not hide" | `context-menus` ("Hide unavailable menu items, don't dim them" – except Cut/Copy/Paste) | Medium | S | R3 | Hide, or keep dimmed only where the dimmed row teaches something (add a reason such as "Unlock first", already done for notes) and record it as an accepted deviation. |
+| U-05 | Context menus | Keyboard shortcut hints appear in context menus (⌫ for Delete, ⇧⌘↵ in Open-in menu). The HIG puts shortcuts in the menu bar only. A web app has no menu bar, so the hints are the only on-screen reminder. | HIG deviation (justified) | `rowMenuItem` `o.hint`, line 4033; line 8178 | `context-menus` ("Show keyboard shortcuts in your app's main menus, not in context menus") | Low | S | R3 | Keep, but treat the Shortcuts dialog as the "menu bar" and make hints identical to it (one source). |
+| U-06 | Context menus | Coverage is uneven: subtask/step/sub-step rows (list, board, panel), sidebar tags, board column headers and the smart views have none, while projects, folders, notes, prompts and table parts do. | Inconsistency + HIG deviation | `oncontextmenu` sites listed in section 4 (none on `task-subtask-row`) | `context-menus` ("Support context menus consistently throughout your app") | Medium | M | R4 | Add a subtask menu (Open Details, Add Step, Promote/Demote, Duplicate, Delete) and a tag menu (Rename/Colour/Delete) built from `rowMenuItem`. |
+| U-07 | Context menus | The task row menu is long (Open, Rename, Priority ▸, Status ▸, Due ▸, Repeat ▸, Move to ▸, Duplicate, Delete …) with four submenus. The HIG asks for few items and one submenu level; levels are one deep but the count is high. | HIG deviation (mild) | `openRowMenu`; `CLAUDE.md` "Cell popovers" | `context-menus` ("small number of items") | Low | M | R4 | Needs visual check; consider moving rare items (Repeat) to the panel only. |
+| U-08 | Typography / accessibility | Text size offers 90/100/115/130 % (`UI_SCALE_STEPS`). The HIG asks for the ability to enlarge text by at least 200 %. Browser zoom works but is not an in-app setting. | HIG deviation | line 2889 | `accessibility` (Vision: "enlarge text by at least 200 percent"), `typography` | Medium | M | R5 | Add 150 % and 200 % steps (check the 52 px bars and 260 px sidebar minimum); note browser zoom as the alternative. |
+| U-09 | Typography | About 30 literal `font-size` declarations remain beside the 7-step token scale (glyph marks 6–10 px, plus 13/14/15/16/17/20/22 px in a few rules and inline styles). | Inconsistency | lines 220, 226, 353, 374, 379, 387, 461, 703, 985, 1110, 1737 and inline styles | `typography` (macOS default 13 pt, minimum 10 pt) | Low | M | R1 | Add `--fs-glyph-*` tokens for control marks; replace the 13–22 px text literals with `--fs-*`. |
+| U-10 | Typography | Control glyphs at 6–9 px (table "+" 6 px, grip 8–9 px, tick marks 7–8 px) are under the 10 pt macOS minimum. They are icons, not text. | HIG deviation (mild) | lines 1292, 1570, 1572, 379, 387 | `typography`, `accessibility` | Low | S | R1 | Needs visual check; raise to ≥10 px where the control allows. |
+| U-11 | Accessibility / hit areas | Table grips are 14 px and the edge "+" 12 px; the macOS minimum control size is 20 × 20 pt. `CLAUDE.md` says an invisible `::before` enlarges remove buttons and table grips, but it is not confirmed for `.tbl-plus` in the code. | HIG deviation | lines 1292, 1570–1572 | `accessibility` (Mobility: macOS minimum 20 × 20 pt) | Medium | S | R6 | Needs visual check; add the same `::before` to `.tbl-plus` and `.tbl-grip.tbl` and test with the DevTools box model. |
+| U-12 | Motion | Seven transition durations (.08–.35 s) and a spring easing with overshoot (`cubic-bezier(.34,1.56,.64,1)`) are mixed. Reduced-motion collapses all of it, which is correct, but normal-motion timing varies for the same kind of change (hover .1/.12/.15 s). | Inconsistency | `transition:` inventory, section 4 | `accessibility` (tighten springs, avoid bounce) | Low | M | R6 | Table: hover 120 ms ease, panel/menu open 200 ms ease-out, no overshoot. |
+| U-13 | Spacing | Off-scale values remain against the documented scale (2,4,6,8,10,12,14,16,20…): 3 px ×11, 5 px ×8, 7 px ×5, 18 px ×6, 21 px ×4, 22 px ×5, 9 px ×3 in padding/gap/margin; the inline-style note in `CLAUDE.md` says inline styles were never remapped. | Inconsistency | `grep` of padding/gap/margin | `layout` (not re-fetched) | Low | M | R1 | Introduce `--sp-*` tokens and snap; add a test that scans for literals. |
+| U-14 | Colour / tokens | `--radius` and `--r-m` are two names for 10 px; `--radius-lg` and `--r-xl`/`--glass-r-menu` for 16 px. Both names are in use. | Inconsistency | radius inventory | – | Low | S | R1 | Keep one name per value and alias the other. |
+| U-15 | Toast / time limits | Toast hides after 2.4 s (6 s with Undo) unless pointer or focus is on it. The HIG warns about time-boxed UI. Errors (`role="alert"`) use the same timer; not confirmed whether they are held longer. | HIG deviation (mitigated) | lines 10598–10620 | `accessibility` (Cognitive: "Minimize use of time-boxed interface elements") | Low | S | R6 | Needs visual check; keep error toasts until dismissed. |
+| U-16 | Tooltips | Tooltips are native `title` attributes (169): delay and style are the browser's, and keyboard users never see them. 177 `aria-label`s exist, but parity (every icon-only button has both) was not verified. | Both | `title=` / `aria-label` counts | `accessibility` (Vision/Mobility: labels) | Low | M | R6 | Needs visual check; test that each `button:not(:has(span))` has an `aria-label`. |
+| U-17 | Window / sidebar state | The sidebar's own active row does not turn grey when focus is in the list, panel or editor, unlike task, note and prompt rows. | Inconsistency | `CLAUDE.md` "Not done: the sidebar's own active row" | `lists-and-tables` (not re-fetched) | Low | S | R4 | Add the sidebar to the `sel-inactive` rule set. |
+| U-18 | Focus | The task panel's title field shows a focus underline (`box-shadow 0 2px 0 var(--focus-ring)`) while its other fields (Notes, number fields) show only a caret with the mouse. | Inconsistency | `CLAUDE.md` "One focus style"; drawer title rule | `text-fields` (not re-fetched) | Low | S | – | Drop the underline for mouse focus; keep it under `html.kbd-input`. |
+| U-19 | Modals | Fifteen dialogs open through `closeAllModals()`-style single-sheet logic, but nested flows had to be worked around: the Compare view uses an **inline** confirm because `openConfirmModal` would close every dialog. | Inconsistency | `CLAUDE.md` "Compare prompts"; `pdf.confirming` | `sheets` ("Display only one sheet at a time") | Low | M | R2 | Allow a stacked alert over a sheet, or standardise on inline confirms for sheets. |
+| U-20 | Menu bar | There is no menu bar (web app), so File/Edit/View commands and their shortcuts are only reachable from the sidebar's Data/Appearance/Help menus and the Shortcuts dialog. | HIG deviation (platform limit) | whole app | `the-menu-bar` | Low | L | R5 | Accept; keep the Shortcuts dialog as the full command list. If packaged (Electron/Tauri), add the standard menus. |
+| U-21 | Wording | Same concept, different word per mode: **Pin** (Notes) vs **Favorite** (Prompts) for "keep at the top"; **Recently Deleted** in all three but the verb is *Delete* vs *Remove* in panels. Prompts uses *Variables*, *Placeholders* and *Choices* in places for the same thing. | Inconsistency | Notes/Prompts menus and Help rows | `alerts` (labels; not re-fetched menus page) | Low | S | R7 | Pick one term per concept (glossary, section 6). |
+| U-22 | Navigation | Tasks has smart views (My Day, This Week, Overdue) in the sidebar but only projects have a context menu; Notes/Prompts folders have one. | Inconsistency | `openProjectMenu` (line 3375) | `context-menus` | Low | S | R4 | Give smart views a short menu (e.g. *Show in Board*), or none by rule. |
+| U-23 | Dialogs | Three dialog shells (plain, settings-style, link/AI) use different header treatments (round blue icon vs plain 17 px title vs large title). | Inconsistency | `.modal`, `.sync-modal`, Help/Shortcuts | `sheets` | Low | M | R2 | Needs visual check; define two shells (form sheet, settings sheet) and map each dialog. |
+| U-24 | Localisation | UI strings are hard-coded English in the script; dates and weekdays use `toLocaleDateString` (good), pluralisation is hand-written. | HIG deviation (if a second language is planned) | whole script | – | Low | L | R5 | Needs a product decision; if localised, move strings to one table and use `Intl.PluralRules`. |
+| U-25 | Compare / Globals | Global Variables dialog applies every change live and is closed by *Done* only; the Compare view saves only on *Save*. Two different "when does it persist" models for similar sheets. | Inconsistency | `#globalsModalBg`, `#pdfModalBg` | `sheets` | Low | S | R2 | Say in the footer which model applies (Compare already shows unsaved state). |
+| U-26 | Contrast (inactive selection) | Grey selected rows use `rgba(60,60,67,.18)` (light) / `rgba(255,255,255,.22)` (dark) with the normal text colours. Contrast on that fill is not computed in code. | – | `--sel-inactive` | `accessibility` (4.5:1) | Low | S | – | Needs visual check (section 7). |
+| U-27 | Modals | The Compare view is a large modal sheet used for repeated editing (typing, merging hunks, F7 navigation) with continuous observation of the result. The HIG: use a panel/window if people repeatedly provide input and observe results. | HIG deviation | `#pdfModalBg`, `openPromptDiff` | `sheets` ("Use a panel instead of a sheet if people need to repeatedly provide input and observe results"; also "open a new window … for self-contained tasks") | Medium | L | R2 | Open Compare in its own window/route (or a full-pane view like Notes), so other prompts stay reachable. |
+| U-28 | Drag and drop | Sub-steps drag only within their parent while steps/subtasks drag across parents, with different state variables; drop feedback is an accent line in the panel and list. Behaviour is documented but not discoverable. | Inconsistency | `draggedItem`, `draggedSubstep` | `drag-and-drop` (not re-fetched) | Low | M | – | Needs visual check; show a "not allowed" cursor when a sub-step is dragged outside its parent. |
+| U-29 | Buttons | Button styles in dialogs: `btn`, `btn-primary`, `btn-danger`, `btn-text-danger` (panel Delete), `btn-sm`. A destructive action is a filled red button in one dialog and plain red text in the panel. | Inconsistency | lines 2285, 2324, 4347 | `buttons` (not re-fetched) | Low | S | R2 | Rule: filled red only inside confirmation dialogs; plain red text elsewhere. |
 
 ---
 
@@ -198,50 +159,48 @@ Type: **I** inconsistency, **H** HIG deviation, **B** both. HIG pages are under 
 
 | Category | Rule |
 |---|---|
-| Components | Before adding a control, look for an existing one in CLAUDE.md: one add control, one empty state, one popover base |
-| Surfaces | Surfaces use `--bg`, `--bg-2`, `--bg-3` or the glass tokens; no raw colours outside token definitions and print |
-| Modals | A dialog says Done only if it applies live (then call it Close); otherwise Cancel plus a verb-labelled primary; one dialog at a time; alerts only for permanent, un-undoable actions |
-| Modal placement | Title, one-line description, content, then actions at the bottom right with Cancel left of the primary; 24 px side padding |
-| Context menus | Right-click menus list only available commands, no shortcut hints, the destructive item last and red, at most three groups |
-| Controls | The primary action is trailing; at most three toolbar groups; icon-only controls carry `aria-label` and `title` |
-| Navigation | Same mode switch, same sidebar rows, selection is the solid accent |
-| Forms | Label above the field or in its placeholder; Return confirms, Esc cancels; validate on commit with a message in place |
-| Lists | Ellipsis plus the full text in the tooltip; selection is the solid accent row |
-| Empty states | One component: optional icon, one sentence, optional single action |
-| Feedback | Toast for Undo and errors only; announced with `role="status"`; paused while pointed at or focused |
-| Destructive actions | Recoverable: no alert, an Undo toast. Permanent: an alert with the verb ("Delete", "Unlink") |
-| Typography | Only `--fs-11` to `--fs-22`; no `calc()` on sizes; weights 400, 500, 600, 700 |
-| Icons | Outline SVG from `ICONS`, sizes 12/14/16/18, stroke 2, `currentColor` |
-| Hover and states | Rows: `--bg-2`; controls: `--hover`; pressed: `--pressed`; revealed controls: opacity |
-| Tooltips | Native `title` on every icon-only control, text equal to its `aria-label` |
-| Spacing | 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40 |
-| Shapes | The radius ladder `--r-xs` to `--r-xl`, pill, circle |
-| Motion | `--dur-fast/base/slow`; nothing animates under reduced motion |
-| Keyboard | No Control modifier; do not reuse a HIG standard key for another command; one meaning per key across modes |
-| Windows and responsive | Every pane has a minimum width and a collapse order (inspector, list, sidebar) |
-| Accessibility | Text contrast at least 4.5:1; hit areas at least 20 × 20 px; every transient message has a live region |
-| Wording | Title-style menu items; one word per concept across modes (Duplicate, Delete, Recently Deleted) |
+| Components / tokens | No literal colour, radius, font size or spacing in rules or inline styles; use `--*` tokens. A test lists any new literal. |
+| Surfaces | Chrome is glass (sidebar, menus, modals); content is flat and opaque. |
+| Modals | Edit-a-draft dialogs: *Cancel* leading, one primary (*Save* / *Create*) trailing and default. Live-apply dialogs: *Done* only. A repeat-edit task gets a window or pane, not a sheet. |
+| Modal buttons | Destructive filled red only in confirmation dialogs; it is never the default and never the only trailing button when a safe option exists. Destructive confirms put focus on no button. |
+| Context menus | Every object you can select and act on has a menu built from `rowMenuItem` / `rowMenuSub`: Open/Edit, status-like submenus, Duplicate, then Delete last in red; at most one submenu level; unavailable items hidden (or dimmed with a stated reason). |
+| Controls | Primary action at the trailing end of its bar; icon-only buttons have an `aria-label` and a `title`. |
+| Navigation | The current location is the solid accent row, grey when focus is elsewhere – in the sidebar too. |
+| Forms | One look for fields (ghost/inline in lists, grouped rows in the panel, boxed in dialogs); validation on submit with one inline message line. |
+| Lists / tables | Truncate with ellipsis and show the full text as `title`. Row selection is the accent fill. |
+| Empty / error states | Icon + title-style label; errors as toasts with `role="alert"` that stay until dismissed. |
+| Feedback | Undoable → toast with Undo; not undoable → alert dialog. |
+| Typography | Text uses `--fs-11…22`, weights 400/500/600/700; control glyphs use `--fs-glyph-*`. |
+| Icons | Only the `ICONS` registry; sizes 12/14/16/18; one icon per meaning (see `CLAUDE.md`). |
+| Hover / state | Hover is a fill (rows, capsules), a brightness change (pills) or a lift (tiles) – never a colour swap alone. |
+| Spacing / shape | Spacing from the 2…40 scale; radii from `--r-*`; one name per radius value. |
+| Motion | Hover 120 ms ease, open/close 200 ms ease-out, no overshoot; everything collapses under Reduce Motion. |
+| Keyboard | Return = default action, Escape = cancel/close, Tab wraps inside dialogs; shortcuts come from one table. |
+| Accessibility | Controls ≥20 × 20 pt hit area (invisible `::before` allowed); text contrast ≥4.5:1 in both themes and on grey selection. |
+| Wording | Title-style capitalisation for menu items and buttons; one term per concept: **Pin** (notes only), **Favorite** (prompts only) unless merged; **Duplicate** everywhere; **Recently Deleted**. |
 
 ---
 
 ## 7. Needs visual check
 
-Checked on 2026-10-20 with headless Chrome (screenshots and a script that composites each text colour over its real background):
+- Computed contrast of text and pills on the grey inactive selection (U-26), and of `--text-3` on every surface in both themes.
+- Rendered size and hit area of `.tbl-plus` / `.tbl-grip` with their `::before` (U-10, U-11).
+- Whether error toasts disappear on the same timer as success toasts (U-15).
+- Parity of `title` and `aria-label` on every icon-only button (U-16).
+- Height and scan-ability of the task row menu (U-07).
+- Header and spacing parity of the three dialog shells (U-23).
+- Escape / click-outside dismissal behaviour in all 15 dialogs (code shows per-dialog `onkeydown` on some; the global path was not traced).
+- Focus order and screen-reader reading order of the panel, Compare view and Variables panel.
+- Not done in this audit: any run in Safari, or at 1100/860 px, after the earlier narrow-window fixes.
 
-| Item | Result |
-|---|---|
-| Prompts in the light theme | Looks right in the template, the Variables panel (all four variable kinds, pills, presets, checklist) and the list. A contrast scan of every text run found nothing under 4.5:1 (its one hit, the white "Copy Prompt" label, is a false alarm: the button is a gradient the scan cannot read). The dark theme scans clean as well |
-| Global Variables dialog, many values and long names | 40 values scroll inside the list; a very long value wraps (even without spaces); a long variable name is cut with an ellipsis in the left list and the hint under the Name field wraps; at a 640 px window the dialog fits. Only A-42 (a bar with nothing above it when no variable exists) turned up |
-| Tick spacing in the Notes toolbar's list-style menu | The tick sat directly against the bullet glyph because that menu had its own 14 px tick column. Fixed: it now uses the shared 22 px column |
-| A-17, A-25, A-27, A-30 | Still not confirmed from code; low priority |
-| VoiceOver | Reading order of the Prompts panel and focus order of the Global Variables dialog still need a real screen reader |
+---
 
 ## 8. Skipped categories
 
 | Category | Reason |
 |---|---|
-| The menu bar | A web app in a browser has no app menu bar, so the HIG's File, Edit and View menus cannot be provided; the toolbar rule "every toolbar item is also a menu command" cannot be tested |
-| Loading states | All data is local; nothing waits long enough to need a spinner or progress bar |
-| Window behaviour (multiple windows, full screen, minimum window size) | The browser owns the window; only layout at narrow widths applies (A-01, A-02) |
-| Drag and drop | Now covered (A-41); notes and prompts drop onto folders with a highlight and an Undo toast, locked items are refused |
-| Sort indicators on tables | Covered by the previous audit and unchanged |
+| Forms and validation (required markers, validation timing) | Only two real forms (folder/project name, new file name); validation is inline and on submit; nothing to compare. |
+| Loading indicators | All data is local; no spinner/skeleton/progress is needed. |
+| Menu bar | Not available in a web app (see U-20); standard menus cannot be provided. |
+| Window management (full screen, multi-window) | Browser/PWA window; the app has one window. |
+| Pointer devices beyond mouse/trackpad | The `pointing-devices` page was not fetched; touch behaviour only noted via `pointer: coarse` rules. |

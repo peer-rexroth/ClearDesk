@@ -579,7 +579,8 @@ test('the confirm dialog names its action: Delete by default, Unlink / Restore w
 test('projectMenuHtml offers New Task Here and Edit for every project, and Delete only for unlocked ones', function () {
   const locked = projects.find(p => p.locked), free = projects.find(p => !p.locked);
   const a = projectMenuHtml(locked.id);
-  assertIncludes(a, 'New Task Here'); assertIncludes(a, 'Edit'); assertIncludes(a, 'Delete'); assertIncludes(a.slice(a.indexOf('Delete') - 600, a.indexOf('Delete')), 'disabled', 'the locked Inbox shows Delete dimmed, not hidden');
+  assertIncludes(a, 'New Task Here'); assertIncludes(a, 'Edit'); assertNotIncludes(a, 'Delete', 'the locked Inbox leaves Delete out (unavailable items are hidden, not dimmed)');
+  assertNotIncludes(tidyMenuSeps(a).slice(-30), 'row-menu-sep', 'no separator is left dangling once Delete is gone');
   const b = projectMenuHtml(free.id);
   assertIncludes(b, 'New Task Here'); assertIncludes(b, 'Edit'); assertIncludes(b, 'Delete');
   assertEqual(projectMenuHtml('nope'), '');
@@ -735,4 +736,35 @@ test('the panel\'s Notes box grows by script only where the browser cannot do it
   document.getElementById('drawer').querySelectorAll = () => [probe]; openTask('t1');
   assertEqual(reads, 0, 'renderDrawer itself does not read the layout (that is what made switching tasks slow)');
   DRAWER_FIELD_SIZING = was;
+});
+
+// ---- HIG audit follow-up: dialogs, context-menu coverage, hidden unavailable items ----
+test('a context menu leaves out unavailable items and never keeps a dangling or doubled separator', function () {
+  var sep = '<div class="row-menu-sep"></div>';
+  assertEqual(rowMenuItem('fa-solid fa-trash', 'Delete', 'x()', { off: true }), '', 'an unavailable item renders nothing');
+  assertEqual(tidyMenuSeps(sep + 'a' + sep + sep + 'b' + sep), sep.slice(0, 0) + 'a' + sep + 'b', 'leading, doubled and trailing separators go');
+  assertEqual(tblMenuJoin([['a', ''], [''], ['b']]), 'a' + sep + 'b', 'table menus drop empty items and empty groups');
+});
+
+test('the subtask right-click menu: ids come from the row checkbox handler, levels offer the right moves, board cards only get subtasks', function () {
+  assertDeepEqual(subRowRefFromHandler("toggleSubtask('t1','s1')"), { level: 1, ids: ['t1', 's1'] });
+  assertDeepEqual(subRowRefFromHandler("event.stopPropagation();toggleSubSubtask('t1','s1','ss1')"), { level: 2, ids: ['t1', 's1', 'ss1'] });
+  assertDeepEqual(subRowRefFromHandler("toggleSubSubSubtask('t1','s1','ss1','x1')"), { level: 3, ids: ['t1', 's1', 'ss1', 'x1'] });
+  assertEqual(subRowRefFromHandler("toggleTaskDone('t1')"), null);
+  tasks = [{ id: 'tsm', title: 'T', notes: '', projectId: 'proj-inbox', status: 'todo', priority: 'medium', dueDate: null, tags: [], subtasks: [] }]; normalizeData();
+  var t = tasks[0]; t.subtasks = [{ id: 'sa', text: 'A', done: false, subtasks: [{ id: 'sb', text: 'B', done: true, subtasks: [{ id: 'sc', text: 'C', done: false }] }] }, { id: 'sd', text: 'D', done: false, subtasks: [] }];
+  var first = subMenuHtml({ level: 1, ids: [t.id, 'sa'] }, 'list'), second = subMenuHtml({ level: 1, ids: [t.id, 'sd'] }, 'list');
+  assertNotIncludes(first, "subMenuRun('demote')", 'the first subtask has nothing above it to join');
+  assertIncludes(second, "subMenuRun('demote')"); assertIncludes(second, 'Mark Complete'); assertIncludes(second, "subMenuRun('delete')");
+  var step = subMenuHtml({ level: 2, ids: [t.id, 'sa', 'sb'] }, 'drawer');
+  assertIncludes(step, 'Mark Not Done'); assertIncludes(step, 'Make Subtask'); assertNotIncludes(step, "subMenuRun('demote')", 'first step has no step above it');
+  assertIncludes(subMenuHtml({ level: 3, ids: [t.id, 'sa', 'sb', 'sc'] }, 'list'), 'Make Step');
+  var board = subMenuHtml({ level: 1, ids: [t.id, 'sd'] }, 'board');
+  assertIncludes(board, 'Rename'); assertNotIncludes(board, "subMenuRun('demote')", 'board cards have no promote / demote');
+  assertEqual(subMenuHtml({ level: 1, ids: [t.id, 'nope'] }, 'list'), '');
+});
+
+test('the destructive confirm has no default button, a plain confirm focuses its button', function () {
+  var src = openConfirmModal.toString();
+  assertIncludes(src, 'alertdialog'); assertNotIncludes(src, "'confirmModalCancel'", 'Cancel is never made the default');
 });
