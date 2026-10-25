@@ -1649,9 +1649,8 @@ const ICONS = {
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
   /* Markdown / XML-tag colouring of the template: colour, weight, italic, underline and background only, never size or spacing, so the painted copy keeps the textarea's metrics. Variables stay filled pills and win over these. Apple's accessible system colours; colour is never the only cue (bold headings and markers, chips on tags and code). */
-  .pr-tpl { overflow: hidden; }   /* the code band bleeds to the field's edges, so the rounded corners clip it */
   .pr-tpl-hl .ln { min-height: 1.7em; }
-  .pr-tpl-hl .ln.fence { background: var(--md-fence-bg); margin: 0 -44px 0 -14px; padding: 0 44px 0 14px; }   /* edge to edge: the negative margin and the padding cancel, so the text does not move */
+  .pr-tpl-hl .ln.fence { background: var(--md-fence-bg); margin: 0 -44px 0 -14px; padding: 0 44px 0 14px; }   /* edge to edge: the negative margin and the padding cancel, so the text does not move.. No overflow clip on .pr-tpl: the band is inset 12px from the top and bottom and the radius is 8px, so it never reaches a corner and nothing needs clipping */
   .md-dim { color: var(--md-dim); }
   .md-h { color: var(--md-h); font-weight: 700; }
   .md-b { font-weight: 700; }
