@@ -3322,7 +3322,7 @@ function isThisWeek(dueDate){
 
 // ── Render ────────────────────────────────────────────────────────────────────
 // An inline rename field that is open when something re-renders (a drag-and-drop reorder, say) is put back as it was: same field, same text, same caret, still focused. A field removed by a re-render fires no blur, so nothing commits behind the person's back.
-function captureEditField(){ const a = (selKeptEdit && selKeptEdit.isConnected) ? selKeptEdit : document.activeElement; return a && a.tagName==='INPUT' && /^rename/.test(a.id||'') ? { id: a.id, value: a.value, s: a.selectionStart, e: a.selectionEnd } : null; }
+function captureEditField(){ const kept = selKeptEdit && selKeptEdit.isConnected ? selKeptEdit : null, a = kept || document.activeElement; return a && a.id && ((kept && (a.tagName==='INPUT' || a.tagName==='TEXTAREA')) || (a.tagName==='INPUT' && /^rename/.test(a.id))) ? { id: a.id, value: a.value, s: a.selectionStart, e: a.selectionEnd } : null; }
 function restoreEditField(k){ if(!k) return; const n = document.getElementById(k.id); if(n && n!==document.activeElement){ n.value = k.value; n.focus(); try{ n.setSelectionRange(k.s, k.e); }catch(_){} } }
 function render(){ const keep = captureEditField(); renderCore(); restoreEditField(keep); }
 function renderCore(){
@@ -3933,7 +3933,7 @@ document.addEventListener('mousedown', e=>{
   // Pressing on a draggable row while an inline rename is open: the press may become a drag, and a drag must not end the edit. (Cancelling mousedown would cancel the drag too, so the field is allowed to blur but its commit is held back, and the field is put back after the drop.) A plain click still ends the edit, below.
   const ae = document.activeElement;
   selKeptEdit = null; selKeepEditPress = false;
-  if(ae && ae.tagName==='INPUT' && /^rename/.test(ae.id||'') && t!==ae && t.closest && t.closest('[draggable="true"]') && !t.closest('input')){ selKeepEditPress = true; selKeptEdit = ae; }
+  if(ae && (ae.tagName==='INPUT' || ae.tagName==='TEXTAREA') && ae.id && t!==ae && t.closest && t.closest('[draggable="true"]') && !t.closest('input, textarea')){ selKeepEditPress = true; selKeptEdit = ae; }   // any field with an id: a rename, the add-subtask field, the panel's title or notes
   if(z==='list' && t.closest && !t.closest('input, textarea, select, [contenteditable="true"]')){
     selPendingZone = z; selDownX = e.clientX; selDownY = e.clientY;
     if(document.documentElement.classList.contains('sel-inactive')) selHold = true;   // before the open field blurs
