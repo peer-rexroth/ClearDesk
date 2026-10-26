@@ -414,14 +414,15 @@ const ICONS = {
   .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity var(--dur-fast) ease; }
   /* the capsule is --bg-3, the same as .icon-btn:hover, so a hovered button used to vanish into it: give it a visible disc */
   .row-actions .icon-btn { border-radius: 999px; padding: 4px 6px; }
+  html[data-scheme="glass"] .row-actions .icon-btn { width: 22px; height: 22px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }   /* each button is a 22px disc, so the hover fill is round inside the round capsule (a glass rule made them 25x22 rounded rectangles) */
   .row-actions .icon-btn:hover, .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); color: var(--text); }
   /* the expand/collapse chevrons sit on a row that is itself grey on hover, so the plain --bg-3 icon-button hover vanished into it */
   /* centre the glyph in its disc: the old box was 16px wide with 4px side padding (8px content) around a 13px icon, so the
      chevron sat 2.5px right of centre and only looked off once the hover disc made the box visible */
   .subtask-toggle, .sub-step-toggle { border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; }
   /* chevrons are small (16px), so the disc is grown with a ring and made stronger than the other icon buttons' */
-  .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text) 20%, transparent); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: var(--sel-fill-hover); box-shadow: 0 0 0 3px var(--sel-halo); }
+  .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: var(--sel-fill-hover); }
 
   .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 60px 20px; color: var(--text-3); }   /* same stack as .notes-empty: icon above the text, both centred */
   .empty-ico { width: calc(var(--ico-empty) * var(--ico-k)); height: calc(var(--ico-empty) * var(--ico-k)); flex: none; fill: none; stroke: currentColor; stroke-width: .9; stroke-linecap: round; stroke-linejoin: round; opacity: .4; }   /* a big symbol is drawn with a thin line (about 1.7px), not the 3.8px the small-icon masks would give at this size */
@@ -1026,7 +1027,7 @@ const ICONS = {
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: var(--sel-line-strong); box-shadow: none; }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: var(--on-accent); border-color: var(--on-accent); }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked i { color: var(--sel-bg); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: var(--sel-fill-hover); color: var(--on-accent); box-shadow: 0 0 0 2px var(--sel-halo); }   /* same hover language as the pills below: translucent white, white content */
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: var(--sel-fill-hover); color: var(--on-accent); }   /* translucent white fill, white content, no ring around it */
   /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
      the cell says "pop-up button" the way a native one does — a small chevron on the pill,
      shown on the selected row/card only so the rest of the list stays calm. (The pill grows
@@ -1878,8 +1879,10 @@ const ICONS = {
   .ph-glob { background: var(--purple-bg); color: var(--purple-text); }
   .pr-var-name .fa-globe { font-size: var(--ico-12); vertical-align: -1px; }
   .pr-insp-tools { display: inline-flex; align-items: center; gap: 8px; }
-  .pr-g-link { align-self: flex-start; border: 0; background: none; color: var(--text-3); font: inherit; font-size: var(--fs-12); padding: 2px 0; cursor: default; }
-  .pr-g-link:hover { color: var(--text); }
+  /* a text button that goes somewhere else (the globals dialog): accent blue, no underline, as in macOS panels; the quiet grey stays for the inline add controls */
+  .pr-g-link { align-self: flex-start; border: 0; background: none; color: var(--blue-text); font: inherit; font-size: var(--fs-13); padding: 2px 0; cursor: default; }
+  .pr-g-link:hover { color: color-mix(in srgb, var(--blue-text) 78%, var(--text)); }
+  .pr-g-link:active { color: color-mix(in srgb, var(--blue-text) 60%, var(--text)); }
   .pr-g-missing { font-size: var(--fs-13); color: var(--text-3); display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: baseline; }
   .globals-modal { width: 660px; max-width: 94vw; padding: 0; gap: 0; overflow: hidden; }
   .pr-g-head { padding: 24px 24px 14px; }
