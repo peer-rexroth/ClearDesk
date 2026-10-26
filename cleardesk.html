@@ -216,9 +216,10 @@ const ICONS = {
   .btn-danger:hover { opacity: 0.85; background: var(--red-text); }
   .btn-icon { padding: 6px 8px; }
   .btn-sm { font-size: var(--fs-12); padding: 4px 10px; }
-  .icon-btn { background: none; border: none; cursor: default; color: var(--text-3); font-size: var(--ico-16); padding: 4px 6px; border-radius: var(--r-xs); }
+  /* ONE icon button: a disc (22px; 26px for the panel's close), filled on hover, no ring. Only icon-only buttons use it; a segment inside a capsule is a pill, and the +/- bar and the code-copy chip are deliberate exceptions. */
+  .icon-btn { background: none; border: none; cursor: default; color: var(--text-3); font-size: var(--ico-16); box-sizing: border-box; width: var(--ib-s); height: var(--ib-s); padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex: none; }
   .subtask-toggle { display: inline-block; flex-shrink: 0; font-size: var(--gl-10); padding: 2px 4px; width: 16px; box-sizing: border-box; }
-  .icon-btn:hover { background: var(--hover); color: var(--text); }
+  .icon-btn:hover { background: var(--pressed); color: var(--text); }
   .proj-select-row { display: flex; align-items: center; gap: 10px; padding: 8px 8px; border-radius: var(--r-m); cursor: default; font-size: var(--fs-13); }
   .proj-select-row:hover { background: var(--bg-2); }
   .proj-select-check { width: 17px; height: 17px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
@@ -371,7 +372,7 @@ const ICONS = {
   .task-subtasks { grid-area: sub; display: flex; flex-direction: column; gap: 4px; }
   .task-subtask-row { display: flex; align-items: center; gap: 8px; font-size: var(--fs-13); color: var(--text-2); position: relative; }
   #taskList .task-subtask-row .subtask-toggle { position: absolute; left: -21px; top: 50%; transform: translateY(-50%); }
-  .sub-hierarchy-btn { opacity: 0; flex-shrink: 0; font-size: var(--gl-10); padding: 2px 4px; }
+  .sub-hierarchy-btn { opacity: 0; flex-shrink: 0; font-size: var(--gl-10); }
   .task-subtask-row:hover .sub-hierarchy-btn { opacity: 1; }
   .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
   .task-subtask-row .mini-check:hover { border-color: var(--green-text); }
@@ -413,8 +414,6 @@ const ICONS = {
   .task-main { position: relative; }
   .row-actions { position: absolute; right: 2px; top: 50%; transform: translateY(-50%); z-index: 2; display: flex; align-items: center; gap: 2px; padding: 2px 4px; border-radius: 999px; background: var(--bg-3); border: 1px solid var(--border); opacity: 0; pointer-events: none; transition: opacity var(--dur-fast) ease; }
   /* the capsule is --bg-3, the same as .icon-btn:hover, so a hovered button used to vanish into it: give it a visible disc */
-  .row-actions .icon-btn { border-radius: 999px; padding: 4px 6px; }
-  html[data-scheme="glass"] .row-actions .icon-btn { width: 22px; height: 22px; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }   /* each button is a 22px disc, so the hover fill is round inside the round capsule (a glass rule made them 25x22 rounded rectangles) */
   .row-actions .icon-btn:hover, .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); color: var(--text); }
   /* the expand/collapse chevrons sit on a row that is itself grey on hover, so the plain --bg-3 icon-button hover vanished into it */
   /* centre the glyph in its disc: the old box was 16px wide with 4px side padding (8px content) around a 13px icon, so the
@@ -938,7 +937,6 @@ const ICONS = {
   html[data-scheme="glass"] .btn-primary:hover { background: var(--glass-accent); filter: brightness(1.06); opacity: 1; }
   html[data-scheme="glass"] .btn-danger { background: var(--danger); color: var(--on-accent); border-color: transparent; box-shadow: none; }
   html[data-scheme="glass"] .btn-danger:hover { background: var(--danger); filter: brightness(1.08); }
-  html[data-scheme="glass"] .icon-btn { border-radius: var(--r-m); }
   /* capsules: controls that live in the toolbars, as in Mail; everything in the
      content stays at --radius */
   html[data-scheme="glass"] :is(.sb-head, .sb-tools, .main-toolbar) :is(.btn, .icon-btn), html[data-scheme="glass"] .main-toolbar select, html[data-scheme="glass"] .main-toolbar .view-switch { border-radius: 999px; }
@@ -1017,7 +1015,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --dur-fast: .12s; --dur-base: .2s; --fs-11: 11px; --gl-6: 6px; --gl-7: 7px; --gl-8: 8px; --gl-9: 9px; --gl-10: 10px; --ico-empty: 36px; --ico-empty-s: 30px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: var(--cap-on); --on-accent: #fff; --danger: #d92d20; }
+  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --dur-fast: .12s; --dur-base: .2s; --ib-s: 22px; --ib-m: 26px; --fs-11: 11px; --gl-6: 6px; --gl-7: 7px; --gl-8: 8px; --gl-9: 9px; --gl-10: 10px; --ico-empty: 36px; --ico-empty-s: 30px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: var(--cap-on); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   html:not(.sel-inactive) .task-row.kbd-selected, html:not(.sel-inactive) .task-row.bulk-selected, html:not(.sel-inactive) .task-row.kbd-selected.bulk-selected, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1064,6 +1062,7 @@ const ICONS = {
   html[data-scheme="glass"] .task-list-header > .subtask-toggle { width: 36px; height: 28px; padding: 0; margin: 0 0 0 -4px; display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-14); color: var(--text); background: var(--bg-3); border: 1px solid var(--glass-edge); border-radius: 999px; box-shadow: inset 0 1px 0 var(--glass-rim), 0 1px 4px var(--glass-lift-1); }
   html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: var(--pressed); box-shadow: none; }
   html[data-scheme="glass"] #collapseAllBtnBoard:hover { background: var(--pressed); box-shadow: none; }
+  html[data-scheme="glass"] #collapseAllBtnBoard { width: var(--bar-ctl-h); padding: 0; justify-content: center; }   /* a round bar button: a 36px disc, not a 34x36 pill */
   .tool-btn:disabled { opacity: .35; cursor: default; }
   .tool-danger:hover:not(:disabled) { background: var(--red-bg); color: var(--red-text); }
   .tool-sep { width: 1px; height: 16px; margin: 0 4px; background: var(--border-2); }
@@ -1129,7 +1128,7 @@ const ICONS = {
   .drawer .subtask-row { position: relative; }
   .drawer .subtask-row .sub-drag-handle { display: none; }   /* the list has no grip; the whole row drags in both places */
   .drawer .subtask-row > .sub-check { margin-left: 16px; }
-  .drawer .subtask-row > .sub-step-toggle { width: 16px; padding: 2px 0; font-size: var(--gl-10); text-align: center; }
+  .drawer .subtask-row > .sub-step-toggle { width: 16px; height: 16px; padding: 0; font-size: var(--gl-10); text-align: center; }
   .drawer .subtask-row > .sub-step-toggle + .sub-check { margin-left: 0; }
   .drawer .subtask-row .sub-step-toggle:has(.fa-plus) { opacity: 0; }
   .drawer .subtask-row:is(:hover, :focus-within) .sub-step-toggle:has(.fa-plus) { opacity: 1; }
