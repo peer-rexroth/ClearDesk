@@ -2268,7 +2268,7 @@ const ICONS = {
               <div class="note-meta" id="pMeta"></div>
               <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
               <div class="pr-section-label"><span>Template</span></div>
-              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the finished prompt" aria-label="Copy the finished prompt" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
+              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the template as written" aria-label="Copy the template as written" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
             </div>
           </div>
           <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-grip" id="prInspResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Variables panel" aria-valuemin="260" aria-valuemax="560" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="pr-insp-inner" id="pInspector"></div></aside>
@@ -8315,11 +8315,15 @@ function emptyPromptTrash(){
   }});
 }
 // The Copy button in the template block's header: the same as Copy Prompt (the finished text), with its label turning to "Copied" for a moment.
+// The small copy button on the template box copies the template exactly as written, placeholders left alone ({{x}}, [[x]], ((x)), {{@x}}, {{>x}} and \{{x}}). The blue Copy Prompt button next to the title bar is the one that copies the finished prompt with the variables filled in.
 function promptCopyFromBlock(btn){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p) return;
-  copyPrompt(p.id, ()=>{
+  const field = document.getElementById('pTemplate'), text = field ? field.value : (p.template || '');   // the field holds what is on screen, even before the save debounce has run
+  Promise.resolve(noteWriteText(text)).then(ok=>{
+    if(!ok){ showToast('Could not copy', true); return; }
     btn.classList.add('done'); btn.innerHTML = ICO_CHECK; btn.title = 'Copied';
-    clearTimeout(btn._reset); btn._reset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY; btn.title = 'Copy the finished prompt'; }, 1400);
+    clearTimeout(btn._reset); btn._reset = setTimeout(()=>{ btn.classList.remove('done'); btn.innerHTML = ICO_COPY; btn.title = 'Copy the template as written'; }, 1400);
+    showToast('Template copied');
   });
 }
 function copyPrompt(id, onCopied){
