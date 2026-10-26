@@ -101,12 +101,15 @@ test('the board tile is title-first: one secondary line (status only when in pro
   assertIncludes(boardCardHtml(mk({ dueDate: '2000-01-01' })), 'sec-due overdue', 'an overdue date is red');
 });
 
-test('the board tile\'s hover capsule keeps every action reachable: Change status always, Set due date only while there is no date, Skip only for repeating tasks', function () {
+test('the board tile\'s hover capsule is just the more button; every action is in its menu, Skip only for a repeating task', function () {
   const mk = x => Object.assign({ id: 't1', title: 'T', projectId: 'proj-inbox', status: 'todo', priority: 'medium', subtasks: [], tags: [], dueDate: null, repeat: 'none', createdAt: 1, updatedAt: 1 }, x || {});
   const caps = h => h.slice(h.indexOf('class="row-actions"'));
-  let c = caps(boardCardHtml(mk())); assertIncludes(c, 'title="Change status"'); assertIncludes(c, 'title="Set due date"'); assertNotIncludes(c, 'Skip to next occurrence');
-  c = caps(boardCardHtml(mk({ dueDate: '2030-03-04', repeat: 'daily' }))); assertNotIncludes(c, 'title="Set due date"', 'a card with a date edits it by clicking the date'); assertIncludes(c, 'Skip to next occurrence');
-  assertIncludes(c, "openCellPop(event,'t1','status')");
+  let c = caps(boardCardHtml(mk({ dueDate: '2030-03-04', repeat: 'daily' })));
+  assertIncludes(c, "openRowMenu(event,'t1')"); assertEqual((c.match(/<button/g) || []).length, 1, 'one button only: nothing else floats over the tile');
+  tasks = [mk()]; normalizeData();
+  let m = rowMenuHtml(['t1']); assertIncludes(m, 'Status'); assertIncludes(m, 'Due'); assertIncludes(m, 'Duplicate'); assertIncludes(m, 'Delete'); assertNotIncludes(m, 'Skip to Next Occurrence');
+  tasks = [mk({ dueDate: '2030-03-04', repeat: 'daily' })]; normalizeData();
+  assertIncludes(rowMenuHtml(['t1']), 'Skip to Next Occurrence', 'a repeating task can still be skipped from the menu');
 });
 
 test('a scrolling board column makes its cards ignore the pointer (no hover repaints), but not during a card drag', function () {

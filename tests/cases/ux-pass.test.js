@@ -695,6 +695,7 @@ test('the selection is accent only while its list is the active area: zones from
   assertEqual(selZoneOf(el('.main', '.quickadd')), 'other', 'the quick-add field lives inside .main but is not the list');
   assertEqual(selZoneOf(el('.main', '.modal-bg')), null, 'a dialog leaves the state as it was');
   assertEqual(selZoneOf(el('.main', '#rowMenu')), null, 'so does a menu');
+  assertEqual(selZoneOf(el('.main', '.main-toolbar')), null, 'and the toolbar (sort, filter, view switch): using it must not turn a grey selection blue');
   assertEqual(selZoneOf(el()), null); assertEqual(selZoneOf(null), null);
   const inactive = () => document.documentElement.classList.contains('sel-inactive');
   selZone = 'list'; selWinActive = true; applySelActive(); assertFalse(inactive(), 'list active, window active');

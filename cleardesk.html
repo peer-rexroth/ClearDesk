@@ -1202,7 +1202,7 @@ const ICONS = {
      the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
   html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg); border-color: transparent; box-shadow: 0 2px 10px var(--shadow-ink); }   /* hover lifts the tile instead of outlining it (a filled hover would swallow the status pill) */
   .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
-  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; }   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
+  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; padding: 1px; }   /* just the more button, so little can be covered */   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
   /* the tile: title first, one quiet secondary line, then the tags */
   .board-card-top { gap: 8px; }
   .board-card-top .task-checkbox { margin-top: 0; }
@@ -3651,12 +3651,7 @@ function boardCardHtml(t){
       <input spellcheck="true" type="text" id="inlineSubtaskInputBoard" placeholder="Add a subtask…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubtask('${t.id}')} else if(event.key==='Tab'){event.preventDefault(); if(!event.shiftKey){indentInlineSubtaskInput('${t.id}');}}">
     </div>`:''}</div>`:''}
     <div class="row-actions">
-      ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
-      <button class="icon-btn" onclick="openCellPop(event,'${t.id}','status')" title="Change status" aria-haspopup="menu"><i class="${STATUS_ICONS[t.status]||STATUS_ICONS.todo}"></i></button>
-      ${t.dueDate ? '' : `<button class="icon-btn" onclick="openCellPop(event,'${t.id}','dueDate')" title="Set due date" aria-haspopup="menu"><i class="fa-regular fa-calendar"></i></button>`}
-      <button class="icon-btn" onclick="event.stopPropagation();duplicateTask('${t.id}')" title="Duplicate"><i class="fa-regular fa-duplicate"></i></button>
-      <button class="icon-btn" onclick="event.stopPropagation();deleteTask('${t.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>
-      <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
+      <button class="icon-btn" onclick="openRowMenu(event,'${t.id}')" title="More actions" aria-label="More actions" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
     </div>
   </div>`;
 }
@@ -3912,7 +3907,7 @@ document.addEventListener('scroll', boardScrollHover, { capture: true, passive: 
 let selZone = 'list', selWinActive = (typeof document.hasFocus==='function') ? document.hasFocus() : true;
 function selZoneOf(el){
   if(!el || !el.closest) return null;
-  if(el.closest('.modal-bg, #rowMenu, .cell-pop, .tool-menu, .split-btn-menu, #toast')) return null;
+  if(el.closest('.modal-bg, #rowMenu, .cell-pop, .tool-menu, .split-btn-menu, #toast, .main-toolbar')) return null;   // the toolbar (sort, filter, view, selection tools) does not take the selection's focus: it stays blue or grey as it was
   if(el.closest('#drawer, .sidebar, .quickadd, .notes-editor-pane')) return 'other';
   if(el.closest('.main, .notes-list-pane')) return 'list';
   return null;
@@ -4080,6 +4075,7 @@ function rowMenuHtml(ids){
   parts.push(sub('fa-regular fa-calendar', 'Due', dueQ.map(d=>menuOpt(`rowMenuRun('due','${d[0]}')`, null, d[1])).join('') + '<div class="row-menu-sep"></div>' + dueDateFieldHtml(same('dueDate'), `rowMenuRun('due',this.value||'clear')`)));
   const curRepeat = ts.every(t=>(t.repeat||'none')===(ts[0].repeat||'none')) ? (ts[0].repeat||'none') : null;
   parts.push(sub('fa-solid fa-repeat', 'Repeat', opts('repeat', REPEATS, curRepeat, ()=>({none:true}))));
+  if(n===1 && ts[0].repeat && ts[0].repeat!=='none') parts.push(item('fa-solid fa-forward-step','Skip to Next Occurrence','rowMenuRun(\'skip\')'));
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
   if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-duplicate','Duplicate','rowMenuRun(\'duplicate\')'));
@@ -4139,6 +4135,7 @@ function rowMenuRun(kind, value){
   if(!ids.length) return;
   const today = todayStr();
   if(kind==='open'){ openTask(ids[0]); }
+  else if(kind==='skip'){ skipOccurrence(ids[0]); }
   else if(kind==='toggledone'){
     const allDone = ids.every(id=>(tasks.find(t=>t.id===id)||{}).status==='done');
     if(ids.length===1) toggleTaskDone(ids[0]); else bulkSetStatus(allDone ? 'todo' : 'done', ids);
