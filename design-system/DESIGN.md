@@ -129,6 +129,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - Keep drawings inside the 4–20 box so optical size is the same across icons (a rounded square is `4.5…19.5`).
 - **Four drawn sizes:** 12 (chevrons, tiny marks), 14 (badges, chips, row marks), 16 (lists, sidebar, menus, icon buttons, search fields), 18 (toolbars). Nothing else.
 - **Effective line weight scales with size** (as SF Symbols do): 1.17px at 14, 1.33px at 16, 1.5px at 18. Do not set a different stroke per context.
+- **A hand-drawn icon must render at the same line weight as a registry icon of that size** (rendered line = stroke × drawn size ÷ viewBox). Chevrons drawn as background images need their own stroke: 1.3 on a 12px-wide box, 1.2 on an 8px one. Measure the stroke of the path, not the svg element.
 - **Large symbols (empty states, 45px drawn) use a thin 0.9-unit stroke** (≈1.7px). Rendering them at stroke 2 gives a 3.8px line that is heavy next to everything else.
 - **Two ways to draw the same registry:**
   - *Masked glyph:* `<i class="fa-solid fa-NAME">` with a CSS rule `.fa-NAME { --fa: url("data:image/svg+xml,…") }` and `mask: var(--fa) center / calc(1.26 * 100%) no-repeat; background: currentColor; width:1em; height:1em`. Icons draw **1.26× their font-size**, so use size tokens `--ico-12|14|16|18` (each `calc(N / 1.26)`), not raw px. Sizes follow `font-size`.
