@@ -982,7 +982,7 @@ const ICONS = {
   }
 
   /* ── Collapsible sidebar, sortable column headers ─────────────────────────── */
-  .sidebar-toggle { padding: 6px 8px; }
+  .sidebar-toggle { padding: 6px 8px; justify-content: center; align-items: center; }   /* the icon sits in the middle of its round button (it was pinned to the left padding, 2px off) */
   .sidebar { transition: width var(--dur-base) ease, border-width var(--dur-base) ease; }
   .sidebar-resizer { position: relative; flex: none; width: 0; z-index: 30; }
   .sidebar-resizer::before { content: ""; position: absolute; top: 0; bottom: 0; left: -4px; width: 9px; cursor: col-resize; }
