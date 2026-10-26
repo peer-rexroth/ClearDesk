@@ -256,8 +256,8 @@ const ICONS = {
   .sidebar-section-label { font-size: var(--fs-11); font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.08em; display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 
   .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 8px; border-radius: var(--r-m); cursor: default; font-size: var(--fs-13); font-weight: 500; }
-  .nav-item:hover { background: var(--bg-2); }
-  .nav-item.active { background: var(--bg-2); }
+  .nav-item:hover { background: var(--hover); }   /* a quiet hint; the selected row below is clearly stronger, so the two can no longer be mistaken for each other */
+  .nav-item.active { background: var(--cap-on); font-weight: 600; }
   .nav-item .count { font-size: var(--fs-11); color: var(--text-3); font-weight: 500; }
 
   .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; }
@@ -266,9 +266,9 @@ const ICONS = {
   .f-chip.active { background: var(--bg-3); color: var(--text); }   /* same weight as the pills; the fill alone says "on" (a bold label and an outline said it twice) */
 
   .project-row { position: relative; display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: var(--r-m); cursor: default; font-size: var(--fs-13); }
-  .project-row:hover { background: var(--bg-2); }
+  .project-row:hover { background: var(--hover); }
   .project-row:is(:hover, :focus-within) .project-actions { opacity: 1; pointer-events: auto; }
-  .project-row.active { background: var(--bg-2); font-weight: 600; }
+  .project-row.active { background: var(--cap-on); font-weight: 600; }
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
@@ -1283,7 +1283,7 @@ const ICONS = {
   .note-editor.locked .note-fmt { opacity: .4; pointer-events: none; }
   .note-editor.locked .note-body { cursor: default; }
   .project-row .folder-twisty { width: 16px; height: 16px; margin-left: -4px; margin-right: -4px; flex: none; display: flex; align-items: center; justify-content: center; padding: 0; border: 0; border-radius: var(--r-xs); background: transparent; color: var(--text-3); cursor: default; font-size: var(--ico-12); }
-  .project-row .folder-twisty:hover { background: var(--hover); color: var(--text); }
+  .project-row .folder-twisty:hover { background: var(--pressed); color: var(--text); }
   .project-row .folder-twisty-gap { width: 16px; margin-left: -4px; margin-right: -4px; flex: none; }
   .project-row.sub-folder { padding-left: 44px; }
   .note-row-lock, .note-row-pin { color: var(--text-2); }
@@ -1337,10 +1337,13 @@ const ICONS = {
   .note-body mark[data-hl="gray"], .nc-sw.nc-hl-gray { background: var(--nh-gray); }
   .note-body mark { color: inherit; border-radius: var(--r-xs); padding: 0 1px; }
   .note-color-menu { width: max-content; min-width: 0 !important; padding: 8px 10px 10px; }
-  .nc-label { margin: 4px 2px 6px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .03em; text-transform: uppercase; color: var(--text-3); }
-  .nc-row { display: flex; gap: 6px; }
-  .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 1px solid var(--border-2); background: var(--bg-2); font: 700 13px/1 var(--font); cursor: default; display: inline-flex; align-items: center; justify-content: center; }
-  .nc-sw:hover { box-shadow: 0 0 0 2px var(--accent); }
+  .nc-label { margin: 4px 2px 8px; font-size: var(--fs-12); font-weight: 600; color: var(--text-2); }   /* title-style labels (HIG), not capitals */
+  .nc-row { display: flex; gap: 8px; padding: 0 2px 4px; }
+  /* flat filled dots (text colours are filled with their colour via currentColor, highlights with their tint), a hairline edge, and a ring only on the colour in use */
+  .nc-sw { width: 24px; height: 24px; flex: none; padding: 0; border-radius: 50%; border: 0; background: var(--bg-2); box-shadow: inset 0 0 0 1px var(--ink-ring); cursor: default; display: inline-flex; align-items: center; justify-content: center; }
+  .nc-sw[class*="nc-tc-"]:not(.nc-tc-none) { background: currentColor; }
+  .nc-sw:hover { box-shadow: inset 0 0 0 1px var(--ink-ring), 0 0 0 2px var(--cap-on); }
+  .nc-sw.on, .nc-sw.on:hover { box-shadow: inset 0 0 0 1px var(--ink-ring), 0 0 0 2px var(--glass-strong), 0 0 0 3.5px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
   /* the copy button on a code block, as in Apple's documentation: an icon in the block's top right corner, shown while the pointer is over the block or the caret is in it (always on a touch screen); one button per block, in a layer over the note */
@@ -8649,8 +8652,18 @@ function noteBlock(tag){
 // Stored as <span data-tc="red"> / <mark data-hl="yellow"> (names, never raw colours) so the sanitizer can allow exactly these and the CSS picks a
 // shade that reads in both themes. Applied by replacing the selection through execCommand('insertHTML') (one undo step), wrapping each text run.
 const NOTE_COLOR_LABELS = { red:'Red', orange:'Orange', green:'Green', blue:'Blue', purple:'Purple', gray:'Grey', yellow:'Yellow', pink:'Pink' };
+// The colour the caret / selection is in now (what gets the ring): the nearest coloured run above the anchor, else 'none'.
+function noteColorState(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection && window.getSelection();
+  const out = { tc:'none', hl:'none' }; if(!body || !sel || !sel.rangeCount || !body.contains(sel.anchorNode)) return out;
+  const n = sel.anchorNode, el = n.nodeType===1 ? n : n.parentElement; if(!el || !el.closest) return out;
+  const t = el.closest('span[data-tc]'), h = el.closest('mark[data-hl]');
+  if(t && NOTE_TEXT_COLORS.includes(t.dataset.tc)) out.tc = t.dataset.tc; if(h && NOTE_HL_COLORS.includes(h.dataset.hl)) out.hl = h.dataset.hl;
+  return out;
+}
 function noteColorMenuHtml(){
-  const sw = (kind, name)=>`<button type="button" class="nc-sw nc-${kind}-${name}" role="menuitem" title="${name==='none' ? 'Default' : NOTE_COLOR_LABELS[name]}" aria-label="${kind==='tc' ? 'Text colour' : 'Highlight'}: ${name==='none' ? 'default' : NOTE_COLOR_LABELS[name]}" onmousedown="event.preventDefault()" onclick="noteApplyColor('${kind}','${name}')">${kind==='tc' ? 'A' : ''}</button>`;
+  const cur = noteColorState();
+  const sw = (kind, name)=>`<button type="button" class="nc-sw nc-${kind}-${name}${cur[kind]===name ? ' on' : ''}" role="menuitemradio" aria-checked="${cur[kind]===name}" title="${name==='none' ? 'Default' : NOTE_COLOR_LABELS[name]}" aria-label="${kind==='tc' ? 'Text colour' : 'Highlight'}: ${name==='none' ? 'default' : NOTE_COLOR_LABELS[name]}" onmousedown="event.preventDefault()" onclick="noteApplyColor('${kind}','${name}')"></button>`;
   return `<div class="nc-label">Text colour</div><div class="nc-row">${['none', ...NOTE_TEXT_COLORS].map(n=>sw('tc', n)).join('')}</div>
           <div class="nc-label">Highlight</div><div class="nc-row">${['none', ...NOTE_HL_COLORS].map(n=>sw('hl', n)).join('')}</div>`;
 }
