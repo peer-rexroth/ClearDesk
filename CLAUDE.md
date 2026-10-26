@@ -387,7 +387,7 @@ parity.
   a `.row-actions` capsule holding **only the ⋯ button** (a 26px **circle**, the button filling it, so there is no second shape inside a capsule) (audit follow-up, chosen from three options: five small buttons ran over the add-subtask field and the last line and were low-contrast on the blue tile; Status, Due, Duplicate, Delete and *Skip to Next Occurrence* are all in the ⋯ menu, and a tile's status text and date are still clickable) on hover/focus/selection, floating in the card's **bottom-right corner** (absolutely
   positioned, so it never changes card height and only covers what is under it while you point at the card).
   **The tile is Apple-style, title first** (`boardCardHtml`): checkbox, then `.board-card-main` = the title (full width,
-  the subtask chevron at its right edge), **one quiet secondary line** `.board-card-sec` (12px, secondary colour; only
+  the subtask chevron at its right edge), **one quiet secondary line** `.board-card-sec` (its flag, calendar and repeat icons are drawn at **16px**, `--ico-16`; at 12 and then 14 they were still too small to read on a tile) (12px, secondary colour; only
   what applies: status text with a dot *only when In Progress* and not when the board is grouped by Status, a red flag
   for high priority, the date with a calendar icon — red when overdue, amber when today — and a repeat mark), then the tags as
   chips (`.badge.badge-tag`, as in the list). The default status is not labelled (nobody writes "Not Started"), and there is

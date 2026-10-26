@@ -322,7 +322,7 @@ const ICONS = {
   .board-card.dragging { opacity: .4; }
   .board-card:is(.kbd-selected, .bulk-selected) { border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
   .board-card-top { display: flex; align-items: flex-start; gap: 8px; }
-  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-14); flex-shrink: 0; }
+  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-16); flex-shrink: 0; }
   .board-card-title { font-size: var(--fs-13); font-weight: 600; flex: 1; word-break: break-word; }
   .board-card.done .board-card-title { text-decoration: line-through; color: var(--text-3); }
 
@@ -1216,11 +1216,11 @@ const ICONS = {
   .board-card-sec .sec-host { padding: 1px 4px; margin: -1px -4px; border-radius: var(--r-xs); }
   .board-card-sec .sec-host:hover { background: var(--hover); }
   .sec-due, .sec-status { display: inline-flex; align-items: center; gap: 4px; }
-  .sec-due i { font-size: var(--ico-14); }
+  .sec-due i { font-size: var(--ico-16); }
   .sec-due.overdue { color: var(--red-text); } .sec-due.today { color: var(--amber-text); }
   .sec-status { font-weight: 600; color: var(--purple-text); }
   .sec-status .sdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
-  .sec-repeat { font-size: var(--ico-14); color: var(--text-3); }
+  .sec-repeat { font-size: var(--ico-16); color: var(--text-3); }
   .board-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
   /* subtasks read as children of the title: indented to the title's text column (the margin-left on the container), a step smaller in text, and a little air above; the circles keep the app-wide 16px so a checkbox is the same size in the list, on a card and in the panel */
   .board-card > .task-subtasks { margin-top: 4px; }
