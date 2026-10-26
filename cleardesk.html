@@ -1202,7 +1202,8 @@ const ICONS = {
      the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
   html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg); border-color: transparent; box-shadow: 0 2px 10px var(--shadow-ink); }   /* hover lifts the tile instead of outlining it (a filled hover would swallow the status pill) */
   .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
-  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; padding: 1px; }   /* just the more button, so little can be covered */   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
+  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; padding: 0; width: 26px; height: 26px; border-radius: 50%; justify-content: center; gap: 0; }   /* one round button: a circle, not a capsule with a second shape inside it */
+  .board-card > .row-actions .icon-btn { width: 100%; height: 100%; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }   /* just the more button, so little can be covered */   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
   /* the tile: title first, one quiet secondary line, then the tags */
   .board-card-top { gap: 8px; }
   .board-card-top .task-checkbox { margin-top: 0; }
@@ -3321,6 +3322,7 @@ function isThisWeek(dueDate){
 
 // ── Render ────────────────────────────────────────────────────────────────────
 function render(){
+  renderAfterPressPending = false;
   if(appMode==='notes'){ renderNotes(); return; }
   if(appMode==='prompts'){ renderPrompts(); return; }
   renderSidebar();
@@ -3904,7 +3906,7 @@ function boardScrollHover(e){
 }
 document.addEventListener('scroll', boardScrollHover, { capture: true, passive: true });
 // Where focus is decides whether the selection is the accent colour or neutral grey (see html.sel-inactive). The list is "active" while the pointer or keyboard is in it; the task panel, the editor, the sidebar, search and the quick-add field are "other", and so is another window. Menus and dialogs borrow focus for a moment and leave the state as it was.
-let selZone = 'list', selWinActive = (typeof document.hasFocus==='function') ? document.hasFocus() : true;
+let selHold = false, selZone = 'list', selWinActive = (typeof document.hasFocus==='function') ? document.hasFocus() : true;
 function selZoneOf(el){
   if(!el || !el.closest) return null;
   if(el.closest('.modal-bg, #rowMenu, .cell-pop, .tool-menu, .split-btn-menu, #toast, .main-toolbar')) return null;   // the toolbar (sort, filter, view, selection tools) does not take the selection's focus: it stays blue or grey as it was
@@ -3914,10 +3916,38 @@ function selZoneOf(el){
 }
 // Typing in any text field (an inline rename, the add-subtask field Tab opens, a note title…) also takes the selection's focus, wherever that field is; it comes back with the field.
 function selEditing(){ const a = document.activeElement; return !!(a && a.closest && a.closest('input, textarea, select, [contenteditable="true"]')); }
-function applySelActive(){ document.documentElement.classList.toggle('sel-inactive', !(selWinActive && selZone==='list' && !selEditing())); }
+function applySelActive(){ if(selHold) return; document.documentElement.classList.toggle('sel-inactive', !(selWinActive && selZone==='list' && !selEditing())); }
 function setSelZone(z){ if(z && z!==selZone){ selZone = z; applySelActive(); } }
-document.addEventListener('mousedown', e=>setSelZone(selZoneOf(e.target)), true);
-document.addEventListener('focusin', e=>{ setSelZone(selZoneOf(e.target)); applySelActive(); }, true);
+// Pressing in the list does not take the selection's focus until the press ENDS as a click: a drag (a card, a subtask row, or just a press-and-move over a row) must not recolour the selection (editing in the panel, then dragging a task, flipped grey back to blue). So the move TO the list waits for the click, and is dropped if a drag starts or the pointer travelled (> 4px) before the button came up. Presses on a field, or in the panel / sidebar, act at once.
+let selPendingZone = null, selDownX = 0, selDownY = 0, selDragging = false, selPointerDown = false, renderAfterPressPending = false;
+// While a press or a drag in the list is under way the colour is FROZEN as it was (grey stays grey): ending an inline rename by pressing on a subtask used to flip it to blue before the drag had even started. The hold ends with the click, or after the drop / drag end.
+function selReleaseHold(){ selHold = false; applySelActive(); }
+document.addEventListener('mousedown', e=>{
+  selPointerDown = true;
+  const z = selZoneOf(e.target), t = e.target;
+  if(z==='list' && t.closest && !t.closest('input, textarea, select, [contenteditable="true"]')){
+    selPendingZone = z; selDownX = e.clientX; selDownY = e.clientY;
+    if(document.documentElement.classList.contains('sel-inactive')) selHold = true;   // before the open field blurs
+    return;
+  }
+  selPendingZone = null; setSelZone(z);
+}, true);
+document.addEventListener('click', e=>{
+  if(!selPendingZone) return;
+  const z = selPendingZone; selPendingZone = null;
+  if(Math.abs(e.clientX - selDownX) <= 4 && Math.abs(e.clientY - selDownY) <= 4){ selHold = false; setSelZone(z); }
+}, true);
+document.addEventListener('mouseup', ()=>{
+  selPointerDown = false;
+  setTimeout(()=>{ selPendingZone = null; if(!selDragging){ selReleaseHold(); flushRenderAfterPress(); } }, 0);   // after the click, if there was one
+}, true);
+document.addEventListener('dragstart', ()=>{ selPendingZone = null; selDragging = true; }, true);
+const selDragDone = ()=>setTimeout(()=>{ selDragging = false; selPointerDown = false; selReleaseHold(); flushRenderAfterPress(); }, 0);
+document.addEventListener('drop', selDragDone, true); document.addEventListener('dragend', selDragDone, true);
+// An inline rename commits when its field loses focus, which happens at the start of the next press; re-rendering right then replaced the very row the person was about to drag, so the drag never started. Those commits wait until the press is over.
+function renderAfterPress(){ if(selPointerDown || selDragging){ renderAfterPressPending = true; } else render(); }
+function flushRenderAfterPress(){ if(renderAfterPressPending){ renderAfterPressPending = false; render(); } }
+document.addEventListener('focusin', e=>{ if(!selPendingZone) setSelZone(selZoneOf(e.target)); applySelActive(); }, true);
 document.addEventListener('focusout', ()=>setTimeout(applySelActive, 0), true);   // after the focus has landed somewhere else (or nowhere)
 document.addEventListener('keydown', e=>{ if((e.key==='ArrowUp' || e.key==='ArrowDown') && !(e.target && e.target.closest && e.target.closest('input, textarea, select, [contenteditable="true"]'))) setSelZone('list'); }, true);   // arrows with no field focused move the list's selection
 if(window.addEventListener){ window.addEventListener('blur', ()=>{ selWinActive = false; applySelActive(); }); window.addEventListener('focus', ()=>{ selWinActive = true; applySelActive(); }); }
@@ -4797,7 +4827,7 @@ function commitRenameTask(id, value){
   const t = tasks.find(x=>x.id===id); if(!t) return;
   const title = value.trim();
   if(title && title!==t.title){ t.title = title; t.updatedAt = Date.now(); save(); }
-  render();
+  renderAfterPress();
 }
 function cancelRenameTask(){
   renamingTaskId = null;
@@ -4827,7 +4857,7 @@ function commitRenameSubtask(taskId, subId, value){
   const s = (t.subtasks||[]).find(x=>x.id===subId); if(!s) return;
   const text = value.trim();
   if(text && text!==s.text){ s.text = text; t.updatedAt = Date.now(); save(); }
-  render();
+  renderAfterPress();
 }
 function cancelRenameSubtask(){
   renamingSubtask = null;
@@ -4888,7 +4918,7 @@ function commitRenameSubSubtask(taskId, subId, subSubId, value){
   const ss = (s.subtasks||[]).find(x=>x.id===subSubId); if(!ss) return;
   const text = value.trim();
   if(text && text!==ss.text){ ss.text = text; t.updatedAt = Date.now(); save(); }
-  render();
+  renderAfterPress();
 }
 function cancelRenameSubSubtask(){
   renamingSubSubtask = null;
@@ -4955,7 +4985,7 @@ function commitRenameSubSubSubtask(taskId, subId, stepId, subSubSubId, value){
   const sss = (ss.subtasks||[]).find(x=>x.id===subSubSubId); if(!sss) return;
   const text = value.trim();
   if(text && text!==sss.text){ sss.text = text; t.updatedAt = Date.now(); save(); }
-  render();
+  renderAfterPress();
 }
 function cancelRenameSubSubSubtask(){
   renamingSubSubSubtask = null;
