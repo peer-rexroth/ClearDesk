@@ -322,7 +322,7 @@ const ICONS = {
   .board-card.dragging { opacity: .4; }
   .board-card:is(.kbd-selected, .bulk-selected) { border-color: var(--blue-border); box-shadow: 0 0 0 1px var(--blue-border); }
   .board-card-top { display: flex; align-items: flex-start; gap: 8px; }
-  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-12); flex-shrink: 0; }
+  .board-card-priority-icon { color: var(--red-text); font-size: var(--ico-14); flex-shrink: 0; }
   .board-card-title { font-size: var(--fs-13); font-weight: 600; flex: 1; word-break: break-word; }
   .board-card.done .board-card-title { text-decoration: line-through; color: var(--text-3); }
 
@@ -1210,15 +1210,16 @@ const ICONS = {
   .board-card-titlerow { display: flex; align-items: flex-start; gap: 6px; }
   .board-card-titlerow .board-card-title { flex: 1; min-width: 0; }
   .board-card-titlerow .subtask-toggle { flex: none; margin: -1px -4px 0 0; }
+  .untitled { color: var(--text-3); font-weight: 400; }   /* a task whose title is empty */
   .board-card-sec { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; font-size: var(--fs-12); color: var(--text-2); }
   .board-card-sec .sec-host { padding: 1px 4px; margin: -1px -4px; border-radius: var(--r-xs); }
   .board-card-sec .sec-host:hover { background: var(--hover); }
   .sec-due, .sec-status { display: inline-flex; align-items: center; gap: 4px; }
-  .sec-due i { font-size: var(--ico-12); }
+  .sec-due i { font-size: var(--ico-14); }
   .sec-due.overdue { color: var(--red-text); } .sec-due.today { color: var(--amber-text); }
   .sec-status { font-weight: 600; color: var(--purple-text); }
   .sec-status .sdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
-  .sec-repeat { font-size: var(--ico-12); color: var(--text-3); }
+  .sec-repeat { font-size: var(--ico-14); color: var(--text-3); }
   .board-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
   /* subtasks read as children of the title: indented to the title's text column (the margin-left on the container), a step smaller in text, and a little air above; the circles keep the app-wide 16px so a checkbox is the same size in the list, on a card and in the panel */
   .board-card > .task-subtasks { margin-top: 4px; }
@@ -3529,7 +3530,7 @@ function renderList(){
       <div class="task-main">
         ${renamingTaskId===t.id
           ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInput" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-          : `<span class="task-title" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span>`}
+          : `<span class="task-title" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${t.title.trim() ? highlightMatch(t.title, searchQuery) : '<span class="untitled">Untitled Task</span>'}</span>`}
         ${(t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('')}
         <div class="row-actions">
           ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
@@ -3616,7 +3617,7 @@ function boardCardHtml(t){
         <div class="board-card-titlerow">
           ${renamingTaskId===t.id
             ? `<input spellcheck="true" type="text" class="task-title-input" id="renameTaskInputBoard" style="flex:1" value="${esc(t.title)}" onclick="event.stopPropagation()" onblur="commitRenameTask('${t.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameTask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
-            : `<div class="board-card-title"><span class="board-card-title-text" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${highlightMatch(t.title, searchQuery)}</span></div>`}
+            : `<div class="board-card-title"><span class="board-card-title-text" ondblclick="event.stopPropagation();startRenameTask('${t.id}')">${t.title.trim() ? highlightMatch(t.title, searchQuery) : '<span class="untitled">Untitled Task</span>'}</span></div>`}
           ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:''}
         </div>
         ${sec.length?`<div class="board-card-sec">${sec.join('')}</div>`:''}
@@ -3647,7 +3648,7 @@ function boardCardHtml(t){
         <input spellcheck="true" type="text" id="inlineSubtaskInputBoard" placeholder="Add a step and press Enter…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubSubtask('${t.id}','${s.id}')} else if(event.key==='Tab'){event.preventDefault();outdentInlineSubtaskInput('${t.id}');}">
       </div>`:''}</div>`:''}
     `).join('')}${inlineAddSubtaskTaskId===t.id && !inlineAddParentSubId?`<div class="task-subtask-add-row" onclick="event.stopPropagation()">
-      <input spellcheck="true" type="text" id="inlineSubtaskInputBoard" placeholder="Add a subtask and press Enter…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubtask('${t.id}')} else if(event.key==='Tab'){event.preventDefault(); if(!event.shiftKey){indentInlineSubtaskInput('${t.id}');}}">
+      <input spellcheck="true" type="text" id="inlineSubtaskInputBoard" placeholder="Add a subtask…" onkeydown="if(event.key==='Enter'){event.preventDefault();addInlineSubtask('${t.id}')} else if(event.key==='Tab'){event.preventDefault(); if(!event.shiftKey){indentInlineSubtaskInput('${t.id}');}}">
     </div>`:''}</div>`:''}
     <div class="row-actions">
       ${t.repeat && t.repeat!=='none' ? `<button class="icon-btn" onclick="event.stopPropagation();skipOccurrence('${t.id}')" title="Skip to next occurrence"><i class="fa-solid fa-forward-step"></i></button>` : ''}
