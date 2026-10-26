@@ -3321,7 +3321,11 @@ function isThisWeek(dueDate){
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
-function render(){
+// An inline rename field that is open when something re-renders (a drag-and-drop reorder, say) is put back as it was: same field, same text, same caret, still focused. A field removed by a re-render fires no blur, so nothing commits behind the person's back.
+function captureEditField(){ const a = (selKeptEdit && selKeptEdit.isConnected) ? selKeptEdit : document.activeElement; return a && a.tagName==='INPUT' && /^rename/.test(a.id||'') ? { id: a.id, value: a.value, s: a.selectionStart, e: a.selectionEnd } : null; }
+function restoreEditField(k){ if(!k) return; const n = document.getElementById(k.id); if(n && n!==document.activeElement){ n.value = k.value; n.focus(); try{ n.setSelectionRange(k.s, k.e); }catch(_){} } }
+function render(){ const keep = captureEditField(); renderCore(); restoreEditField(keep); }
+function renderCore(){
   renderAfterPressPending = false;
   if(appMode==='notes'){ renderNotes(); return; }
   if(appMode==='prompts'){ renderPrompts(); return; }
@@ -3922,9 +3926,14 @@ function setSelZone(z){ if(z && z!==selZone){ selZone = z; applySelActive(); } }
 let selPendingZone = null, selDownX = 0, selDownY = 0, selDragging = false, selPointerDown = false, renderAfterPressPending = false;
 // While a press or a drag in the list is under way the colour is FROZEN as it was (grey stays grey): ending an inline rename by pressing on a subtask used to flip it to blue before the drag had even started. The hold ends with the click, or after the drop / drag end.
 function selReleaseHold(){ selHold = false; applySelActive(); }
+let selKeptEdit = null, selKeepEditPress = false;
 document.addEventListener('mousedown', e=>{
   selPointerDown = true;
   const z = selZoneOf(e.target), t = e.target;
+  // Pressing on a draggable row while an inline rename is open: the press may become a drag, and a drag must not end the edit. (Cancelling mousedown would cancel the drag too, so the field is allowed to blur but its commit is held back, and the field is put back after the drop.) A plain click still ends the edit, below.
+  const ae = document.activeElement;
+  selKeptEdit = null; selKeepEditPress = false;
+  if(ae && ae.tagName==='INPUT' && /^rename/.test(ae.id||'') && t!==ae && t.closest && t.closest('[draggable="true"]') && !t.closest('input')){ selKeepEditPress = true; selKeptEdit = ae; }
   if(z==='list' && t.closest && !t.closest('input, textarea, select, [contenteditable="true"]')){
     selPendingZone = z; selDownX = e.clientX; selDownY = e.clientY;
     if(document.documentElement.classList.contains('sel-inactive')) selHold = true;   // before the open field blurs
@@ -3932,17 +3941,19 @@ document.addEventListener('mousedown', e=>{
   }
   selPendingZone = null; setSelZone(z);
 }, true);
+function selEndKeptEdit(){ const k = selKeptEdit; selKeptEdit = null; selKeepEditPress = false; if(k && k.isConnected && typeof k.onblur==='function') k.onblur(new Event('blur')); }   // the press was not a drag after all: finish the edit as any click would (run the field's own blur handler, which commits)
 document.addEventListener('click', e=>{
+  if(selKeptEdit) selEndKeptEdit();
   if(!selPendingZone) return;
   const z = selPendingZone; selPendingZone = null;
   if(Math.abs(e.clientX - selDownX) <= 4 && Math.abs(e.clientY - selDownY) <= 4){ selHold = false; setSelZone(z); }
 }, true);
 document.addEventListener('mouseup', ()=>{
   selPointerDown = false;
-  setTimeout(()=>{ selPendingZone = null; if(!selDragging){ selReleaseHold(); flushRenderAfterPress(); } }, 0);   // after the click, if there was one
+  setTimeout(()=>{ selPendingZone = null; if(!selDragging){ selEndKeptEdit(); selReleaseHold(); flushRenderAfterPress(); } }, 0);   // after the click, if there was one
 }, true);
 document.addEventListener('dragstart', ()=>{ selPendingZone = null; selDragging = true; }, true);
-const selDragDone = ()=>setTimeout(()=>{ selDragging = false; selPointerDown = false; selReleaseHold(); flushRenderAfterPress(); }, 0);
+const selDragDone = ()=>setTimeout(()=>{ const k = selKeptEdit; selKeptEdit = null; selKeepEditPress = false; selDragging = false; selPointerDown = false; if(k && k.isConnected && k.focus) k.focus();   /* a drag that changed nothing: the field is still there, edit on */ selReleaseHold(); flushRenderAfterPress(); }, 0);
 document.addEventListener('drop', selDragDone, true); document.addEventListener('dragend', selDragDone, true);
 // An inline rename commits when its field loses focus, which happens at the start of the next press; re-rendering right then replaced the very row the person was about to drag, so the drag never started. Those commits wait until the press is over.
 function renderAfterPress(){ if(selPointerDown || selDragging){ renderAfterPressPending = true; } else render(); }
@@ -4822,6 +4833,7 @@ function startRenameTask(id){
   if(input){ input.focus(); input.select(); }
 }
 function commitRenameTask(id, value){
+  if(selKeepEditPress) return;   // the press that blurred this field may turn into a drag: keep editing
   if(renamingTaskId!==id) return;
   renamingTaskId = null;
   const t = tasks.find(x=>x.id===id); if(!t) return;
@@ -4851,6 +4863,7 @@ function startRenameSubtask(taskId, subId, context){
   }
 }
 function commitRenameSubtask(taskId, subId, value){
+  if(selKeepEditPress) return;   // the press that blurred this field may turn into a drag: keep editing
   if(!renamingSubtask || renamingSubtask.taskId!==taskId || renamingSubtask.subId!==subId) return;
   renamingSubtask = null;
   const t = tasks.find(x=>x.id===taskId); if(!t) return;
@@ -4911,6 +4924,7 @@ function startRenameSubSubtask(taskId, subId, subSubId, context){
   }
 }
 function commitRenameSubSubtask(taskId, subId, subSubId, value){
+  if(selKeepEditPress) return;   // the press that blurred this field may turn into a drag: keep editing
   if(!renamingSubSubtask || renamingSubSubtask.taskId!==taskId || renamingSubSubtask.subId!==subId || renamingSubSubtask.subSubId!==subSubId) return;
   renamingSubSubtask = null;
   const t = tasks.find(x=>x.id===taskId); if(!t) return;
@@ -4977,6 +4991,7 @@ function startRenameSubSubSubtask(taskId, subId, stepId, subSubSubId, context){
   }
 }
 function commitRenameSubSubSubtask(taskId, subId, stepId, subSubSubId, value){
+  if(selKeepEditPress) return;   // the press that blurred this field may turn into a drag: keep editing
   if(!renamingSubSubSubtask || renamingSubSubSubtask.taskId!==taskId || renamingSubSubSubtask.subId!==subId || renamingSubSubSubtask.stepId!==stepId || renamingSubSubSubtask.subSubSubId!==subSubSubId) return;
   renamingSubSubSubtask = null;
   const t = tasks.find(x=>x.id===taskId); if(!t) return;
