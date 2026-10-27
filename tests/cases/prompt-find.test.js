@@ -16,20 +16,17 @@ test('find: whole words only match between non-word characters', function(){
   assertEqual(promptFindMatches('Müller Müllers', 'Müller', w).length, 1, 'letters beyond ASCII count as word characters');
   assertEqual(promptFindMatches('use {{tone}} here', '{{tone}}', w).length, 1, 'a query that starts and ends with punctuation needs no word boundary');
 });
-test('find: matches inside a variable are known, and Replace All leaves them alone', function(){
+test('find: Replace All changes every match, variables included', function(){
   var text = 'Be {{tone}} and tone it: ((tone)) [[tone]] tone', ms = promptFindMatches(text, 'tone', {});
   assertEqual(ms.length, 5);
-  var ranges = promptFindProtected(text);
-  assertEqual(ranges.length, 3);
-  assertEqual(ms.filter(function(m){ return promptFindInside(ranges, m); }).length, 3);
-  var r = promptFindReplaceAllPure(text, ms, 'voice', ranges);
-  assertEqual(r.text, 'Be {{tone}} and voice it: ((tone)) [[tone]] voice');
-  assertEqual(r.n, 2); assertEqual(r.skipped, 3);
+  var r = promptFindReplaceAllPure(text, ms, 'voice');
+  assertEqual(r.text, 'Be {{voice}} and voice it: ((voice)) [[voice]] voice');
+  assertEqual(r.n, 5);
 });
 test('find: the replacement is literal and may contain the query', function(){
   var text = 'a b a', ms = promptFindMatches(text, 'a', {});
-  assertEqual(promptFindReplaceAllPure(text, ms, '$& aa', []).text, '$& aa b $& aa');
-  assertEqual(promptFindReplaceAllPure(text, ms, '', []).text, ' b ');
+  assertEqual(promptFindReplaceAllPure(text, ms, '$& aa').text, '$& aa b $& aa');
+  assertEqual(promptFindReplaceAllPure(text, ms, '').text, ' b ');
 });
 test('the find bar is wired up (markup, shortcuts, layer)', function(){
   ['prFind', 'prFindInput', 'prReplaceInput', 'prFindCount', 'pTplFind', 'prFindRepAll', 'prFindRepToggle'].forEach(function(id){ assertTrue(globalThis.__APP_HTML.indexOf('id="' + id + '"') > -1, id); });

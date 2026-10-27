@@ -2371,7 +2371,7 @@ const ICONS = {
           <div class="pr-find-row" id="prFindRepRow" hidden>
             <div class="pr-find-field pr-find-rep"><input type="text" id="prReplaceInput" placeholder="Replace" aria-label="Replace with" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFind.rep=this.value" onkeydown="promptFindKey(event)"></div>
             <button type="button" class="btn btn-sm" id="prFindRep1" onclick="promptFindReplaceCurrent()" title="Replace this match and go to the next (↵)">Replace</button>
-            <button type="button" class="btn btn-sm" id="prFindRepAll" onclick="promptFindReplaceAll()" title="Replace every match outside the variables (⌥↵)">Replace All</button>
+            <button type="button" class="btn btn-sm" id="prFindRepAll" onclick="promptFindReplaceAll()" title="Replace every match (⌥↵)">Replace All</button>
           </div>
         </div>
         <div class="pr-split" id="prSplit">
@@ -2652,7 +2652,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
-          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the template with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; text inside a variable (<code>{{…}}</code>, <code>[[…]]</code>, <code>((…))</code>) is found but never replaced. A locked prompt can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the template with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; it changes text inside a variable (<code>{{…}}</code>, <code>[[…]]</code>, <code>((…))</code>) too, which makes a new variable (to rename one and keep its options, use the Variables panel). A locked prompt can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case. <strong>Pass values down</strong> with <code>{{&gt;Role who=critic tone="very formal"}}</code>: for that one use, they replace the included prompt's own choices (a checklist takes items split by <code>|</code>, a global variable is set as <code>@Language=German</code>); the included prompt itself stays as it is. The Variables panel lists what a prompt includes (with the values you pass, and which variables it can set) and, under <em>Used In</em>, which other prompts include it, so you can see what a change will affect; a click opens that prompt. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
           <div class="help-row"><i class="fa-solid fa-diff"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right; to compare a different pair, close the window and select again. The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. The sliders button's menu sets how closely changes are marked (<em>Lines</em>, <em>Words</em> or <em>Characters</em>), <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it); the button is tinted while an option other than the default is on. <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard (the copy button in the template box’s corner copies the template itself, placeholders and all) with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
@@ -7501,7 +7501,7 @@ function paintTemplateHl(template, selfId){
 // ---- find and replace in the template (⌘F, ⌥⌘F; a bar under the toolbar like TextEdit's and Notes') ----
 // The matching is pure (text in, ranges out) so it is tested; the bar only paints it. Every match is tinted in `#pTplFind`, a copy of the text drawn between the highlighted
 // copy and the textarea (same metrics, transparent text, so it cannot drift); the current one is stronger. Replace goes through execCommand('insertText') on the textarea, so
-// ⌘Z undoes it like typing (Replace All is ONE step). Matches inside a variable ({{x}}, [[x]], ((x)), {{@x}}, {{>x}}) are found but never replaced: renaming a variable has its own command.
+// ⌘Z undoes it like typing (Replace All is ONE step). Every match is replaced, inside a variable ({{x}}, [[x]], ((x))) too: the template is re-read afterwards, so a renamed placeholder is a new variable (renaming one keeping its options is the Variables panel's command).
 const PROMPT_FIND_KEY = 'cleardesk_prompt_find', PROMPT_FIND_MAX = 5000;
 let promptFind = { open: false, q: '', rep: '', ignoreCase: true, whole: false, replace: false, cur: -1, matches: [], anchor: 0 };
 try{ const o = JSON.parse(localStorage.getItem(PROMPT_FIND_KEY) || 'null'); if(o){ promptFind.ignoreCase = o.ignoreCase!==false; promptFind.whole = !!o.whole; } }catch(_){}
@@ -7521,17 +7521,11 @@ function promptFindMatches(text, q, opts){
   }
   return out;
 }
-function promptFindProtected(text){
-  const out = [], re = /\{\{[^}\n]*\}\}|\[\[[^\]\n]*\]\]|\(\([^)\n]*\)\)/g; let m;
-  while((m = re.exec(text))) out.push({ s: m.index, e: m.index + m[0].length });
-  return out;
-}
-const promptFindInside = (ranges, m)=>ranges.some(r=>m.s < r.e && m.e > r.s);
-// The text with every match outside a variable replaced (literal replacement: no $1 patterns). {text, n, skipped}
-function promptFindReplaceAllPure(text, matches, rep, ranges){
-  let out = '', at = 0, n = 0, skipped = 0;
-  matches.forEach(m=>{ if(promptFindInside(ranges, m)){ skipped++; return; } out += text.slice(at, m.s) + rep; at = m.e; n++; });
-  return { text: out + text.slice(at), n, skipped };
+// The text with every match replaced (literal replacement: no $1 patterns). {text, n}
+function promptFindReplaceAllPure(text, matches, rep){
+  let out = '', at = 0;
+  matches.forEach(m=>{ out += text.slice(at, m.s) + rep; at = m.e; });
+  return { text: out + text.slice(at), n: matches.length };
 }
 const promptFindReadOnly = ()=>{ const p = prompts.find(x=>x.id===promptEditorId); return !p || p.locked || promptTrashed(p); };
 const promptFindText = ()=>{ const ta = document.getElementById('pTemplate'); return ta ? ta.value : ''; };
@@ -7617,20 +7611,18 @@ function promptFindEditText(from, to, text){          // one undoable edit in th
 }
 function promptFindReplaceCurrent(){
   const f = promptFind, m = f.matches[f.cur]; if(!m || promptFindReadOnly()) return;
-  if(promptFindInside(promptFindProtected(promptFindText()), m)){ showToast('That match is inside a variable, so it was left alone'); promptFindStep(1); return; }
   f.anchor = m.s + f.rep.length;
   if(!promptFindEditText(m.s, m.e, f.rep)) return;
   promptFindRun();
 }
 function promptFindReplaceAll(){
   const f = promptFind; if(!f.matches.length || promptFindReadOnly()) return;
-  const text = promptFindText(), res = promptFindReplaceAllPure(text, f.matches, f.rep, promptFindProtected(text));
-  if(!res.n){ showToast(res.skipped ? 'Every match is inside a variable, so nothing was replaced' : 'Nothing to replace'); return; }
+  const text = promptFindText(), res = promptFindReplaceAllPure(text, f.matches, f.rep);
   if(res.text.length > 100000){ showToast('The result would be longer than a template can be (100,000 characters)', true); return; }
   f.anchor = 0;
   if(!promptFindEditText(0, text.length, res.text)) return;
   promptFindRun();
-  showToast(`Replaced ${res.n} ${res.n===1 ? 'match' : 'matches'}${res.skipped ? `; ${res.skipped} inside variables left alone` : ''}`, false, ()=>promptUndo('undo'));
+  showToast(`Replaced ${res.n} ${res.n===1 ? 'match' : 'matches'}`, false, ()=>promptUndo('undo'));
 }
 function promptFindOptionsMenuHtml(){
   const f = promptFind, o = (op, label, on)=>menuOpt(`promptFindOption('${op}')`, {none: true}, label, on);
