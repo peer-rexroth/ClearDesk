@@ -102,7 +102,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - Every column starts with its own **52px bar** with a hairline under it, so baselines line up across sidebar header, list header and editor toolbar.
 - A **docked detail panel** (420px) beside the list, not an overlay: the list stays visible, ↑/↓ move the selection and the panel together, Esc closes it. Under 800px it floats.
 - Three-pane shape for document modes: list (300, resizable 200–600) + editor (text capped at 900px, left-aligned) + optional inspector (340, resizable 260–560; floats over the editor under 740px).
-- The sidebar collapses (⌥⌘S) and starts collapsed under 800px, where it floats.
+- The sidebar collapses (⌥⌘S) and floats below 1100px (a docked 300px sidebar leaves a bar under 680px; it starts hidden there, hides when you resize across the line and is not saved), so every bar keeps one row. The detail panel is `clamp(340px, 36vw, 420px)`. A bar steps down on **its own pane's width** (container queries), never by wrapping.
 - **Navigation details are in section 19; a general, rearrangeable layout system (Xcode / Pages / Mail style regions) is in section 20.**
 
 ---
@@ -276,7 +276,7 @@ An alert can open **over** a sheet (it stacks at a higher z-index and closes on 
 ### 6.3 Behaviour
 - **Esc cancels; clicking the scrim cancels** (except where unsaved work would be lost: ask inline first).
 - **Return = the default (primary) action.** A **destructive confirm has no default button** (focus goes to the dialog itself, so Return does nothing; Cancel is never made the default: the HIG says to give no button the default instead). A plain confirm focuses its button.
-- **Focus** moves into the dialog when it opens and **returns to where it came from** when it closes; Tab / Shift+Tab wrap inside.
+- **Focus** moves into the dialog when it opens (its first text field, else its primary button, else its first control; the dialog itself when it has none) and **returns to where it came from** when it closes; Tab / Shift+Tab wrap inside. Do this once, from the `open` class of the dialog backdrop, not in each dialog's own opener: five dialogs once forgot (audit V-01).
 - **One close path** (`closeModal(id)`) for every dialog, which also drops that dialog's pending state.
 - **Only one sheet at a time**, but a **confirmation alert stacks over a sheet**: it has its own return-focus and close path and Esc closes it first, then the sheet (Compare routes Esc through its own close request so unsaved edits ask first, wherever focus is).
 - **Dialogs that edit a draft end Cancel · Save (or Create)**; dialogs whose changes apply as you go end in **Done** only and say so ("Saved as you type").

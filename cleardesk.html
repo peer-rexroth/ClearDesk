@@ -806,7 +806,7 @@ const ICONS = {
      from just off-screen, the grey strip that used to run down the right
      edge of every screen is gone. Below 800px it floats over the page again. */
   .drawer { position: relative; top: auto; right: auto; height: auto; width: 0; max-width: none; flex-shrink: 0; overflow: hidden; border-left: 0 solid var(--border-2); box-shadow: none; transform: none; z-index: auto; transition: width var(--dur-base) ease, background-color var(--dur-base) ease; }
-  .drawer.open { width: 420px; border-left-width: 1px; transform: none; }
+  .drawer.open { width: clamp(340px, 36vw, 420px); border-left-width: 1px; transform: none; }   /* 420 from a 1170px window up; narrower windows give the list more room */
   .drawer > * { min-width: 420px; }
   @media (max-width: 800px) {
     .drawer.open { position: fixed; top: 0; right: 0; bottom: 0; width: min(420px, 100vw); z-index: 151; box-shadow: var(--shadow); }
@@ -1001,8 +1001,8 @@ const ICONS = {
   html.sidebar-resizing .sidebar { transition: none; }
   html.sidebar-collapsed .sidebar-resizer { display: none; }
   html.sidebar-collapsed .sidebar { width: 0; border-right-width: 0; visibility: hidden; transition: width var(--dur-base) ease, border-width var(--dur-base) ease, visibility 0s linear var(--dur-base); }
-  @media (max-width: 800px) {
-    /* narrow: the sidebar floats over the content instead of squeezing it */
+  @media (max-width: 1100px) {
+    /* narrow (below 1100px, V-02: with the 300px sidebar docked a bar has less than 680px): the sidebar floats over the content instead of squeezing it */
     .sidebar-resizer { display: none; }   /* the floating sidebar on a narrow window keeps its fixed width */
     .sidebar { position: fixed; top: 0; bottom: 0; left: 0; z-index: 140; width: min(300px, 86vw); box-shadow: 0 0 40px var(--shadow-ink-strong); }
     html.sidebar-collapsed .sidebar { width: min(300px, 86vw); transform: translateX(-100%); box-shadow: none; }
@@ -1492,7 +1492,7 @@ const ICONS = {
      text size / Help in a bar at its bottom), and every column starts with its own 52px bar so the three
      baselines line up. While the sidebar is hidden a small floating toggle (with a mirror of the file-sync chip)
      takes its place. */
-  @media (min-width: 801px) { .sidebar { position: relative; z-index: 60; } }
+  @media (min-width: 1101px) { .sidebar { position: relative; z-index: 60; } }   /* (below that it floats: see the 1100px query above) */
   .sidebar { overflow: visible; }                                  /* the bottom bar's menus open upward over the content */
   html.sidebar-collapsed .sidebar { overflow: hidden; }
   .sidebar-resizer { z-index: 61; }
@@ -1626,6 +1626,11 @@ const ICONS = {
   @container notepane (max-width: 740px) { .note-toolbar .tool-btn { min-width: 28px !important; } .note-toolbar .tool-group { gap: 0; } .note-toolbar .note-clear-btn { display: none; } }
   @container notepane (max-width: 720px) { .note-toolbar { gap: 4px; padding-left: 8px !important; padding-right: 8px !important; } .note-toolbar #noteStyleSelect { max-width: 66px; padding-right: 18px; } .note-toolbar .note-new-btn { min-width: 32px; } .note-toolbar .tool-group:has(#noteUndoBtn) { display: none; } }   /* Undo / Redo step aside in a narrow pane (⌘Z still works) */   /* the rarest button steps aside so the bar stays on one row */
   @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
+  /* The Notes bar keeps ONE row down to a 460px pane (a 680px window: V-02): the text-style menu shrinks, then Table and Link step aside (the / menu inserts a table, ⌘K a link), then the style menu goes (Title / Heading are in the / menu and the Markdown shortcuts) */
+  @container notepane (max-width: 640px) { .note-toolbar #noteStyleSelect { max-width: 56px; } }
+  @container notepane (max-width: 560px) { .note-toolbar #noteTableDropdown { display: none; } }
+  @container notepane (max-width: 540px) { .note-toolbar #noteLinkBtn { display: none; } }
+  @container notepane (max-width: 500px) { .note-toolbar #noteStyleSelect { display: none; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
   .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: var(--r-s); background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-9); cursor: default; }
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
@@ -1829,9 +1834,20 @@ const ICONS = {
   }
   @container notepane (max-width: 860px) { .pr-insert-group { display: none; } .pr-insert-menu { display: inline-flex; } }
   @container notepane (max-width: 560px) { .pr-copy-label { display: none; } #pCopyBtn { padding-left: 10px; padding-right: 10px; } }
-  @container notepane (max-width: 450px) { #pFavBtn, #pLockBtn, #pEditor .note-toolbar .tool-group:has([aria-label="Undo"]) { display: none; } }
+  @container notepane (max-width: 520px) { #pFavBtn, #pLockBtn, #pEditor .note-toolbar .tool-group:has([aria-label="Undo"]) { display: none; } }
   @container notepane (max-width: 330px) { .pr-insert-menu { display: none; } }
-  @media (min-width: 801px) and (max-width: 1000px) { .notes-list-pane { width: min(var(--list-w, var(--notes-list-w, 300px)), 240px); } }   /* a window this narrow gives the editor the room */
+  @media (min-width: 801px) and (max-width: 1100px) { .notes-list-pane { width: min(var(--list-w, var(--notes-list-w, 300px)), 240px); } }   /* a window this narrow gives the editor the room */
+  /* The tasks bar steps down on its OWN width, like the Notes and Prompts bars (V-02): one row, never wrapped. First the Filter label goes, then the
+     selection capsule (every command is in the right-click menu and on the keys), then the Sort control narrows; the title shortens with an ellipsis. */
+  .main { container-type: inline-size; container-name: mainpane; }
+  .main-toolbar { flex-wrap: nowrap; gap: 12px; }
+  .main-title-wrap { flex: 1 1 0; min-width: 0; }
+  .main-title, .main-subtitle { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .main-toolbar-right { flex-wrap: nowrap; flex: 0 0 auto; }
+  @container mainpane (max-width: 900px) { #filterBtn .tb-label { display: none; } }
+  @container mainpane (max-width: 880px) { #selToolbar { display: none; } }
+  @container mainpane (max-width: 780px) { #sortSelect { max-width: 112px; text-overflow: ellipsis; } }
+  @container mainpane (max-width: 560px) { #sortSelect { max-width: 84px; } #boardGroupSwitch { display: none !important; } }
   .pr-split.insp-closed .pr-insp-inner { opacity: 0; pointer-events: none; }
   .pr-insp-head { font-size: var(--fs-17); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
   .pr-insp-sub { font-size: var(--fs-12); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
@@ -2141,7 +2157,7 @@ const ICONS = {
           <button type="button" class="tool-btn tool-danger" id="trashDeleteBtn" onclick="permanentDeleteTask(trashSelectedId)" title="Delete Permanently" aria-label="Delete Permanently" disabled><i class="fa-regular fa-trash-can"></i></button>
         </div>
         <div class="lib-dropdown" id="filterDropdown">
-          <button class="btn btn-sm" id="filterBtn" onclick="event.stopPropagation();toggleFilterMenu()" title="Filter by status and priority"><i class="fa-solid fa-filter"></i> Filter <span class="filter-count" id="filterCount"></span></button>
+          <button class="btn btn-sm" id="filterBtn" onclick="event.stopPropagation();toggleFilterMenu()" title="Filter by status and priority"><i class="fa-solid fa-filter"></i><span class="tb-label"> Filter</span> <span class="filter-count" id="filterCount"></span></button>
           <div class="split-btn-menu filter-menu" id="filterMenu" style="left:auto;right:0">
             <div class="filter-menu-body">
               <div class="toolbar-filter-label">Status</div>
@@ -2798,17 +2814,31 @@ function applySidebarState(){
 }
 function toggleSidebar(){
   sidebarCollapsed = !sidebarCollapsed;
-  try{ localStorage.setItem(SIDEBAR_KEY, sidebarCollapsed ? '1' : '0'); }catch(_){}
+  if(!sidebarNarrow()){ try{ localStorage.setItem(SIDEBAR_KEY, sidebarCollapsed ? '1' : '0'); }catch(_){} }   // a narrow window floats it and never changes the wide-window choice
   applySidebarState();
 }
+const SIDEBAR_FLOAT_W = 1100;   // at or below this window width the sidebar floats over the content (keep in step with the CSS media query)
+function sidebarNarrow(){ return typeof window!=='undefined' && !!window.matchMedia && window.matchMedia(`(max-width: ${SIDEBAR_FLOAT_W}px)`).matches; }
 function collapseSidebarIfNarrow(){
   if(sidebarCollapsed || !window.matchMedia) return;
-  if(window.matchMedia('(max-width: 800px)').matches){ sidebarCollapsed = true; applySidebarState(); }
+  if(window.matchMedia(`(max-width: ${SIDEBAR_FLOAT_W}px)`).matches){ sidebarCollapsed = true; applySidebarState(); }
 }
 (function(){
   let v = null; try{ v = localStorage.getItem(SIDEBAR_KEY); }catch(_){}
-  sidebarCollapsed = v==='1' ? true : v==='0' ? false : (typeof window!=='undefined' && window.innerWidth <= 800);
+  sidebarCollapsed = (typeof window!=='undefined' && window.innerWidth <= SIDEBAR_FLOAT_W) ? true : v==='1';   // narrow: always starts hidden; wide: the saved choice (open by default)
   applySidebarState();
+  // Resizing across the threshold: below it the sidebar hides (floating, not saved); back above it the saved choice returns.
+  try{
+    if(window.matchMedia){
+      const mq = window.matchMedia(`(max-width: ${SIDEBAR_FLOAT_W}px)`);
+      const cross = ()=>{
+        let sv = null; try{ sv = localStorage.getItem(SIDEBAR_KEY); }catch(_){}
+        const want = mq.matches ? true : sv==='1';
+        if(sidebarCollapsed!==want){ sidebarCollapsed = want; applySidebarState(); }
+      };
+      if(mq.addEventListener) mq.addEventListener('change', cross); else if(mq.addListener) mq.addListener(cross);
+    }
+  }catch(_){}
 })();
 // While the sidebar is hidden, #fileSyncMini (next to the floating toggle) mirrors the file-sync chip.
 (function(){
@@ -5781,6 +5811,64 @@ function closeAllModals(){
   if(modalReturnFocus && modalReturnFocus.focus && document.contains(modalReturnFocus)) modalReturnFocus.focus();   // back to where the dialog was opened from
   modalReturnFocus = null;
 }
+// ── One focus contract for every dialog (audit V-01) ──────────────────────────────────────────────────────────────
+// Whatever opens a `.modal-bg` (and however: openConfirmModal, openFileSyncModal, a bare classList.add('open')), the same three things
+// happen: focus moves INTO the dialog, Tab / Shift+Tab stay inside it, and closing puts focus back where it was. It is driven by the
+// `open` class itself, so a new dialog gets it without any code of its own. Help and Shortcuts keep their own Tab wrap (`helpModalKey`).
+const MODAL_FOCUSABLE = 'a[href],button,input,select,textarea,[tabindex],[contenteditable]:not([contenteditable="false"])';
+function modalFocusables(root){
+  return [...root.querySelectorAll(MODAL_FOCUSABLE)].filter(el=>el.tabIndex>=0 && !el.disabled && !el.hidden && el.type!=='hidden' && el.offsetParent!==null);
+}
+// Pure: where Tab should land. `null` = let the browser move on (focus is inside and not at an end). Focus outside the dialog is pulled in.
+function modalTrapTarget(items, active, shift, root){
+  if(!items.length) return root || null;
+  const i = items.indexOf(active);
+  if(i<0) return shift ? items[items.length-1] : items[0];
+  if(shift && i===0) return items[items.length-1];
+  if(!shift && i===items.length-1) return items[0];
+  return null;
+}
+// Pure: the control a new dialog should start on: its first text field, else its primary button, else its first control.
+function modalInitialFocus(items){
+  return items.find(el=>/^(INPUT|TEXTAREA)$/.test(el.tagName) && !/^(checkbox|radio|button|submit)$/.test(el.type))
+      || items.find(el=>el.classList && el.classList.contains('btn-primary'))
+      || items[0] || null;
+}
+const modalOpener = new Map();
+function modalOpened(bg){
+  const a = document.activeElement;
+  if(!modalOpener.has(bg)) modalOpener.set(bg, a && a!==document.body && !bg.contains(a) ? a : null);
+  const go = ()=>{
+    if(!bg.classList.contains('open') || bg.contains(document.activeElement)) return;
+    const dlg = bg.querySelector('.modal, [role="dialog"], [role="alertdialog"]') || bg;
+    const t = modalInitialFocus(modalFocusables(dlg));
+    if(t) t.focus(); else { dlg.tabIndex = -1; dlg.focus(); }                      // a dialog with nothing to press (About) takes focus itself
+  };
+  go(); setTimeout(go, 220);                                                       // again once the fade-in has finished, for the ones whose own code focuses later
+}
+function modalClosed(bg){
+  const o = modalOpener.get(bg); modalOpener.delete(bg);
+  const a = document.activeElement;
+  if(o && document.contains(o) && (!a || a===document.body || bg.contains(a))) o.focus();   // (a dialog that already restored focus itself is left alone)
+}
+(function(){
+  try{
+    if(typeof MutationObserver==='undefined') return;
+    const mo = new MutationObserver(list=>list.forEach(m=>{
+      const bg = m.target, was = (m.oldValue || '').split(/\s+/).includes('open'), now = bg.classList.contains('open');
+      if(now && !was) modalOpened(bg); else if(!now && was) modalClosed(bg);
+    }));
+    document.querySelectorAll('.modal-bg').forEach(bg=>mo.observe(bg, { attributes:true, attributeFilter:['class'], attributeOldValue:true }));
+    document.addEventListener('keydown', e=>{
+      if(e.key!=='Tab' || e.defaultPrevented) return;
+      const open = [...document.querySelectorAll('.modal-bg.open')].sort((a, b)=>(+getComputedStyle(b).zIndex || 0) - (+getComputedStyle(a).zIndex || 0));
+      const bg = open[0]; if(!bg || bg.id==='helpModalBg' || bg.id==='shortcutsModalBg') return;
+      const dlg = bg.querySelector('.modal, [role="dialog"], [role="alertdialog"]') || bg;
+      const t = modalTrapTarget(modalFocusables(dlg), document.activeElement, e.shiftKey, dlg);
+      if(t){ e.preventDefault(); e.stopPropagation(); t.focus(); }
+    }, true);
+  }catch(_){}
+})();
 // `confirmLabel` names what the button does (it used to say "Delete" for everything); `danger: false` makes it the plain accent button.
 function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger = true, icon, cancelLabel = 'Cancel', onCancel}){
   document.getElementById('confirmModalTitle').textContent = title;
