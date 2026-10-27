@@ -1853,7 +1853,7 @@ const ICONS = {
   .inc-row .row-menu-hint { flex: none; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 8px; }
   .inc-suggest .row-menu-item.sel, .inc-pick .row-menu-item.sel { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .inc-suggest .row-menu-item.sel i, .inc-pick .row-menu-item.sel i, .inc-suggest .row-menu-item.sel .row-menu-hint, .inc-pick .row-menu-item.sel .row-menu-hint { color: var(--on-accent); }
-  .inc-pick { width: 300px; max-width: 80vw; }
+  .inc-pick { width: 280px; max-width: 80vw; }   /* the menu is 300px at most, padding included: a wider list ran past its right edge */
   .inc-search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 5px 6px 8px;   /* inset enough for the 3px focus ring to sit inside the menu, clear of its edge */ padding: 0 10px; border-radius: 999px; background: var(--cap-fill); }
   .inc-search i { font-size: var(--ico-14); color: var(--text-3); }
   .inc-search input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0 !important; border-radius: 0; padding: 0; background: transparent; box-shadow: none !important; outline: none !important; color: var(--text); font: inherit; font-size: var(--fs-13); }
@@ -10769,10 +10769,10 @@ function openPromptIncludeMenu(e){
   promptIncPickRender();
   menu.classList.add('open');
   // the list only gets the room below the button (the popover must not climb over the toolbar it hangs from); with too little room below it opens above instead
-  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1, vh = document.documentElement.clientHeight, list = document.getElementById('incPickList');
+  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1, vh = window.innerHeight, list = document.getElementById('incPickList');   // viewport px, like the rects; the list's height is in CSS px (the text-size zoom sits between them)
   const below = (vh - r.bottom - 6 - 16) / k - 52, above = (r.top - 6 - 16) / k - 52;
-  const up = below < 140 && above > below;
-  if(list) list.style.maxHeight = Math.max(100, Math.min(320, up ? above : below)) + 'px';
+  const up = below < 100 && above > below + 80;      // only when there is clearly more room above, never just because the window is short
+  if(list) list.style.maxHeight = Math.max(56, Math.min(320, up ? above : below)) + 'px';
   if(up) placeRowMenu(menu, r.left, r.top - 6 - menu.offsetHeight * k, btn); else placeRowMenu(menu, r.left, r.bottom + 6, btn);
   setTimeout(()=>document.getElementById('incPickInput')?.focus(), 0);
 }
