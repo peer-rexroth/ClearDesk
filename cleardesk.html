@@ -370,6 +370,7 @@ const ICONS = {
   .badge-status-done { background: var(--green-bg); color: var(--green-text); }
 
   .task-subtasks { grid-area: sub; display: flex; flex-direction: column; gap: 4px; }
+  .task-row > .task-subtasks { padding-top: 4px; }   /* air between the title line and the first subtask (it sat right under the solid band of a selected task) */
   .task-subtask-row { display: flex; align-items: center; gap: 8px; font-size: var(--fs-13); color: var(--text-2); position: relative; }
   #taskList .task-subtask-row .subtask-toggle { position: absolute; left: -21px; top: 50%; transform: translateY(-50%); }
   .sub-hierarchy-btn { opacity: 0; flex-shrink: 0; font-size: var(--gl-10); }
@@ -1062,7 +1063,7 @@ const ICONS = {
   html.sel-inactive .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
   html.sel-inactive .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-grey); }
   /* the solid band on a list row: a grid item across the whole first grid row, out to the row's edges */
-  .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks)::before { content: ""; grid-area: 1 / 1 / 2 / -1; align-self: stretch; margin: -5px -11px -1px; border-radius: var(--r-s) var(--r-s) 0 0; background: var(--sel-band); pointer-events: none; }
+  .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks)::before { content: ""; grid-area: 1 / 1 / 2 / -1; align-self: stretch; margin: -5px -11px -3px; border-radius: var(--r-s) var(--r-s) 0 0; background: var(--sel-band); pointer-events: none; }
   /* ... and on a board tile: the top part (checkbox, title, secondary line, tags) */
   .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .board-card-top { background: var(--sel-band); margin: -9px -11px 0; padding: 9px 11px 8px; border-radius: calc(var(--r-m) - 1px) calc(var(--r-m) - 1px) 0 0; }
   /* a tile's ⋯ button sits in the tinted part: it keeps its normal capsule look there */
