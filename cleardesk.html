@@ -2212,7 +2212,7 @@ const ICONS = {
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing, or type / for blocks"
-                 oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()"></div>
+                 oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()" onbeforeinput="onNoteBeforeInput(event)"></div>
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
                         <div class="note-code-copy-layer" id="noteCodeCopyLayer"></div>
           </div>
@@ -6754,6 +6754,7 @@ function renderNoteEditor(){
       if(had) fresh.focus();
     }
     title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
+    noteWrapLeadingInline(body);                                            // a first line stored as loose text becomes a paragraph, so its spacing matches the others
     noteAutoLinkDom(body);                                                  // links, e-mail addresses and phone numbers in existing text
     if(!noteIsLocked(n.id)) noteEnsureTrailingLine(body);
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
@@ -9632,6 +9633,23 @@ function updateNoteToolbarState(){
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
   const style = document.getElementById('noteStyleSelect');
   if(style) style.value = /^h[1-3]$/.test(v) ? v : noteClosest(sel.anchorNode, 'BLOCKQUOTE') ? 'blockquote' : noteClosest(sel.anchorNode, 'PRE') ? 'pre' : 'p';
+}
+// The first line of a note is a paragraph like every other one. Typing into an EMPTY editor puts the text straight into the editor with nothing around it (the browser only
+// makes paragraphs from the second line on), and a bare first line has no margin below it, so the gap to the second line was smaller than all the others. So an empty editor
+// first gets an empty paragraph with the caret in it (before any history exists), and a note that already starts with loose text has that text wrapped in one when it opens.
+function onNoteBeforeInput(e){
+  const body = document.getElementById('noteBody'); if(!body || noteIsLocked(noteEditorId)) return;
+  if(e.inputType!=='insertText' && e.inputType!=='insertCompositionText') return;
+  if(body.firstElementChild || (body.textContent||'')!=='') return;               // not empty
+  const p = document.createElement('p'); p.appendChild(document.createElement('br')); body.innerHTML = ''; body.appendChild(p);
+  const sel = window.getSelection(), r = document.createRange(); r.setStart(p, 0); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+}
+const NOTE_LOOSE_INLINE = /^(A|B|I|U|S|EM|STRONG|SPAN|MARK|CODE|SUB|SUP|BR|STRIKE|FONT)$/;
+function noteWrapLeadingInline(body){
+  let n = body && body.firstChild; const run = [];
+  while(n && (n.nodeType===3 || (n.nodeType===1 && NOTE_LOOSE_INLINE.test(n.tagName)))){ run.push(n); n = n.nextSibling; }
+  if(!run.length || !run.some(x=>x.nodeType===1 || (x.nodeValue||'').trim())) return;     // nothing there, or only blanks
+  const p = document.createElement('p'); body.insertBefore(p, run[0]); run.forEach(x=>p.appendChild(x));
 }
 function onNoteInput(e){
   const body = document.getElementById('noteBody');
