@@ -1022,7 +1022,7 @@ const ICONS = {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
     --text: #fff; --text-2: rgba(255,255,255,.94); --text-3: rgba(255,255,255,.85); --border: rgba(255,255,255,.28); --border-2: rgba(255,255,255,.5);
   }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: var(--sel-fill) !important; color: var(--on-accent) !important; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: var(--sel-pill) !important; color: var(--on-accent) !important; }   /* white text on a pill that is only 10% white over the accent: 4.7:1 (at the old 18% it was 4.0:1) */
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: var(--sel-line-strong); box-shadow: none; }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: var(--on-accent); border-color: var(--on-accent); }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked i { color: var(--sel-bg); }
@@ -1055,11 +1055,14 @@ const ICONS = {
      solid row as before. The grey "focus is elsewhere" state has the same two parts in neutral grey. */
   :root { --sel-sub-tint: color-mix(in srgb, var(--accent) 9%, transparent); --sel-sub-grey: color-mix(in srgb, var(--text) 6%, transparent); }
   html[data-theme="dark"] { --sel-sub-tint: color-mix(in srgb, var(--accent) 16%, transparent); }
-  html { --sel-band: var(--sel-bg); }
+  html { --sel-band: var(--sel-bg); --sel-pill: rgba(255,255,255,.10); --pill-plate: 11%; }
+  html[data-theme="dark"] { --pill-plate: 20%; }
   html.sel-inactive { --sel-band: var(--sel-inactive); }
   /* the tinted body */
   html:not(.sel-inactive) .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
   html[data-scheme="glass"]:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-tint); border-color: transparent; }
+  /* on the grey selection the pills keep their hue but sit on an opaque plate (their own text colour at 15% / 20% over the page colour): their translucent tints over the grey fill dropped their text to 3.1-4.0:1, against 4.7:1 or more on an unselected row */
+  html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: color-mix(in srgb, currentColor var(--pill-plate), var(--bg)) !important; }
   html.sel-inactive .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
   html.sel-inactive .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-grey); }
   /* the solid band on a list row: a grid item across the whole first grid row, out to the row's edges */
@@ -1847,9 +1850,11 @@ const ICONS = {
   .pr-pill-wrap.has-x.on { background: var(--accent); color: var(--on-accent); }
   .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: 999px 0 0 999px; }
   .pr-chip-wrap.has-x .pr-chip { padding-left: 12px; }
-  .pr-pill-x::before, .pr-chip-x::before, .tbl-plus::before, .tbl-grip.tbl::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
-  .tbl-plus::before { inset: -4px; }
-  .tbl-grip.tbl::before { inset: -3px; }
+  .pr-pill-x::before, .pr-chip-x::before, .tbl-plus::before, .tbl-grip.tbl::before, .tbl-grip.col::before, .tbl-grip.row::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
+  .tbl-plus::before { inset: -5px; }                          /* inset is from the padding box, inside a 1px border: 10px + 2 x 5 = 20 */
+  .tbl-grip.tbl::before { inset: -4px -8px -4px 0; }          /* 12 + 2 x 4 = 20 tall; the grip sits against the list resizer, so the width grows to the right only */
+  .tbl-grip.col::before { inset: -4px 0; }                    /* the column / row grips were 14px across: 12 + 2 x 4 = 20 */
+  .tbl-grip.row::before { inset: 0 -8px 0 0; }
   .pr-pill-x, .pr-chip-x { position: relative; flex: none; width: 18px; height: 18px; margin-right: 6px; padding: 0; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: inherit; font-size: var(--ico-12); opacity: 0; cursor: default; }
   .pr-chip-wrap.has-x:hover .pr-chip-x, .pr-chip-wrap.has-x:focus-within .pr-chip-x, .pr-pill-wrap.has-x:hover .pr-pill-x, .pr-pill-wrap.has-x:focus-within .pr-pill-x { opacity: .7; }
   .pr-chip-x:hover, .pr-pill-x:hover { opacity: 1 !important; background: color-mix(in srgb, currentColor 18%, transparent); }
