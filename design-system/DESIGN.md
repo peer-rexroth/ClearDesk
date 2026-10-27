@@ -269,6 +269,8 @@ The first-run "link a file" prompt is a **quiet banner**, never a modal; the dia
 
 ---
 
+> **Dialog shells (supersedes the header advice above where they differ):** two shells only, a *sheet* for anything you fill in (left title + optional subtitle, no header icon) and an *alert* for anything that asks a question (round icon, centred text, full-width buttons), and a confirmation stacks over the dialog that asked it. Full CSS, markup and behaviour rules for porting are in `DIALOG-SHELL.md`.
+
 ## 7. Behaviour patterns
 
 - **Keyboard first:** ↑/↓ move the selection, Return opens, Space toggles/collapses, Tab adds a child (subtask → step → sub-step chain), Esc closes/cancels, Delete removes, F2 renames, N focuses quick-add. Arrow keys cross the quick-add field (↓ into the list, ↑ from the first row back to the field). Modifier clicks: ⌘ extends, ⇧ selects a range.

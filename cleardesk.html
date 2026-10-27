@@ -486,12 +486,24 @@ const ICONS = {
   .modal-bg { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 200; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity var(--dur-fast) ease, visibility var(--dur-fast) ease; }
   .modal-bg.open { opacity: 1; visibility: visible; pointer-events: auto; }
   /* Dialog: layout and type here; the surface (background, border, radius, shadow, blur) comes from the Glass rules further down, shared with menus and popovers. */
-  .modal { padding: 24px; width: 380px; max-width: 90vw; display: flex; flex-direction: column; gap: 14px; }
+  .modal { padding: 24px; width: 380px; max-width: 90vw; display: flex; flex-direction: column; gap: 16px; }
   .modal h3 { font-size: var(--fs-17); font-weight: 600; }
   .modal p { font-size: var(--fs-14); color: var(--text-2); line-height: 1.6; }
   .modal input, .modal select { width: 100%; border: 1px solid var(--border); border-radius: var(--r-m); padding: 8px 12px; font-size: var(--fs-15); background: var(--bg-2); color: var(--text); outline: none; font-family: var(--font); }
   .modal input:focus { border-color: var(--border-2); }
   .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+  /* Two dialog shells (audit U-23). SHEET (.modal): a left-aligned title with an optional one-line subtitle (.modal-head), the fields, Cancel then the primary button at the trailing end; no header icon.
+     ALERT (.modal.alert): a question you answer, as macOS alerts are: a round tinted icon, a centred title and sentence, full-width buttons. The confirm dialog and Import are alerts; everything you fill in is a sheet.
+     Help / Shortcuts / About / Global Variables are windows (a sidebar and a large title), not dialogs, and keep their own layout. */
+  .modal-head h3 { font-size: var(--fs-17); font-weight: 600; }
+  .modal-head p { margin-top: 2px; font-size: var(--fs-13); color: var(--text-3); line-height: 1.4; }
+  .modal.alert { width: 340px; text-align: center; align-items: center; gap: 12px; padding: 24px 24px 20px; }
+  .modal.alert.alert-wide { width: 400px; }
+  .alert-ico { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--accent-tint); color: var(--accent); font-size: var(--ico-18); }
+  .alert-ico.danger { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+  .modal.alert .modal-actions { align-self: stretch; justify-content: center; margin-top: 8px; }
+  .modal.alert .modal-actions .btn { flex: 1; justify-content: center; }
+  #confirmModalBg { z-index: 210; }   /* a confirmation can stack on top of another dialog (Compare), which stays open underneath */
   .import-options { display: flex; flex-direction: column; gap: 8px; }
   .import-option { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--r-m); cursor: default; transition: background var(--dur-fast); }
   .import-option:hover { background: var(--bg-2); }
@@ -506,16 +518,12 @@ const ICONS = {
   .help-close { width: 28px; height: 28px; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--text) 9%, transparent); color: var(--text-2); font-size: var(--fs-12); cursor: default; }
   /* About: a centred, button-less panel like macOS's "About" window — the app icon, its name, a line of credit, and the same round close control as Help */
   /* Link/Create dialog: a grouped list of choices (the Help dialog's idiom), then a quiet notice */
-  .sync-modal { width: 420px; gap: 16px; }
+  .sync-modal { width: 420px; }
   .newfile-field { position: relative; margin: 0; }
   .newfile-field input { width: 100%; padding-right: 58px; }
   .newfile-ext { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--text-3, var(--text-2)); font-size: var(--fs-15); pointer-events: none; }
   .newfile-error { color: var(--red-text, var(--danger)); font-size: var(--fs-13); line-height: 1.4; margin-top: -6px; }
   .newfile-error:empty { display: none; }
-  .sync-head { display: flex; align-items: center; gap: 14px; }
-  .sync-head-icon { width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; background: var(--blue-bg); color: var(--blue-text); font-size: var(--ico-16); }
-  .sync-head h3 { font-size: var(--fs-17); font-weight: 700; letter-spacing: -0.01em; }
-  .sync-head p { margin-top: 1px; font-size: var(--fs-13); color: var(--text-3); line-height: 1.4; }
   .sync-list { background: color-mix(in srgb, var(--text) 4%, transparent); border-radius: var(--r-l); padding: 0 6px; display: flex; flex-direction: column; }
   .sync-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 8px; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: default; border-radius: var(--r-s); }
   .sync-row:not(:last-child) { border-bottom: 1px solid color-mix(in srgb, var(--text) 8%, transparent); border-radius: 0; }
@@ -2334,12 +2342,13 @@ const ICONS = {
 </div>
 
 <!-- Confirm modal -->
-<div class="modal-bg" id="confirmModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" role="alertdialog" tabindex="-1" style="outline:none" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalBody">
+<div class="modal-bg" id="confirmModalBg" onclick="if(event.target===this) closeConfirmModal(true)">
+  <div class="modal alert" role="alertdialog" tabindex="-1" style="outline:none" aria-modal="true" aria-labelledby="confirmModalTitle" aria-describedby="confirmModalBody">
+    <span class="alert-ico danger" id="confirmModalIcon" aria-hidden="true"><i class="fa-solid fa-trash"></i></span>
     <h3 id="confirmModalTitle">Delete?</h3>
     <p id="confirmModalBody"></p>
     <div class="modal-actions">
-      <button class="btn" id="confirmModalCancel" onclick="closeAllModals()">Cancel</button>
+      <button class="btn" id="confirmModalCancel" onclick="closeConfirmModal(true)">Cancel</button>
       <button class="btn btn-danger" id="confirmModalBtn" onclick="confirmModalAction()">Delete</button>
     </div>
   </div>
@@ -2373,7 +2382,8 @@ const ICONS = {
 
 <!-- Import modal -->
 <div class="modal-bg" id="importModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+  <div class="modal alert alert-wide" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+    <span class="alert-ico" aria-hidden="true"><i class="fa-solid fa-arrow-down-to-bracket"></i></span>
     <h3 id="importModalTitle">Import data</h3>
     <p>Merge the imported file into your current tasks and projects, or replace everything with the file's contents? Replacing automatically downloads a backup of your current data first.</p>
     <div class="modal-actions">
@@ -2650,8 +2660,7 @@ const ICONS = {
 <!-- File sync onboarding modal: one grouped list of choices, then a quiet notice (the Help dialog's list idiom) -->
 <div class="modal-bg" id="fileSyncModalBg" onclick="if(event.target===this) closeFileSyncModal()">
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
-    <div class="sync-head">
-      <span class="sync-head-icon"><i class="fa-solid fa-link"></i></span>
+    <div class="modal-head">
       <div>
         <h3 id="syncTitle">Sync to a file</h3>
         <p>Back up and share your tasks across sessions</p>
@@ -2687,8 +2696,7 @@ const ICONS = {
 <!-- Name for a new data file (after its folder is picked) -->
 <div class="modal-bg" id="newFileModalBg" onclick="if(event.target===this) closeNewFileModal()">
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="newFileTitle">
-    <div class="sync-head">
-      <span class="sync-head-icon"><i class="fa-solid fa-file-circle-plus"></i></span>
+    <div class="modal-head">
       <div><h3 id="newFileTitle">Name the new file</h3><p id="newFileFolder"></p></div>
     </div>
     <div class="field newfile-field"><input type="text" id="newFileName" maxlength="80" autocomplete="off" spellcheck="false" aria-label="File name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitNewFile()}else if(event.key==='Escape'){event.stopPropagation();closeNewFileModal()}" oninput="document.getElementById('newFileError').textContent=''"><span class="newfile-ext" aria-hidden="true">.json</span></div>
@@ -2727,8 +2735,7 @@ const ICONS = {
 <!-- AI apps: the pages the Open in button offers (a name and a web address each) -->
 <div class="modal-bg" id="aiAppsModalBg" onclick="if(event.target===this) closeAiAppsModal()">
   <div class="modal sync-modal ai-modal" role="dialog" aria-modal="true" aria-labelledby="aiAppsTitle" onkeydown="if(event.key==='Escape'){event.stopPropagation();closeAiAppsModal()}">
-    <div class="sync-head">
-      <span class="sync-head-icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
+    <div class="modal-head">
       <div><h3 id="aiAppsTitle">AI Apps</h3><p>Open in copies the prompt, then opens the page.</p></div>
     </div>
     <div class="ai-apps-list" id="aiAppsList"></div>
@@ -2741,8 +2748,7 @@ const ICONS = {
 <!-- Which data file in the linked folder (shown when linking finds several) -->
 <div class="modal-bg" id="dataFilesModalBg" onclick="if(event.target===this) closeDataFilesModal()">
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="dataFilesTitle">
-    <div class="sync-head">
-      <span class="sync-head-icon"><i class="fa-solid fa-folder-open"></i></span>
+    <div class="modal-head">
       <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one ClearDesk file</p></div>
     </div>
     <div class="sync-list" id="dataFilesList" role="group" aria-label="Data files"></div>
@@ -5744,21 +5750,34 @@ function closeAllModals(){
   modalReturnFocus = null;
 }
 // `confirmLabel` names what the button does (it used to say "Delete" for everything); `danger: false` makes it the plain accent button.
-function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger = true}){
+function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger = true, icon, cancelLabel = 'Cancel', onCancel}){
   document.getElementById('confirmModalTitle').textContent = title;
+  const ico = document.getElementById('confirmModalIcon');
+  if(ico){ ico.className = 'alert-ico' + (danger ? ' danger' : ''); ico.innerHTML = `<i class="fa-solid ${icon || (danger ? 'fa-trash' : 'fa-circle-info')}"></i>`; }
+  const cancelBtn = document.querySelector('#confirmModalBg .modal-actions .btn'); if(cancelBtn) cancelBtn.textContent = cancelLabel;   // the first button is Cancel
   document.getElementById('confirmModalBody').textContent = body;
   const btn = document.getElementById('confirmModalBtn');
   if(btn){ btn.textContent = confirmLabel; btn.className = danger ? 'btn btn-danger' : 'btn btn-primary'; }
-  modalTarget = { action };
-  modalReturnFocus = document.activeElement;
+  modalTarget = { action, onCancel };
+  confirmReturnFocus = document.activeElement;
   document.getElementById('confirmModalBg').classList.add('open');
   // HIG (alerts): never make Cancel the default. A destructive confirmation has NO default button (focus goes to the dialog, so Return does nothing and Esc cancels); a plain confirmation focuses its button.
   const dlg = document.querySelector('#confirmModalBg [role="alertdialog"]');
   const dflt = danger ? dlg : document.getElementById('confirmModalBtn'); if(dflt && dflt.focus){ const f = ()=>{ if(document.activeElement!==dflt && document.getElementById('confirmModalBg').classList.contains('open')) dflt.focus(); }; f(); requestAnimationFrame(f); setTimeout(f, 250); }   // the dialog is hidden until its fade starts, so a first focus() can be ignored
 }
+// A confirmation sits ABOVE whatever dialog asked it (Compare asks "Discard changes?"), so it closes alone: Esc, Cancel, a click outside and its own button end it and nothing under it. `cancelled` runs the caller's onCancel (Keep Editing).
+let confirmReturnFocus = null;
+function closeConfirmModal(cancelled){
+  const t = modalTarget;
+  closeModal('confirmModalBg');
+  const f = confirmReturnFocus; confirmReturnFocus = null;
+  if(cancelled && t && t.onCancel) t.onCancel();
+  if(f && f.focus && document.contains(f)) f.focus();
+}
 function confirmModalAction(){
-  if(modalTarget && modalTarget.action) modalTarget.action();
-  closeAllModals();
+  const t = modalTarget;
+  closeConfirmModal(false);
+  if(t && t.action) t.action();
 }
 // Shared by the Shortcuts modal and the Help modal's condensed shortcuts
 // section — platform-aware modifier key labels (⌘/⇧ on Mac, Ctrl/Shift
@@ -7606,21 +7625,21 @@ function pdfRulerClick(e){
 }
 function pdfRenderFoot(){
   const dirty = pdfChanged('a') || pdfChanged('b'), msg = pdfEl('pdfMsg'), acts = pdfEl('pdfActs');
-  if(pdf.confirming){
-    msg.textContent = 'Discard your changes?';
-    acts.innerHTML = `<button type="button" class="btn" onclick="pdfKeepEditing()">Keep Editing</button><button type="button" class="btn btn-danger" onclick="pdfClose()">Discard</button>`;
-  } else {
-    const n = (pdfChanged('a') ? 1 : 0) + (pdfChanged('b') ? 1 : 0);
-    msg.textContent = dirty ? `Unsaved changes in ${n===2 ? 'both prompts' : 'one prompt'}` : '';
-    acts.innerHTML = `<button type="button" class="btn" onclick="pdfRequestClose()">Close</button><button type="button" class="btn btn-primary" onclick="pdfSave()"${dirty ? '' : ' disabled'}>Save Changes</button>`;
-  }
+  const n = (pdfChanged('a') ? 1 : 0) + (pdfChanged('b') ? 1 : 0);
+  msg.textContent = dirty ? `Unsaved changes in ${n===2 ? 'both prompts' : 'one prompt'}` : '';
+  acts.innerHTML = `<button type="button" class="btn" onclick="pdfRequestClose()">Close</button><button type="button" class="btn btn-primary" onclick="pdfSave()"${dirty ? '' : ' disabled'}>Save Changes</button>`;
 }
 function pdfRequestClose(){
   if(!pdf) return closeAllModals();
-  if(pdfChanged('a') || pdfChanged('b')){ pdf.confirming = true; pdfRenderFoot(); return; }
+  if(pdf.confirming) return;   // the alert is already up over this dialog
+  if(pdfChanged('a') || pdfChanged('b')){
+    pdf.confirming = true;
+    openConfirmModal({ title: 'Discard changes?', body: 'Your edits to the two prompts are not saved.', confirmLabel: 'Discard', cancelLabel: 'Keep Editing', icon: 'fa-triangle-exclamation', action: ()=>pdfClose(), onCancel: ()=>pdfKeepEditing() });
+    return;
+  }
   pdfClose();
 }
-function pdfKeepEditing(){ if(pdf){ pdf.confirming = false; pdfRenderFoot(); } }
+function pdfKeepEditing(){ if(pdf) pdf.confirming = false; }
 function pdfClose(){ pdf = null; closeAllModals(); }
 function pdfSave(){
   if(!pdf) return;
@@ -10587,6 +10606,8 @@ document.querySelectorAll('i[data-empty-ico]').forEach(i=>{ i.outerHTML = emptyI
 applyModeSwitchTitles();
 document.addEventListener('keydown', e=>{
   if(e.key==='Escape'){
+    if(document.getElementById('confirmModalBg').classList.contains('open')){ e.preventDefault(); closeConfirmModal(true); return; }   // the top dialog first: a confirmation over Compare closes alone
+    if(typeof pdf !== 'undefined' && pdf && document.getElementById('pdfModalBg').classList.contains('open')){ e.preventDefault(); pdfRequestClose(); return; }   // Compare asks before it drops edits, wherever the focus is
     closeCellPop(); closeRowMenu(); closeToolMenus(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
     closeAllModals(); closeDrawer(); inlineAddSubtaskTaskId=null; inlineAddParentSubId=null; inlineAddParentStepId=null; renamingTaskId=null; renamingSubtask=null; renamingSubSubtask=null; renamingSubSubSubtask=null; selectedTaskIds.clear(); kbdSelectedTaskId=null;
     if(viewMode==='board'){ renderBoard(); } else { renderList(); }
@@ -11279,7 +11300,7 @@ function onFileSyncChipClick(state){
   if(state==='unlinked') openFileSyncModal();
   else if(state==='lapsed') reconnectFile();
   else openConfirmModal({
-    title: 'Unlink file?', confirmLabel: 'Unlink',
+    title: 'Unlink file?', confirmLabel: 'Unlink', icon: 'fa-link-slash',
     body: `Your tasks stay in this browser, but stop being saved to ${fileHandle ? fileHandle.name : 'the file'}. You can link it again any time.`,
     action: ()=>unlinkFile()
   });

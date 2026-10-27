@@ -264,3 +264,17 @@ test('Compare has its own icon (the diff square) in the menus, the shortcuts gro
   assertEqual(shortcutGroups().find(g => g.id === 'compare').icon, 'fa-solid fa-diff');
   promptCompareId = null;
 });
+
+test('Compare asks "Discard changes?" with the shared alert stacked over it: Keep Editing closes only the alert, Discard closes both', function () {
+  dfOpen('p', 'q'); pdfMerge(0, true);
+  pdfRequestClose();
+  assertTrue(pdf.confirming, 'the alert is up');
+  assertEqual(document.getElementById('confirmModalTitle').textContent, 'Discard changes?');
+  assertEqual(document.getElementById('confirmModalBtn').textContent, 'Discard');
+  pdfRequestClose(); assertTrue(pdf.confirming, 'a second Esc does not ask twice');
+  closeConfirmModal(true);
+  assertFalse(pdf.confirming, 'Keep Editing hands the dialog back'); assertTrue(!!pdf, 'Compare is still open under the alert');
+  pdfRequestClose(); confirmModalAction();
+  assertEqual(pdf, null, 'Discard closes Compare');
+  assertEqual(prompts[1].template, 'q', 'and drops the edit');
+});
