@@ -32,7 +32,7 @@ HIG base URL: `https://developer.apple.com/design/human-interface-guidelines/` (
 | R3 | Contrast was checked on content surfaces in one state at a time; `--text-3`, `--danger`, the checked-box tick and the grey band are not tuned for the glass sidebar, dark mode and layered tints | V-03 … V-07 | Add a contrast pass (the pixel sweep used here) to the test routine; fix with `--text-2` / `--red-text` / `--bg` tokens | S |
 | R4 | `DESIGN.md` and `tokens.css` are hand-extracted from the app and drift | V-09, V-10, V-11, V-20, V-24, V-28 | Generate `tokens.css` from the app's `:root` blocks; add a "what changed" line to `DESIGN.md` in the same commit as each rule change | S |
 | R5 | Context menus were composed per feature; there is no menu spec (groups, icons, ellipsis, coverage) | V-12, V-17, V-18 | Add a *Menus* spec to `DESIGN.md` §5.5 (≤ 3 groups, Delete placement, ellipsis rule, icons all-or-none, coverage table per mode) and a registry check | S |
-| R6 | The hit-area `::before` is applied control by control | V-08 | One `.hit-20` utility applied to every control under 20 px; extend the scan to the panel | S |
+| R6 | The hit-area `::before` is applied control by control | V-08 *(fixed)* | One `.hit-20` utility applied to every control under 20 px; extend the scan to the panel | S |
 | R7 | HIG deviations decided in code but not written in §12 | V-15, V-16, V-19, V-26 | Add each to `DESIGN.md` §12 with its reason (or fix) | S |
 | R8 | Residual literals and one-offs in rules that predate the scales | V-21, V-22, V-23, V-27 | A test that scans CSS for off-scale font sizes, radii, cursors, `width:auto` on masks and fails on new ones | S |
 | R9 | PWA shell files are not part of the "design change" routine | V-25 | Bump `CACHE_NAME` with icon/manifest changes; list all icons in the precache | S |
@@ -43,15 +43,15 @@ HIG base URL: `https://developer.apple.com/design/human-interface-guidelines/` (
 
 | ID | What | Why it is small |
 |---|---|---|
-| V-03 | Sidebar counts: use `--text-2` (or raise `--text-3` alpha on the glass block) | one token in one rule; 3.8:1 → ≥ 4.5:1 |
-| V-04 | Destructive text in dark mode: use `--red-text` for text and keep `--danger` for fills | `.btn-text-danger`, one rule |
-| V-05 | Completed checkbox tick in dark mode: dark tick (`--bg`) on the light green, or a darker green fill | one rule, two colours |
-| V-06 | Grey selected board tile: stop stacking the tile tint under the band (or use band-only grey) | `--sel-sub-grey` / `.board-card-top` rule |
+| V-03 *(fixed)* | Sidebar counts: use `--text-2` (or raise `--text-3` alpha on the glass block) | one token in one rule; 3.8:1 → ≥ 4.5:1 |
+| V-04 *(fixed)* | Destructive text in dark mode: use `--red-text` for text and keep `--danger` for fills | `.btn-text-danger`, one rule |
+| V-05 *(fixed)* | Completed checkbox tick in dark mode: dark tick (`--bg`) on the light green, or a darker green fill | one rule, two colours |
+| V-06 *(fixed)* | Grey selected board tile: stop stacking the tile tint under the band (or use band-only grey) | `--sel-sub-grey` / `.board-card-top` rule |
 | V-08 | Three controls under 20 px: add the `::before` hit area (`.sub-check` in the panel, `.drow-skip`, `.subtask-toggle`) | three selectors |
-| V-09 | Primary button: make `--glass-accent` flat, or write the gradient into `DESIGN.md` §5.1 | one token or one sentence |
-| V-10 | `tokens.css`: add the dark `--accent`, selection, focus and `--ib-*` tokens | copy 14 lines from the app |
-| V-11 | Fix §2.2/§16 (text size is per device; view state is in the file but not read back) or change the code | one paragraph, or removing 8 payload keys |
-| V-12 | `fa-calendar-day` → `calendar-days` (or add the drawing) in the Overdue menu | one string |
+| V-09 *(fixed)* | Primary button: make `--glass-accent` flat, or write the gradient into `DESIGN.md` §5.1 | one token or one sentence |
+| V-10 *(fixed)* | `tokens.css`: add the dark `--accent`, selection, focus and `--ib-*` tokens | copy 14 lines from the app |
+| V-11 *(fixed)* | Fix §2.2/§16 (text size is per device; view state is in the file but not read back) or change the code | one paragraph, or removing 8 payload keys |
+| V-12 *(fixed)* | `fa-calendar-day` → `calendar-days` (or add the drawing) in the Overdue menu | one string |
 
 ---
 

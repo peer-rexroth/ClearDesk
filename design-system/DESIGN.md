@@ -50,12 +50,14 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Text | `--text` | `#15161b` | `#f5f6fa` |
 | Secondary text | `--text-2` | text at 74% | text at 74% |
 | Tertiary text | `--text-3` | text at 62% | text at 62% |
-| Destructive | `--danger` | `#d92d20` | same |
+| Destructive fill | `--danger` | `#d92d20` | same |
+| Destructive text (the panel's Delete) | `--red-text` | `#c4281f` | `#ff9a92` (`--danger` on dark was 3.4:1) |
+| Tick on the green completed fill | `--on-green` | `#fff` | `#0b2a14` (white on the dark theme's light green was 1.5:1) |
 | Status colours | `--blue-text`, `--green-text`, `--red-text`, `--amber-text` (+ `-bg` tints) | `#0959c8`, `#1a7a36`, `#c4281f`, `#8a4b00` | `#8cc2ff`, `#8ee6a4`, `#ff9a92`, `#ffc566` |
 | Toolbar capsule fill | `--cap-fill` / `--cap-hover` / `--cap-on` | `rgba(60,60,67,.08 / .16 / .18)` | `rgba(255,255,255,.10 / .19 / .22)` |
 | Focus ring | `--focus-ring`, `--focus-edge` | `#9bbcf6`, `#89aae6` | `#417391`, `#3c6f8c` |
 
-- **Contrast:** text ≥ 4.5:1 on every surface in both themes, including on the selected row (`--text-3` was raised to .62 for this). White text on `--accent` is ≥ 4.5:1.
+- **Contrast:** text ≥ 4.5:1 on every surface in both themes, including on the selected row (`--text-3` was raised to .62 for this). White text on `--accent` is ≥ 4.5:1. `--text-3` holds on content surfaces only; on the glass sidebar it measured 3.8:1, so sidebar and column counts use `--text-2`.
 - **Colour is never the only cue:** status has a dot and text, an unresolved include is red *and* wavy-underlined, overdue is a colour *and* a calendar glyph.
 - **Dark mode is a second full set of values**, not an inversion. Define the same variables in both blocks (a variable only the light block sets leaks into dark).
 - **Theme** follows the system live; the user may override with Light / Dark. It is a per-device preference, never synced.
@@ -68,7 +70,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - **Weights:** 400, 500, 600, 700 only. Titles and bold row text 600; pills 500–600; section labels 600 uppercase with letter-spacing `.04–.08em` at 11–12px.
 - **macOS minimums:** default 13pt, nothing below 10pt for text. Control glyphs (tick marks, tiny chevrons) are icons, not text, and use the `--gl-8…10` tokens (`--gl-8` draws about 10px, the smallest glyph anywhere; the old 6 and 7 are gone, U-10).
 - Line height 1.45–1.7 in body copy; dialogs 1.6.
-- **Text size setting:** Small 90%, Medium 100% (default), Large 115%, Extra Large 130%, applied as CSS `zoom` on `<html>` (so every layout measure scales). The HIG asks for up to 200%; browser zoom covers that.
+- **Text size setting:** Small 90%, Medium 100% (default), Large 115%, Extra Large 130%, applied as CSS `zoom` on `<html>` (so every layout measure scales). The setting is **per device** (`cleardesk_uiscale`), like the theme; it is not written to the data file. The HIG asks for up to 200%; browser zoom covers that.
 
 ### 2.3 Spacing, radius, elevation
 
@@ -76,7 +78,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - **One left gutter** `--gutter` 20px: every pane's content starts 20px in, so switching modes keeps the margin.
 - **Radius ladder:** `--r-xs` 4 (chips, tiny), `--r-s` 8 (rows, controls), `--r-m` 10 (cards, fields, buttons), `--r-l` 12 (bars), `--r-xl` 16 (menus, dialogs, columns), plus `999px` for pills and capsules and `50%` for circles. One name per value; do not invent radii.
 - **Toolbar controls are capsules** (fully rounded); content uses the ladder.
-- **Elevation:** three levels `--elev-1/2/3` (`0 1px 2px .12`, `0 6px 18px .14`, `0 8px 32px .18`); menus and dialogs use `--glass-shadow` plus an inner top highlight `--glass-rim` (a 1px inset white line, the "lit edge"). Dark mode shadows are stronger, rims weaker.
+- **Elevation:** three levels `--elev-1/2/3` (only `--elev-2` is used so far; `--shadow` is the resting button shadow and `--glass-lift-1/2` lift a board tile) (`0 1px 2px .12`, `0 6px 18px .14`, `0 8px 32px .18`); menus and dialogs use `--glass-shadow` plus an inner top highlight `--glass-rim` (a 1px inset white line, the "lit edge"). Dark mode shadows are stronger, rims weaker.
 - **Hairlines, not borders:** 1px, `--border`. Cards and board tiles have *no* outline: they are set off by fill (`--bg` on a `--bg-2` column) and a whisper of shadow in light mode.
 
 ### 2.4 Materials (the glass)
@@ -110,7 +112,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 ## 3. Selection, focus, hover
 
 - **Selected task = ONE solid accent row with white text; its subtasks sit on a light accent tint** (`--sel-sub-tint`, 9% light / 16% dark), identical for one task or many. On a list row the solid part is the first grid row, on a board tile the top block (checkbox, title, secondary line, tags). Badges become translucent white, checkboxes white; inside the tinted part every colour is back to normal (the content re-points `--text*` / `--border*` to the un-selected `--ink*` values). Chosen from four mocks (keep the whole block solid / solid title line / deeper solid / tint only) because Apple's outline views make the parent row solid and leave its children alone, and a tall solid block was too heavy. A task with no (or collapsed) subtasks is a single solid row. An **accent bar** on the left edge was built and **rejected** (it reads as Material, not Apple) — do not rebuild it.
-- **Grey when focus is elsewhere:** when the pointer/keyboard/focus is in the detail panel, sidebar, quick-add field, an editor, or the window is inactive, the selection becomes a neutral fill (`rgba(60,60,67,.18)` light / `rgba(255,255,255,.22)` dark, transparent border) and everything inside looks as it does unselected. Typing in any text field also makes it grey. The grey state has the same two parts (a grey band on a lighter grey body), pills on it keep ≥ 4.5:1 (the badge is its own colour at 11% light / 20% dark over the page colour, not a white plate), and the title / date text in Notes and Prompts rows measured 4.9:1 or better in both themes.
+- **Grey when focus is elsewhere:** when the pointer/keyboard/focus is in the detail panel, sidebar, quick-add field, an editor, or the window is inactive, the selection becomes a neutral fill (`rgba(60,60,67,.18)` light / `rgba(255,255,255,.22)` dark, transparent border) and everything inside looks as it does unselected. Typing in any text field also makes it grey. The grey state has the same two parts (an opaque grey band, the page colour with the text colour mixed in at `--sel-grey-mix`, on a lighter grey body; the band never sits on top of the body tint, which made the board tile's coloured line 3.2:1), pills on it keep ≥ 4.5:1 (the badge is its own colour at 11% light / 20% dark over the page colour, not a white plate), and the title / date text in Notes and Prompts rows measured 4.9:1 or better in both themes.
 - **Never rebuild the list to move the highlight**: toggle a class on the rows that exist (a rebuild flashes, loses hover, scroll and focus).
 - **Hover is a fill** (`--bg-2` for rows, `--cap-hover` for capsules); hover must not beat selection (`:hover:not(.selected)`).
 - **Editable cells** (priority, status, due) react on the **pill only** on hover (brightness + soft halo), never on the whole cell. On the selected row they show a small chevron so they read as pop-up buttons; unselected rows stay calm.
@@ -134,6 +136,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - **Two ways to draw the same registry:**
   - *Masked glyph:* `<i class="fa-solid fa-NAME">` with a CSS rule `.fa-NAME { --fa: url("data:image/svg+xml,…") }` and `mask: var(--fa) center / calc(1.26 * 100%) no-repeat; background: currentColor; width:1em; height:1em`. Icons draw **1.26× their font-size**, so use size tokens `--ico-12|14|16|18` (each `calc(N / 1.26)`), not raw px. Sizes follow `font-size`.
   - *Inline svg* (`class="tb-ico2"`, 18px, stroke 2; menus `svg.mi`, 16px) for toolbars and menus.
+- **A masked icon's box is square.** The mask is 126% of the box *width*: widening an icon with `width: 16px` while its height stays `1em` makes the drawing taller than the box, so its top and bottom are cut (a house lost its roof and floor). When a rule sets a width, set the same height and size the mask from the font size (`mask-size: calc(1em * var(--ico-k))`).
 - **Never give a masked icon `width: auto`**: it is an empty box that gets its width from `1em`, so `auto` collapses it to zero and its button shows as an empty circle.
 - **Colour follows state:** default grey (`--text-2`), white on a selected/blue hover row, red on danger items, amber for lock/favourite on.
 - **Text-style toolbar glyphs** (B, I, U, S, A): letters at weight 600, 15px (the italic I is 500, 16px so a slanted letter is not heavier). The text-colour **A** has a 14×3px bar underneath showing the last colour used (grey until one is chosen), as in Pages.
@@ -448,7 +451,7 @@ Table "+" and grips: closed (U-11, U-10). Their hit areas were measured at 20×2
 ## 16. Settings: per device vs synced
 
 - **Per device, never synced:** theme (Light/Dark/Auto), sidebar width and collapsed state, list and inspector widths, the open item, the selected folder, sort choices, the chosen view mode.
-- **Exception:** the text size is saved in the data, so it follows you to another device.
+- **Text size is per device too** (it is not in the data file). The data file does carry the last view, filters and sort (so a reload on this device restores them), but another device's copy of them is never applied; only the data itself, the project order and the "shown in All Tasks" list travel.
 - **Synced with the data:** the data itself, the project order, which projects show in "All Tasks" (with a timestamp so the newer copy wins).
 - A synced file must never push one device's display choice onto another.
 
