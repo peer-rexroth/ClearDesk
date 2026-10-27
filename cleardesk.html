@@ -1854,7 +1854,7 @@ const ICONS = {
   .inc-suggest .row-menu-item.sel, .inc-pick .row-menu-item.sel { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .inc-suggest .row-menu-item.sel i, .inc-pick .row-menu-item.sel i, .inc-suggest .row-menu-item.sel .row-menu-hint, .inc-pick .row-menu-item.sel .row-menu-hint { color: var(--on-accent); }
   .inc-pick { width: 300px; max-width: 80vw; }
-  .inc-search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 2px 2px 6px; padding: 0 10px; border-radius: 999px; background: var(--cap-fill); }
+  .inc-search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 5px 6px 8px;   /* inset enough for the 3px focus ring to sit inside the menu, clear of its edge */ padding: 0 10px; border-radius: 999px; background: var(--cap-fill); }
   .inc-search i { font-size: var(--ico-14); color: var(--text-3); }
   .inc-search input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0 !important; border-radius: 0; padding: 0; background: transparent; box-shadow: none !important; outline: none !important; color: var(--text); font: inherit; font-size: var(--fs-13); }
   .inc-search:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
@@ -10744,7 +10744,7 @@ function promptIncPickItems(query){
 function promptIncPickRender(){
   const s = promptIncPick, list = document.getElementById('incPickList'); if(!s || !list) return;
   const on = { pre: 'incPick', hover: 'promptIncPickHover', pick: 'promptIncPickChoose' };
-  list.innerHTML = s.items.length ? s.items.map((it, i)=>(it.head && it.head!==(s.items[i - 1] || {}).head ? `<div class="inc-head">${esc(it.head)}</div>` : '') + promptIncRowHtml({ ...it, folder: it.head ? '' : it.folder }, i, i===s.idx, on)).join('')
+  list.innerHTML = s.items.length ? s.items.map((it, i)=>(it.head && it.head!==(s.items[i - 1] || {}).head ? `<div class="inc-head">${esc(it.head)}</div>` : '') + promptIncRowHtml({ ...it, folder: it.head ? '' : it.folder, favorite: it.favorite && it.head!=='Favorites' }, i, i===s.idx, on)).join('')
     : `<div class="row-menu-hint row-menu-empty">${s.q ? 'No prompt matches' : 'No other prompts to include yet'}</div>`;
   const input = document.getElementById('incPickInput'); if(input) input.setAttribute('aria-activedescendant', s.items.length ? 'incPickOpt' + s.idx : '');
 }
