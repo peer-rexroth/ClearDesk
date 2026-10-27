@@ -1847,6 +1847,19 @@ const ICONS = {
   .ai-apps-empty { font-size: var(--fs-13); color: var(--text-3); padding: 6px 0; }
   .ai-apps-tools { display: flex; gap: 8px; }
   .note-slash { min-width: 230px; max-width: 280px; }
+  .inc-suggest { min-width: 260px; max-width: 360px; max-height: 280px; overflow-y: auto; }
+  .inc-row .inc-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .inc-row .inc-star { flex: none; font-size: var(--ico-12); color: var(--amber-text); }
+  .inc-row .row-menu-hint { flex: none; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-left: 8px; }
+  .inc-suggest .row-menu-item.sel, .inc-pick .row-menu-item.sel { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
+  .inc-suggest .row-menu-item.sel i, .inc-pick .row-menu-item.sel i, .inc-suggest .row-menu-item.sel .row-menu-hint, .inc-pick .row-menu-item.sel .row-menu-hint { color: var(--on-accent); }
+  .inc-pick { width: 300px; max-width: 80vw; }
+  .inc-search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 2px 2px 6px; padding: 0 10px; border-radius: 999px; background: var(--cap-fill); }
+  .inc-search i { font-size: var(--ico-14); color: var(--text-3); }
+  .inc-search input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0 !important; border-radius: 0; padding: 0; background: transparent; box-shadow: none !important; outline: none !important; color: var(--text); font: inherit; font-size: var(--fs-13); }
+  .inc-search:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
+  .inc-list { max-height: min(50vh, 320px); overflow-y: auto; }
+  .inc-head { padding: 8px 10px 4px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
   .note-slash .row-menu-item.sel { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .note-slash .row-menu-item.sel i, .note-slash .row-menu-item.sel .row-menu-hint { color: var(--on-accent); }
   .note-slash .slash-glyph { display: inline-block; width: 16px; flex: none; text-align: center; font-size: var(--gl-10); font-weight: 700; letter-spacing: -.02em; color: var(--text-3); }
@@ -2409,7 +2422,7 @@ const ICONS = {
               <div class="note-meta" id="pMeta"></div>
               <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
               <div class="pr-section-label"><span>Template</span></div>
-              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the template as written" aria-label="Copy the template as written" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><div class="pr-tpl-find" id="pTplFind" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
+              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the template as written" aria-label="Copy the template as written" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><div class="pr-tpl-find" id="pTplFind" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput(event)" onkeydown="promptIncMenuKey(event)" onkeyup="promptIncFollow()" onclick="promptIncFollow()" onblur="promptIncClose();flushPromptEdit()"></textarea></div>
             </div>
           </div>
           <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-grip" id="prInspResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Variables panel" aria-valuemin="260" aria-valuemax="560" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="pr-insp-inner" id="pInspector"></div></aside>
@@ -2682,6 +2695,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the template with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; it changes text inside a variable (<code>{{…}}</code>, <code>[[…]]</code>, <code>((…))</code>) too, which makes a new variable (to rename one and keep its options, use the Variables panel). A locked prompt can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
+          <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Choosing a prompt to include</strong>: type <code>{{&gt;</code> in the template and a menu of your prompts opens at the caret and narrows as you type (<kbd>↑</kbd> <kbd>↓</kbd> choose, <kbd>Return</kbd> or <kbd>Tab</kbd> insert the whole <code>{{&gt;Name}}</code>, <kbd>Esc</kbd> keeps what you typed). The <code>{{&gt;}}</code> button (or <em>Include Prompt…</em> in the Insert menu) opens a search field with your Favorites first, then the prompts by folder. A prompt this one already includes is not offered again.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case. <strong>Pass values down</strong> with <code>{{&gt;Role who=critic tone="very formal"}}</code>: for that one use, they replace the included prompt's own choices (a checklist takes items split by <code>|</code>, a global variable is set as <code>@Language=German</code>); the included prompt itself stays as it is. The Variables panel lists what a prompt includes (with the values you pass, and which variables it can set) and, under <em>Used In</em>, which other prompts include it, so you can see what a change will affect; a click opens that prompt. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
           <div class="help-row"><i class="fa-solid fa-diff"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right; to compare a different pair, close the window and select again. The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. The sliders button's menu sets how closely changes are marked (<em>Lines</em>, <em>Words</em> or <em>Characters</em>), <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it); the button is tinted while an option other than the default is on. <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard (the copy button in the template box’s corner copies the template itself, placeholders and all) with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
@@ -8341,7 +8355,7 @@ function updatePromptMeta(p){
 function promptAutoSize(){ /* the highlight layer sets the height; the field is laid over it */ }
 
 // Editing: the template field updates the highlight and the variables at once, and is saved after a short pause.
-function onPromptTemplateInput(){
+function onPromptTemplateInput(e){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
   const ta = document.getElementById('pTemplate');
   p.template = ta.value.slice(0,100000);
@@ -8352,6 +8366,7 @@ function onPromptTemplateInput(){
   if(sig!==promptVarSig){ promptVarSig = sig; renderPromptInspector(p); }
   updatePromptMeta(p);
   schedulePromptSave();
+  promptIncUpdate(e);
 }
 function onPromptNameInput(){
   const p = prompts.find(x=>x.id===promptEditorId); if(!p || p.locked || promptTrashed(p)) return;
@@ -10678,20 +10693,33 @@ function openPromptGlobalInsertMenu(e){
   placeRowMenu(menu, r.left, r.bottom + 6, btn);
 }
 // The "{{>}}" toolbar button: a menu of the other prompts; the choice is written as {{>Name}}.
-function openPromptIncludeMenu(e){
-  if(e){ e.preventDefault(); e.stopPropagation(); }
-  const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
-  const btn = (e && e.currentTarget) || document.querySelector('.pr-insert-menu .tool-btn') || document.querySelector('.pr-insert-group .tool-btn'), r = btn.getBoundingClientRect();
-  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
-  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  const off = !!(p.locked || promptTrashed(p));
-  const others = prompts.filter(q=>q.id!==p.id && !promptTrashed(q) && !promptTitle(q).includes('}')).sort((a, b)=>promptTitle(a).localeCompare(promptTitle(b), undefined, {sensitivity:'base'}));
-  menu.innerHTML = others.length
-    ? `<div class="row-menu-scroll">` + others.map(q=>rowMenuItem('fa-regular fa-braces', esc(promptTitle(q)), `promptInsertInclude('${q.id}')`, { off })).join('') + `</div>`
-    : `<div class="row-menu-hint row-menu-empty">No other prompts to include yet</div>`;
-  menu.classList.add('open');
-  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+// ---- choosing a prompt to include, for any number of prompts (audit: a flat menu of every prompt does not scale). Two doors: typing "{{>" in the template opens a suggestion
+// menu at the caret that narrows as you type (like the Notes "/" menu), and the {{>}} button opens a popover with a search field, Favorites first, then the rest by folder.
+// The ranking is pure (`promptIncludeRank`) and so is finding the "{{>…" before the caret (`promptIncludeToken`). A prompt already included here is not offered again. ----
+function promptIncludeToken(text, caret){
+  const before = String(text).slice(0, caret), i = before.lastIndexOf('{{>'); if(i<0) return null;
+  const q = before.slice(i + 3); if(/[}\n=]/.test(q)) return null;      // closed already, or on to the arguments (name key=value)
+  if(i>0 && text[i - 1]==='\\') return null;                           // an escaped, literal \{{>
+  return { start: i, end: String(text).slice(caret, caret + 2)==='}}' ? caret + 2 : caret, query: q };
 }
+// Best match first: the title starts with the words, a word of the title does, the title contains them, only the folder name does; ties: favorites, then A to Z.
+function promptIncludeRank(list, query, folderOf){
+  const words = String(query || '').trim().toLowerCase().split(/\s+/).filter(Boolean), q = words.join(' ');
+  const rows = [];
+  list.forEach(p=>{
+    const title = promptTitle(p), t = title.toLowerCase(), fol = folderOf ? String(folderOf(p) || '') : '', hay = t + ' ' + fol.toLowerCase();
+    if(!words.every(w=>hay.includes(w))) return;
+    const score = !q ? 1 : t.startsWith(q) ? 4 : t.split(/[\s_\-.]+/).some(w=>w.startsWith(words[0])) && words.every(w=>t.includes(w)) ? 3 : words.every(w=>t.includes(w)) ? 2 : 1;
+    rows.push({ id: p.id, title, folder: fol, favorite: !!p.favorite, score });
+  });
+  return rows.sort((a, b)=>(b.score - a.score) || (Number(b.favorite) - Number(a.favorite)) || a.title.localeCompare(b.title, undefined, { sensitivity: 'base' }));
+}
+function promptIncludeCandidates(p){
+  const have = new Set(promptIncludes(p).map(i=>i.target && i.target.id).filter(Boolean));
+  return prompts.filter(q=>q.id!==p.id && !promptTrashed(q) && !promptTitle(q).includes('}') && !have.has(q.id));
+}
+const promptIncFolderName = q=>{ const f = promptFolderById(q.folderId); return f ? f.name : ''; };
+const promptIncRowHtml = (it, i, sel, on)=>`<button type="button" class="row-menu-item inc-row${sel ? ' sel' : ''}" role="option" id="${on.pre}Opt${i}" aria-selected="${sel}" onmouseenter="${on.hover}(${i})" onclick="${on.pick}(${i})"><i class="fa-regular fa-braces"></i><span class="inc-title">${esc(it.title)}</span>${it.favorite ? '<i class="fa-solid fa-star inc-star" aria-label="Favorite"></i>' : ''}${it.folder ? `<span class="row-menu-hint">${esc(it.folder)}</span>` : ''}</button>`;
 function promptInsertInclude(id){
   closeRowMenu();
   const q = prompts.find(x=>x.id===id), p = prompts.find(x=>x.id===promptEditorId); if(!q || !p || p.locked || promptTrashed(p)) return;
@@ -10699,6 +10727,126 @@ function promptInsertInclude(id){
   document.execCommand('insertText', false, `{{>${promptTitle(q)}}}`);
   onPromptTemplateInput();
 }
+
+// -- the popover on the {{>}} button: a search field, then Favorites, then the prompts by folder (or the ranked matches while you type) --
+let promptIncPick = null;
+function promptIncPickItems(query){
+  const p = prompts.find(x=>x.id===promptEditorId); if(!p) return [];
+  const cands = promptIncludeCandidates(p), ranked = promptIncludeRank(cands, query, promptIncFolderName);
+  if(String(query || '').trim()) return ranked.map(x=>({ ...x, head: '' }));
+  const out = [], seen = new Set();
+  ranked.filter(x=>x.favorite).forEach(x=>{ out.push({ ...x, head: 'Favorites' }); seen.add(x.id); });
+  const folders = orderedPromptFolders ? orderedPromptFolders() : promptFolders;
+  folders.forEach(f=>ranked.filter(x=>!seen.has(x.id) && cands.find(c=>c.id===x.id).folderId===f.id).forEach(x=>{ out.push({ ...x, head: f.name }); seen.add(x.id); }));
+  ranked.filter(x=>!seen.has(x.id)).forEach(x=>out.push({ ...x, head: 'Other' }));
+  return out;
+}
+function promptIncPickRender(){
+  const s = promptIncPick, list = document.getElementById('incPickList'); if(!s || !list) return;
+  const on = { pre: 'incPick', hover: 'promptIncPickHover', pick: 'promptIncPickChoose' };
+  list.innerHTML = s.items.length ? s.items.map((it, i)=>(it.head && it.head!==(s.items[i - 1] || {}).head ? `<div class="inc-head">${esc(it.head)}</div>` : '') + promptIncRowHtml({ ...it, folder: it.head ? '' : it.folder }, i, i===s.idx, on)).join('')
+    : `<div class="row-menu-hint row-menu-empty">${s.q ? 'No prompt matches' : 'No other prompts to include yet'}</div>`;
+  const input = document.getElementById('incPickInput'); if(input) input.setAttribute('aria-activedescendant', s.items.length ? 'incPickOpt' + s.idx : '');
+}
+function promptIncPickHover(i){ if(!promptIncPick) return; promptIncPick.idx = i; document.querySelectorAll('#incPickList .inc-row').forEach((b, k)=>{ b.classList.toggle('sel', k===i); b.setAttribute('aria-selected', String(k===i)); }); }
+function promptIncPickChoose(i){ const it = promptIncPick && promptIncPick.items[i]; if(it) promptInsertInclude(it.id); }
+function promptIncPickFilter(v){ if(!promptIncPick) return; promptIncPick.q = v; promptIncPick.items = promptIncPickItems(v); promptIncPick.idx = 0; promptIncPickRender(); }
+function promptIncPickKey(e){
+  const s = promptIncPick; if(!s) return;
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); if(!s.items.length) return; s.idx = (s.idx + (e.key==='ArrowDown' ? 1 : s.items.length - 1)) % s.items.length; promptIncPickHover(s.idx); document.getElementById('incPickOpt' + s.idx)?.scrollIntoView({ block: 'nearest' }); }
+  else if(e.key==='Enter'){ e.preventDefault(); promptIncPickChoose(s.idx); }
+  else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeRowMenu(); document.getElementById('pTemplate')?.focus(); }
+}
+function openPromptIncludeMenu(e){
+  if(e){ e.preventDefault(); e.stopPropagation(); }
+  const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
+  const btn = (e && e.currentTarget) || document.querySelector('.pr-insert-menu .tool-btn') || document.querySelector('.pr-insert-group .tool-btn'), r = btn.getBoundingClientRect();
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  if(p.locked || promptTrashed(p)){ menu.innerHTML = '<div class="row-menu-hint row-menu-empty">Unlock the prompt to include another one</div>'; menu.classList.add('open'); placeRowMenu(menu, r.left, r.bottom + 6, btn); return; }
+  promptIncPick = { q: '', items: promptIncPickItems(''), idx: 0 };
+  menu.innerHTML = `<div class="inc-pick"><div class="inc-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="text" id="incPickInput" role="combobox" aria-expanded="true" aria-controls="incPickList" placeholder="Search prompts" aria-label="Search prompts to include" autocomplete="off" spellcheck="false" oninput="promptIncPickFilter(this.value)" onkeydown="promptIncPickKey(event)"></div><div class="inc-list" id="incPickList" role="listbox" aria-label="Prompts"></div></div>`;
+  promptIncPickRender();
+  menu.classList.add('open');
+  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+  setTimeout(()=>document.getElementById('incPickInput')?.focus(), 0);
+}
+
+// -- typing "{{>" in the template: a suggestion menu at the caret that narrows as you type; ↑ ↓ choose, ↵ or Tab insert the whole {{>Name}}, Esc leaves what you typed --
+let promptInc = null, promptIncOff = -1;
+function promptCaretRect(offset){                                     // where the caret is on screen: the same text is drawn in #pTplHl, one .ln per line
+  const hl = document.getElementById('pTplHl'), ta = document.getElementById('pTemplate'); if(!hl || !ta) return null;
+  const text = ta.value, line = (text.slice(0, offset).match(/\n/g) || []).length, col = offset - (text.lastIndexOf('\n', offset - 1) + 1), ln = hl.children[line];
+  if(!ln) return null;
+  if(col>0){
+    const w = document.createTreeWalker(ln, NodeFilter.SHOW_TEXT); let n, left = col;
+    while((n = w.nextNode())){
+      if(left <= n.nodeValue.length){ const r = document.createRange(); r.setStart(n, left - 1); r.setEnd(n, left); const b = r.getBoundingClientRect(); if(b && b.height) return { left: b.right, top: b.top, bottom: b.bottom }; break; }
+      left -= n.nodeValue.length;
+    }
+  }
+  const b = ln.getBoundingClientRect(); return { left: b.left, top: b.top, bottom: b.bottom };
+}
+function promptIncUpdate(e){
+  const p = prompts.find(x=>x.id===promptEditorId), ta = document.getElementById('pTemplate');
+  if(!p || !ta || p.locked || promptTrashed(p) || document.activeElement!==ta){ promptIncClose(); return; }
+  const t = promptIncludeToken(ta.value, ta.selectionStart);
+  if(!t || ta.selectionStart!==ta.selectionEnd){ promptIncOff = -1; promptIncClose(); return; }
+  if(promptIncOff===t.start){ promptIncClose(); return; }
+  if(!promptInc && !/^(insertText|deleteContent)/.test((e && e.inputType) || '')) return;     // it opens while typing, not after a paste or an undo
+  const items = promptIncludeRank(promptIncludeCandidates(p), t.query, promptIncFolderName).slice(0, 50);
+  if(!items.length){ promptIncClose(); return; }
+  promptInc = { ...t, items, idx: promptInc && promptInc.query===t.query ? Math.min(promptInc.idx, items.length - 1) : 0 };
+  promptIncRender();
+}
+function promptIncRender(){
+  const s = promptInc; if(!s) return;
+  let menu = document.getElementById('promptIncMenu');
+  if(!menu){
+    menu = document.createElement('div'); menu.id = 'promptIncMenu'; menu.className = 'row-menu note-slash inc-suggest'; menu.setAttribute('role', 'listbox'); menu.setAttribute('aria-label', 'Prompts to include');
+    menu.onmousedown = ev=>ev.preventDefault();                       // the template keeps focus (and its caret) while you pick
+    document.body.appendChild(menu);
+  }
+  const on = { pre: 'promptIncOpt', hover: 'promptIncHover', pick: 'promptIncPickAt' };
+  menu.innerHTML = s.items.map((it, i)=>promptIncRowHtml(it, i, i===s.idx, on)).join('');
+  const rc = promptCaretRect(s.start + 3 + s.query.length) || { left: 0, bottom: 0, top: 0 };
+  placeRowMenu(menu, rc.left, rc.bottom + 6, document.getElementById('pTemplate'));
+  const mr = menu.getBoundingClientRect(), vh = document.documentElement.clientHeight;
+  if(mr.height && rc.bottom + 6 + mr.height > vh - 8 && rc.top - 6 - mr.height > 8) placeRowMenu(menu, rc.left, rc.top - 6 - mr.height, document.getElementById('pTemplate'));
+  const ta = document.getElementById('pTemplate'); ta.setAttribute('role', 'combobox'); ta.setAttribute('aria-haspopup', 'listbox'); ta.setAttribute('aria-controls', 'promptIncMenu'); ta.setAttribute('aria-expanded', 'true'); ta.setAttribute('aria-activedescendant', 'promptIncOpt' + s.idx);
+}
+function promptIncHover(i){ if(!promptInc) return; promptInc.idx = i; promptIncMark(); }
+function promptIncMark(){
+  const s = promptInc; if(!s) return;
+  document.querySelectorAll('#promptIncMenu .inc-row').forEach((b, i)=>{ b.classList.toggle('sel', i===s.idx); b.setAttribute('aria-selected', String(i===s.idx)); });
+  const ta = document.getElementById('pTemplate'); if(ta) ta.setAttribute('aria-activedescendant', 'promptIncOpt' + s.idx);
+  document.getElementById('promptIncOpt' + s.idx)?.scrollIntoView({ block: 'nearest' });
+}
+function promptIncClose(){
+  promptInc = null;
+  const menu = document.getElementById('promptIncMenu'); if(menu) menu.classList.remove('open');
+  const ta = document.getElementById('pTemplate'); if(ta){ ta.setAttribute('role', 'textbox'); ['aria-haspopup', 'aria-controls', 'aria-expanded', 'aria-activedescendant'].forEach(a=>ta.removeAttribute(a)); }
+}
+function promptIncMenuKey(e){
+  const s = promptInc; if(!s || e.isComposing) return;
+  if(e.key==='ArrowDown' || e.key==='ArrowUp'){ e.preventDefault(); s.idx = (s.idx + (e.key==='ArrowDown' ? 1 : s.items.length - 1)) % s.items.length; promptIncMark(); }
+  else if((e.key==='Enter' || e.key==='Tab') && !e.metaKey && !e.ctrlKey && !e.altKey && !e.shiftKey){ e.preventDefault(); e.stopPropagation(); promptIncPickAt(s.idx); }
+  else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); promptIncOff = s.start; promptIncClose(); }
+}
+function promptIncFollow(){                                           // the caret moved away from the "{{>…" (an arrow key, a click): close the menu
+  if(!promptInc) return;
+  const ta = document.getElementById('pTemplate'), t = ta && promptIncludeToken(ta.value, ta.selectionStart);
+  if(!t || t.start!==promptInc.start) promptIncClose();
+}
+function promptIncPickAt(i){
+  const s = promptInc, it = s && s.items[i]; promptIncClose();
+  const ta = document.getElementById('pTemplate'), p = prompts.find(x=>x.id===promptEditorId);
+  if(!it || !ta || !p || p.locked || promptTrashed(p)) return;
+  ta.focus(); ta.setSelectionRange(s.start, s.end);                    // the typed "{{>…" (and a "}}" right after it) is replaced by the finished include
+  document.execCommand('insertText', false, `{{>${it.title}}}`);
+  onPromptTemplateInput();
+}
+window.addEventListener('scroll', ()=>{ if(promptInc) promptIncRender(); }, true);
 function promptInsertGlobal(id){
   closeRowMenu();
   const g = promptGlobalById(id), p = prompts.find(x=>x.id===promptEditorId); if(!g || !p || p.locked || promptTrashed(p)) return;
