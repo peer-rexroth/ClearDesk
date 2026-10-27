@@ -33,7 +33,7 @@ html[data-scheme="glass"] {
   --red-bg: rgba(255,69,58,.15);
   --red-text: #c4281f;
   --green-bg: rgba(52,199,89,.18);
-  --green-text: #1a7a36;
+  --green-text: #17722f;
   --diff-del: rgba(255,69,58,.38); --diff-add: rgba(52,199,89,.42);
   --find-hit: rgba(255,204,0,.38); --find-cur: rgba(255,149,0,.62);
   --md-dim: var(--text-3);

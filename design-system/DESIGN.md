@@ -53,7 +53,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Destructive fill | `--danger` | `#d92d20` | same |
 | Destructive text (the panel's Delete) | `--red-text` | `#c4281f` | `#ff9a92` (`--danger` on dark was 3.4:1) |
 | Tick on the green completed fill | `--on-green` | `#fff` | `#0b2a14` (white on the dark theme's light green was 1.5:1) |
-| Status colours | `--blue-text`, `--green-text`, `--red-text`, `--amber-text` (+ `-bg` tints) | `#0959c8`, `#1a7a36`, `#c4281f`, `#8a4b00` | `#8cc2ff`, `#8ee6a4`, `#ff9a92`, `#ffc566` |
+| Status colours | `--blue-text`, `--green-text`, `--red-text`, `--amber-text` (+ `-bg` tints) | `#0959c8`, `#17722f`, `#c4281f`, `#8a4b00` | `#8cc2ff`, `#8ee6a4`, `#ff9a92`, `#ffc566` |
 | Toolbar capsule fill | `--cap-fill` / `--cap-hover` / `--cap-on` | `rgba(60,60,67,.08 / .16 / .18)` | `rgba(255,255,255,.10 / .19 / .22)` |
 | Focus ring | `--focus-ring`, `--focus-edge` | `#9bbcf6`, `#89aae6` | `#417391`, `#3c6f8c` |
 
@@ -252,6 +252,14 @@ Native `title` attributes (browser delay and style), written to four rules: **se
 The tooltips are always paired with an `aria-label` on icon-only controls. The pairing is automatic: write the `title`, and a small observer copies it into `aria-label` for any button with no text of its own (and follows later title changes); a test scans the markup so a nameless icon-only button cannot be added (U-16). Truncated text gets its full text as a `title` too.
 
 ---
+
+### 5.8 The find bar and the searchable picker
+
+- **Find bar** (⌘F in Notes and in a prompt template; one component for both): a bar between the toolbar and the editor, hairline under it, on the content surface. A **capsule field** (28px, `--cap-fill`) with the options menu on its magnifier (*Find* / *Find and Replace* as a ticked pair, then *Ignore Case* and *Whole Words*), the **count inside the field** ("3 of 12", "No Results" in red), a joined ↑ ↓ capsule, a *Replace…* toggle (the ellipsis because it reveals more input) and *Done*. A second row holds the Replace field, *Replace* and *Replace All* on the **same grid columns** as the row above, so edges line up. Every control is 28px high; buttons are the toolbar's quiet family (soft fill, no ring; A-04). The field rings as a whole when focused.
+- **Matches** are tinted with two tokens (`--find-hit`, `--find-cur`): all matches, the current one stronger; never colour alone for the count. In Notes the tint is the CSS Custom Highlight API (nothing is added to the note); in a template it is a transparent-text copy under the textarea.
+- **Keys:** ⌘F find, ⌥⌘F with Replace, ⌘G / ⇧⌘G next / previous, ↵ / ⇧↵ in the field, Esc or Done closes and leaves the current match selected. Replace is one undo step, Replace All is one step with a toast Undo.
+- **Searchable picker** (choosing one item from a list that can be long: the prompt to include): a popover with a capsule search field on top, **Favorites first, then the items by folder** while the field is empty, a ranked flat list while typing (starts with, a word starts with, contains, folder only; ties by favorite, then A to Z). The first row is selected, ↑ ↓ ↵ Esc work in the field. It sits under its button, takes only the room below it (and opens above only when clearly more room there), and its content never exceeds the menu's 300px.
+- **Autocomplete where the text is typed** (the Notes `/` menu, `{{>` in a template): a small menu at the caret that narrows as you type; ↑ ↓ choose, ↵ / Tab insert, Esc keeps what you typed and stays closed for that spot; it opens while typing only, never after a paste or an undo.
 
 ## 6. Dialogs, sheets and modals (the Apple feeling)
 

@@ -546,7 +546,7 @@ const ICONS = {
   .help-close:hover { background: var(--pressed); color: var(--text); }
   .help-nav { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 2px; padding: 6px 10px 12px; overflow-y: auto; }
   .help-nav button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; border: 0; border-radius: var(--r-s); background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); font-weight: 500; text-align: left; cursor: default; }
-  .help-nav button i { width: 16px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex-shrink: 0; }
+  .help-nav button i { width: 16px; height: 16px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex-shrink: 0; -webkit-mask-size: calc(1em * var(--ico-k)); mask-size: calc(1em * var(--ico-k)); }   /* a square box: the mask is 126% of the width, so a 16 x 12.7 box cut the drawing */
   .help-nav button:hover { background: var(--hover); }
   .help-nav button.active { background: var(--sel-bg); color: var(--on-accent); }   /* the same solid accent as a selected row */
   .help-nav button.active i { color: var(--on-accent); }
@@ -875,7 +875,7 @@ const ICONS = {
     --teal-bg: rgba(48,176,160,.18); --teal-text: #0b6b5f;
     --amber-bg: rgba(255,159,10,.20); --amber-text: #8a4b00;
     --red-bg: rgba(255,69,58,.15); --red-text: #c4281f;
-    --green-bg: rgba(52,199,89,.18); --green-text: #1a7a36;
+    --green-bg: rgba(52,199,89,.18); --green-text: #17722f;
     --diff-del: rgba(255,69,58,.38); --diff-add: rgba(52,199,89,.42);   /* Compare: the changed words inside a line */
     --find-hit: rgba(255,204,0,.38); --find-cur: rgba(255,149,0,.62);   /* find in the template: every match, the current one */
     --md-dim: var(--text-3); --md-h: #3634a3; --md-li: #d30f45; --md-code: #b02e00; --md-code-bg: rgba(255,149,0,.16); --md-fence: #9f3000; --md-fence-bg: rgba(255,149,0,.10); --md-quote: #5c5c61; --md-link: #0040dd; --md-tag: #8944ab; --md-tag-bg: rgba(175,82,222,.14);
