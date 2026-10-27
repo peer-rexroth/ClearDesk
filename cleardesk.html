@@ -1127,7 +1127,7 @@ const ICONS = {
   .drawer-header input.title-input:focus-visible { box-shadow: none !important; border-color: transparent !important; border-radius: 0; }   /* mouse: just the caret, like the panel's other fields */
   html.kbd-input .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 var(--focus-ring) !important; }   /* keyboard: an underline */
   /* inside a selected (blue) row the neutral ring would vanish: use white */
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):focus-visible { border-color: var(--on-accent) !important; box-shadow: 0 0 0 3px var(--sel-halo-strong) !important; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):not(.task-subtasks *):focus-visible { border-color: var(--on-accent) !important; box-shadow: 0 0 0 3px var(--sel-halo-strong) !important; }
 
   /* ── Ghost row: inline "add subtask / step / sub-step" fields ──────────────────
      No box, no dashed border: the field looks like one more line in the list — a
@@ -3943,7 +3943,9 @@ function selZoneOf(el){
   return null;
 }
 // Typing in any text field (an inline rename, the add-subtask field Tab opens, a note title…) also takes the selection's focus, wherever that field is; it comes back with the field.
-function selEditing(){ const a = document.activeElement; return !!(a && a.closest && a.closest('input, textarea, select, [contenteditable="true"]')); }
+// Typing in a field that is OUTSIDE the list (the panel, search, quick-add, an editor) hands the selection's focus away, so it goes grey. A field inside the selected row or card
+// (an inline rename, the add-subtask field) does not: focus is still in the list, so the selection keeps its colour while you edit (as a row being renamed in a macOS table does).
+function selEditing(){ const a = document.activeElement; return !!(a && a.closest && a.closest('input, textarea, select, [contenteditable="true"]') && !a.closest('.task-row, .board-card')); }
 function applySelActive(){ if(selHold) return; document.documentElement.classList.toggle('sel-inactive', !(selWinActive && selZone==='list' && !selEditing())); }
 function setSelZone(z){ if(z && z!==selZone){ selZone = z; applySelActive(); } }
 // Pressing in the list does not take the selection's focus until the press ENDS as a click: a drag (a card, a subtask row, or just a press-and-move over a row) must not recolour the selection (editing in the panel, then dragging a task, flipped grey back to blue). So the move TO the list waits for the click, and is dropped if a drag starts or the pointer travelled (> 4px) before the button came up. Presses on a field, or in the panel / sidebar, act at once.
