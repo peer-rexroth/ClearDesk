@@ -1727,10 +1727,16 @@ const ICONS = {
   .pr-tpl-find mark { background: var(--find-hit); color: transparent; border-radius: 3px; }
   .pr-tpl-find mark.cur { background: var(--find-cur); }
   /* the find bar (TextEdit / Notes): a capsule field with the options menu on its magnifier, the count inside it, Previous / Next, Done; a second row for Replace */
-  .pr-find { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 8px var(--gutter); border-bottom: 1px solid var(--border); background: var(--bg); }
+  /* one grid for both rows: Find | Previous-Next | Replace… | Done above, Replace field | Replace | Replace All below, so the edges line up; the field column shrinks first in a narrow pane */
+  .pr-find { flex: none; display: grid; grid-template-columns: minmax(100px, 420px) auto auto auto; justify-content: start; align-items: center; gap: 8px; padding: 8px var(--gutter); border-bottom: 1px solid var(--border); background: var(--bg); }
+  .pr-find-row { display: contents; }
   .pr-find[hidden], .pr-find-row[hidden] { display: none; }
-  .pr-find-row { display: flex; align-items: center; gap: 8px; }
-  .pr-find-field { flex: 1 1 160px; min-width: 120px; max-width: 420px; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--cap-fill); }
+  .pr-find > .pr-find-row > :is(.btn, .tool-group) { justify-self: stretch; }
+  .pr-find .tool-group .tool-btn { flex: 1; }
+  .pr-find > .pr-find-row:first-child > :nth-child(1) { grid-area: 1 / 1; } .pr-find > .pr-find-row:first-child > .tool-group { grid-area: 1 / 2; } .pr-find-toggle { grid-area: 1 / 3; } .pr-find-row:first-child > .btn:last-child { grid-area: 1 / 4; }
+  #prFindRepRow > .pr-find-field { grid-area: 2 / 1; } #prFindRep1 { grid-area: 2 / 2; } #prFindRepAll { grid-area: 2 / 3; }
+  @container notepane (max-width: 460px) { .pr-find .pr-find-toggle { display: none; } .pr-find-row:first-child > .btn:last-child { grid-area: 1 / 3; } }   /* a very narrow pane: the toggle steps aside (the magnifier menu and ⌥⌘F still show Replace) */
+  .pr-find-field { min-width: 0; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--cap-fill); }
   .pr-find-field:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
   .pr-find-field input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); }
   .pr-find-field input:focus, .pr-find-field input:focus-visible { outline: none !important; border: 0 !important; box-shadow: none !important; }
