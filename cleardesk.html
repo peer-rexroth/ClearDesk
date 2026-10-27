@@ -260,7 +260,7 @@ const ICONS = {
   .nav-item .count { font-size: var(--fs-11); color: var(--text-2); font-weight: 500; }   /* --text-2: --text-3 measured 3.8:1 on the glass sidebar */
 
   .filter-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-  .f-chip { font-size: var(--fs-11); font-weight: 500; padding: 4px 8px; border-radius: 999px; cursor: default; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: all var(--dur-fast); user-select: none; }
+  .f-chip { font-size: var(--fs-11); font-weight: 500; padding: 4px 8px; border-radius: 999px; cursor: default; border: 0.5px solid transparent; background: var(--bg-2); color: var(--text-2); display: inline-flex; align-items: center; gap: 4px; transition: background-color var(--dur-fast), color var(--dur-fast), border-color var(--dur-fast); user-select: none; }
   .f-chip:hover { border-color: var(--border-2); color: var(--text); }
   .f-chip.active { background: var(--bg-3); color: var(--text); }   /* same weight as the pills; the fill alone says "on" (a bold label and an outline said it twice) */
 
@@ -610,7 +610,7 @@ const ICONS = {
   kbd { font-family: var(--mono); font-size: var(--fs-11); background: var(--bg-3); border: 0.5px solid var(--border-2); border-radius: var(--r-xs); padding: 2px 6px; color: var(--text); box-shadow: 0 1px 0 var(--border-2); display: inline-block; line-height: 1.4; }
 
   /* toast */
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: var(--r-m); font-size: var(--fs-13); font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: all var(--dur-base) ease; z-index: 300; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: var(--r-m); font-size: var(--fs-13); font-weight: 500; display: flex; align-items: center; gap: 8px; transform: translateY(80px); opacity: 0; transition: transform var(--dur-base) ease, opacity var(--dur-base) ease; z-index: 300; }
   .toast.show { transform: translateY(0); opacity: 1; }
   .toast.error { background: var(--red-text); }
   /* ---- classes that replaced inline style="…" literals (audit cleanup) ---- */
@@ -620,7 +620,7 @@ const ICONS = {
   .task-list-header .th-sort[data-col="due"] { margin-left: -8px; }
   #folderParentField { margin-top: 12px; }
   .modal.modal-w360 { width: 360px; }
-  .modal p.modal-sub { font-size: var(--fs-12); color: var(--text-3); margin-top: -8px; }
+  .modal p.modal-sub { font-size: var(--fs-13); color: var(--text-3); margin-top: -8px; }
   #allTasksProjectsList { display: flex; flex-direction: column; gap: 1px; max-height: 320px; overflow-y: auto; }
   .due-repeat-ico { color: var(--text-3); font-size: var(--ico-14); margin-left: 4px; }
   .task-subtasks.ind-21 { margin-left: 21px; }   /* one level in: a measured alignment (circle centre under the parent's), not a spacing step */
@@ -876,6 +876,8 @@ const ICONS = {
     --amber-bg: rgba(255,159,10,.20); --amber-text: #8a4b00;
     --red-bg: rgba(255,69,58,.15); --red-text: #c4281f;
     --green-bg: rgba(52,199,89,.18); --green-text: #1a7a36;
+    --diff-del: rgba(255,69,58,.38); --diff-add: rgba(52,199,89,.42);   /* Compare: the changed words inside a line */
+    --find-hit: rgba(255,204,0,.38); --find-cur: rgba(255,149,0,.62);   /* find in the template: every match, the current one */
     --md-dim: var(--text-3); --md-h: #3634a3; --md-li: #d30f45; --md-code: #b02e00; --md-code-bg: rgba(255,149,0,.16); --md-fence: #9f3000; --md-fence-bg: rgba(255,149,0,.10); --md-quote: #5c5c61; --md-link: #0040dd; --md-tag: #8944ab; --md-tag-bg: rgba(175,82,222,.14);
     --purple-bg: rgba(175,82,222,.16); --purple-text: #7a2fb0;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
@@ -895,6 +897,8 @@ const ICONS = {
     --amber-bg: rgba(255,159,10,.26); --amber-text: #ffc566;
     --red-bg: rgba(255,69,58,.26); --red-text: #ff9a92;
     --green-bg: rgba(52,199,89,.26); --green-text: #8ee6a4;
+    --diff-del: rgba(255,69,58,.38); --diff-add: rgba(52,199,89,.42);
+    --find-hit: rgba(255,214,10,.30); --find-cur: rgba(255,159,10,.58);
     --md-dim: var(--text-3); --md-h: #9b99ff; --md-li: #ff6482; --md-code: #ffb340; --md-code-bg: rgba(255,159,10,.20); --md-fence: #ffc266; --md-fence-bg: rgba(255,159,10,.12); --md-quote: #aeaeb2; --md-link: #409cff; --md-tag: #da8fff; --md-tag-bg: rgba(191,90,242,.22);
     --purple-bg: rgba(175,82,222,.28); --purple-text: #d6a6f5;
     --blue-dot: #0a84ff; --teal-dot: #30b0a0; --purple-dot: #af52de;
@@ -1591,15 +1595,15 @@ const ICONS = {
   html[data-scheme="glass"] .quickadd:has(#quickAddInput:focus) { border-bottom-color: var(--sel-bg); box-shadow: none; }
   .quickadd:has(#quickAddInput:focus) .qa-plus { color: var(--sel-bg); }
   .qa-wrap { position: relative; flex: none; margin-right: 2px; }
-  .qa-popup { display: inline-flex; align-items: center; gap: 8px; height: 28px; max-width: 190px; padding: 0 8px 0 12px; border: 0; border-radius: var(--r-s); background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text-2); font: 500 13px var(--font); cursor: default; white-space: nowrap; }
-  .qa-popup:hover:not(:disabled) { background: var(--cap-hover, rgba(120,120,128,.22)); color: var(--text); }
+  .qa-popup { display: inline-flex; align-items: center; gap: 8px; height: 28px; max-width: 190px; padding: 0 8px 0 12px; border: 0; border-radius: var(--r-s); background: var(--cap-fill); color: var(--text-2); font: 500 13px var(--font); cursor: default; white-space: nowrap; }
+  .qa-popup:hover:not(:disabled) { background: var(--cap-hover); color: var(--text); }
   .qa-popup:disabled { opacity: .55; cursor: default; }
   .qa-popup #qaProjectName { overflow: hidden; text-overflow: ellipsis; }
   .qa-updown { flex: none; width: 8px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; opacity: .75; }
   .qa-menu { left: auto; right: 0; top: calc(100% + 6px); min-width: var(--submenu-w); z-index: 80; }
   /* the list header's fold-all button: no ring, a plain glyph that gets a soft fill on hover, like the row disclosure chevrons */
   html[data-scheme="glass"] .task-list-header > .subtask-toggle { background: transparent; border: 0; box-shadow: none; color: var(--text-3); width: 28px; height: 28px; margin: 0 0 0 -2px; }
-  html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: var(--cap-fill, rgba(120,120,128,.14)); color: var(--text); box-shadow: none; }
+  html[data-scheme="glass"] .task-list-header > .subtask-toggle:hover { background: var(--cap-fill); color: var(--text); box-shadow: none; }
   /* the column-header row: its 28px controls sit in the middle of the band (they used to hug the hairline above, 10px of air below) */
   html[data-scheme="glass"] .task-list-header { padding-top: 6px; padding-bottom: 6px; align-items: center; }
   /* Projects and Tags flow one after the other in one scrolling area (Tags used to be pinned to the bottom with a gap above it) */
@@ -1717,8 +1721,35 @@ const ICONS = {
   /* the template: a transparent field laid over a layer that shows the same text with its placeholders tinted (the layer sets the height) */
   .pr-tpl { position: relative; border-radius: var(--r-s); background: var(--bg-2); }
   .pr-tpl .note-code-copy { top: 5px; right: 5px; }
-  .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: var(--fs-13); line-height: 1.7; padding: 12px 44px 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
+  .pr-tpl-hl, .pr-tpl-find, .pr-tpl textarea { font-family: var(--mono); font-size: var(--fs-13); line-height: 1.7; padding: 12px 44px 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
   .pr-tpl-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
+  .pr-tpl-find { position: absolute; inset: 0; color: transparent; pointer-events: none; }   /* the find matches: the same text and metrics as the copy under the textarea, drawn invisible with only the marks tinted */
+  .pr-tpl-find mark { background: var(--find-hit); color: transparent; border-radius: 3px; }
+  .pr-tpl-find mark.cur { background: var(--find-cur); }
+  /* the find bar (TextEdit / Notes): a capsule field with the options menu on its magnifier, the count inside it, Previous / Next, Done; a second row for Replace */
+  .pr-find { flex: none; display: flex; flex-direction: column; gap: 8px; padding: 8px var(--gutter); border-bottom: 1px solid var(--border); background: var(--bg); }
+  .pr-find[hidden], .pr-find-row[hidden] { display: none; }
+  .pr-find-row { display: flex; align-items: center; gap: 8px; }
+  .pr-find-field { flex: 1 1 160px; min-width: 120px; max-width: 420px; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--cap-fill); }
+  .pr-find-field:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
+  .pr-find-field input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); }
+  .pr-find-field input:focus, .pr-find-field input:focus-visible { outline: none !important; border: 0 !important; box-shadow: none !important; }
+  .pr-find-field input::placeholder { color: var(--text-3); }
+  .pr-find-rep { padding-left: 47px; }   /* the Replace text starts under the Find text (the magnifier button is 33px wide) */
+  .pr-find-opts { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text-3); }
+  .pr-find-opts:hover { background: var(--hover); }
+  .pr-find-opts i { font-size: var(--ico-14); }
+  .pr-find-count { flex: none; font-size: var(--fs-12); color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pr-find-count.none { color: var(--red-text); }
+  .pr-find .tool-btn:disabled, .pr-find .btn:disabled { opacity: .4; }
+  /* the controls are the toolbar's own family (A-04): a soft fill, no ring, one height (28px) with the field */
+  html[data-scheme="glass"] .pr-find .tool-group { height: 28px; padding: 2px; gap: 2px; border: 0; background: var(--cap-fill); box-sizing: border-box; }
+  html[data-scheme="glass"] .pr-find .tool-group .tool-btn { height: 24px; min-width: 30px; padding: 0 6px; color: var(--text-2); }
+  html[data-scheme="glass"] .pr-find .tool-group .tool-btn:hover:not(:disabled) { background: var(--cap-hover); color: var(--text); }
+  html[data-scheme="glass"] .pr-find .btn { height: 28px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--cap-fill); box-shadow: none; color: var(--text); }
+  html[data-scheme="glass"] .pr-find .btn:hover:not(:disabled) { background: var(--cap-hover); }
+  html[data-scheme="glass"] .pr-find .btn.pr-find-toggle.on { background: var(--cap-on); }
+  .pr-find .btn[hidden] { display: none; }
   .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
@@ -1744,8 +1775,8 @@ const ICONS = {
   .pdiff-view[data-selside="a"] .dc.sb, .pdiff-view[data-selside="b"] .dc.sa, .pdiff-view .dm { user-select: none; }   /* a drag selects text on one side only */
   .dc.del { background: var(--red-bg); }
   .dc.add { background: var(--green-bg); }
-  .dc.del mark { background: rgba(255,69,58,.38); }
-  .dc.add mark { background: rgba(52,199,89,.42); }
+  .dc.del mark { background: var(--diff-del); }
+  .dc.add mark { background: var(--diff-add); }
   .dc mark { color: inherit; border-radius: 2px; }
   .dc.filler { background: repeating-linear-gradient(135deg, transparent 0 6px, var(--hover) 6px 7px); }
   .dr.dcur .dc:first-child { box-shadow: inset 3px 0 0 var(--accent); }
@@ -2323,6 +2354,26 @@ const ICONS = {
           <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)" aria-label="Copy Prompt"><i class="fa-solid fa-copy"></i><span class="pr-copy-label"> Copy Prompt</span></button>
           <button type="button" class="btn note-more-btn" id="pInspToggle" onclick="togglePromptInspector()" title="Hide Variables (⌥⌘I)" aria-label="Hide Variables" aria-pressed="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.7" y="2.7" width="12.6" height="10.6" rx="2.4"/><path d="M10 2.9v10.2"/></svg></button>
         </div>
+        <div class="pr-find" id="prFind" role="search" aria-label="Find in the template" hidden>
+          <div class="pr-find-row">
+            <div class="pr-find-field">
+              <button type="button" class="pr-find-opts" onclick="openPromptFindMenu(event)" title="Search options" aria-label="Search options" aria-haspopup="menu"><i class="fa-solid fa-magnifying-glass"></i><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
+              <input type="text" id="prFindInput" placeholder="Find" aria-label="Find in the template" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFindInput(this.value)" onkeydown="promptFindKey(event)">
+              <span class="pr-find-count" id="prFindCount" aria-live="polite"></span>
+            </div>
+            <div class="tool-group" role="group" aria-label="Move between matches">
+              <button type="button" class="tool-btn" id="prFindPrev" onclick="promptFindStep(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"></path></svg></button>
+              <button type="button" class="tool-btn" id="prFindNext" onclick="promptFindStep(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"></path></svg></button>
+            </div>
+            <button type="button" class="btn btn-sm pr-find-toggle" id="prFindRepToggle" onclick="promptFindOption('replace')" aria-pressed="false" title="Show the Replace row (⌥⌘F)">Replace…</button>
+            <button type="button" class="btn btn-sm" onclick="promptFindClose()">Done</button>
+          </div>
+          <div class="pr-find-row" id="prFindRepRow" hidden>
+            <div class="pr-find-field pr-find-rep"><input type="text" id="prReplaceInput" placeholder="Replace" aria-label="Replace with" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFind.rep=this.value" onkeydown="promptFindKey(event)"></div>
+            <button type="button" class="btn btn-sm" id="prFindRep1" onclick="promptFindReplaceCurrent()" title="Replace this match and go to the next (↵)">Replace</button>
+            <button type="button" class="btn btn-sm" id="prFindRepAll" onclick="promptFindReplaceAll()" title="Replace every match outside the variables (⌥↵)">Replace All</button>
+          </div>
+        </div>
         <div class="pr-split" id="prSplit">
           <div class="note-scroll">
             <div class="pr-doc">
@@ -2330,7 +2381,7 @@ const ICONS = {
               <div class="note-meta" id="pMeta"></div>
               <div class="note-trash-bar" id="pTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="pTrashText"></span><button type="button" class="btn btn-sm" onclick="restorePrompt(promptEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deletePrompt(promptEditorId)">Delete Now</button></div>
               <div class="pr-section-label"><span>Template</span></div>
-              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the template as written" aria-label="Copy the template as written" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
+              <div class="pr-tpl" id="pTpl"><button type="button" class="note-code-copy" id="pTplCopy" title="Copy the template as written" aria-label="Copy the template as written" onmousedown="event.preventDefault()" onclick="promptCopyFromBlock(this)"></button><div class="pr-tpl-hl" id="pTplHl" aria-hidden="true"></div><div class="pr-tpl-find" id="pTplFind" aria-hidden="true"></div><textarea id="pTemplate" spellcheck="false" aria-label="Template" placeholder="Write the prompt. Add {{choice}}, [[checklist]] or ((text)) variables." oninput="onPromptTemplateInput()" onblur="flushPromptEdit()"></textarea></div>
             </div>
           </div>
           <aside class="pr-inspector" id="prInspector" aria-label="Variables"><div class="pr-insp-grip" id="prInspResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Variables panel" aria-valuemin="260" aria-valuemax="560" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="pr-insp-inner" id="pInspector"></div></aside>
@@ -2409,7 +2460,7 @@ const ICONS = {
 
 <!-- Import modal -->
 <div class="modal-bg" id="importModalBg" onclick="if(event.target===this) closeAllModals()">
-  <div class="modal alert alert-wide" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
+  <div class="modal alert alert-wide" role="alertdialog" aria-modal="true" aria-labelledby="importModalTitle">
     <span class="alert-ico" aria-hidden="true"><i class="fa-solid fa-arrow-down-to-bracket"></i></span>
     <h3 id="importModalTitle">Import Data</h3>
     <p>Merge the imported file into your current tasks and projects, or replace everything with the file's contents? Replacing automatically downloads a backup of your current data first.</p>
@@ -2601,6 +2652,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-sliders"></i><span><strong>Variables</strong> are on the right, in a panel that slides in and out (the panel button above it, or <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>I</kbd>). Each placeholder in the template gets a row: click an option to choose it (click it again to clear it), tick checklist items, or type the text. <strong>+</strong> adds an option or an item; to remove one, click the <strong>×</strong> that appears inside it when you point at it, select it and press <kbd>Delete</kbd>, or right-click it and choose <em>Remove</em>. To <strong>rename</strong> an option, item, preset or variable, double-click it (or select it and press <kbd>F2</kbd>, or right-click → <em>Rename</em>); <kbd>Return</kbd> keeps the new name and <kbd>Esc</kbd> leaves it. Renaming a variable renames its placeholder in the template too. <strong>Presets</strong> save a combination of choices and checklists under a name (typed text is never part of a preset); <em>Clear</em> empties every variable.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-wide-short"></i><span><strong>Reorder</strong> options, checklist items and presets by dragging them, with <kbd>Option</kbd>+<kbd>←</kbd> / <kbd>→</kbd> (<kbd>↑</kbd> / <kbd>↓</kbd> in a checklist) on the one you have selected, or <em>Move</em> in its right-click menu. Values in the Global Variables dialog drag and move the same way. The order of a checklist is the order it is copied in.</span></div>
           <div class="help-row"><i class="fa-solid fa-globe"></i><span><strong>Global variables</strong> are choices shared by every prompt: <code>{{@Language}}</code>. Their values live in one place, so changing them updates every prompt that uses them. Add one from the <strong>{{@}}</strong> button above the template (or the <strong>globe</strong> button in the Variables panel, or <em>Manage Global Variables…</em> at the foot of the panel); the dialog adds, renames and removes variables and their values. Each prompt keeps its own choice. Renaming a variable rewrites the placeholder in your prompts; removing one leaves the placeholder empty.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the template with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; text inside a variable (<code>{{…}}</code>, <code>[[…]]</code>, <code>((…))</code>) is found but never replaced. A locked prompt can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Include another prompt</strong> with <code>{{&gt;Name}}</code> (the <code>{{&gt;}}</code> button lists your prompts): when you copy, that prompt's finished text goes in its place, so a shared block, such as a role description, is written and edited in one place. Names are matched ignoring case. <strong>Pass values down</strong> with <code>{{&gt;Role who=critic tone="very formal"}}</code>: for that one use, they replace the included prompt's own choices (a checklist takes items split by <code>|</code>, a global variable is set as <code>@Language=German</code>); the included prompt itself stays as it is. The Variables panel lists what a prompt includes (with the values you pass, and which variables it can set) and, under <em>Used In</em>, which other prompts include it, so you can see what a change will affect; a click opens that prompt. Renaming a prompt updates the references in your other prompts. A name that cannot be found, or an include that would loop, shows in red and stays as written.</span></div>
           <div class="help-row"><i class="fa-solid fa-diff"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right; to compare a different pair, close the window and select again. The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. The sliders button's menu sets how closely changes are marked (<em>Lines</em>, <em>Words</em> or <em>Characters</em>), <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it); the button is tinted while an option other than the default is on. <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard (the copy button in the template box’s corner copies the template itself, placeholders and all) with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
@@ -5940,7 +5992,8 @@ function shortcutGroups(){
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-braces', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
       ['Copy the finished prompt', [mod,'↵']], ['Copy and open in the first AI app', [shift,mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
-      ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']] ] },
+      ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']],
+      ['Find in the template', [mod,'F']], ['Find and replace', mac ? ['⌥','⌘','F'] : ['Ctrl','Alt','F']], ['Next match', [mod,'G']], ['Previous match', [shift,mod,'G']], ['Close the find bar', ['Esc']] ] },
     { id:'compare', label:'Comparing prompts', icon:'fa-solid fa-diff', rows:[
       ['Next difference', ['F7']], ['Previous difference', [shift,'F7']], ['Next difference (alternative)', [opt,'F5']], ['Save changes to both prompts', [mod,'S']],
       ['Undo the last edit or move', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Move between lines at their edges', ['↑','↓']], ['Close (asks first when there are changes)', ['Esc']] ] },
@@ -7433,7 +7486,7 @@ function promptHlPlan(prev, next){
 function paintTemplateHl(template, selfId){
   const el = document.getElementById('pTplHl'); if(!el) return;
   const lines = promptHighlightLines(template, selfId), prev = el._hl;
-  if(!prev || typeof el.insertAdjacentHTML!=='function' || !el.children || el.children.length!==prev.length){ el.innerHTML = lines.join(''); el._hl = lines; return; }   // first paint, or something else touched it: rebuild
+  if(!prev || typeof el.insertAdjacentHTML!=='function' || !el.children || el.children.length!==prev.length){ el.innerHTML = lines.join(''); el._hl = lines; if(promptFind.open) promptFindRun(); return; }   // first paint, or something else touched it: rebuild
   const pl = promptHlPlan(prev, lines);
   if(pl.remove || pl.insert.length){
     const kids = el.children;
@@ -7442,6 +7495,161 @@ function paintTemplateHl(template, selfId){
     if(html){ if(next) next.insertAdjacentHTML('beforebegin', html); else el.insertAdjacentHTML('beforeend', html); }
   }
   el._hl = lines;
+  if(promptFind.open) promptFindRun();                      // the template changed under the find bar: its matches follow
+}
+
+// ---- find and replace in the template (⌘F, ⌥⌘F; a bar under the toolbar like TextEdit's and Notes') ----
+// The matching is pure (text in, ranges out) so it is tested; the bar only paints it. Every match is tinted in `#pTplFind`, a copy of the text drawn between the highlighted
+// copy and the textarea (same metrics, transparent text, so it cannot drift); the current one is stronger. Replace goes through execCommand('insertText') on the textarea, so
+// ⌘Z undoes it like typing (Replace All is ONE step). Matches inside a variable ({{x}}, [[x]], ((x)), {{@x}}, {{>x}}) are found but never replaced: renaming a variable has its own command.
+const PROMPT_FIND_KEY = 'cleardesk_prompt_find', PROMPT_FIND_MAX = 5000;
+let promptFind = { open: false, q: '', rep: '', ignoreCase: true, whole: false, replace: false, cur: -1, matches: [], anchor: 0 };
+try{ const o = JSON.parse(localStorage.getItem(PROMPT_FIND_KEY) || 'null'); if(o){ promptFind.ignoreCase = o.ignoreCase!==false; promptFind.whole = !!o.whole; } }catch(_){}
+function promptFindMatches(text, q, opts){
+  if(!q || !text) return [];
+  const o = opts || {}, re = new RegExp(String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), o.ignoreCase===false ? 'gu' : 'giu'), out = [], word = /[\p{L}\p{N}_]/u;
+  let m;
+  while((m = re.exec(text)) && out.length < PROMPT_FIND_MAX){
+    const s = m.index, e = s + m[0].length;
+    if(e===s){ re.lastIndex++; continue; }
+    if(o.whole){
+      const prev = s>0 ? Array.from(text.slice(Math.max(0, s-2), s)).pop() : '', next = Array.from(text.slice(e, e+2))[0] || '';
+      const first = Array.from(m[0])[0], last = Array.from(m[0]).pop();
+      if((prev && word.test(prev) && word.test(first)) || (next && word.test(next) && word.test(last))){ re.lastIndex = s + 1; continue; }
+    }
+    out.push({ s, e });
+  }
+  return out;
+}
+function promptFindProtected(text){
+  const out = [], re = /\{\{[^}\n]*\}\}|\[\[[^\]\n]*\]\]|\(\([^)\n]*\)\)/g; let m;
+  while((m = re.exec(text))) out.push({ s: m.index, e: m.index + m[0].length });
+  return out;
+}
+const promptFindInside = (ranges, m)=>ranges.some(r=>m.s < r.e && m.e > r.s);
+// The text with every match outside a variable replaced (literal replacement: no $1 patterns). {text, n, skipped}
+function promptFindReplaceAllPure(text, matches, rep, ranges){
+  let out = '', at = 0, n = 0, skipped = 0;
+  matches.forEach(m=>{ if(promptFindInside(ranges, m)){ skipped++; return; } out += text.slice(at, m.s) + rep; at = m.e; n++; });
+  return { text: out + text.slice(at), n, skipped };
+}
+const promptFindReadOnly = ()=>{ const p = prompts.find(x=>x.id===promptEditorId); return !p || p.locked || promptTrashed(p); };
+const promptFindText = ()=>{ const ta = document.getElementById('pTemplate'); return ta ? ta.value : ''; };
+function promptFindSave(){ try{ localStorage.setItem(PROMPT_FIND_KEY, JSON.stringify({ ignoreCase: promptFind.ignoreCase, whole: promptFind.whole })); }catch(_){} }
+function promptFindPaintLayer(){
+  const el = document.getElementById('pTplFind'); if(!el) return;
+  const f = promptFind;
+  if(!f.open || !f.matches.length){ el.innerHTML = ''; return; }
+  const text = promptFindText(); let html = '', at = 0;
+  f.matches.forEach((m, i)=>{ html += esc(text.slice(at, m.s)) + `<mark${i===f.cur ? ' class="cur"' : ''}>${esc(text.slice(m.s, m.e))}</mark>`; at = m.e; });
+  el.innerHTML = html + esc(text.slice(at));
+}
+function promptFindUpdateBar(){
+  const f = promptFind, c = document.getElementById('prFindCount'); if(!c) return;
+  c.textContent = !f.q ? '' : !f.matches.length ? 'No Results' : `${f.cur + 1} of ${f.matches.length}${f.matches.length>=PROMPT_FIND_MAX ? '+' : ''}`;
+  c.classList.toggle('none', !!f.q && !f.matches.length);
+  const ro = promptFindReadOnly(), repRow = document.getElementById('prFindRepRow'), tg = document.getElementById('prFindRepToggle');
+  if(repRow) repRow.hidden = !(f.replace && !ro);
+  if(tg){ tg.hidden = ro; tg.setAttribute('aria-pressed', f.replace && !ro ? 'true' : 'false'); tg.classList.toggle('on', f.replace && !ro); }
+  const has = f.matches.length > 0;
+  ['prFindPrev', 'prFindNext'].forEach(id=>{ const b = document.getElementById(id); if(b) b.disabled = !has; });
+  const r1 = document.getElementById('prFindRep1'), rA = document.getElementById('prFindRepAll');
+  if(r1) r1.disabled = !has || ro; if(rA) rA.disabled = !has || ro;
+}
+function promptFindShowCurrent(){
+  const m = promptFind.matches[promptFind.cur]; if(!m) return;
+  promptFind.anchor = m.s;
+  const mk = document.querySelector('#pTplFind mark.cur'); if(mk && mk.scrollIntoView) mk.scrollIntoView({ block: 'center', inline: 'nearest' });
+}
+// Recompute the matches (typing in the field, an edit of the template, another prompt, an option); the current one is the first at or after the caret / the last one shown.
+function promptFindRun(){
+  const f = promptFind; if(!f.open) return;
+  const ta = document.getElementById('pTemplate');
+  if(ta && document.activeElement===ta) f.anchor = ta.selectionStart;
+  f.matches = promptFindMatches(promptFindText(), f.q, f);
+  const i = f.matches.findIndex(m=>m.s >= f.anchor);
+  f.cur = !f.matches.length ? -1 : i>=0 ? i : 0;
+  promptFindPaintLayer(); promptFindUpdateBar(); promptFindShowCurrent();
+}
+function promptFindEditorOpen(){ const ed = document.getElementById('pEditor'); return appMode==='prompts' && !!promptEditorId && !!ed && ed.classList.contains('open'); }
+function promptFindOpen(withReplace){
+  if(!promptFindEditorOpen()) return;
+  const f = promptFind, ta = document.getElementById('pTemplate'), input = document.getElementById('prFindInput'), bar = document.getElementById('prFind');
+  if(!input || !bar) return;
+  if(!f.open && ta){                                           // opening: a one-line selection in the template becomes the search (as ⌘E does)
+    const sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
+    if(sel && sel.length<=100 && !/\n/.test(sel)) f.q = sel;
+    f.anchor = ta.selectionStart;
+  }
+  f.open = true; if(withReplace) f.replace = true;
+  bar.hidden = false; input.value = f.q; document.getElementById('prReplaceInput').value = f.rep;
+  promptFindRun();
+  input.focus(); input.select();
+}
+function promptFindClose(){
+  const f = promptFind; if(!f.open) return;
+  const m = f.matches[f.cur], bar = document.getElementById('prFind'), ta = document.getElementById('pTemplate');
+  f.open = false; f.matches = []; f.cur = -1;
+  if(bar) bar.hidden = true;
+  promptFindPaintLayer();
+  if(ta && promptFindEditorOpen()){ ta.focus(); if(m) ta.setSelectionRange(m.s, m.e); }   // like TextEdit: the match you were on stays selected
+}
+function promptFindStep(dir){
+  const f = promptFind; if(!f.matches.length) return;
+  f.cur = (f.cur + dir + f.matches.length) % f.matches.length;
+  promptFindPaintLayer(); promptFindUpdateBar(); promptFindShowCurrent();
+}
+function promptFindInput(v){ promptFind.q = v; const ta = document.getElementById('pTemplate'); promptFind.anchor = promptFind.matches[promptFind.cur] ? promptFind.matches[promptFind.cur].s : (ta ? ta.selectionStart : 0); promptFindRun(); }
+function promptFindKey(e){
+  if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); promptFindClose(); }
+  else if(e.key==='Enter' && e.target.id==='prFindInput'){ e.preventDefault(); promptFindStep(e.shiftKey ? -1 : 1); }
+  else if(e.key==='Enter' && e.target.id==='prReplaceInput'){ e.preventDefault(); if(e.altKey || e.metaKey || e.ctrlKey) promptFindReplaceAll(); else promptFindReplaceCurrent(); }
+}
+function promptFindEditText(from, to, text){          // one undoable edit in the textarea, then the find field gets the focus back
+  const ta = document.getElementById('pTemplate'); if(!ta) return false;
+  const back = document.activeElement && document.getElementById('prFind') && document.getElementById('prFind').contains(document.activeElement) ? document.activeElement : null;
+  const scroller = ta.closest('.note-scroll'), top = scroller ? scroller.scrollTop : 0;
+  ta.focus(); ta.setSelectionRange(from, to);
+  const ok = document.execCommand('insertText', false, text);
+  if(scroller) scroller.scrollTop = top;
+  if(back) back.focus();
+  return ok;
+}
+function promptFindReplaceCurrent(){
+  const f = promptFind, m = f.matches[f.cur]; if(!m || promptFindReadOnly()) return;
+  if(promptFindInside(promptFindProtected(promptFindText()), m)){ showToast('That match is inside a variable, so it was left alone'); promptFindStep(1); return; }
+  f.anchor = m.s + f.rep.length;
+  if(!promptFindEditText(m.s, m.e, f.rep)) return;
+  promptFindRun();
+}
+function promptFindReplaceAll(){
+  const f = promptFind; if(!f.matches.length || promptFindReadOnly()) return;
+  const text = promptFindText(), res = promptFindReplaceAllPure(text, f.matches, f.rep, promptFindProtected(text));
+  if(!res.n){ showToast(res.skipped ? 'Every match is inside a variable, so nothing was replaced' : 'Nothing to replace'); return; }
+  if(res.text.length > 100000){ showToast('The result would be longer than a template can be (100,000 characters)', true); return; }
+  f.anchor = 0;
+  if(!promptFindEditText(0, text.length, res.text)) return;
+  promptFindRun();
+  showToast(`Replaced ${res.n} ${res.n===1 ? 'match' : 'matches'}${res.skipped ? `; ${res.skipped} inside variables left alone` : ''}`, false, ()=>promptUndo('undo'));
+}
+function promptFindOptionsMenuHtml(){
+  const f = promptFind, o = (op, label, on)=>menuOpt(`promptFindOption('${op}')`, {none: true}, label, on);
+  return (promptFindReadOnly() ? '' : o('find', 'Find', !f.replace) + o('replace', 'Find and Replace', f.replace) + '<div class="row-menu-sep"></div>') + o('case', 'Ignore Case', f.ignoreCase) + o('whole', 'Whole Words', f.whole);
+}
+function openPromptFindMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+  menu.innerHTML = tidyMenuSeps(promptFindOptionsMenuHtml());
+  const btn = e.currentTarget, r = btn.getBoundingClientRect();
+  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+}
+function promptFindOption(op){
+  const f = promptFind; closeRowMenu();
+  if(op==='case') f.ignoreCase = !f.ignoreCase; else if(op==='whole') f.whole = !f.whole; else if(op==='replace') f.replace = !f.replace; else if(op==='find') f.replace = false;
+  promptFindSave(); promptFindRun();
+  document.getElementById(f.replace && (op==='replace' || op==='find') ? 'prReplaceInput' : 'prFindInput')?.focus();
 }
 
 // ---- compare two prompts (the diff view) ----
@@ -10239,10 +10447,17 @@ function promptGlobalOptions(key){ const g = promptGlobalOfKey(key); return g ? 
 const DEFAULT_PROMPT_GLOBALS = [
   { name: 'language', options: ['English', 'German', 'Match input'] },
   { name: 'language_level', options: ['B1', 'B2', 'C1', 'C2'] },
-  { name: 'tone', options: ['Professional', 'Neutral', 'Friendly', 'Formal'] },
-  { name: 'wording_style', options: ['Polished', 'Natural', 'Direct'] },
   { name: 'audience', options: ['General', 'Business', 'Executive', 'Technical'] },
-  { name: 'detail_level', options: ['Brief', 'Standard', 'Detailed', 'Comprehensive'] }
+  { name: 'perspective', options: ['First person (I)', 'First person (we)', 'Impersonal'] },
+  { name: 'person_reference', options: ['Direct (informal)', 'Direct (formal)', 'First name', 'Full name', 'Third person', 'Role'] },
+  { name: 'tone', options: ['Friendly', 'Neutral', 'Professional', 'Formal'] },
+  { name: 'writing_style', options: ['Natural', 'Polished', 'Concise'] },
+  { name: 'detail_level', options: ['Brief', 'Standard', 'Detailed', 'Comprehensive'] },
+  { name: 'output_structure', options: ['Prose', 'Bullets', 'Steps', 'Table', 'TL;DR'] },
+  { name: 'output_markup', options: ['Plain text', 'Markdown', 'HTML'] },
+  { name: 'phrasing', options: ['Verb-driven', 'Noun-driven', 'Mixed'] },
+  { name: 'edit_intensity', options: ['Proofread', 'Polish', 'Revise', 'Rewrite'] },
+  { name: 'edit_focus', options: ['Clarity', 'Structure', 'Brevity', 'Flow', 'Accuracy'] }
 ];
 function seedDefaultPromptGlobals(list){
   (list || DEFAULT_PROMPT_GLOBALS).forEach(d=>{
@@ -10535,7 +10750,9 @@ function globalValueKey(e, i){
 // ---- keyboard (Prompts: the list side; the template field and the variables have their own) ----
 function handlePromptsKeys(e){
   if(document.querySelector('.modal-bg.open')) return;
-  const el = document.activeElement, typing = isTypingTarget(el);
+  const el = document.activeElement, typing = isTypingTarget(el), mod = e.metaKey || e.ctrlKey;
+  if(mod && !e.shiftKey && e.code==='KeyF' && promptFindEditorOpen()){ e.preventDefault(); promptFindOpen(e.altKey); return; }   // ⌘F find, ⌥⌘F find and replace
+  if(mod && !e.altKey && e.code==='KeyG' && promptFind.open){ e.preventDefault(); promptFindStep(e.shiftKey ? -1 : 1); return; }
   if(e.key==='Escape' && promptInspectorFloats() && !document.getElementById('prSplit').classList.contains('insp-closed') && !document.getElementById('rowMenu').classList.contains('open')){ e.preventDefault(); togglePromptInspector(false, false); return; }
   if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); togglePromptInspector(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key==='Enter' && selectedPromptId){ e.preventDefault(); copyPrompt(selectedPromptId); return; }

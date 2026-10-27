@@ -34,6 +34,8 @@ html[data-scheme="glass"] {
   --red-text: #c4281f;
   --green-bg: rgba(52,199,89,.18);
   --green-text: #1a7a36;
+  --diff-del: rgba(255,69,58,.38); --diff-add: rgba(52,199,89,.42);
+  --find-hit: rgba(255,204,0,.38); --find-cur: rgba(255,149,0,.62);
   --md-dim: var(--text-3);
   --md-h: #3634a3;
   --md-li: #d30f45;
@@ -78,6 +80,8 @@ html[data-scheme="glass"][data-theme="dark"] {
   --red-text: #ff9a92;
   --green-bg: rgba(52,199,89,.26);
   --green-text: #8ee6a4;
+  --diff-del: rgba(255,69,58,.38); --diff-add: rgba(52,199,89,.42);
+  --find-hit: rgba(255,214,10,.30); --find-cur: rgba(255,159,10,.58);
   --md-dim: var(--text-3);
   --md-h: #9b99ff;
   --md-li: #ff6482;

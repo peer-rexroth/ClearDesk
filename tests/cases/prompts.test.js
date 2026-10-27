@@ -325,15 +325,15 @@ test('a fresh install can start with built-in global variables; they are added o
   assertEqual(promptGlobals.length, 2, 'not added again, whatever the case'); assertDeepEqual(promptGlobalByName('Tone').options, ['natural', 'professional', 'direct']);
 });
 
-test('the built-in global variables: six, valid names, no clashes, and a fresh install gets them', function () {
-  assertEqual(DEFAULT_PROMPT_GLOBALS.length, 6);
+test('the built-in global variables: thirteen, valid names, no clashes, and a fresh install gets them', function () {
+  assertEqual(DEFAULT_PROMPT_GLOBALS.length, 13);
   pgfresh(); seedDefaultPromptGlobals();
-  assertEqual(promptGlobals.length, 6, 'no two share a name or an id');
-  ['language', 'language_level', 'tone', 'wording_style', 'audience', 'detail_level'].forEach(function (n) { assertTrue(!!promptGlobalByName(n), n); });
-  assertDeepEqual(promptGlobalByName('tone').options, ['Professional', 'Neutral', 'Friendly', 'Formal']);
+  assertEqual(promptGlobals.length, 13, 'no two share a name or an id');
+  ['language', 'language_level', 'audience', 'perspective', 'person_reference', 'tone', 'writing_style', 'detail_level', 'output_structure', 'output_markup', 'phrasing', 'edit_intensity', 'edit_focus'].forEach(function (n) { assertTrue(!!promptGlobalByName(n), n); });
+  assertDeepEqual(promptGlobalByName('tone').options, ['Friendly', 'Neutral', 'Professional', 'Formal']);
   promptGlobals.forEach(function (g) { assertTrue(isSafeId(g.id), g.id); assertTrue(g.options.length > 0); });
   localStorage.clear(); pgfresh(); load();
-  assertEqual(promptGlobals.length, 6, 'load() with nothing saved seeds them'); assertTrue(!!promptGlobalOfKey('@language_level'));
+  assertEqual(promptGlobals.length, 13, 'load() with nothing saved seeds them'); assertTrue(!!promptGlobalOfKey('@language_level'));
   const d = dataPayload(); localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.assign({}, d, { promptGlobals: [] }))); load();
   assertEqual(promptGlobals.length, 0, 'saved data without globals is left alone');
 });
