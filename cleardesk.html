@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ClearDesk">
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1e1e1c" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#1e1f24" media="(prefers-color-scheme: dark)">
 <title>ClearDesk</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
@@ -34,13 +34,11 @@ const ICONS = {
   "calendar-days": "<rect x=\"4\" y=\"5.5\" width=\"16\" height=\"14.5\" rx=\"3\"/><path d=\"M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4\"/><path d=\"M8.5 14h.01M12 14h.01M15.5 14h.01M8.5 17h.01M12 17h.01\" stroke-width=\"2\"/>",
   "calendar-plus": "<rect x=\"4\" y=\"5.5\" width=\"16\" height=\"14.5\" rx=\"3\"/><path d=\"M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4\"/><path d=\"M12 12.5v5M9.5 15h5\"/>",
   "calendar-week": "<rect x=\"4\" y=\"5.5\" width=\"16\" height=\"14.5\" rx=\"3\"/><path d=\"M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4\"/><path d=\"M8 14.5h8\"/>",
-  "calendar-xmark": "<rect x=\"4\" y=\"5.5\" width=\"16\" height=\"14.5\" rx=\"3\"/><path d=\"M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4\"/><path d=\"m10 13.5 4 4M14 13.5l-4 4\"/>",
   "camera": "<path d=\"M4 8.5A2.5 2.5 0 0 1 6.5 6H8l1.5-2h5L16 6h1.5A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z\"/><circle cx=\"12\" cy=\"12.5\" r=\"3.2\"/>",
   "chart-line": "<path d=\"M4 4.5V19a.5.5 0 0 0 .5.5H20M7.5 15l3.5-4.5 3 2.5 4.5-6\"/>",
   "check": "<path d=\"m5 12.5 4.5 4.5L19 7.5\" stroke-width=\"2.6\"/>",
   "check-double": "<path d=\"m3.5 12.5 4 4L15 8M11 14l2 2.5L20.5 8\"/>",
   "chevron-down": "<path d=\"m6 9.5 6 6 6-6\"/>",
-  "chevron-left": "<path d=\"m14.5 6-6 6 6 6\"/>",
   "chevron-right": "<path d=\"m9.5 6 6 6-6 6\"/>",
   "chevron-up": "<path d=\"m6 14.5 6-6 6 6\"/>",
   "circle": "<circle cx=\"12\" cy=\"12\" r=\"8\"/>",
@@ -364,7 +362,7 @@ const ICONS = {
   .task-cell.priority { grid-area: priority; }
   .task-cell.status { grid-area: status; margin-left: -4px; }
   .task-cell.due { grid-area: due; margin-left: -8px; }
-  .task-cell-empty { color: var(--text-3); font-size: var(--fs-12); }
+  .task-cell-empty { color: var(--text-2); font-size: var(--fs-12); }   /* a dash is text: 4.5:1 */
   .badge-status-todo { background: var(--bg-3); color: var(--text-2); }
   .badge-status-doing { background: var(--purple-bg); color: var(--purple-text); }
   .badge-status-done { background: var(--green-bg); color: var(--green-text); }
@@ -457,7 +455,7 @@ const ICONS = {
   .subtask-row.drag-over-top, .task-subtask-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .subtask-row.drag-over-bottom, .task-subtask-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
   .subtask-row.drag-denied, .task-subtask-row.drag-denied { box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--danger) 45%, transparent); border-radius: var(--r-s); }   /* a sub-step is over a row it cannot go to */
-  .subtask-row .sub-drag-handle { width: 10px; text-align: center; font-size: var(--fs-11); color: var(--text-3); flex-shrink: 0; cursor: grab; opacity: 0; }
+  .subtask-row .sub-drag-handle { width: 10px; text-align: center; font-size: var(--fs-11); color: var(--text-3); flex-shrink: 0; opacity: 0; }
   .subtask-row:hover .sub-drag-handle { opacity: 1; }
   .subtask-row .sub-check { width: 16px; height: 16px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); }
   .subtask-row .sub-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
@@ -574,7 +572,7 @@ const ICONS = {
   .help-section { display: flex; flex-direction: column; gap: 8px; }
   .help-section-title { font-size: var(--fs-11); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-3); }
   .help-row { display: flex; gap: 12px; align-items: flex-start; font-size: var(--fs-13); line-height: 1.6; color: var(--text-2); }
-  .help-row > i { flex: 0 0 18px; margin-top: 3px; text-align: center; font-size: var(--ico-16); color: var(--text-3); width: auto; }
+  .help-row > i { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 1px; text-align: center; font-size: var(--ico-16); color: var(--text-3); -webkit-mask-size: calc(1em * var(--ico-k)); mask-size: calc(1em * var(--ico-k)); }   /* a square box: the mask is 126% of the width, so the old 18 x 12.7 box cut the drawing top and bottom */
   .help-row strong, .help-row em { color: var(--text); }
   .help-row strong { font-weight: 600; }
   .help-row em { font-style: normal; }
@@ -732,7 +730,6 @@ const ICONS = {
   .cell-pop-opt:hover, .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .pop-check, .row-menu-item .pop-check { width: 22px; font-size: var(--gl-9); visibility: hidden; flex: none; text-align: left; padding-left: 1px; }   /* a light ✓ about the height of a capital, with a clear gap before the label (as in a macOS menu) */
   .row-menu-item .pop-check i, .row-menu-item .pop-icon { color: inherit; }
-  .row-menu-item .pop-icon { width: auto; }
   .current > .pop-check { visibility: visible; }
   .pop-dot { width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; flex: none; }
   .pop-icon { width: 16px; margin-right: 8px; text-align: center; font-size: var(--ico-16); color: var(--text-3); flex: none; }
@@ -1230,6 +1227,8 @@ const ICONS = {
   html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) .task-title-input { background: var(--sel-fill); }
   .task-subtask-text-input { max-width: 420px; }   /* a rename field should be a field, not a bar across the whole row */
   html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):not(:has(> .task-subtasks)) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }   /* the on-blue look; a tile whose button sits on the light subtask tint keeps the normal one (next rules) */
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected) .row-actions .icon-btn { color: var(--on-accent); }   /* the ⋯ glyph on the blue capsule was 2.9:1 at white .8 */
+  html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected) .badge-project { color: var(--text); }   /* grey row: text-2 over the grey fill was 4.4:1 in dark */
   /* with several rows selected the toolbar and the right-click menu act on all of them, so the per-row capsule (which would act on one row) is hidden on the selected rows */
   /* The selection is the accent colour only while its list is the active area (as in Finder, Mail and Notes); with focus in the task panel, the editor, the sidebar, search or another window it is a neutral grey and everything inside the row looks as it does unselected. html.sel-inactive is kept by the focus-zone code (selZoneOf). */
   html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) { background: var(--sel-inactive); border-color: transparent; box-shadow: none; }   /* transparent: a translucent border over the translucent fill would draw a darker ring */
@@ -1405,7 +1404,7 @@ const ICONS = {
     #notePrintArea { display: block !important; padding: 0; }
   }
   .note-section i { margin-right: 4px; font-size: var(--ico-12); }
-  .note-section:has(.fa-thumbtack) i { color: var(--accent); }
+  .note-section:has(.fa-thumbtack) i { color: var(--blue-text); }   /* --accent was 2.9:1 on the dark list */
   .note-section:has(.fa-star) i { color: var(--amber-text); }
   .note-section { padding: 10px 12px 4px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
   .notes-list-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 4px 6px; padding: 8px 10px; border-radius: var(--r-m); font-size: var(--fs-12); color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, transparent); }
@@ -1718,7 +1717,7 @@ const ICONS = {
   /* the template: a transparent field laid over a layer that shows the same text with its placeholders tinted (the layer sets the height) */
   .pr-tpl { position: relative; border-radius: var(--r-s); background: var(--bg-2); }
   .pr-tpl .note-code-copy { top: 5px; right: 5px; }
-  .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; padding: 12px 44px 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
+  .pr-tpl-hl, .pr-tpl textarea { font-family: var(--mono); font-size: var(--fs-13); line-height: 1.7; padding: 12px 44px 12px 14px; margin: 0; border: 0; white-space: pre-wrap; overflow-wrap: anywhere; box-sizing: border-box; letter-spacing: normal; tab-size: 4; }
   .pr-tpl-hl { color: var(--text); min-height: 7.5em; pointer-events: none; }
   .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
   .pr-tpl textarea::selection { background: var(--accent-tint); }
@@ -1736,7 +1735,7 @@ const ICONS = {
   .pdiff-name { min-width: 0; padding: 6px 12px 6px 8px; font-size: var(--fs-13); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }   /* the two prompts are fixed (Select for Compare chose them), so they are labels, not pickers */
   /* the aligned view: one grid row per line pair, so wrapped and filler cells keep both sides level */
   .pdiff-viewwrap { flex: 1; min-height: 0; display: flex; gap: 4px; }
-  .pdiff-view { flex: 1; min-width: 0; position: relative; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); font-family: var(--mono); font-size: calc(var(--fs-13) * .96); line-height: 1.7; }
+  .pdiff-view { flex: 1; min-width: 0; position: relative; overflow: auto; border-radius: var(--r-s); background: var(--bg-2); border: 0.5px solid var(--border); font-family: var(--mono); font-size: var(--fs-13); line-height: 1.7; }
   .dr { display: grid; grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1fr); }
   .dc { display: flex; gap: 10px; padding: 0 12px 0 8px; min-width: 0; min-height: 1.7em; }
   .dc .ln { flex: 0 0 4ch; text-align: right; color: var(--text-3); user-select: none; }
@@ -1795,7 +1794,7 @@ const ICONS = {
   .pr-inc + .pr-inc { border-top: 1px solid color-mix(in srgb, var(--text) 8%, transparent); }
   .pr-inc > i { flex: none; color: var(--green-text); }
   .pr-inc.bad > i { color: var(--red-text); }
-  .pr-inc-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: var(--text); cursor: pointer; }
+  .pr-inc-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: none; border: 0; padding: 0; text-align: left; font: inherit; color: var(--text); }
   .pr-inc-name:hover { text-decoration: underline; }
   .pr-inc.bad .pr-inc-name { color: var(--text-2); cursor: default; text-decoration: none; }
   .pr-inc-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
@@ -2024,11 +2023,11 @@ const ICONS = {
     </div>
     <div id="notesSide">
       <div class="sidebar-section">
-        <div class="nav-item" id="allNotesNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('all')">
+        <div class="nav-item" id="allNotesNav" oncontextmenu="openSmartViewMenu(event,'notes-all')" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('all')">
           <span><i class="fa-regular fa-note-sticky lead-ico"></i>All Notes</span>
           <span class="count" id="allNotesCount"></span>
         </div>
-        <div class="nav-item" id="pinnedNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('pinned')">
+        <div class="nav-item" id="pinnedNav" oncontextmenu="openSmartViewMenu(event,'notes-pinned')" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('pinned')">
           <span><i class="fa-solid fa-thumbtack lead-ico"></i>Pinned</span>
           <span class="count" id="pinnedCount"></span>
         </div>
@@ -2040,7 +2039,7 @@ const ICONS = {
         <div id="noteFolderList"></div>
       </div>
       <div class="sidebar-section">
-        <div class="nav-item" id="trashNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('trash')">
+        <div class="nav-item" id="trashNav" oncontextmenu="openSmartViewMenu(event,'notes-trash')" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('trash')">
           <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
           <span class="count" id="trashCount"></span>
         </div>
@@ -2048,11 +2047,11 @@ const ICONS = {
     </div>
     <div id="promptsSide">
       <div class="sidebar-section">
-        <div class="nav-item" id="pAllNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('all')">
+        <div class="nav-item" id="pAllNav" oncontextmenu="openSmartViewMenu(event,'prompts-all')" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('all')">
           <span><i class="fa-regular fa-braces lead-ico"></i>All Prompts</span>
           <span class="count" id="pAllCount"></span>
         </div>
-        <div class="nav-item" id="pFavNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('favorites')">
+        <div class="nav-item" id="pFavNav" oncontextmenu="openSmartViewMenu(event,'prompts-favorites')" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('favorites')">
           <span><i class="fa-regular fa-star lead-ico"></i>Favorites</span>
           <span class="count" id="pFavCount"></span>
         </div>
@@ -2064,7 +2063,7 @@ const ICONS = {
         <div id="promptFolderList"></div>
       </div>
       <div class="sidebar-section">
-        <div class="nav-item" id="pTrashNav" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('trash')">
+        <div class="nav-item" id="pTrashNav" oncontextmenu="openSmartViewMenu(event,'prompts-trash')" role="button" tabindex="0" aria-pressed="false" onclick="setPromptFolder('trash')">
           <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
           <span class="count" id="pTrashCount"></span>
         </div>
@@ -2102,7 +2101,7 @@ const ICONS = {
     </div>
     </div>
     <div class="sidebar-section task-trash-nav">
-      <div class="nav-item" id="taskTrashNav" role="button" tabindex="0" aria-pressed="false" onclick="setTaskTrashFilter()">
+      <div class="nav-item" id="taskTrashNav" oncontextmenu="openSmartViewMenu(event,'tasks-trash')" role="button" tabindex="0" aria-pressed="false" onclick="setTaskTrashFilter()">
         <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
         <span class="count" id="taskTrashCount"></span>
       </div>
@@ -2412,7 +2411,7 @@ const ICONS = {
 <div class="modal-bg" id="importModalBg" onclick="if(event.target===this) closeAllModals()">
   <div class="modal alert alert-wide" role="dialog" aria-modal="true" aria-labelledby="importModalTitle">
     <span class="alert-ico" aria-hidden="true"><i class="fa-solid fa-arrow-down-to-bracket"></i></span>
-    <h3 id="importModalTitle">Import data</h3>
+    <h3 id="importModalTitle">Import Data</h3>
     <p>Merge the imported file into your current tasks and projects, or replace everything with the file's contents? Replacing automatically downloads a backup of your current data first.</p>
     <div class="modal-actions">
       <button class="btn" onclick="closeAllModals()">Cancel</button>
@@ -2661,7 +2660,7 @@ const ICONS = {
 <!-- All Tasks projects modal -->
 <div class="modal-bg" id="allTasksProjectsModalBg" onclick="if(event.target===this) closeAllModals()">
   <div class="modal modal-w360" role="dialog" aria-modal="true" aria-labelledby="allTasksProjectsTitle">
-    <h3 id="allTasksProjectsTitle">Projects shown</h3>
+    <h3 id="allTasksProjectsTitle">Projects Shown</h3>
     <p class="modal-sub">Choose which projects' tasks show up in the All Tasks list and as board columns.</p>
     <div id="allTasksProjectsList"></div>
     <div class="modal-actions"><button class="btn btn-primary" onclick="closeAllModals()">Done</button></div>
@@ -2690,7 +2689,7 @@ const ICONS = {
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="syncTitle">
     <div class="modal-head">
       <div>
-        <h3 id="syncTitle">Sync to a file</h3>
+        <h3 id="syncTitle">Sync to a File</h3>
         <p>Back up and share your tasks across sessions</p>
       </div>
     </div>
@@ -2725,7 +2724,7 @@ const ICONS = {
 <div class="modal-bg" id="newFileModalBg" onclick="if(event.target===this) closeNewFileModal()">
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="newFileTitle">
     <div class="modal-head">
-      <div><h3 id="newFileTitle">Name the new file</h3><p id="newFileFolder"></p></div>
+      <div><h3 id="newFileTitle">Name the New File</h3><p id="newFileFolder"></p></div>
     </div>
     <div class="field newfile-field"><input type="text" id="newFileName" maxlength="80" autocomplete="off" spellcheck="false" aria-label="File name" onkeydown="if(event.key==='Enter'){event.preventDefault();submitNewFile()}else if(event.key==='Escape'){event.stopPropagation();closeNewFileModal()}" oninput="document.getElementById('newFileError').textContent=''"><span class="newfile-ext" aria-hidden="true">.json</span></div>
     <div id="newFileError" class="newfile-error" role="alert"></div>
@@ -2777,7 +2776,7 @@ const ICONS = {
 <div class="modal-bg" id="dataFilesModalBg" onclick="if(event.target===this) closeDataFilesModal()">
   <div class="modal sync-modal" role="dialog" aria-modal="true" aria-labelledby="dataFilesTitle">
     <div class="modal-head">
-      <div><h3 id="dataFilesTitle">Choose the data file</h3><p id="dataFilesFolder">This folder has more than one ClearDesk file</p></div>
+      <div><h3 id="dataFilesTitle">Choose the Data File</h3><p id="dataFilesFolder">This folder has more than one ClearDesk file</p></div>
     </div>
     <div class="sync-list" id="dataFilesList" role="group" aria-label="Data files"></div>
     <div class="modal-actions"><button type="button" class="btn" onclick="closeDataFilesModal()">Cancel</button></div>
@@ -6744,6 +6743,12 @@ function projectMenuRun(kind){
 let smartMenuKind = null;
 function smartViewMenuHtml(kind){
   const item = rowMenuItem;
+  if(kind==='notes-all' || kind==='notes-pinned') return item('fa-solid fa-plus', 'New Note Here', `smartViewMenuRun('newnote')`);
+  if(kind==='prompts-all' || kind==='prompts-favorites') return item('fa-solid fa-plus', 'New Prompt Here', `smartViewMenuRun('newprompt')`);
+  if(kind==='tasks-trash' || kind==='notes-trash' || kind==='prompts-trash'){   // Recently Deleted rows: the one thing to do is empty it (nothing to offer while it is empty)
+    const n = kind==='tasks-trash' ? trashedTasks.length : kind==='notes-trash' ? notes.filter(noteTrashed).length : prompts.filter(promptTrashed).length;
+    return n ? item('fa-solid fa-trash', 'Delete All…', `smartViewMenuRun('emptytrash')`, {danger:true}) : '';
+  }
   if(kind==='overdue'){
     const n = tasks.filter(isOverdue).length;
     return n ? item('fa-solid fa-calendar-days', n===1 ? 'Move to Today' : `Move All ${n} to Today`, `smartViewMenuRun('today')`) : '';
@@ -6763,6 +6768,9 @@ function openSmartViewMenu(e, kind){
 function smartViewMenuRun(op){
   const kind = smartMenuKind; closeRowMenu(); smartMenuKind = null;
   if(!kind) return;
+  if(op==='emptytrash'){ (kind==='tasks-trash' ? emptyTaskTrash : kind==='notes-trash' ? emptyTrash : emptyPromptTrash)(); return; }
+  if(op==='newnote'){ setNoteFolder(kind==='notes-pinned' ? 'pinned' : 'all'); createNote(); return; }
+  if(op==='newprompt'){ setPromptFolder(kind==='prompts-favorites' ? 'favorites' : 'all'); createPrompt(); return; }
   if(op==='today'){ bulkSetDueDate(todayStr(), tasks.filter(isOverdue).map(t=>t.id)); return; }
   if(kind==='all') setProjectFilter(null); else if(kind==='myday') setMyDayFilter(); else if(kind==='week') setThisWeekFilter();
   document.getElementById('quickAddInput')?.focus();

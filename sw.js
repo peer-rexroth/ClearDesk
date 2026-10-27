@@ -1,10 +1,12 @@
-const CACHE_NAME = 'cleardesk-cache-v1';
+const CACHE_NAME = 'cleardesk-cache-v2';
 const APP_SHELL = [
   'cleardesk.html',
   'manifest.json',
   'icons/favicon.svg',
   'icons/icon-192.png',
   'icons/icon-512.png',
+  'icons/icon-180.png',
+  'icons/icon-maskable-512.png',
 ];
 
 self.addEventListener('install', (event) => {

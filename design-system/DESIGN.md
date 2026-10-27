@@ -22,7 +22,7 @@ Source of truth for everything: `cleardesk.html` (CSS tokens near the top of the
 2. **Quiet by default, controls appear when you point at them.** Row actions, remove buttons, hierarchy buttons and "add" toggles show on hover/focus only. The resting screen is text and a few pills.
 3. **Few boxes.** Inputs inside lists are "ghost" fields (no border, a faint tint on focus). Boxed fields exist only inside dialogs. The detail panel is grouped rows (label left, value right, hairlines), not a form.
 4. **Flat fills and crisp rings, no coloured glows.** No blurred coloured shadows, no gradients on buttons. Hover darkens or tints; it does not grow a shadow.
-5. **The arrow cursor, everywhere.** The hand is for links only. Never `cursor: pointer` on a control.
+5. **The arrow cursor, everywhere.** The hand is for links only. Never `cursor: pointer` on a control. The exceptions are the system's own: `text` over a text field or editor, `col-resize` / `row-resize` on a resize edge, `not-allowed` on a refused drop target; there is no `grab` cursor (an invisible handle must not change the pointer).
 6. **One icon per meaning, one family.** See section 4.
 7. **Undo instead of "Are you sure?"** for anything that can be undone (a toast with Undo, 6 seconds). Ask only for what cannot be undone.
 8. **Hide what does not apply, don't dim it** in context menus.
@@ -66,7 +66,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 ### 2.2 Typography
 
 - **One family:** the system stack (`--font`: `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`); monospace only for code (`--mono`: `'SF Mono', 'Fira Code', 'Cascadia Code', monospace`). No serif anywhere (the toolbar's italic *I* is the system italic).
-- **Seven sizes, nothing in between:** `--fs-11` 11, `--fs-12` 12, `--fs-13` 13 (the default control text), `--fs-14` 14 (body, list rows), `--fs-15` 15 (fields in dialogs), `--fs-17` 17 (dialog titles, panel title), `--fs-22` 22 (page titles).
+- **Seven sizes, nothing in between:** `--fs-11` 11, `--fs-12` 12, `--fs-13` 13 (the default control text), `--fs-14` 14 (body, list rows), `--fs-15` 15 (fields in dialogs), `--fs-17` 17 (dialog titles, panel title, the window bar's title at weight 700), `--fs-22` 22 (reserved for a large page title; the bar title is 17). Monospace text (a prompt template, the Compare view) uses `--fs-13` like the rest; `em` sizes are allowed only for inline code inside running text.
 - **Weights:** 400, 500, 600, 700 only. Titles and bold row text 600; pills 500–600; section labels 600 uppercase with letter-spacing `.04–.08em` at 11–12px.
 - **macOS minimums:** default 13pt, nothing below 10pt for text. Control glyphs (tick marks, tiny chevrons) are icons, not text, and use the `--gl-8…10` tokens (`--gl-8` draws about 10px, the smallest glyph anywhere; the old 6 and 7 are gone, U-10).
 - Line height 1.45–1.7 in body copy; dialogs 1.6.
@@ -127,7 +127,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 
 ### 4.1 The family
 
-- **Outline only.** 24×24 grid, **2-unit stroke**, round caps and joins, `currentColor`, `fill: none`. No filled glyphs (so a "star" is an outline; a favourite is shown by colour).
+- **Outline only.** 24×24 grid, **2-unit stroke**, round caps and joins, `currentColor`, `fill: none`. No filled glyphs (so a "star" is an outline; a favourite is shown by colour). Two allowed details: a dot (an ellipsis, a keyboard key, the exclamation point) is a zero-length stroke at 2–2.2 so it reads as a dot, and a drawing that had to be scaled to fit the visible window carries its own `<g transform>` with the stroke compensated back to 2 (the registry's 18 oversized drawings). Keep geometry inside 4–20 (the mask shows 2.5–21.5 including the stroke).
 - Keep drawings inside the 4–20 box so optical size is the same across icons (a rounded square is `4.5…19.5`).
 - **Four drawn sizes:** 12 (chevrons, tiny marks), 14 (badges, chips, row marks), 16 (lists, sidebar, menus, icon buttons, search fields), 18 (toolbars). Nothing else.
 - **Effective line weight scales with size** (as SF Symbols do): 1.17px at 14, 1.33px at 16, 1.5px at 18. Do not set a different stroke per context.
@@ -229,6 +229,7 @@ One shape per job, so the same kind of thing always looks the same:
 - **Surface:** glass (2.4), `--r-xl`, 230px wide for the main menu, small option menus at a fixed `--submenu-w` 164px so Priority/Status/Due/Move look the same everywhere.
 - **Row:** 8px radius, a 22px tick column for the current value (✓ at the left for single-choice lists, at the right for toggle states), then a dot or 16px icon, then the label. **Hover fills the row with the accent and turns text white**, as in a macOS pop-up; a destructive item turns white on it too.
 - **Context-menu rules:** Title-style labels ("Open Details", "Add Subtask", "Move to"); few items; **one level of submenu** (hover or click to open, flips left and nudges up when near the edge); **hide unavailable items** (do not dim); separators group (≤ 3 groups; the task row menu's four are a documented exception, U-07) and are cleaned up when a group empties; Delete is always its own last group, red; the ⌫ glyph hint, not "Del". A command that opens a dialog or asks for more input ends in an ellipsis ("Edit…", "Print / Save as PDF…"); a row that only acts does not. Move to lists its targets with an icon each (project icons in Tasks, the folder glyph in Notes and Prompts): icons on all rows or none.
+- **Coverage:** every row in the sidebar has a right-click menu: a project or folder (New Here, Edit…, Delete), a smart view or All / Pinned / Favorites row (New Task / Note / Prompt Here; Overdue also *Move All to Today*), and a Recently Deleted row (*Delete All…*, nothing while it is empty).
 - Every context-menu command also exists in a visible control (toolbar, panel, ⋯ button).
 - A menu **never changes the selection**; it acts on the whole selection if the clicked row is part of it, else on that row.
 - Position with the real layout rect (measure the zoom factor from an element), then pull the menu 16px inside the window edge.
@@ -318,7 +319,7 @@ The first-run "link a file" prompt is a **quiet banner**, never a modal; the dia
 
 ## 8. Wording
 
-- **Title-style capitalisation** for menu items and buttons: "Open Details", "Copy Note", "Insert Row Above"; short prepositions stay lower-case ("Move to"). Alert titles that are sentences use sentence style.
+- **Title-style capitalisation** for menu items and buttons: "Open Details", "Copy Note", "Insert Row Above"; short prepositions stay lower-case ("Move to"). Sheet titles (a dialog you fill in) are title style too ("New Project", "Sync to a File", "Choose the Data File", "Import Data"); an alert's title is the question it asks, in sentence style ("Delete this note permanently?").
 - **Cancel** is always the dismiss word. Verbs for actions ("Delete", "Replace", "Create"); the same term for the same thing (Duplicate everywhere, Recently Deleted everywhere).
 - Placeholders say what to type and what happens ("Add a task…", "Web address, e-mail or phone number").
 - Empty-state labels are title-style nouns ("No Prompts").
@@ -428,7 +429,7 @@ Table "+" and grips: closed (U-11, U-10). Their hit areas were measured at 20×2
 - `assets/favicon.svg`: the same drawing on a rounded square with slightly heavier strokes, for tab size. `assets/icon-maskable.svg`: the same drawing with the glyph smaller, inside the safe zone.
 - **PNG renders:** 180, 192, 512 from `icon.svg`, plus a 512 maskable. Render with headless Chrome at the exact pixel size, and **bump the cache name in the service worker** (`CACHE_NAME`) whenever shell files change, so installed copies refresh.
 - **`manifest.json`** (`assets/manifest.json`): a stable `id`, `display: standalone`, categories, **separate `any` icons (192/512) and a `maskable` one**, `theme_color` / `background_color`, and three **jump-list `shortcuts`** (New Task / New Note / New Prompt → `?new=task|note|prompt`). A tiny launch function reads `?new=`, removes it from the address, and runs the action. Shortcuts only appear after the app is installed afresh.
-- `<meta name="theme-color">` twice, one per colour scheme, matching the chrome colour.
+- `<meta name="theme-color">` twice, one per colour scheme, matching the chrome colour (light `#ffffff`, dark `#1e1f24`). The manifest can hold only one colour (`#ffffff`), so the dark tint comes from the meta tags. The service worker precaches every icon the manifest and the page name (192, 512, 180, maskable 512, favicon).
 - **Not used on purpose:** window-controls-overlay, screenshots in the manifest.
 - **Safari cannot install this kind of PWA on macOS**; the launcher script opens it in Chrome/Edge. Offline support needs the http server (not `file://`).
 - **A new-version notice** (a quiet banner with Reload) compares the page's server headers on load, on tab focus and hourly, and when a new service worker takes over.
@@ -516,7 +517,7 @@ HIG toolbar layout (follow it when building a bar):
 - **Trailing:** things that must always stay visible: buttons that open an **inspector**, search, the **More (⋯)** menu, and **one primary action** (Done / Save / Copy) at the far end.
 - **At most three groups**, each a joined capsule; keep text-labelled buttons apart from icon buttons; prefer symbols **without borders** (the group's capsule is the container); don't tint bars.
 - **Overflow:** define what moves into the ⋯ menu as the bar narrows; don't create layouts that overflow by default. Every toolbar command must also exist as a menu command (in a web app: in a ⋯ menu or the Shortcuts list).
-- **ClearDesk's main bar:** title (22 / 700, `-0.01em`) with a 12px subtitle ("3 open · 1 overdue", plus "· K selected" for two or more) · selection capsule (Complete, Priority ▾, Due ▾, Move ▾ | Duplicate, Delete; disabled with no selection, acting on the whole selection through the same code path as the context menu) · **Filter** button (shows a count; a ✕ clears) · **view switch** (List | Board, segmented) · **Sort** pull-down (shows the base key). The board adds a **group-by** segmented control (Project | Status).
+- **ClearDesk's main bar:** title (17 / 700, `-0.01em`: a window title, not a page heading) with a 12px subtitle ("3 open · 1 overdue", plus "· K selected" for two or more) · selection capsule (Complete, Priority ▾, Due ▾, Move ▾ | Duplicate, Delete; disabled with no selection, acting on the whole selection through the same code path as the context menu) · **Filter** button (shows a count; a ✕ clears) · **view switch** (List | Board, segmented) · **Sort** pull-down (shows the base key). The board adds a **group-by** segmented control (Project | Status).
 - **Filters** live in a popover from the Filter button (chips inside), not in the sidebar.
 - **Rules:** icon-only buttons have tooltips and `aria-label`s; a disabled button stays visible (a toolbar is not a menu; do not hide toolbar items, only dim them).
 
