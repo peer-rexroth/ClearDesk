@@ -10768,7 +10768,12 @@ function openPromptIncludeMenu(e){
   menu.innerHTML = `<div class="inc-pick"><div class="inc-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="text" id="incPickInput" role="combobox" aria-expanded="true" aria-controls="incPickList" placeholder="Search prompts" aria-label="Search prompts to include" autocomplete="off" spellcheck="false" oninput="promptIncPickFilter(this.value)" onkeydown="promptIncPickKey(event)"></div><div class="inc-list" id="incPickList" role="listbox" aria-label="Prompts"></div></div>`;
   promptIncPickRender();
   menu.classList.add('open');
-  placeRowMenu(menu, r.left, r.bottom + 6, btn);
+  // the list only gets the room below the button (the popover must not climb over the toolbar it hangs from); with too little room below it opens above instead
+  const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1, vh = document.documentElement.clientHeight, list = document.getElementById('incPickList');
+  const below = (vh - r.bottom - 6 - 16) / k - 52, above = (r.top - 6 - 16) / k - 52;
+  const up = below < 140 && above > below;
+  if(list) list.style.maxHeight = Math.max(100, Math.min(320, up ? above : below)) + 'px';
+  if(up) placeRowMenu(menu, r.left, r.top - 6 - menu.offsetHeight * k, btn); else placeRowMenu(menu, r.left, r.bottom + 6, btn);
   setTimeout(()=>document.getElementById('incPickInput')?.focus(), 0);
 }
 
