@@ -1392,6 +1392,8 @@ const ICONS = {
   .nc-sw.on, .nc-sw.on:hover { box-shadow: inset 0 0 0 1px var(--ink-ring), 0 0 0 2px var(--glass-strong), 0 0 0 3.5px var(--accent); }
   .nc-sw.nc-tc-none, .nc-sw.nc-hl-none { color: var(--text-3); background: linear-gradient(135deg, transparent 46%, var(--text-3) 47% 53%, transparent 54%), var(--bg-2); }
   ::highlight(note-search) { background-color: var(--search-hit); color: inherit; }
+  ::highlight(note-find) { background-color: var(--find-hit); color: inherit; }
+  ::highlight(note-find-cur) { background-color: var(--find-cur); color: inherit; }
   /* the copy button on a code block, as in Apple's documentation: an icon in the block's top right corner, shown while the pointer is over the block or the caret is in it (always on a touch screen); one button per block, in a layer over the note */
   .note-code-copy-layer { position: absolute; left: 0; top: 0; width: 0; height: 0; }
   .note-code-copy { position: absolute; z-index: 3; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--r-s); border: 0; background: transparent; color: var(--text-2); cursor: default; opacity: 0; transition: opacity var(--dur-fast) ease, background var(--dur-fast) ease, color var(--dur-fast) ease; }
@@ -1728,34 +1730,34 @@ const ICONS = {
   .pr-tpl-find mark.cur { background: var(--find-cur); }
   /* the find bar (TextEdit / Notes): a capsule field with the options menu on its magnifier, the count inside it, Previous / Next, Done; a second row for Replace */
   /* one grid for both rows: Find | Previous-Next | Replace… | Done above, Replace field | Replace | Replace All below, so the edges line up; the field column shrinks first in a narrow pane */
-  .pr-find { flex: none; display: grid; grid-template-columns: minmax(100px, 420px) auto auto auto; justify-content: start; align-items: center; gap: 8px; padding: 8px var(--gutter); border-bottom: 1px solid var(--border); background: var(--bg); }
-  .pr-find-row { display: contents; }
-  .pr-find[hidden], .pr-find-row[hidden] { display: none; }
-  .pr-find > .pr-find-row > :is(.btn, .tool-group) { justify-self: stretch; }
-  .pr-find .tool-group .tool-btn { flex: 1; }
-  .pr-find > .pr-find-row:first-child > :nth-child(1) { grid-area: 1 / 1; } .pr-find > .pr-find-row:first-child > .tool-group { grid-area: 1 / 2; } .pr-find-toggle { grid-area: 1 / 3; } .pr-find-row:first-child > .btn:last-child { grid-area: 1 / 4; }
-  #prFindRepRow > .pr-find-field { grid-area: 2 / 1; } #prFindRep1 { grid-area: 2 / 2; } #prFindRepAll { grid-area: 2 / 3; }
-  @container notepane (max-width: 460px) { .pr-find .pr-find-toggle { display: none; } .pr-find-row:first-child > .btn:last-child { grid-area: 1 / 3; } }   /* a very narrow pane: the toggle steps aside (the magnifier menu and ⌥⌘F still show Replace) */
-  .pr-find-field { min-width: 0; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--cap-fill); }
-  .pr-find-field:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
-  .pr-find-field input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); }
-  .pr-find-field input:focus, .pr-find-field input:focus-visible { outline: none !important; border: 0 !important; box-shadow: none !important; }
-  .pr-find-field input::placeholder { color: var(--text-3); }
-  .pr-find-rep { padding-left: 47px; }   /* the Replace text starts under the Find text (the magnifier button is 33px wide) */
-  .pr-find-opts { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text-3); }
-  .pr-find-opts:hover { background: var(--hover); }
-  .pr-find-opts i { font-size: var(--ico-14); }
-  .pr-find-count { flex: none; font-size: var(--fs-12); color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .pr-find-count.none { color: var(--red-text); }
-  .pr-find .tool-btn:disabled, .pr-find .btn:disabled { opacity: .4; }
+  .find-bar { flex: none; display: grid; grid-template-columns: minmax(100px, 420px) auto auto auto; justify-content: start; align-items: center; gap: 8px; padding: 8px var(--gutter); border-bottom: 1px solid var(--border); background: var(--bg); }
+  .find-row { display: contents; }
+  .find-bar[hidden], .find-row[hidden] { display: none; }
+  .find-bar > .find-row > :is(.btn, .tool-group) { justify-self: stretch; }
+  .find-bar .tool-group .tool-btn { flex: 1; }
+  .find-bar > .find-row:first-child > :nth-child(1) { grid-area: 1 / 1; } .find-bar > .find-row:first-child > .tool-group { grid-area: 1 / 2; } .find-toggle { grid-area: 1 / 3; } .find-row:first-child > .btn:last-child { grid-area: 1 / 4; }
+  .find-rep-row > .find-field { grid-area: 2 / 1; } .find-rep1 { grid-area: 2 / 2; } .find-repall { grid-area: 2 / 3; }
+  @container notepane (max-width: 460px) { .find-bar .find-toggle { display: none; } .find-row:first-child > .btn:last-child { grid-area: 1 / 3; } }   /* a very narrow pane: the toggle steps aside (the magnifier menu and ⌥⌘F still show Replace) */
+  .find-field { min-width: 0; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--cap-fill); }
+  .find-field:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
+  .find-field input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); }
+  .find-field input:focus, .find-field input:focus-visible { outline: none !important; border: 0 !important; box-shadow: none !important; }
+  .find-field input::placeholder { color: var(--text-3); }
+  .find-rep { padding-left: 47px; }   /* the Replace text starts under the Find text (the magnifier button is 33px wide) */
+  .find-opts { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text-3); }
+  .find-opts:hover { background: var(--hover); }
+  .find-opts i { font-size: var(--ico-14); }
+  .find-count { flex: none; font-size: var(--fs-12); color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .find-count.none { color: var(--red-text); }
+  .find-bar .tool-btn:disabled, .find-bar .btn:disabled { opacity: .4; }
   /* the controls are the toolbar's own family (A-04): a soft fill, no ring, one height (28px) with the field */
-  html[data-scheme="glass"] .pr-find .tool-group { height: 28px; padding: 2px; gap: 2px; border: 0; background: var(--cap-fill); box-sizing: border-box; }
-  html[data-scheme="glass"] .pr-find .tool-group .tool-btn { height: 24px; min-width: 30px; padding: 0 6px; color: var(--text-2); }
-  html[data-scheme="glass"] .pr-find .tool-group .tool-btn:hover:not(:disabled) { background: var(--cap-hover); color: var(--text); }
-  html[data-scheme="glass"] .pr-find .btn { height: 28px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--cap-fill); box-shadow: none; color: var(--text); }
-  html[data-scheme="glass"] .pr-find .btn:hover:not(:disabled) { background: var(--cap-hover); }
-  html[data-scheme="glass"] .pr-find .btn.pr-find-toggle.on { background: var(--cap-on); }
-  .pr-find .btn[hidden] { display: none; }
+  html[data-scheme="glass"] .find-bar .tool-group { height: 28px; padding: 2px; gap: 2px; border: 0; background: var(--cap-fill); box-sizing: border-box; }
+  html[data-scheme="glass"] .find-bar .tool-group .tool-btn { height: 24px; min-width: 30px; padding: 0 6px; color: var(--text-2); }
+  html[data-scheme="glass"] .find-bar .tool-group .tool-btn:hover:not(:disabled) { background: var(--cap-hover); color: var(--text); }
+  html[data-scheme="glass"] .find-bar .btn { height: 28px; padding: 0 14px; border: 0; border-radius: 999px; background: var(--cap-fill); box-shadow: none; color: var(--text); }
+  html[data-scheme="glass"] .find-bar .btn:hover:not(:disabled) { background: var(--cap-hover); }
+  html[data-scheme="glass"] .find-bar .btn.find-toggle.on { background: var(--cap-on); }
+  .find-bar .btn[hidden] { display: none; }
   .pr-tpl textarea { position: absolute; inset: 0; width: 100%; height: 100%; resize: none; overflow: hidden; background: transparent; color: transparent; caret-color: var(--text); outline: none; }
   .pr-tpl textarea::selection { background: var(--accent-tint); }
   .pr-tpl textarea::placeholder { color: var(--text-3); }
@@ -2305,6 +2307,26 @@ const ICONS = {
           <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg></button>
           <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
         </div>
+        <div class="find-bar" id="ntFind" role="search" aria-label="Find in the note" hidden>
+          <div class="find-row">
+            <div class="find-field">
+              <button type="button" class="find-opts" onclick="noteFindBar.menu(event)" title="Search options" aria-label="Search options" aria-haspopup="menu"><i class="fa-solid fa-magnifying-glass"></i><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
+              <input type="text" id="ntFindInput" placeholder="Find" aria-label="Find in the note" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="noteFindBar.input(this.value)" onkeydown="noteFindBar.key(event)">
+              <span class="find-count" id="ntFindCount" aria-live="polite"></span>
+            </div>
+            <div class="tool-group" role="group" aria-label="Move between matches">
+              <button type="button" class="tool-btn" id="ntFindPrev" onclick="noteFindBar.step(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"></path></svg></button>
+              <button type="button" class="tool-btn" id="ntFindNext" onclick="noteFindBar.step(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"></path></svg></button>
+            </div>
+            <button type="button" class="btn btn-sm find-toggle" id="ntFindRepToggle" onclick="noteFindBar.option('replace')" aria-pressed="false" title="Show the Replace row (⌥⌘F)">Replace…</button>
+            <button type="button" class="btn btn-sm" onclick="noteFindBar.close()" title="Close the find bar (Esc)">Done</button>
+          </div>
+          <div class="find-row find-rep-row" id="ntFindRepRow" hidden>
+            <div class="find-field find-rep"><input type="text" id="ntReplaceInput" placeholder="Replace" aria-label="Replace with" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="noteFindBar.state.rep=this.value" onkeydown="noteFindBar.key(event)"></div>
+            <button type="button" class="btn btn-sm find-rep1" id="ntFindRep1" onclick="noteFindBar.replaceOne()" title="Replace this match and go to the next (↵)">Replace</button>
+            <button type="button" class="btn btn-sm find-repall" id="ntFindRepAll" onclick="noteFindBar.replaceAll()" title="Replace every match (⌥↵)">Replace All</button>
+          </div>
+        </div>
         <div class="note-scroll">
           <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyHover(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyHover(null)">
             <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
@@ -2360,24 +2382,24 @@ const ICONS = {
           <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)" aria-label="Copy Prompt"><i class="fa-solid fa-copy"></i><span class="pr-copy-label"> Copy Prompt</span></button>
           <button type="button" class="btn note-more-btn" id="pInspToggle" onclick="togglePromptInspector()" title="Hide Variables (⌥⌘I)" aria-label="Hide Variables" aria-pressed="true"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="1.7" y="2.7" width="12.6" height="10.6" rx="2.4"/><path d="M10 2.9v10.2"/></svg></button>
         </div>
-        <div class="pr-find" id="prFind" role="search" aria-label="Find in the template" hidden>
-          <div class="pr-find-row">
-            <div class="pr-find-field">
-              <button type="button" class="pr-find-opts" onclick="openPromptFindMenu(event)" title="Search options" aria-label="Search options" aria-haspopup="menu"><i class="fa-solid fa-magnifying-glass"></i><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
-              <input type="text" id="prFindInput" placeholder="Find" aria-label="Find in the template" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFindInput(this.value)" onkeydown="promptFindKey(event)">
-              <span class="pr-find-count" id="prFindCount" aria-live="polite"></span>
+        <div class="find-bar" id="prFind" role="search" aria-label="Find in the template" hidden>
+          <div class="find-row">
+            <div class="find-field">
+              <button type="button" class="find-opts" onclick="promptFindBar.menu(event)" title="Search options" aria-label="Search options" aria-haspopup="menu"><i class="fa-solid fa-magnifying-glass"></i><svg class="pr-menu-chev" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 3.5 3 3 3-3"/></svg></button>
+              <input type="text" id="prFindInput" placeholder="Find" aria-label="Find in the template" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFindBar.input(this.value)" onkeydown="promptFindBar.key(event)">
+              <span class="find-count" id="prFindCount" aria-live="polite"></span>
             </div>
             <div class="tool-group" role="group" aria-label="Move between matches">
-              <button type="button" class="tool-btn" id="prFindPrev" onclick="promptFindStep(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"></path></svg></button>
-              <button type="button" class="tool-btn" id="prFindNext" onclick="promptFindStep(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"></path></svg></button>
+              <button type="button" class="tool-btn" id="prFindPrev" onclick="promptFindBar.step(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"></path></svg></button>
+              <button type="button" class="tool-btn" id="prFindNext" onclick="promptFindBar.step(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"></path></svg></button>
             </div>
-            <button type="button" class="btn btn-sm pr-find-toggle" id="prFindRepToggle" onclick="promptFindOption('replace')" aria-pressed="false" title="Show the Replace row (⌥⌘F)">Replace…</button>
-            <button type="button" class="btn btn-sm" onclick="promptFindClose()">Done</button>
+            <button type="button" class="btn btn-sm find-toggle" id="prFindRepToggle" onclick="promptFindBar.option('replace')" aria-pressed="false" title="Show the Replace row (⌥⌘F)">Replace…</button>
+            <button type="button" class="btn btn-sm" onclick="promptFindBar.close()" title="Close the find bar (Esc)">Done</button>
           </div>
-          <div class="pr-find-row" id="prFindRepRow" hidden>
-            <div class="pr-find-field pr-find-rep"><input type="text" id="prReplaceInput" placeholder="Replace" aria-label="Replace with" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFind.rep=this.value" onkeydown="promptFindKey(event)"></div>
-            <button type="button" class="btn btn-sm" id="prFindRep1" onclick="promptFindReplaceCurrent()" title="Replace this match and go to the next (↵)">Replace</button>
-            <button type="button" class="btn btn-sm" id="prFindRepAll" onclick="promptFindReplaceAll()" title="Replace every match (⌥↵)">Replace All</button>
+          <div class="find-row find-rep-row" id="prFindRepRow" hidden>
+            <div class="find-field find-rep"><input type="text" id="prReplaceInput" placeholder="Replace" aria-label="Replace with" autocomplete="off" autocapitalize="off" spellcheck="false" oninput="promptFindBar.state.rep=this.value" onkeydown="promptFindBar.key(event)"></div>
+            <button type="button" class="btn btn-sm find-rep1" id="prFindRep1" onclick="promptFindBar.replaceOne()" title="Replace this match and go to the next (↵)">Replace</button>
+            <button type="button" class="btn btn-sm find-repall" id="prFindRepAll" onclick="promptFindBar.replaceAll()" title="Replace every match (⌥↵)">Replace All</button>
           </div>
         </div>
         <div class="pr-split" id="prSplit">
@@ -2632,6 +2654,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Delete and Delete table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
+          <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Duplicate, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
           <div class="help-row"><i class="fa-regular fa-paste"></i><span><strong>Pasting</strong> keeps headings, bold, italic, lists and links from other apps and cleans everything else to plain text. Images and attachments are not supported yet.</span></div>
@@ -5994,7 +6017,8 @@ function shortcutGroups(){
       ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print or save as PDF', [mod,'P']],
       ['Leave a table: go to the line below it', [mod,'↵']], ...(mac ? [] : [['Table options (rows, columns, header) at the caret', ['Shift','F10']]]),
       ['Next cell, adding a row after the last one', ['Tab']], ['Indent a list item', ['Tab']], ['Outdent a list item', [shift,'Tab']],
-      ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']] ] },
+      ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']],
+      ['Find in the note', [mod,'F']], ['Find and replace', mac ? ['⌥','⌘','F'] : ['Ctrl','Alt','F']], ['Next match', [mod,'G']], ['Previous match', [shift,mod,'G']], ['Close the find bar', ['Esc']] ] },
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-braces', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
       ['Copy the finished prompt', [mod,'↵']], ['Copy and open in the first AI app', [shift,mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
@@ -7492,7 +7516,7 @@ function promptHlPlan(prev, next){
 function paintTemplateHl(template, selfId){
   const el = document.getElementById('pTplHl'); if(!el) return;
   const lines = promptHighlightLines(template, selfId), prev = el._hl;
-  if(!prev || typeof el.insertAdjacentHTML!=='function' || !el.children || el.children.length!==prev.length){ el.innerHTML = lines.join(''); el._hl = lines; if(promptFind.open) promptFindRun(); return; }   // first paint, or something else touched it: rebuild
+  if(!prev || typeof el.insertAdjacentHTML!=='function' || !el.children || el.children.length!==prev.length){ el.innerHTML = lines.join(''); el._hl = lines; if(promptFindBar.state.open) promptFindBar.run(false); return; }   // first paint, or something else touched it: rebuild
   const pl = promptHlPlan(prev, lines);
   if(pl.remove || pl.insert.length){
     const kids = el.children;
@@ -7501,21 +7525,22 @@ function paintTemplateHl(template, selfId){
     if(html){ if(next) next.insertAdjacentHTML('beforebegin', html); else el.insertAdjacentHTML('beforeend', html); }
   }
   el._hl = lines;
-  if(promptFind.open) promptFindRun();                      // the template changed under the find bar: its matches follow
+  if(promptFindBar.state.open) promptFindBar.run(false);    // the template changed under the find bar: its matches follow
 }
 
-// ---- find and replace in the template (⌘F, ⌥⌘F; a bar under the toolbar like TextEdit's and Notes') ----
-// The matching is pure (text in, ranges out) so it is tested; the bar only paints it. Every match is tinted in `#pTplFind`, a copy of the text drawn between the highlighted
-// copy and the textarea (same metrics, transparent text, so it cannot drift); the current one is stronger. Replace goes through execCommand('insertText') on the textarea, so
-// ⌘Z undoes it like typing (Replace All is ONE step). Every match is replaced, inside a variable ({{x}}, [[x]], ((x))) too: the template is re-read afterwards, so a renamed placeholder is a new variable (renaming one keeping its options is the Variables panel's command).
-const PROMPT_FIND_KEY = 'cleardesk_prompt_find', PROMPT_FIND_MAX = 5000;
-let promptFind = { open: false, q: '', rep: '', ignoreCase: true, whole: false, replace: false, cur: -1, matches: [], anchor: 0 };
-try{ const o = JSON.parse(localStorage.getItem(PROMPT_FIND_KEY) || 'null'); if(o){ promptFind.ignoreCase = o.ignoreCase!==false; promptFind.whole = !!o.whole; } }catch(_){}
-function promptFindMatches(text, q, opts){
+// ---- find and replace (⌘F, ⌥⌘F): one bar, used by the prompt template and by the open note (a bar under the toolbar like TextEdit's and Notes') ----
+// The matching is pure (text in, ranges out) so it is tested; `makeFindBar` is the bar itself and each editor gives it a small driver (where the text is, how matches are
+// painted, how one replacement is made). Replace always goes through the editor's own editing command (execCommand), so ⌘Z undoes it like typing; Replace All is ONE step.
+// Every match is replaced, inside a prompt variable ({{x}}, [[x]], ((x))) too: the template is re-read afterwards, so a renamed placeholder is a new variable (renaming one
+// keeping its options is the Variables panel's command). Ignore Case / Whole Words are shared by both editors and kept per device.
+const FIND_KEY = 'cleardesk_find', FIND_MAX = 5000;
+const findOpts = { ignoreCase: true, whole: false };
+try{ const o = JSON.parse(localStorage.getItem(FIND_KEY) || localStorage.getItem('cleardesk_prompt_find') || 'null'); if(o){ findOpts.ignoreCase = o.ignoreCase!==false; findOpts.whole = !!o.whole; } }catch(_){}
+function findMatches(text, q, opts){
   if(!q || !text) return [];
   const o = opts || {}, re = new RegExp(String(q).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), o.ignoreCase===false ? 'gu' : 'giu'), out = [], word = /[\p{L}\p{N}_]/u;
   let m;
-  while((m = re.exec(text)) && out.length < PROMPT_FIND_MAX){
+  while((m = re.exec(text)) && out.length < FIND_MAX){
     const s = m.index, e = s + m[0].length;
     if(e===s){ re.lastIndex++; continue; }
     if(o.whole){
@@ -7528,127 +7553,227 @@ function promptFindMatches(text, q, opts){
   return out;
 }
 // The text with every match replaced (literal replacement: no $1 patterns). {text, n}
-function promptFindReplaceAllPure(text, matches, rep){
+function findReplaceAllPure(text, matches, rep){
   let out = '', at = 0;
   matches.forEach(m=>{ out += text.slice(at, m.s) + rep; at = m.e; });
   return { text: out + text.slice(at), n: matches.length };
 }
+function saveFindOpts(){ try{ localStorage.setItem(FIND_KEY, JSON.stringify(findOpts)); }catch(_){} }
+// cfg: pre (id prefix), name (the global the markup calls), label, editorOpen(), readOnly(), caret() (offset while the editor has focus, else null), selection() (a one-line selection or ''),
+// compute(q, opts) -> [{s, e, ...}], paint(matches, cur), reveal(match), editOne(match, rep) -> ok, replaceAllIn(matches, rep) -> count, selectMatch(match), undo()
+function makeFindBar(cfg){
+  const f = { open: false, q: '', rep: '', replace: false, cur: -1, matches: [], anchor: 0 }, el = s=>document.getElementById(cfg.pre + s);
+  const bar = {
+    state: f,
+    run(reveal){
+      if(!f.open) return;
+      const c = cfg.caret(); if(c!==null) f.anchor = c;
+      f.matches = cfg.compute(f.q, findOpts);
+      const i = f.matches.findIndex(m=>m.s >= f.anchor);
+      f.cur = !f.matches.length ? -1 : i>=0 ? i : 0;
+      cfg.paint(f.matches, f.cur); bar.update(); if(reveal) bar.show();
+    },
+    update(){
+      const c = el('FindCount'); if(!c) return;
+      c.textContent = !f.q ? '' : !f.matches.length ? 'No Results' : `${f.cur + 1} of ${f.matches.length}${f.matches.length>=FIND_MAX ? '+' : ''}`;
+      c.classList.toggle('none', !!f.q && !f.matches.length);
+      const ro = cfg.readOnly(), repRow = el('FindRepRow'), tg = el('FindRepToggle');
+      if(repRow) repRow.hidden = !(f.replace && !ro);
+      if(tg){ tg.hidden = ro; tg.setAttribute('aria-pressed', f.replace && !ro ? 'true' : 'false'); tg.classList.toggle('on', f.replace && !ro); }
+      const has = f.matches.length > 0;
+      ['FindPrev', 'FindNext'].forEach(id=>{ const b = el(id); if(b) b.disabled = !has; });
+      ['FindRep1', 'FindRepAll'].forEach(id=>{ const b = el(id); if(b) b.disabled = !has || ro; });
+    },
+    show(){ const m = f.matches[f.cur]; if(!m) return; f.anchor = m.s; cfg.reveal(m); },
+    openBar(withReplace){
+      if(!cfg.editorOpen()) return;
+      const input = el('FindInput'), bar_ = el('Find'); if(!input || !bar_) return;
+      if(!f.open){ const sel = cfg.selection(); if(sel) f.q = sel; const c = cfg.caret(); f.anchor = c!==null ? c : 0; }   // opening: a one-line selection becomes the search (as ⌘E does)
+      f.open = true; if(withReplace) f.replace = true;
+      bar_.hidden = false; input.value = f.q; el('ReplaceInput').value = f.rep;
+      bar.run(true); input.focus(); input.select();
+    },
+    close(){
+      if(!f.open) return;
+      const m = f.matches[f.cur], bar_ = el('Find');
+      f.open = false; f.matches = []; f.cur = -1;
+      if(bar_) bar_.hidden = true;
+      cfg.paint([], -1);
+      if(cfg.editorOpen() && m) cfg.selectMatch(m);                        // like TextEdit: the match you were on stays selected
+      else if(cfg.editorOpen() && cfg.focusEditor) cfg.focusEditor();
+    },
+    step(dir){
+      if(!f.matches.length) return;
+      f.cur = (f.cur + dir + f.matches.length) % f.matches.length;
+      cfg.paint(f.matches, f.cur); bar.update(); bar.show();
+    },
+    input(v){ f.q = v; const m = f.matches[f.cur]; if(m) f.anchor = m.s; bar.run(true); },
+    key(e){
+      if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); bar.close(); }
+      else if(e.key==='Enter' && e.target.id===cfg.pre + 'FindInput'){ e.preventDefault(); bar.step(e.shiftKey ? -1 : 1); }
+      else if(e.key==='Enter' && e.target.id===cfg.pre + 'ReplaceInput'){ e.preventDefault(); if(e.altKey || e.metaKey || e.ctrlKey) bar.replaceAll(); else bar.replaceOne(); }
+    },
+    withFocusKept(fn){                                               // an edit takes the focus into the editor; the bar's field gets it back
+      const root = el('Find'), back = root && root.contains(document.activeElement) ? document.activeElement : null;
+      const ok = fn(); if(back) back.focus(); return ok;
+    },
+    replaceOne(){
+      const m = f.matches[f.cur]; if(!m || cfg.readOnly()) return;
+      f.anchor = m.s + f.rep.length;
+      if(!bar.withFocusKept(()=>cfg.editOne(m, f.rep))) return;
+      bar.run(true);
+    },
+    replaceAll(){
+      if(!f.matches.length || cfg.readOnly()) return;
+      const n = bar.withFocusKept(()=>cfg.replaceAllIn(f.matches, f.rep)); if(!n) return;
+      f.anchor = 0; bar.run(true);
+      showToast(`Replaced ${n} ${n===1 ? 'match' : 'matches'}`, false, ()=>cfg.undo());
+    },
+    menuHtml(){
+      const o = (op, label, on)=>menuOpt(`${cfg.name}.option('${op}')`, {none: true}, label, on);
+      return (cfg.readOnly() ? '' : o('find', 'Find', !f.replace) + o('replace', 'Find and Replace', f.replace) + '<div class="row-menu-sep"></div>') + o('case', 'Ignore Case', findOpts.ignoreCase) + o('whole', 'Whole Words', findOpts.whole);
+    },
+    menu(e){
+      e.preventDefault(); e.stopPropagation();
+      const menu = document.getElementById('rowMenu'); if(!menu) return;
+      closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+      promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
+      menu.innerHTML = tidyMenuSeps(bar.menuHtml());
+      const btn = e.currentTarget, r = btn.getBoundingClientRect();
+      placeRowMenu(menu, r.left, r.bottom + 6, btn);
+    },
+    option(op){
+      closeRowMenu();
+      if(op==='case') findOpts.ignoreCase = !findOpts.ignoreCase; else if(op==='whole') findOpts.whole = !findOpts.whole; else if(op==='replace') f.replace = !f.replace; else if(op==='find') f.replace = false;
+      saveFindOpts(); bar.run(true);
+      el(f.replace && (op==='replace' || op==='find') ? 'ReplaceInput' : 'FindInput')?.focus();
+    }
+  };
+  return bar;
+}
+
+// ---- the prompt template: the text is the textarea's; every match is tinted in `#pTplFind`, a copy of the text drawn between the highlighted copy and the textarea (same metrics,
+// transparent text, so it cannot drift); the current one is stronger ----
 const promptFindReadOnly = ()=>{ const p = prompts.find(x=>x.id===promptEditorId); return !p || p.locked || promptTrashed(p); };
 const promptFindText = ()=>{ const ta = document.getElementById('pTemplate'); return ta ? ta.value : ''; };
-function promptFindSave(){ try{ localStorage.setItem(PROMPT_FIND_KEY, JSON.stringify({ ignoreCase: promptFind.ignoreCase, whole: promptFind.whole })); }catch(_){} }
-function promptFindPaintLayer(){
-  const el = document.getElementById('pTplFind'); if(!el) return;
-  const f = promptFind;
-  if(!f.open || !f.matches.length){ el.innerHTML = ''; return; }
-  const text = promptFindText(); let html = '', at = 0;
-  f.matches.forEach((m, i)=>{ html += esc(text.slice(at, m.s)) + `<mark${i===f.cur ? ' class="cur"' : ''}>${esc(text.slice(m.s, m.e))}</mark>`; at = m.e; });
-  el.innerHTML = html + esc(text.slice(at));
-}
-function promptFindUpdateBar(){
-  const f = promptFind, c = document.getElementById('prFindCount'); if(!c) return;
-  c.textContent = !f.q ? '' : !f.matches.length ? 'No Results' : `${f.cur + 1} of ${f.matches.length}${f.matches.length>=PROMPT_FIND_MAX ? '+' : ''}`;
-  c.classList.toggle('none', !!f.q && !f.matches.length);
-  const ro = promptFindReadOnly(), repRow = document.getElementById('prFindRepRow'), tg = document.getElementById('prFindRepToggle');
-  if(repRow) repRow.hidden = !(f.replace && !ro);
-  if(tg){ tg.hidden = ro; tg.setAttribute('aria-pressed', f.replace && !ro ? 'true' : 'false'); tg.classList.toggle('on', f.replace && !ro); }
-  const has = f.matches.length > 0;
-  ['prFindPrev', 'prFindNext'].forEach(id=>{ const b = document.getElementById(id); if(b) b.disabled = !has; });
-  const r1 = document.getElementById('prFindRep1'), rA = document.getElementById('prFindRepAll');
-  if(r1) r1.disabled = !has || ro; if(rA) rA.disabled = !has || ro;
-}
-function promptFindShowCurrent(){
-  const m = promptFind.matches[promptFind.cur]; if(!m) return;
-  promptFind.anchor = m.s;
-  const mk = document.querySelector('#pTplFind mark.cur'); if(mk && mk.scrollIntoView) mk.scrollIntoView({ block: 'center', inline: 'nearest' });
-}
-// Recompute the matches (typing in the field, an edit of the template, another prompt, an option); the current one is the first at or after the caret / the last one shown.
-function promptFindRun(){
-  const f = promptFind; if(!f.open) return;
-  const ta = document.getElementById('pTemplate');
-  if(ta && document.activeElement===ta) f.anchor = ta.selectionStart;
-  f.matches = promptFindMatches(promptFindText(), f.q, f);
-  const i = f.matches.findIndex(m=>m.s >= f.anchor);
-  f.cur = !f.matches.length ? -1 : i>=0 ? i : 0;
-  promptFindPaintLayer(); promptFindUpdateBar(); promptFindShowCurrent();
-}
-function promptFindEditorOpen(){ const ed = document.getElementById('pEditor'); return appMode==='prompts' && !!promptEditorId && !!ed && ed.classList.contains('open'); }
-function promptFindOpen(withReplace){
-  if(!promptFindEditorOpen()) return;
-  const f = promptFind, ta = document.getElementById('pTemplate'), input = document.getElementById('prFindInput'), bar = document.getElementById('prFind');
-  if(!input || !bar) return;
-  if(!f.open && ta){                                           // opening: a one-line selection in the template becomes the search (as ⌘E does)
-    const sel = ta.value.slice(ta.selectionStart, ta.selectionEnd);
-    if(sel && sel.length<=100 && !/\n/.test(sel)) f.q = sel;
-    f.anchor = ta.selectionStart;
-  }
-  f.open = true; if(withReplace) f.replace = true;
-  bar.hidden = false; input.value = f.q; document.getElementById('prReplaceInput').value = f.rep;
-  promptFindRun();
-  input.focus(); input.select();
-}
-function promptFindClose(){
-  const f = promptFind; if(!f.open) return;
-  const m = f.matches[f.cur], bar = document.getElementById('prFind'), ta = document.getElementById('pTemplate');
-  f.open = false; f.matches = []; f.cur = -1;
-  if(bar) bar.hidden = true;
-  promptFindPaintLayer();
-  if(ta && promptFindEditorOpen()){ ta.focus(); if(m) ta.setSelectionRange(m.s, m.e); }   // like TextEdit: the match you were on stays selected
-}
-function promptFindStep(dir){
-  const f = promptFind; if(!f.matches.length) return;
-  f.cur = (f.cur + dir + f.matches.length) % f.matches.length;
-  promptFindPaintLayer(); promptFindUpdateBar(); promptFindShowCurrent();
-}
-function promptFindInput(v){ promptFind.q = v; const ta = document.getElementById('pTemplate'); promptFind.anchor = promptFind.matches[promptFind.cur] ? promptFind.matches[promptFind.cur].s : (ta ? ta.selectionStart : 0); promptFindRun(); }
-function promptFindKey(e){
-  if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); promptFindClose(); }
-  else if(e.key==='Enter' && e.target.id==='prFindInput'){ e.preventDefault(); promptFindStep(e.shiftKey ? -1 : 1); }
-  else if(e.key==='Enter' && e.target.id==='prReplaceInput'){ e.preventDefault(); if(e.altKey || e.metaKey || e.ctrlKey) promptFindReplaceAll(); else promptFindReplaceCurrent(); }
-}
-function promptFindEditText(from, to, text){          // one undoable edit in the textarea, then the find field gets the focus back
+function promptFindEditText(from, to, text){          // one undoable edit in the textarea
   const ta = document.getElementById('pTemplate'); if(!ta) return false;
-  const back = document.activeElement && document.getElementById('prFind') && document.getElementById('prFind').contains(document.activeElement) ? document.activeElement : null;
   const scroller = ta.closest('.note-scroll'), top = scroller ? scroller.scrollTop : 0;
   ta.focus(); ta.setSelectionRange(from, to);
-  const ok = document.execCommand('insertText', false, text);
+  const ok = text==='' ? document.execCommand('delete') : document.execCommand('insertText', false, text);
   if(scroller) scroller.scrollTop = top;
-  if(back) back.focus();
   return ok;
 }
-function promptFindReplaceCurrent(){
-  const f = promptFind, m = f.matches[f.cur]; if(!m || promptFindReadOnly()) return;
-  f.anchor = m.s + f.rep.length;
-  if(!promptFindEditText(m.s, m.e, f.rep)) return;
-  promptFindRun();
+const promptFindBar = makeFindBar({
+  pre: 'pr', name: 'promptFindBar', label: 'the template',
+  editorOpen: ()=>appMode==='prompts' && !!promptEditorId && !!document.getElementById('pEditor') && document.getElementById('pEditor').classList.contains('open'),
+  readOnly: promptFindReadOnly,
+  caret: ()=>{ const ta = document.getElementById('pTemplate'); return ta && document.activeElement===ta ? ta.selectionStart : null; },
+  selection: ()=>{ const ta = document.getElementById('pTemplate'); if(!ta) return ''; const sel = ta.value.slice(ta.selectionStart, ta.selectionEnd); return sel && sel.length<=100 && !/\n/.test(sel) ? sel : ''; },
+  compute: (q, o)=>findMatches(promptFindText(), q, o),
+  paint: (matches, cur)=>{
+    const el = document.getElementById('pTplFind'); if(!el) return;
+    if(!matches.length){ el.innerHTML = ''; return; }
+    const text = promptFindText(); let html = '', at = 0;
+    matches.forEach((m, i)=>{ html += esc(text.slice(at, m.s)) + `<mark${i===cur ? ' class="cur"' : ''}>${esc(text.slice(m.s, m.e))}</mark>`; at = m.e; });
+    el.innerHTML = html + esc(text.slice(at));
+  },
+  reveal: ()=>{ const mk = document.querySelector('#pTplFind mark.cur'); if(mk && mk.scrollIntoView) mk.scrollIntoView({ block: 'center', inline: 'nearest' }); },
+  editOne: (m, rep)=>promptFindEditText(m.s, m.e, rep),
+  replaceAllIn: (matches, rep)=>{
+    const text = promptFindText(), res = findReplaceAllPure(text, matches, rep);
+    if(res.text.length > 100000){ showToast('The result would be longer than a template can be (100,000 characters)', true); return 0; }
+    return promptFindEditText(0, text.length, res.text) ? res.n : 0;
+  },
+  selectMatch: m=>{ const ta = document.getElementById('pTemplate'); if(ta){ ta.focus(); ta.setSelectionRange(m.s, m.e); } },
+  focusEditor: ()=>document.getElementById('pTemplate')?.focus(),
+  undo: ()=>promptUndo('undo')
+});
+
+// ---- the open note: the text is the body's text nodes joined, with a line break between blocks (so a match never runs across two paragraphs); matches are DOM ranges, tinted with the CSS
+// Custom Highlight API (nothing is added to the note). One Replace is execCommand on the range; Replace All edits a clone's text nodes and swaps the whole body in with insertHTML (the
+// idiom every table edit uses), so it is one undo step. Where the highlight API is missing the bar still counts, steps and replaces; it just shows no tint. ----
+const NOTE_FIND_BLOCKS = new Set(['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'PRE', 'BLOCKQUOTE', 'TD', 'TH', 'TR', 'UL', 'OL', 'TABLE', 'HR']);
+function noteFindMap(root){
+  const segs = []; let text = '', lastBlock = null;
+  const blockOf = n=>{ for(let e = n.parentNode; e && e!==root; e = e.parentNode) if(e.nodeType===1 && NOTE_FIND_BLOCKS.has(e.tagName)) return e; return root; };
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT); let n;
+  while((n = w.nextNode())){
+    if(n.nodeType===1){ if(n.tagName==='BR'){ text += '\n'; lastBlock = null; } continue; }
+    const v = n.nodeValue; if(!v) continue;
+    const b = blockOf(n); if(lastBlock && b!==lastBlock) text += '\n'; lastBlock = b;
+    segs.push({ node: n, start: text.length, end: text.length + v.length }); text += v;
+  }
+  return { text, segs };
 }
-function promptFindReplaceAll(){
-  const f = promptFind; if(!f.matches.length || promptFindReadOnly()) return;
-  const text = promptFindText(), res = promptFindReplaceAllPure(text, f.matches, f.rep);
-  if(res.text.length > 100000){ showToast('The result would be longer than a template can be (100,000 characters)', true); return; }
-  f.anchor = 0;
-  if(!promptFindEditText(0, text.length, res.text)) return;
-  promptFindRun();
-  showToast(`Replaced ${res.n} ${res.n===1 ? 'match' : 'matches'}`, false, ()=>promptUndo('undo'));
+function noteFindLoc(map, off, atEnd){
+  for(const g of map.segs) if(atEnd ? (off > g.start && off <= g.end) : (off >= g.start && off < g.end)) return { node: g.node, o: off - g.start, seg: g };
+  return null;
 }
-function promptFindOptionsMenuHtml(){
-  const f = promptFind, o = (op, label, on)=>menuOpt(`promptFindOption('${op}')`, {none: true}, label, on);
-  return (promptFindReadOnly() ? '' : o('find', 'Find', !f.replace) + o('replace', 'Find and Replace', f.replace) + '<div class="row-menu-sep"></div>') + o('case', 'Ignore Case', f.ignoreCase) + o('whole', 'Whole Words', f.whole);
-}
-function openPromptFindMenu(e){
-  e.preventDefault(); e.stopPropagation();
-  const menu = document.getElementById('rowMenu'); if(!menu) return;
-  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
-  promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  menu.innerHTML = tidyMenuSeps(promptFindOptionsMenuHtml());
-  const btn = e.currentTarget, r = btn.getBoundingClientRect();
-  placeRowMenu(menu, r.left, r.bottom + 6, btn);
-}
-function promptFindOption(op){
-  const f = promptFind; closeRowMenu();
-  if(op==='case') f.ignoreCase = !f.ignoreCase; else if(op==='whole') f.whole = !f.whole; else if(op==='replace') f.replace = !f.replace; else if(op==='find') f.replace = false;
-  promptFindSave(); promptFindRun();
-  document.getElementById(f.replace && (op==='replace' || op==='find') ? 'prReplaceInput' : 'prFindInput')?.focus();
-}
+const noteFindApi = ()=>typeof CSS!=='undefined' && !!CSS.highlights && typeof Highlight!=='undefined';
+const noteFindBody = ()=>document.getElementById('noteBody');
+function noteFindInSelection(){ const b = noteFindBody(), sel = window.getSelection(); return !!(b && sel && sel.rangeCount && b.contains(sel.anchorNode)); }
+const noteFindBar = makeFindBar({
+  pre: 'nt', name: 'noteFindBar', label: 'the note',
+  editorOpen: ()=>appMode==='notes' && !!noteEditorId && !!document.getElementById('noteEditor') && document.getElementById('noteEditor').classList.contains('open'),
+  readOnly: ()=>!noteEditorId || noteIsLocked(noteEditorId),
+  caret: ()=>{
+    const body = noteFindBody(); if(!body || document.activeElement!==body || !noteFindInSelection()) return null;
+    const sel = window.getSelection(), map = noteFindMap(body), seg = map.segs.find(g=>g.node===sel.anchorNode);
+    if(seg) return seg.start + sel.anchorOffset;
+    const r = sel.getRangeAt(0), after = map.segs.find(g=>r.comparePoint(g.node, 0) >= 0);
+    return after ? after.start : map.text.length;
+  },
+  selection: ()=>{ if(!noteFindInSelection()) return ''; const t = String(window.getSelection()); return t && t.length<=100 && !/\n/.test(t) ? t : ''; },
+  compute: (q, o)=>{
+    const body = noteFindBody(); if(!body) return [];
+    const map = noteFindMap(body), out = [];
+    findMatches(map.text, q, o).forEach(m=>{
+      if(/\n/.test(map.text.slice(m.s, m.e))) return;
+      const a = noteFindLoc(map, m.s, false), b = noteFindLoc(map, m.e, true); if(!a || !b) return;
+      const range = document.createRange(); range.setStart(a.node, a.o); range.setEnd(b.node, b.o);
+      out.push({ s: m.s, e: m.e, range });
+    });
+    return out;
+  },
+  paint: (matches, cur)=>{
+    if(!noteFindApi()) return;
+    CSS.highlights.delete('note-find'); CSS.highlights.delete('note-find-cur');
+    if(!matches.length) return;
+    CSS.highlights.set('note-find', new Highlight(...matches.map(m=>m.range)));
+    if(cur>=0){ const h = new Highlight(matches[cur].range); h.priority = 1; CSS.highlights.set('note-find-cur', h); }
+  },
+  reveal: m=>{ const e = m.range.startContainer.nodeType===1 ? m.range.startContainer : m.range.startContainer.parentElement; if(e && e.scrollIntoView) e.scrollIntoView({ block: 'center', inline: 'nearest' }); },
+  editOne: (m, rep)=>{
+    const body = noteFindBody(); if(!body || !m.range.startContainer.isConnected) return false;
+    const sc = body.closest('.note-scroll'), top = sc ? sc.scrollTop : 0, sel = window.getSelection();
+    body.focus(); sel.removeAllRanges(); sel.addRange(m.range);
+    const ok = rep==='' ? document.execCommand('delete') : document.execCommand('insertText', false, rep);
+    if(sc) sc.scrollTop = top;
+    return ok;
+  },
+  replaceAllIn: (matches, rep)=>{
+    const body = noteFindBody(); if(!body || !matches.length) return 0;
+    const clone = body.cloneNode(true), map = noteFindMap(clone);
+    for(let i = matches.length - 1; i>=0; i--){                           // last to first, so the offsets of the earlier matches stay true
+      const m = matches[i], a = noteFindLoc(map, m.s, false), b = noteFindLoc(map, m.e, true); if(!a || !b) continue;
+      if(a.node===b.node){ const v = a.node.nodeValue; a.node.nodeValue = v.slice(0, a.o) + rep + v.slice(b.o); continue; }
+      const i0 = map.segs.indexOf(a.seg), i1 = map.segs.indexOf(b.seg);
+      a.node.nodeValue = a.node.nodeValue.slice(0, a.o) + rep;
+      for(let k = i0 + 1; k<i1; k++) map.segs[k].node.nodeValue = '';
+      b.node.nodeValue = b.node.nodeValue.slice(b.o);
+    }
+    clone.querySelectorAll('b, i, u, s, strong, em, strike, span, mark, code').forEach(x=>{ if(!x.textContent && !x.querySelector('img, br')) x.remove(); });   // a run whose text was all replaced away leaves nothing behind
+    const sc = body.closest('.note-scroll'), top = sc ? sc.scrollTop : 0, sel = window.getSelection(), range = document.createRange();
+    body.focus(); range.selectNodeContents(body); sel.removeAllRanges(); sel.addRange(range);
+    const ok = document.execCommand('insertHTML', false, clone.innerHTML);
+    if(sc) sc.scrollTop = top;
+    return ok ? matches.length : 0;
+  },
+  selectMatch: m=>{ const body = noteFindBody(); if(!body) return; body.focus(); if(m.range.startContainer.isConnected){ const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(m.range); } },
+  focusEditor: ()=>noteFindBody()?.focus(),
+  undo: ()=>noteCmd('undo')
+});
 
 // ---- compare two prompts (the diff view) ----
 // The engine is pure (arrays and strings in, plain objects out) so it can be tested without a DOM; the dialog below only paints it.
@@ -10051,6 +10176,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   noteEditCount++;
+  if(noteFindBar.state.open) noteFindBar.run(false);     // the note changed under the find bar: its matches follow
   noteSlashUpdate(e);
   noteCodeCopyQueue();
   noteEnsureTrailingLine(body);
@@ -10413,8 +10539,10 @@ document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState=
 // ---- keyboard (the list side; the editor has its own handlers) ----
 function handleNotesKeys(e){
   if(document.querySelector('.modal-bg.open')) return;
-  const el = document.activeElement, typing = isTypingTarget(el);
+  const el = document.activeElement, typing = isTypingTarget(el), mod = e.metaKey || e.ctrlKey;
   const onList = !el || el===document.body || (el.classList && el.classList.contains('note-row'));
+  if(mod && !e.shiftKey && e.code==='KeyF' && selectedNoteId){ e.preventDefault(); noteFindBar.openBar(e.altKey); return; }   // ⌘F find, ⌥⌘F find and replace
+  if(mod && !e.altKey && e.code==='KeyG' && noteFindBar.state.open){ e.preventDefault(); noteFindBar.step(e.shiftKey ? -1 : 1); return; }
   if(e.key==='/' && !typing){ e.preventDefault(); document.getElementById('searchInput')?.focus(); return; }
   if(e.key==='?' && !typing){ e.preventDefault(); openShortcutsModal(); return; }
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
@@ -10749,8 +10877,8 @@ function globalValueKey(e, i){
 function handlePromptsKeys(e){
   if(document.querySelector('.modal-bg.open')) return;
   const el = document.activeElement, typing = isTypingTarget(el), mod = e.metaKey || e.ctrlKey;
-  if(mod && !e.shiftKey && e.code==='KeyF' && promptFindEditorOpen()){ e.preventDefault(); promptFindOpen(e.altKey); return; }   // ⌘F find, ⌥⌘F find and replace
-  if(mod && !e.altKey && e.code==='KeyG' && promptFind.open){ e.preventDefault(); promptFindStep(e.shiftKey ? -1 : 1); return; }
+  if(mod && !e.shiftKey && e.code==='KeyF' && selectedPromptId){ e.preventDefault(); promptFindBar.openBar(e.altKey); return; }   // ⌘F find, ⌥⌘F find and replace
+  if(mod && !e.altKey && e.code==='KeyG' && promptFindBar.state.open){ e.preventDefault(); promptFindBar.step(e.shiftKey ? -1 : 1); return; }
   if(e.key==='Escape' && promptInspectorFloats() && !document.getElementById('prSplit').classList.contains('insp-closed') && !document.getElementById('rowMenu').classList.contains('open')){ e.preventDefault(); togglePromptInspector(false, false); return; }
   if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); togglePromptInspector(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key==='Enter' && selectedPromptId){ e.preventDefault(); copyPrompt(selectedPromptId); return; }
