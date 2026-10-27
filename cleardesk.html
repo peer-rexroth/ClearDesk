@@ -1078,7 +1078,7 @@ const ICONS = {
   /* ... and on a board tile: the top part (checkbox, title, secondary line, tags) */
   .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .board-card-top { background: var(--sel-band); margin: -9px -11px 0; padding: 9px 11px 8px; border-radius: calc(var(--r-m) - 1px) calc(var(--r-m) - 1px) 0 0; }
   /* a tile's ⋯ button sits in the tinted part: it keeps its normal capsule look there */
-  .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); color: var(--ink); background: var(--bg-3); }
+  .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); color: var(--ink); background: var(--bg-3); border-color: var(--ink-border); }
   html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions .icon-btn:hover { background: var(--pressed); color: var(--ink); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtasks .mini-check:not(.checked) { background: transparent; }   /* an empty circle is see-through on the tint (no dark disc in dark mode) */
   /* inside the tint everything has its normal colours again */
@@ -1219,7 +1219,7 @@ const ICONS = {
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input):is(:focus, :focus-visible) { border: 0 !important; box-shadow: none !important; outline: none !important; }
   html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) .task-title-input { background: var(--sel-fill); }
   .task-subtask-text-input { max-width: 420px; }   /* a rename field should be a field, not a bar across the whole row */
-  html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }
+  html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):not(:has(> .task-subtasks)) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }   /* the on-blue look; a tile whose button sits on the light subtask tint keeps the normal one (next rules) */
   /* with several rows selected the toolbar and the right-click menu act on all of them, so the per-row capsule (which would act on one row) is hidden on the selected rows */
   /* The selection is the accent colour only while its list is the active area (as in Finder, Mail and Notes); with focus in the task panel, the editor, the sidebar, search or another window it is a neutral grey and everything inside the row looks as it does unselected. html.sel-inactive is kept by the focus-zone code (selZoneOf). */
   html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) { background: var(--sel-inactive); border-color: transparent; box-shadow: none; }   /* transparent: a translucent border over the translucent fill would draw a darker ring */
