@@ -4233,7 +4233,7 @@ function rowMenuHtml(ids){
   if(n===1 && ts[0].repeat && ts[0].repeat!=='none') parts.push(item('fa-solid fa-forward-step','Skip to Next Occurrence','rowMenuRun(\'skip\')'));
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
-  if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-duplicate','Duplicate','rowMenuRun(\'duplicate\')'));
+  if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-duplicate','Duplicate','rowMenuRun(\'duplicate\')'), sep);
   parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} Tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'⌫'}));
   return parts.join('');
 }
@@ -6624,7 +6624,6 @@ function noteMenuHtml(id, opts){
     item('fa-regular fa-copy', 'Copy Note', `noteMenuRun('copy')`),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
-    sep,
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
     item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock First' : '⌫', off:!!n.locked})
@@ -6659,7 +6658,7 @@ function folderMenuHtml(id){
   if(!f.parentId) parts.push(item('fa-regular fa-folder-plus', 'New Subfolder', `folderMenuRun('newsub')`));
   const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
 }
 // Right-click menu of a project in the Tasks sidebar (the Notes folders have one too): the same builder pattern, title-style labels, danger last.
@@ -6720,7 +6719,7 @@ let projectMenuId = null;
 function projectMenuHtml(id){
   const p = projById(id); if(!p) return '';
   const item = rowMenuItem;
-  const parts = [item('fa-solid fa-plus', 'New Task Here', `projectMenuRun('new')`), item('fa-solid fa-pen', 'Edit', `projectMenuRun('edit')`)];
+  const parts = [item('fa-solid fa-plus', 'New Task Here', `projectMenuRun('new')`), item('fa-solid fa-pen', 'Edit…', `projectMenuRun('edit')`)];
   parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-trash', 'Delete', `projectMenuRun('delete')`, {danger:true, off:!!p.locked}));
   return parts.join('');
 }
@@ -8784,7 +8783,7 @@ function promptFolderMenuHtml(id){
   if(!f.parentId) parts.push(item('fa-regular fa-folder-plus', 'New Subfolder', `promptFolderMenuRun('newsub')`));
   const sibs = f.locked ? [] : promptFolderSibs(f), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `promptFolderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `promptFolderMenuRun('down')`, {off: at===sibs.length-1}));
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit', `promptFolderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true, off:!!f.locked}));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `promptFolderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
 }
 function openPromptFolderMenu(e, id){
