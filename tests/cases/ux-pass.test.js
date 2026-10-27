@@ -794,3 +794,13 @@ test('dragging a sub-step over a row it cannot move to is refused explicitly (no
   assertTrue(ev.prevented && !cls['drag-denied'], 'siblings in the same step still accept it');
   draggedSubstep = null;
 });
+
+test('opening one sidebar or toolbar pop-up closes the others (one at a time, as in macOS)', function () {
+  var ids = ['libMenu', 'uiScaleMenu', 'helpMenu', 'filterMenu'];
+  var open = function (id) { return document.getElementById(id).classList.contains('open'); };
+  toggleLibMenu(); toggleUiScaleMenu(); toggleHelpMenu();
+  assertEqual(ids.filter(open).join(), 'helpMenu', 'only the last one is open');
+  toggleFilterMenu();
+  assertEqual(ids.filter(open).join(), 'filterMenu');
+  toggleFilterMenu(); assertEqual(ids.filter(open).length, 0, 'a second click closes it');
+});

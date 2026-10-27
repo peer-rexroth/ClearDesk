@@ -4056,6 +4056,11 @@ function mainSubtitleText(){
   return parts.join(' · ');
 }
 // Only the task toolbar's menus (inside .tool-dd): the Notes toolbar reuses .tool-menu for its look and must not be closed by this.
+// One pop-up at a time, as in macOS: the buttons stop the click from reaching the outside-click handler, so each toggle closes the others itself.
+function closeMenusExcept(keepId){
+  ['libMenu','uiScaleMenu','helpMenu','filterMenu'].forEach(id=>{ if(id!==keepId) document.getElementById(id)?.classList.remove('open'); });
+  closeToolMenus(); closeCellPop(); closeRowMenu();
+}
 function closeToolMenus(){ document.querySelectorAll('.tool-dd .tool-menu.open').forEach(m=>m.classList.remove('open')); }
 function toolMenuHtml(which){
   const ts = selectionIds().map(id=>tasks.find(t=>t.id===id)).filter(Boolean);
@@ -4069,7 +4074,7 @@ function toggleToolMenu(which){
   const id = 'toolMenu' + which.charAt(0).toUpperCase() + which.slice(1);
   const m = document.getElementById(id); if(!m) return;
   const wasOpen = m.classList.contains('open');
-  closeToolMenus(); closeFilterMenu();
+  closeMenusExcept('');
   if(wasOpen || !selectionIds().length) return;
   m.innerHTML = toolMenuHtml(which);
   m.classList.add('open');
@@ -5685,7 +5690,7 @@ function clearFilters(){
   filterTags = [];
   save(); render();
 }
-function toggleFilterMenu(){ document.getElementById('filterMenu')?.classList.toggle('open'); }
+function toggleFilterMenu(){ closeMenusExcept('filterMenu'); document.getElementById('filterMenu')?.classList.toggle('open'); }
 function closeFilterMenu(){ document.getElementById('filterMenu')?.classList.remove('open'); }
 function clearSpecialViews(){ myDayFilter = false; thisWeekFilter = false; overdueFilter = false; trashFilter = false; }
 function setProjectFilter(id){ filterProjectId = id; clearSpecialViews(); save(); render(); }
@@ -10504,7 +10509,7 @@ function openFileSyncModal(reconnectHandle){
   document.getElementById('fileSyncModalBg').classList.add('open');
 }
 function closeFileSyncModal(){ closeModal('fileSyncModalBg'); }
-function toggleLibMenu(){ updateFileBackupUI(); document.getElementById('libMenu')?.classList.toggle('open'); }
+function toggleLibMenu(){ closeMenusExcept('libMenu'); updateFileBackupUI(); document.getElementById('libMenu')?.classList.toggle('open'); }
 function closeLibMenu(){ document.getElementById('libMenu')?.classList.remove('open'); }
 // Light/Dark icons: thin outlined sun and crescent moon, drawn in the SF Symbols
 // idiom (round caps, ~1px stroke, currentColor) rather than the heavy solid Font
@@ -10529,9 +10534,9 @@ function renderUiScaleMenu(){
     </div>
   `;
 }
-function toggleHelpMenu(){ document.getElementById('helpMenu')?.classList.toggle('open'); }
+function toggleHelpMenu(){ closeMenusExcept('helpMenu'); document.getElementById('helpMenu')?.classList.toggle('open'); }
 function closeHelpMenu(){ document.getElementById('helpMenu')?.classList.remove('open'); }
-function toggleUiScaleMenu(){ renderUiScaleMenu(); document.getElementById('uiScaleMenu')?.classList.toggle('open'); }
+function toggleUiScaleMenu(){ closeMenusExcept('uiScaleMenu'); renderUiScaleMenu(); document.getElementById('uiScaleMenu')?.classList.toggle('open'); }
 function closeUiScaleMenu(){ document.getElementById('uiScaleMenu')?.classList.remove('open'); }
 function setUiScale(v){
   uiScale = clampUiScale(v);
