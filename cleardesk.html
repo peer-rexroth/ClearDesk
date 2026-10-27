@@ -421,7 +421,7 @@ const ICONS = {
   .subtask-toggle, .sub-step-toggle { border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; padding: 0; }
   /* chevrons are small (16px), so the disc is grown with a ring and made stronger than the other icon buttons' */
   .subtask-toggle:hover, .sub-step-toggle:hover { background: var(--pressed); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover { background: var(--sel-fill-hover); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(.subtask-toggle, .sub-step-toggle):hover:not(.task-subtasks *) { background: var(--sel-fill-hover); }
 
   .empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding: 60px 20px; color: var(--text-3); }   /* same stack as .notes-empty: icon above the text, both centred */
   .empty-ico { width: calc(var(--ico-empty) * var(--ico-k)); height: calc(var(--ico-empty) * var(--ico-k)); flex: none; fill: none; stroke: currentColor; stroke-width: .9; stroke-linecap: round; stroke-linejoin: round; opacity: .4; }   /* a big symbol is drawn with a thin line (about 1.7px), not the 3.8px the small-icon masks would give at this size */
@@ -1025,7 +1025,7 @@ const ICONS = {
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox { background: transparent; border-color: var(--sel-line-strong); box-shadow: none; }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked { background: var(--on-accent); border-color: var(--on-accent); }
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-checkbox.checked i { color: var(--sel-bg); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover { background: var(--sel-fill-hover); color: var(--on-accent); }   /* translucent white fill, white content, no ring around it */
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .icon-btn:hover:not(.task-subtasks *) { background: var(--sel-fill-hover); color: var(--on-accent); }   /* translucent white fill, white content, no ring around it */
   /* Editable cells follow macOS: the pointer stays an arrow (the hand is for links), and
      the cell says "pop-up button" the way a native one does — a small chevron on the pill,
      shown on the selected row/card only so the rest of the list stays calm. (The pill grows
@@ -1044,11 +1044,33 @@ const ICONS = {
   html[data-scheme="glass"]:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) { background: var(--sel-bg); border-color: var(--sel-bg); }
   /* Inline inputs (add subtask, rename) inside a selected row: white text on a white
      field was invisible. Give them a translucent-white field with white text. */
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *) { background: var(--sel-fill); color: var(--on-accent); border-color: var(--sel-line); caret-color: var(--on-accent); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, textarea):not(.cell-pop *)::placeholder { color: var(--sel-text-3); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check { background: transparent; border-color: var(--sel-line-strong); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked { background: var(--on-accent); border-color: var(--on-accent); box-shadow: none; }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .mini-check.checked i { color: var(--sel-bg); opacity: 1; }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):not(.task-subtasks *) { background: var(--sel-fill); color: var(--on-accent); border-color: var(--sel-line); caret-color: var(--on-accent); }
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, textarea):not(.cell-pop *):not(.task-subtasks *)::placeholder { color: var(--sel-text-3); }
+
+  /* ── Selection: ONE solid row, its subtasks on a light tint ─────────────────────────────────────
+     A task with subtasks used to turn into one big solid block, which was heavy. The selected task is now exactly one solid row (the
+     title line; on a board tile, the title, secondary line and tags) and its subtasks sit on a light tint with their normal colours, as
+     in an outline view: the parent row is the selected row, the children stay quiet. A task without subtasks (or collapsed) is a single
+     solid row as before. The grey "focus is elsewhere" state has the same two parts in neutral grey. */
+  :root { --sel-sub-tint: color-mix(in srgb, var(--accent) 9%, transparent); --sel-sub-grey: color-mix(in srgb, var(--text) 6%, transparent); }
+  html[data-theme="dark"] { --sel-sub-tint: color-mix(in srgb, var(--accent) 16%, transparent); }
+  html { --sel-band: var(--sel-bg); }
+  html.sel-inactive { --sel-band: var(--sel-inactive); }
+  /* the tinted body */
+  html:not(.sel-inactive) .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
+  html[data-scheme="glass"]:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-tint); border-color: transparent; }
+  html.sel-inactive .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
+  html.sel-inactive .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-grey); }
+  /* the solid band on a list row: a grid item across the whole first grid row, out to the row's edges */
+  .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks)::before { content: ""; grid-area: 1 / 1 / 2 / -1; align-self: stretch; margin: -5px -11px -1px; border-radius: var(--r-s) var(--r-s) 0 0; background: var(--sel-band); pointer-events: none; }
+  /* ... and on a board tile: the top part (checkbox, title, secondary line, tags) */
+  .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .board-card-top { background: var(--sel-band); margin: -9px -11px 0; padding: 9px 11px 8px; border-radius: calc(var(--r-m) - 1px) calc(var(--r-m) - 1px) 0 0; }
+  /* a tile's ⋯ button sits in the tinted part: it keeps its normal capsule look there */
+  .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); color: var(--ink); background: var(--bg-3); }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions .icon-btn:hover { background: var(--pressed); color: var(--ink); }
+  :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtasks .mini-check:not(.checked) { background: transparent; }   /* an empty circle is see-through on the tint (no dark disc in dark mode) */
+  /* inside the tint everything has its normal colours again */
+  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtasks { color: var(--ink); --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); }
 
   /* ── Selection toolbar (a capsule group that acts on the selection) ─────── */
   .main-title-wrap { display: flex; flex-direction: column; min-width: 0; }
@@ -1177,17 +1199,13 @@ const ICONS = {
   :is(.task-row, .board-card) .task-subtask-add-row::before { width: 16px; height: 16px; }
   :is(.task-row, .board-card) .task-subtask-add-row:focus-within { background: transparent; }   /* no tint while typing: the caret and the placeholder say it, and on the grey selected card the tint was a hard-edged pale bar */
   /* on the solid selection colour */
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row::before { border-color: var(--sel-line-strong); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row:focus-within { background: var(--sel-fill); }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row input { background: transparent; border-color: transparent; }
-  html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtask-add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
 
   .task-row:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
   /* Inline rename fields are quiet, like the ghost add rows: a soft tint and the caret/selected text are the indicator. The
      boxed field with the global 3px focus halo (white on the blue row) read as a heavy bar across the whole row. */
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input) { border: 0 !important; border-radius: var(--r-s); padding: 1px 6px; background: var(--bg-3); box-shadow: none !important; outline: none !important; }
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input):is(:focus, :focus-visible) { border: 0 !important; box-shadow: none !important; outline: none !important; }
-  html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) :is(.task-subtask-text-input, .task-title-input) { background: var(--sel-fill); }
+  html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) .task-title-input { background: var(--sel-fill); }
   .task-subtask-text-input { max-width: 420px; }   /* a rename field should be a field, not a bar across the whole row */
   html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }
   /* with several rows selected the toolbar and the right-click menu act on all of them, so the per-row capsule (which would act on one row) is hidden on the selected rows */
