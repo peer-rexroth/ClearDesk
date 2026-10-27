@@ -378,7 +378,7 @@ const ICONS = {
   .task-subtask-row .mini-check { width: 14px; height: 14px; border-radius: var(--r-xs); border: 1.5px solid var(--border-2); flex-shrink: 0; cursor: default; display: flex; align-items: center; justify-content: center; background: var(--bg-2); transition: background-color var(--dur-fast), border-color var(--dur-fast); }
   .task-subtask-row .mini-check:hover { border-color: var(--green-text); }
   .task-subtask-row .mini-check.checked { background: var(--green-text); border-color: var(--green-text); box-shadow: 0 0 0 2px var(--green-bg); }
-  .task-subtask-row .mini-check i { font-size: var(--gl-7); color: var(--on-accent); opacity: 0; }
+  .task-subtask-row .mini-check i { color: var(--on-accent); opacity: 0; }
   .task-subtask-row .mini-check.checked i { opacity: 1; }
   .task-subtask-row.done { color: var(--text-3); }
   .task-subtask-row.done > span { text-decoration: line-through; }   /* strike the text only, not the check circle or buttons */
@@ -1024,7 +1024,7 @@ const ICONS = {
      descendants that read them (project, subtasks, due) follow. Badges and the
      checkbox are recoloured explicitly (the tag badges carry inline colours,
      hence !important). */
-  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --dur-fast: .12s; --dur-base: .2s; --ib-s: 22px; --ib-m: 26px; --fs-11: 11px; --gl-6: 6px; --gl-7: 7px; --gl-8: 8px; --gl-9: 9px; --gl-10: 10px; --ico-empty: 36px; --ico-empty-s: 30px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: var(--cap-on); --on-accent: #fff; --danger: #d92d20; }
+  :root { --gutter: 20px; --ink-ring: rgba(0,0,0,.12); --search-hit: rgba(255,214,10,.45); --dur-fast: .12s; --dur-base: .2s; --ib-s: 22px; --ib-m: 26px; --fs-11: 11px; --gl-8: 8px; --gl-9: 9px; --gl-10: 10px; --ico-empty: 36px; --ico-empty-s: 30px; --fs-12: 12px; --fs-13: 13px; --fs-14: 14px; --fs-15: 15px; --fs-17: 17px; --fs-22: 22px; --r-xs: 4px; --r-s: 8px; --r-m: 10px; --r-l: 12px; --r-xl: 16px; --ico-k: 1.26; --ico-12: calc(12px / 1.26); --ico-14: calc(14px / 1.26); --ico-16: calc(16px / 1.26); --ico-18: calc(18px / 1.26); --scrim: rgba(0,0,0,.25); --scrim-light: rgba(0,0,0,.2); --scrim-glass: rgba(20,24,50,.22); --elev-1: 0 1px 2px rgba(0,0,0,.12); --elev-2: 0 6px 18px rgba(0,0,0,.14); --elev-3: 0 8px 32px rgba(0,0,0,.18); --shadow-ink: rgba(0,0,0,.16); --shadow-ink-strong: rgba(0,0,0,.25); --glass-lift-1: rgba(40,50,110,.10); --glass-lift-2: rgba(40,50,110,.15); --sel-fill: rgba(255,255,255,.18); --sel-fill-hover: rgba(255,255,255,.45); --sel-line: rgba(255,255,255,.55); --sel-line-strong: rgba(255,255,255,.75); --sel-halo: rgba(255,255,255,.24); --sel-halo-strong: rgba(255,255,255,.4); --sel-text-2: rgba(255,255,255,.9); --sel-text-3: rgba(255,255,255,.85); --hover: color-mix(in srgb, var(--text) 8%, transparent); --pressed: color-mix(in srgb, var(--text) 14%, transparent); --accent: #2a5fcf; --accent-hover: color-mix(in srgb, var(--accent) 88%, #000); --accent-tint: color-mix(in srgb, var(--accent) 24%, transparent); --glass-accent: linear-gradient(180deg, color-mix(in srgb, var(--accent) 90%, #fff), var(--accent)); --sel-bg: var(--accent); --sel-inactive: var(--cap-on); --on-accent: #fff; --danger: #d92d20; }
   html[data-theme="dark"] { --accent: #2c62c9; }
   html:not(.sel-inactive) .task-row.kbd-selected, html:not(.sel-inactive) .task-row.bulk-selected, html:not(.sel-inactive) .task-row.kbd-selected.bulk-selected, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) {
     background: var(--sel-bg); border-color: var(--sel-bg); box-shadow: none; color: var(--on-accent);
@@ -1344,7 +1344,7 @@ const ICONS = {
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
   .note-editor.locked .tbl-handles { display: none; }
-  .tbl-plus { position: absolute; width: 12px; height: 12px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-6); cursor: default; transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+  .tbl-plus { position: absolute; width: 14px; height: 14px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-8); cursor: default; transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
   .tbl-colrs { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; z-index: 1; }
   .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: var(--r-xs); background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; }
   .tbl-colrs:hover::after, .tbl-colrs.active::after { opacity: .75; }
@@ -1862,7 +1862,7 @@ const ICONS = {
   .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: 999px 0 0 999px; }
   .pr-chip-wrap.has-x .pr-chip { padding-left: 12px; }
   .pr-pill-x::before, .pr-chip-x::before, .tbl-plus::before, .tbl-grip.tbl::before, .tbl-grip.col::before, .tbl-grip.row::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
-  .tbl-plus::before { inset: -5px; }                          /* inset is from the padding box, inside a 1px border: 10px + 2 x 5 = 20 */
+  .tbl-plus::before { inset: -4px; }                          /* inset is from the padding box, inside a 1px border: 12px + 2 x 4 = 20 */
   .tbl-grip.tbl::before { inset: -4px -8px -4px 0; }          /* 12 + 2 x 4 = 20 tall; the grip sits against the list resizer, so the width grows to the right only */
   .tbl-grip.col::before { inset: -4px 0; }                    /* the column / row grips were 14px across: 12 + 2 x 4 = 20 */
   .tbl-grip.row::before { inset: 0 -8px 0 0; }
@@ -2817,6 +2817,33 @@ function collapseSidebarIfNarrow(){
   const mirror = ()=>{ mini.innerHTML = src.innerHTML; mini.style.display = src.style.display; };
   new MutationObserver(mirror).observe(src, { childList: true, subtree: true, attributes: true });
   mirror();
+})();
+// Icon-only buttons (audit U-16): the markup gives every one a `title`; this copies it into `aria-label` so a screen reader gets the same name
+// (a title alone is only a fallback). A button with visible text, or with its own aria-label, is left alone; a label this pass wrote follows a later title change.
+function iconButtonLabel(el){
+  if(!el || !el.getAttribute) return null;
+  const title = el.getAttribute('title');
+  if(!title) return null;
+  const own = el.getAttribute('aria-label');
+  if(own && el.getAttribute('data-autolabel')!=='1') return null;
+  if(String(el.textContent||'').trim()) return null;
+  return own===title ? null : title;
+}
+function labelIconButtons(root){
+  if(!root || !root.querySelectorAll) return;
+  const list = root.querySelectorAll('button[title], [role="button"][title]');
+  for(let i=0;i<list.length;i++){
+    const t = iconButtonLabel(list[i]);
+    if(t){ list[i].setAttribute('aria-label', t); list[i].setAttribute('data-autolabel', '1'); }
+  }
+}
+(function(){
+  if(typeof MutationObserver==='undefined' || !document.body) return;
+  let queued = false;
+  const run = ()=>{ queued = false; labelIconButtons(document.body); };
+  new MutationObserver(()=>{ if(!queued){ queued = true; requestAnimationFrame(run); } })
+    .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['title'] });
+  labelIconButtons(document.body);
 })();
 // Sidebar width: drag the sidebar's right edge (or use the arrow keys on it); a per-device display preference like the collapse state.
 const SIDEBAR_W_KEY = 'cleardesk_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 260, SIDEBAR_W_MAX = 480;   // 260 = the widest the tools bar needs (Reconnect chip + Data / Appearance / Help = 259px), so nothing runs past the edge
@@ -9292,8 +9319,8 @@ function tblHandlesShow(table){
     const cs = table.rows[0].cells;
     for(let i=1; i<cols; i++) html += `<div class="tbl-colrs" style="left:${p((cs[i - 1].getBoundingClientRect().right - dr.left) / k)}px;top:${p(top)}px;height:${p(h)}px" title="Drag to resize the column · double-click to even out" onmousedown="event.preventDefault()" onpointerdown="tblColResizeDown(event,${i})" ondblclick="tblColsEven(event)"></div>`;
   }
-  html += `<div class="tbl-plus" style="left:${p(left + w + 6)}px;top:${p(top + h / 2 - 6)}px" role="button" aria-label="Add a column" title="Add column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div>`;
-  html += `<div class="tbl-plus" style="left:${p(left + w / 2 - 6)}px;top:${p(top + h + 6)}px" role="button" aria-label="Add a row" title="Add row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div>`;
+  html += `<div class="tbl-plus" style="left:${p(left + w + 6)}px;top:${p(top + h / 2 - 7)}px" role="button" aria-label="Add a column" title="Add column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div>`;
+  html += `<div class="tbl-plus" style="left:${p(left + w / 2 - 7)}px;top:${p(top + h + 6)}px" role="button" aria-label="Add a row" title="Add row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div>`;
   layer.innerHTML = html;
 }
 // ---- table column widths ----

@@ -175,6 +175,7 @@ async function run(argv) {
   const testSrc = fileNames.map(f => '\n// --- ' + f + ' ---\n' + readFile(casesDir + '/' + f)).join('\n');
 
   // ---- one combined eval: app code + resetState glue + all test registrations ----
+  globalThis.__APP_HTML = html;   // the page's markup, for tests that scan it (a11y-labels)
   eval(appCode + glue + testSrc);
 
   // ---- run ----
