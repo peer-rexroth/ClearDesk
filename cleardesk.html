@@ -776,8 +776,7 @@ const ICONS = {
   .sync-banner .btn { border-radius: 999px; }
   .sync-banner .icon-btn { color: var(--text-3); }
   .update-banner > i:first-child { color: var(--accent); }
-  .split-btn-menu-item.prompts-only { border-top: 0.5px solid var(--border-2); }
-  html:not([data-mode="prompts"]) .prompts-only { display: none !important; }   /* Export / Import Prompts in the Data menu only matter in Prompts */
+  .split-btn-menu-item.notes-only { border-top: 0.5px solid var(--border-2); }   /* Export Notes / Prompts follow the general items after a hairline */
 
   .filter-menu { min-width: 280px; }
   .filter-menu-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -2052,6 +2051,7 @@ const ICONS = {
     <button type="button" class="btn btn-primary btn-sm" onclick="applyNoteLink()">Done</button>
   </div>
 </div>
+<input type="file" id="noteImportInput" accept=".md,.markdown,.txt,.html,.htm,.json" multiple style="display:none" onchange="onNoteImportPicked(event)">
 <input type="file" id="fileInput" accept=".json,.md,.markdown,.txt,.html,.htm" multiple style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
@@ -2171,11 +2171,15 @@ const ICONS = {
         </div>
         <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-arrow-down-to-bracket split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Import…</div><div class="split-btn-menu-desc">A backup or a prompts file</div></div>
+          <div><div class="split-btn-menu-label">Import…</div><div class="split-btn-menu-desc">A backup, a prompts or notes file, or .md / .txt / .html notes</div></div>
+        </div>
+        <div class="split-btn-menu-item notes-only" onclick="exportNotes('all');closeLibMenu()">
+          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
+          <div><div class="split-btn-menu-label">Export Notes</div><div class="split-btn-menu-desc">All notes and folders, as a .json file</div></div>
         </div>
         <div class="split-btn-menu-item prompts-only" onclick="exportPrompts('all');closeLibMenu()">
           <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export Prompts</div><div class="split-btn-menu-desc">Prompts as a .json file</div></div>
+          <div><div class="split-btn-menu-label">Export Prompts</div><div class="split-btn-menu-desc">All prompts, folders and variables, as a .json file</div></div>
         </div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
@@ -2667,7 +2671,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Delete and Delete table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links, lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, and headings below level 3 become Subheadings. One <em>Undo</em> takes the whole import back.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → ClearDesk Note</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links, lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, and headings below level 3 become Subheadings. One <em>Undo</em> takes the whole import back.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
@@ -2702,7 +2706,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-diff"></i><span><strong>Compare two prompts</strong> the way VS Code does: choose <em>Select for Compare</em> in one prompt's ⋯ or right-click menu, then <em>Compare with Selected</em> in another's. The selected prompt is on the left, the other on the right; to compare a different pair, close the window and select again. The two texts line up row by row: changed lines are red on the left and green on the right with the changed words marked, and a hatched gap means the line is only on the other side. The sliders button's menu sets how closely changes are marked (<em>Lines</em>, <em>Words</em> or <em>Characters</em>), <em>Ignore Whitespace</em> skips spacing, and <em>Hide Unchanged</em> folds long stretches that did not change (click a fold to open it); the button is tinted while an option other than the default is on. <strong>Type in either side</strong> and the differences update as you go; the arrow beside a difference moves it across (the left text to the right, or the right to the left). The strip beside the scroll bar shows where every difference is, and clicking it jumps there. <strong>F7</strong> and <strong>Shift+F7</strong> step through the differences, <strong>Cmd/Ctrl+Z</strong> undoes (and <strong>Shift+Cmd/Ctrl+Z</strong> redoes) the last edit or move. Nothing is changed in your prompts until you choose <em>Save Changes</em> (<strong>Cmd/Ctrl+S</strong>); a locked prompt can be read but not changed.</span></div>
           <div class="help-row"><i class="fa-solid fa-copy"></i><span><strong>Copy Prompt</strong> (or <kbd>Cmd/Ctrl</kbd>+<kbd>Enter</kbd>) puts the finished text on the clipboard (the copy button in the template box’s corner copies the template itself, placeholders and all) with every placeholder filled in. A variable you have not filled in (no choice, no checklist item, no text) stays in the text as its placeholder, for example <code>{{tone}}</code>, so the gap is visible; a toast tells you which ones.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-right-from-square"></i><span><strong>Open in an AI app</strong>: the <em>Open in</em> button (the arrow leaving a square, next to <em>⋯</em>; <em>Open in</em> is also in the ⋯ and right-click menus) copies the finished prompt and opens Claude, Copilot or another page in a new tab, ready to paste. <kbd>Cmd/Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>Enter</kbd> does it with the first one. <em>Edit Apps…</em> changes the list (a name and a web address each; kept on this device).</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar, while you are in Prompts) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and import</strong>: <em>Export Prompts</em> in the <strong>Data</strong> menu (bottom of the sidebar) saves every prompt, its folders and the global variables it uses as a <code>.json</code> file; right-click a prompt or a folder for <em>Export Prompt</em> / <em>Export Folder</em>. <em>Import…</em> in the same menu reads such a file (it recognises a prompts file and merges it straight in; a full backup still asks Replace or Merge). Prompts that are already here (same id) are skipped, so importing a file twice changes nothing; folders are matched by name, and a global variable you already have keeps its own values. Recently Deleted prompts are not exported.</span></div>
           <div class="help-row"><i class="fa-regular fa-star"></i><span><strong>Favorite</strong> adds a prompt to the Favorites list. <strong>Lock</strong> makes it read-only (its template, name and options); you can still choose values and type text. <strong>Duplicate</strong>, <strong>Move to</strong> a folder and <strong>Delete</strong> are in the <strong>⋯</strong> menu and on right-click; you can also drag a prompt onto a folder. Delete goes to <em>Recently Deleted</em> for 30 days.</span></div>
           </div>
         </div>
@@ -6978,7 +6982,7 @@ function noteMenuHtml(id, opts){
     item('fa-regular fa-copy', 'Copy Note', `noteMenuRun('copy')`),
     ...(opts && opts.selection ? [rowMenuSub('fa-regular fa-copy', 'Copy Selection As', ['rich:Rich Text', 'plain:Plain Text', 'markdown:Markdown', 'html:HTML'].map(x=>menuOpt(`noteMenuRun('copyselas','${x.split(':')[0]}')`, {none: true}, x.split(':')[1])).join(''))] : []),
     rowMenuSub('fa-regular fa-copy', 'Copy As', menuOpt(`noteMenuRun('copyas','rich')`, {none: true}, 'Rich Text') + menuOpt(`noteMenuRun('copyas','plain')`, {none: true}, 'Plain Text') + menuOpt(`noteMenuRun('copyas','markdown')`, {none: true}, 'Markdown') + menuOpt(`noteMenuRun('copyas','html')`, {none: true}, 'HTML')),
-    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
+    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('exportas','json')`, {svg: menuSvg('file-lines')}, 'ClearDesk Note (.json)')),
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
@@ -7002,7 +7006,7 @@ function noteMenuRun(kind, value){
   else if(kind==='pin') toggleNotePin(id);
   else if(kind==='copyas') copyNoteAs(id, value);
   else if(kind==='copyselas') copySelectionAs(value);
-  else if(kind==='exportas') noteExportAs(id, value);
+  else if(kind==='exportas'){ if(value==='json') exportNotes('note', id); else noteExportAs(id, value); }
   else if(kind==='print') noteExportPrint(id);
   else if(kind==='restore') restoreNote(id);
   else if(kind==='clone') cloneNote(id);
@@ -7014,9 +7018,10 @@ function folderMenuHtml(id){
   const item = rowMenuItem;
   const parts = [item('fa-solid fa-plus', 'New Note Here', `folderMenuRun('new')`)];
   if(!f.parentId) parts.push(item('fa-regular fa-folder-plus', 'New Subfolder', `folderMenuRun('newsub')`));
+  parts.push(item('fa-solid fa-arrow-down-to-bracket', 'Import Notes Here…', `folderMenuRun('import')`));
   const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `folderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
 }
 // Right-click menu of a project in the Tasks sidebar (the Notes folders have one too): the same builder pattern, title-style labels, danger last.
@@ -7151,6 +7156,8 @@ function folderMenuRun(kind){
   else if(kind==='up') moveFolderBy(id, -1);
   else if(kind==='down') moveFolderBy(id, 1);
   else if(kind==='rename') openFolderModal(id);
+  else if(kind==='import') openNoteImport(id);
+  else if(kind==='export') exportNotes('folder', id);
   else if(kind==='delete') deleteNoteFolder(id);
 }
 
@@ -9318,7 +9325,7 @@ function importPromptsData(data){
   if(!incoming.length) return null;
   const srcFolders = Array.isArray(data.folders) ? data.folders : Array.isArray(data.promptFolders) ? data.promptFolders : [];
   const srcGlobals = Array.isArray(data.globals) ? data.globals : Array.isArray(data.promptGlobals) ? data.promptGlobals : [];
-  const now = Date.now(), byId = {}, fmap = {}; let foldersAdded = 0, globalsAdded = 0, added = 0, skipped = 0;
+  const now = Date.now(), byId = {}, fmap = {}; let foldersAdded = 0, globalsAdded = 0, added = 0, skipped = 0; const newPrompts = [], newFolders = [], newGlobals = [];
   srcFolders.forEach(f=>{ if(f && f.id && typeof f.name==='string' && f.name.trim()) byId[f.id] = f; });
   const resolve = sid=>{
     const sf = byId[sid]; if(!sf) return '';
@@ -9328,21 +9335,21 @@ function importPromptsData(data){
     if(same){ fmap[sid] = same.id; return same.id; }
     const nf = { id: isSafeId(String(sf.id)) && !promptFolderById(String(sf.id)) ? String(sf.id) : genId(), name: sf.name.trim().slice(0, 40), updatedAt: now, order: promptFolderEndOrder(parent) };
     if(parent) nf.parentId = parent;
-    promptFolders.push(nf); foldersAdded++; fmap[sid] = nf.id; return nf.id;
+    promptFolders.push(nf); newFolders.push(nf.id); foldersAdded++; fmap[sid] = nf.id; return nf.id;
   };
   incoming.forEach(x=>{
     const id = isSafeId(String(x.id)) ? String(x.id) : genId();
     if(prompts.some(p=>p.id===id)){ skipped++; return; }
     prompts.push({ id, name: String(x.name || 'Untitled prompt').slice(0, 200), folderId: x.folderId ? resolve(x.folderId) : '', favorite: x.favorite===true, locked: x.locked===true,
       template: x.template, vars: x.vars || {}, presets: Array.isArray(x.presets) ? x.presets : [], createdAt: Number.isFinite(x.createdAt) ? x.createdAt : now, updatedAt: now });
-    untombstone(deletedPromptIds, id); added++;
+    untombstone(deletedPromptIds, id); added++; newPrompts.push(id);
   });
   srcGlobals.forEach(g=>{
     if(!g || typeof g.name!=='string' || !g.name.trim() || promptGlobalByName(g.name)) return;
-    promptGlobals.push({ id: genId(), name: g.name, options: Array.isArray(g.options) ? g.options.map(String) : [], updatedAt: now }); globalsAdded++;
+    const gid = genId(); promptGlobals.push({ id: gid, name: g.name, options: Array.isArray(g.options) ? g.options.map(String) : [], updatedAt: now }); newGlobals.push(gid); globalsAdded++;
   });
   normalizePrompts();
-  return { added, skipped, folders: foldersAdded, globals: globalsAdded };
+  return { added, skipped, folders: foldersAdded, globals: globalsAdded, newPrompts, newFolders, newGlobals };
 }
 function finishPromptsImport(data){
   const res = importPromptsData(data);
@@ -9351,7 +9358,13 @@ function finishPromptsImport(data){
   save(); render();
   const bits = [];
   if(res.skipped) bits.push(`${res.skipped} already here`); if(res.folders) bits.push(`${res.folders} folder${res.folders===1 ? '' : 's'}`); if(res.globals) bits.push(`${res.globals} global variable${res.globals===1 ? '' : 's'}`);
-  showToast(res.added ? `Imported ${res.added} prompt${res.added===1 ? '' : 's'}${bits.length ? ' · ' + bits.join(' · ') : ''}` : `Nothing new to import${res.skipped ? ' — all ' + res.skipped + ' were already here' : ''}`);
+  const undo = res.added ? ()=>{
+    res.newPrompts.forEach(id=>{ const i = prompts.findIndex(x=>x.id===id); if(i>=0){ prompts.splice(i, 1); tombstone(deletedPromptIds, id); } });
+    res.newFolders.forEach(id=>{ const i = promptFolders.findIndex(x=>x.id===id); if(i>=0){ promptFolders.splice(i, 1); tombstone(deletedPromptFolderIds, id); } });
+    res.newGlobals.forEach(id=>{ const i = promptGlobals.findIndex(x=>x.id===id); if(i>=0){ promptGlobals.splice(i, 1); tombstone(deletedPromptGlobalIds, id); } });
+    if(!prompts.some(x=>x.id===selectedPromptId)) selectedPromptId = null; save(); render(); showToast('Import undone');
+  } : null;
+  showToast(res.added ? `Imported ${res.added} prompt${res.added===1 ? '' : 's'}${bits.length ? ' · ' + bits.join(' · ') : ''}` : `Nothing new to import${res.skipped ? ' — all ' + res.skipped + ' were already here' : ''}`, false, undo);
 }
 
 // ---- right-click menus ----
@@ -11821,19 +11834,97 @@ function triggerImport(){ document.getElementById('fileInput').click(); }
 function importKindOf(data){
   if(!data || typeof data!=='object') return null;
   if(data.format===PROMPTS_FILE_FORMAT) return 'prompts';
+  if(data.format===NOTES_FILE_FORMAT) return 'notes';
   if(Array.isArray(data.prompts) && !Array.isArray(data.tasks) && !Array.isArray(data.projects)) return 'prompts';
   return (Array.isArray(data.tasks) && Array.isArray(data.projects)) ? 'backup' : null;
 }
 // Notes come in from .md / .markdown, .txt and .html files (several at once) through the same Import… door as a ClearDesk file, or dropped on the notes list. Each file becomes a note in the
 // folder you are looking at (the default folder from All Notes, Pinned or Recently Deleted); the last one is selected. One toast Undo takes them all back.
+// ---- a ClearDesk notes file: one note, a folder (with its subfolders) or all notes, keeping title, body, folder, pinned, locked and dates. It comes back through the same Import… door as
+// every other file; notes whose id is already here are skipped (so importing twice changes nothing), folders are matched by name and level else created. ----
+const NOTES_FILE_FORMAT = 'cleardesk-notes';
+function buildNotesExport(scope, id){                              // scope: 'note' | 'folder' (and its subfolders) | 'all'
+  let list = notes.filter(n=>!noteTrashed(n));
+  const need = new Set();
+  if(scope==='note') list = list.filter(n=>n.id===id);
+  else if(scope==='folder'){
+    if(!folderById(id)) return null;
+    const ids = new Set([id, ...folderChildren(id).map(k=>k.id)]); ids.forEach(x=>need.add(x));
+    list = list.filter(n=>ids.has(n.folderId));
+  }
+  if(!list.length) return null;
+  list.forEach(n=>{ let f = folderById(n.folderId); while(f && !need.has(f.id)){ need.add(f.id); f = f.parentId ? folderById(f.parentId) : null; } });
+  if(scope==='all') noteFolders.forEach(f=>need.add(f.id));
+  return JSON.parse(JSON.stringify({
+    format: NOTES_FILE_FORMAT, version: 1, exported: new Date().toISOString(),
+    folders: noteFolders.filter(f=>need.has(f.id)).map(f=>f.parentId ? { id: f.id, name: f.name, parentId: f.parentId } : { id: f.id, name: f.name }),
+    notes: list.map(n=>({ id: n.id, title: n.title, body: n.body, folderId: n.folderId, pinned: !!n.pinned, locked: !!n.locked, createdAt: n.createdAt, updatedAt: n.updatedAt }))
+  }));
+}
+function exportNotes(scope, id){
+  flushNoteEdit();
+  const data = buildNotesExport(scope, id);
+  if(!data){ showToast('There are no notes to export', true); return; }
+  const day = new Date().toISOString().slice(0, 10), slug = t=>String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+  const name = scope==='note' ? slug((notes.find(n=>n.id===id) || {}).title) : scope==='folder' ? slug((folderById(id) || {}).name) : '';
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+  a.download = `cleardesk-note${scope==='note' ? '' : 's'}-${name ? name + '-' : ''}${day}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  showToast(`Exported ${data.notes.length} note${data.notes.length===1 ? '' : 's'}`);
+}
+// Merge a notes file in. `target` (a folder id) puts every note there and ignores the file's folders. {added, skipped, folders, first}
+function importNotesData(data, target){
+  if(!data || typeof data!=='object' || !Array.isArray(data.notes)) return null;
+  const incoming = data.notes.filter(x=>x && typeof x==='object' && typeof x.body==='string');
+  if(!incoming.length) return null;
+  const srcFolders = Array.isArray(data.folders) ? data.folders : [], now = Date.now(), byId = {}, fmap = {};
+  let foldersAdded = 0, added = 0, skipped = 0, first = null; const newNotes = [], newFolders = [];
+  srcFolders.forEach(f=>{ if(f && f.id && typeof f.name==='string' && f.name.trim()) byId[f.id] = f; });
+  const resolve = sid=>{
+    const sf = byId[sid]; if(!sf) return NOTES_DEFAULT_FOLDER;
+    if(fmap[sid]!==undefined) return fmap[sid];
+    const parentSrc = sf.parentId && byId[sf.parentId] && !byId[sf.parentId].parentId ? sf.parentId : null, parent = parentSrc ? resolve(parentSrc) : '';
+    const same = noteFolders.find(x=>x.name.toLowerCase()===sf.name.trim().toLowerCase() && (x.parentId || '')===(parent===NOTES_DEFAULT_FOLDER ? '' : parent));
+    if(same){ fmap[sid] = same.id; return same.id; }
+    const par = parent===NOTES_DEFAULT_FOLDER ? '' : parent;
+    const nf = { id: isSafeId(String(sf.id)) && !folderById(String(sf.id)) ? String(sf.id) : genId(), name: sf.name.trim().slice(0, 40), order: folderEndOrder(par), updatedAt: now };
+    if(par) nf.parentId = par;
+    noteFolders.push(nf); newFolders.push(nf.id); foldersAdded++; fmap[sid] = nf.id; return nf.id;
+  };
+  incoming.forEach(x=>{
+    const id = isSafeId(String(x.id)) ? String(x.id) : genId();
+    if(notes.some(n=>n.id===id)){ skipped++; return; }
+    notes.push({ id, title: String(x.title || '').slice(0, 200), body: sanitizeNoteHtml(x.body), folderId: folderById(target) ? target : x.folderId ? resolve(x.folderId) : NOTES_DEFAULT_FOLDER,
+      pinned: x.pinned===true, locked: x.locked===true, createdAt: Number.isFinite(x.createdAt) ? x.createdAt : now, updatedAt: now });
+    untombstone(deletedNoteIds, id); added++; newNotes.push(id); first = first || id;
+  });
+  normalizeNotes();
+  return { added, skipped, folders: foldersAdded, first, newNotes, newFolders };
+}
+function finishNotesImport(data, target){
+  const res = importNotesData(data, target);
+  if(!res){ showToast('That file contains no notes', true); return; }
+  if(appMode!=='notes') setAppMode('notes');
+  if(res.first){ noteFolderFilter = noteFolderFilter==='trash' ? 'all' : noteFolderFilter; selectedNoteId = res.first; noteEditorId = null; noteSearchQuery = ''; syncSearchBox(); }
+  save(); render();
+  const bits = [];
+  if(res.skipped) bits.push(`${res.skipped} already here`); if(res.folders) bits.push(`${res.folders} folder${res.folders===1 ? '' : 's'}`);
+  const undo = res.added ? ()=>{
+    res.newNotes.forEach(id=>{ const i = notes.findIndex(x=>x.id===id); if(i>=0){ notes.splice(i, 1); tombstone(deletedNoteIds, id); } });
+    res.newFolders.forEach(id=>{ const i = noteFolders.findIndex(x=>x.id===id); if(i>=0){ noteFolders.splice(i, 1); tombstone(deletedNoteFolderIds, id); } });
+    if(!notes.some(x=>x.id===selectedNoteId)) selectedNoteId = null; noteEditorId = null; save(); render(); showToast('Import undone');
+  } : null;
+  showToast(res.added ? `Imported ${res.added} note${res.added===1 ? '' : 's'}${bits.length ? ' · ' + bits.join(' · ') : ''}` : `Nothing new to import${res.skipped ? ' — all ' + res.skipped + ' were already here' : ''}`, false, undo);
+}
 const NOTE_IMPORT_RE = /\.(md|markdown|mdown|txt|text|html?)$/i, NOTE_IMPORT_MAX = 50, NOTE_IMPORT_BYTES = 2000000;
-function importNoteFiles(files){
-  const list = [...files].filter(f=>NOTE_IMPORT_RE.test(f.name));
-  if(!list.length){ showToast('Nothing to import: notes come in as .md, .txt or .html files', true); return; }
+function importNoteFiles(files, target){
+  const all = [...files], list = all.filter(f=>NOTE_IMPORT_RE.test(f.name)), jsons = all.filter(f=>/\.json$/i.test(f.name));
+  jsons.forEach(f=>f.text().then(t=>{ try{ const d = JSON.parse(t); if(importKindOf(d)==='notes') finishNotesImport(d, target); else showToast('That is not a ClearDesk notes file', true); }catch(_){ showToast('Invalid ClearDesk file', true); } }));
+  if(!list.length){ if(!jsons.length) showToast('Nothing to import: notes come in as .md, .txt, .html or ClearDesk .json files', true); return; }
   const take = list.slice(0, NOTE_IMPORT_MAX), big = take.filter(f=>f.size>NOTE_IMPORT_BYTES);
   flushNoteEdit();
   Promise.all(take.filter(f=>f.size<=NOTE_IMPORT_BYTES).map(f=>f.text().then(t=>({ name: f.name, text: t }), ()=>null))).then(res=>{
-    const now = Date.now(), folderId = folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, made = [];
+    const now = Date.now(), folderId = folderById(target) ? target : folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, made = [];
     res.filter(Boolean).forEach((r, i)=>{
       const p = noteImportParse(r.name, r.text); if(!p.title && !p.body) return;
       made.push({ id: genId(), title: p.title, body: p.body, folderId, createdAt: now + i, updatedAt: now + i });
@@ -11860,6 +11951,9 @@ function importNoteFiles(files){
   e.preventDefault();
   if(type==='drop') importNoteFiles(dt.files);
 }));
+let noteImportFolder = null;
+function openNoteImport(folderId){ noteImportFolder = folderId || null; document.getElementById('noteImportInput')?.click(); }
+function onNoteImportPicked(event){ const files = [...event.target.files]; event.target.value = ''; if(files.length) importNoteFiles(files, noteImportFolder); noteImportFolder = null; }
 function handleFileImport(event){
   const picked = [...event.target.files]; event.target.value = '';
   if(picked.length && picked.every(f=>NOTE_IMPORT_RE.test(f.name))){ importNoteFiles(picked); return; }   // notes
@@ -11868,6 +11962,7 @@ function handleFileImport(event){
   reader.onload = e=>{
     try{
       const data = JSON.parse(e.target.result);
+      if(importKindOf(data)==='notes'){ finishNotesImport(data); return; }              // a notes file is merged straight in too
       if(importKindOf(data)==='prompts'){ finishPromptsImport(data); return; }          // a prompts file is merged straight in (no Replace choice that could empty your tasks)
       if(!data.tasks || !data.projects) throw new Error('bad');
       pendingImportData = data;
