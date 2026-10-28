@@ -9,6 +9,9 @@
 
 html {
   --submenu-w: 164px;
+  --bar-ctl-h: 36px;                /* the height of every control in a column's 52px bar (capsule groups, selects, round buttons) */
+  /* Per-pane hooks, set on the pane that needs them and not defaults: --list-w (a list column's width, falls back to --notes-list-w: 300px),
+     --pdf-ruler-w (the Compare dialog's overview ruler, 14px). --fa is the icon mask mechanism, written by the icon registry, not a design value. */
   --ink: var(--text);
   --ink-2: var(--text-2);
   --ink-3: var(--text-3);

@@ -229,6 +229,7 @@ One shape per job, so the same kind of thing always looks the same:
 
 - **Surface:** glass (2.4), `--r-xl`, 230px wide for the main menu, small option menus at a fixed `--submenu-w` 164px so Priority/Status/Due/Move look the same everywhere.
 - **Row:** 8px radius, a 22px tick column for the current value (✓ at the left for single-choice lists, at the right for toggle states), then a dot or 16px icon, then the label. **Hover fills the row with the accent and turns text white**, as in a macOS pop-up; a destructive item turns white on it too.
+- **A flyout is as wide as its longest label** (`width: max-content`, at least `--submenu-w`, at most 280px) so labels like "Plain Text (.txt)" never wrap onto a second line; it is measured while hidden and flips to the left when it would leave the window.
 - **Context-menu rules:** Title-style labels ("Open Details", "Add Subtask", "Move to"); few items; **one level of submenu** (hover or click to open, flips left and nudges up when near the edge); **hide unavailable items** (do not dim); separators group (≤ 3 groups; the task row menu's four are a documented exception, U-07) and are cleaned up when a group empties; Delete is always its own last group, red; the ⌫ glyph hint, not "Del". A command that opens a dialog or asks for more input ends in an ellipsis ("Edit…", "Print / Save as PDF…"); a row that only acts does not. Move to lists its targets with an icon each (project icons in Tasks, the folder glyph in Notes and Prompts): icons on all rows or none.
 - **Coverage:** every row in the sidebar has a right-click menu: a project or folder (New Here, Edit…, Delete), a smart view or All / Pinned / Favorites row (New Task / Note / Prompt Here; Overdue also *Move All to Today*), and a Recently Deleted row (*Delete All…*, nothing while it is empty).
 - Every context-menu command also exists in a visible control (toolbar, panel, ⋯ button).
@@ -243,7 +244,7 @@ One shape per job, so the same kind of thing always looks the same:
 - **Toast:** bottom-right, glass, 13px, a live region (`role="status"`, `role="alert"` for errors). Success 2.4s, with Undo 6s; **held while the pointer or focus is on it**. **An error toast stays until dismissed** (a ✕ button), per the HIG's warning about time-boxed messages.
 - **Banners** are quiet neutral bars (a small amber icon, one pill action, ✕), not coloured blocks. A first-run notice is a banner, not a modal.
 - **Inline messages** for form validation, in red, under the field, saying what to do.
-- **A new-version banner** compares server headers and offers Reload.
+- **A new-version banner** says a newer copy is ready and offers Reload; it stays until acted on. The reference is **the copy that actually loaded**, not the first check after load (a page started from the offline copy would otherwise take the newer stamp as its baseline and never report it was stale). The service worker remembers the stamp and source of the last page it served and answers the page. A **Check for Updates** command in the Help menu runs the same comparison on request and **always answers**: "up to date", the banner returning even if dismissed, or "could not reach the server".
 
 ### 5.7 Tooltips
 
@@ -335,6 +336,7 @@ The first-run "link a file" prompt is a **quiet banner**, never a modal; the dia
 - Placeholders say what to type and what happens ("Add a task…", "Web address, e-mail or phone number").
 - Empty-state labels are title-style nouns ("No Prompts").
 - No "Are you sure?" copy: say what will happen and what is lost.
+- **No app name in a command's label.** Name the thing, not the product: "Note File (.json)", not "ClearDesk Note (.json)".
 
 ---
 
@@ -432,6 +434,12 @@ Table "+" and grips: closed (U-11, U-10). Their hit areas were measured at 20×2
 **Tables in an editor, Apple-Notes style:** no second toolbar; hover grips and an edge "+"; a grip click only selects the row/column; options on right-click; the same four menus (toolbar, row/column grip, whole table, keyboard) built from one set of helpers.
 
 **A column-width / pane resizer:** 4–6px hit strip on the edge, pointer events measured once for the UI zoom, double-click resets, ←/→ nudge by 16px (Shift 48), clamped, stored per device.
+
+**Import and export** (every data type, one grammar):
+- **One import door** (Data → Import…), plus drop on the list and an "Import … Here…" on a folder. The file is recognised by its **content**, never its name, so a notes or prompts file can never reach the Replace / Merge dialog meant for a full backup and empty the rest of the app.
+- **Merge is the default and is quiet**: a file of one data type merges straight in and says what happened in a toast ("Imported 3 notes · 2 already here"); **every import offers Undo** that removes exactly what came in (items, the folders it created, anything else it added). Re-importing the same file adds nothing (existing ids are skipped).
+- **Where it lands is predictable**: one item goes into the folder you are looking at (as a text file does); a file with several keeps its own folders; an explicit "Import Here…" wins over both.
+- **Export commands exist in every mode** (the whole-app backup, then each data type) rather than appearing only in their own mode. A single item's Export submenu lists the **readable formats and Print first**, then, after a separator, the **re-importable file**.
 
 **Soft-delete trash view** in every mode: the same banner ("removed after 30 days" + Delete All), the same rows with solid selection, Restore and Delete Permanently as two toolbar icon buttons and in the context menu.
 
