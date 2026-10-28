@@ -2197,6 +2197,7 @@ const ICONS = {
         <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Help guide</div></div></div>
         <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard shortcuts</div></div></div>
         <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About</div></div></div>
+        <div class="split-btn-menu-item" onclick="closeHelpMenu();checkForUpdatesNow()"><i class="fa-solid fa-rotate-right split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Check for Updates</div></div></div>
       </div>
     </div>
     </div>
@@ -12485,13 +12486,36 @@ function showUpdateBanner(){
 }
 function dismissUpdateBanner(){ updateBannerDismissed = true; const el = document.getElementById('updateBanner'); if(el){ el.classList.remove('show'); el.innerHTML = ''; } }
 function reloadForUpdate(){ flushNoteEdit && flushNoteEdit(); flushPromptEdit && flushPromptEdit(); location.reload(); }
+const versionDiffers = (loaded, now)=>!!loaded && !!now && loaded!==now;
+// The reference is the copy this page actually loaded, which only the service worker knows (it remembers the stamp and whether it served the network or its saved copy). Taking the first
+// check after load instead meant a page started from the saved copy (server down) adopted the NEWER stamp as its baseline and never said it was stale.
+function askLoadedStamp(){
+  return new Promise(resolve=>{
+    const sw = navigator.serviceWorker && navigator.serviceWorker.controller; if(!sw) { resolve(null); return; }
+    const t = setTimeout(()=>resolve(null), 1500), on = e=>{ if(e.data && e.data.type==='nav-stamp'){ clearTimeout(t); navigator.serviceWorker.removeEventListener('message', on); resolve(e.data); } };
+    navigator.serviceWorker.addEventListener('message', on); sw.postMessage({ type: 'nav-stamp' });
+  });
+}
+async function currentVersionStamps(){                               // {loaded, server}; the server stamp throws when it cannot be reached
+  if(loadedVersionStamp===null){ const info = await askLoadedStamp(); if(info && info.stamp) loadedVersionStamp = info.stamp; }
+  const server = versionStampOf((await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' })).headers);
+  if(loadedVersionStamp===null) loadedVersionStamp = server;
+  return { loaded: loadedVersionStamp, server };
+}
 async function checkForNewVersion(){
   if(location.protocol==='file:' || !window.fetch) return;
+  try{ const v = await currentVersionStamps(); if(versionDiffers(v.loaded, v.server)) showUpdateBanner(); }
+  catch(_){}                                                         // offline: nothing to compare
+}
+// Help → Check for Updates: the same comparison on request, with an answer either way (the banner comes back even if it was dismissed).
+async function checkForUpdatesNow(){
+  if(location.protocol==='file:' || !window.fetch){ showToast('Updates are checked when ClearDesk runs from its local server, not from a file', true); return; }
   try{
-    const stamp = versionStampOf((await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' })).headers);
-    if(loadedVersionStamp===null) loadedVersionStamp = stamp;
-    else if(stamp && loadedVersionStamp && stamp!==loadedVersionStamp) showUpdateBanner();
-  }catch(_){}                                                        // offline: nothing to compare
+    const v = await currentVersionStamps();
+    if(navigator.serviceWorker && navigator.serviceWorker.getRegistration) navigator.serviceWorker.getRegistration().then(r=>r && r.update()).catch(()=>{});
+    if(versionDiffers(v.loaded, v.server)){ updateBannerDismissed = false; showUpdateBanner(); showToast('A new version is ready: use Reload'); }
+    else showToast('ClearDesk is up to date');
+  }catch(_){ showToast('Could not reach the server to check for updates', true); }
 }
 checkForNewVersion();
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkForNewVersion(); });

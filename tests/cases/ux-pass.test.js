@@ -804,3 +804,8 @@ test('opening one sidebar or toolbar pop-up closes the others (one at a time, as
   assertEqual(ids.filter(open).join(), 'filterMenu');
   toggleFilterMenu(); assertEqual(ids.filter(open).length, 0, 'a second click closes it');
 });
+test('an update is only reported when both stamps are known and differ (the stamp is the one of the copy that loaded)', function(){
+  assertEqual(versionDiffers('a', 'b'), true); assertEqual(versionDiffers('a', 'a'), false);
+  assertEqual(versionDiffers('', 'b'), false, 'no known loaded copy: nothing to compare'); assertEqual(versionDiffers('a', ''), false, 'server gave no stamp');
+  assertEqual(versionDiffers(null, 'b'), false);
+});

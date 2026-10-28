@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cleardesk-cache-v2';
+const CACHE_NAME = 'cleardesk-cache-v3';
 const APP_SHELL = [
   'cleardesk.html',
   'manifest.json',
@@ -8,6 +8,25 @@ const APP_SHELL = [
   'icons/icon-180.png',
   'icons/icon-maskable-512.png',
 ];
+
+// What the last page navigation was served from, so the page can tell which copy of the app it is running (the page asks with {type:'nav-stamp'}). Kept in memory and in the
+// cache (the worker is stopped and restarted often). 'cache' means the saved copy was used because the server could not be reached: that page may be out of date.
+const META_KEY = 'cleardesk-last-nav';
+let lastNav = null;
+const stampOf = (h) => h.get('etag') || h.get('last-modified') || h.get('content-length') || '';
+function remember(res, source) {
+  lastNav = { stamp: stampOf(res.headers), source };
+  caches.open(CACHE_NAME).then((c) => c.put(META_KEY, new Response(JSON.stringify(lastNav)))).catch(() => {});
+}
+
+self.addEventListener('message', (event) => {
+  if (!event.data || event.data.type !== 'nav-stamp' || !event.source) return;
+  const reply = (info) => event.source.postMessage({ type: 'nav-stamp', stamp: info.stamp || '', source: info.source || '' });
+  if (lastNav) { reply(lastNav); return; }
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((c) => c.match(META_KEY)).then((r) => (r ? r.json() : {})).catch(() => ({})).then(reply)
+  );
+});
 
 self.addEventListener('install', (event) => {
   // cache.addAll() is all-or-nothing — one failed request (a CDN hiccup, an
@@ -43,11 +62,15 @@ self.addEventListener('fetch', (event) => {
       // would otherwise keep handing back an old cleardesk.html after an edit.
       fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
+          remember(res, 'network');
           const copy = res.clone();   // clone before returning: cloning later races the page reading the body
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('cleardesk.html')))
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('cleardesk.html')).then((cached) => {
+          if (cached) remember(cached, 'cache');
+          return cached;
+        }))
     );
     return;
   }
