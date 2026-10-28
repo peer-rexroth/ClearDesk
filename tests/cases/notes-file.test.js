@@ -74,3 +74,11 @@ test('importing a notes file or a prompts file offers an Undo that removes exact
   assertEqual(prompts.filter(function(p){ return p.id==='px1'; }).length, 0);
   assertEqual(promptGlobals.filter(function(g){ return g.name==='tone'; }).length, 0, 'the variable it added is removed');
 });
+test('a single note imported while viewing a folder lands in that folder; a bigger file keeps its folders', function(){
+  nfSeed(); var one = buildNotesExport('note', 'n1'), many = buildNotesExport('all');
+  notes = []; noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true, order: 1000, updatedAt: 0 }, { id: 'f-mine', name: 'Mine', order: 2000, updatedAt: 0 }];
+  noteFolderFilter = 'f-mine'; finishNotesImport(one);
+  assertEqual(notes.find(function(n){ return n.title==='Plan'; }).folderId, 'f-mine');
+  notes = []; finishNotesImport(many);
+  assertEqual(notes.find(function(n){ return n.title==='Plan'; }).folderId === 'f-mine', false, 'several notes keep their own folders');
+});

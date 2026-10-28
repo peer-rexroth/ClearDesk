@@ -11902,6 +11902,8 @@ function importNotesData(data, target){
   return { added, skipped, folders: foldersAdded, first, newNotes, newFolders };
 }
 function finishNotesImport(data, target){
+  // One note imported while you are looking at a real folder goes into that folder, like a .md file does; a folder or the whole library keeps its own structure.
+  if(!target && folderById(noteFolderFilter) && data && Array.isArray(data.notes) && data.notes.length===1) target = noteFolderFilter;
   const res = importNotesData(data, target);
   if(!res){ showToast('That file contains no notes', true); return; }
   if(appMode!=='notes') setAppMode('notes');
