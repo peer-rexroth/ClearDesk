@@ -2677,7 +2677,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Delete and Delete table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links, lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links (also reference-style <code>[text][ref]</code> with its <code>[ref]: address</code> line), lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
@@ -6775,6 +6775,22 @@ function mdSplitRow(r){
   for(let i = 0; i<t.length; i++){ if(t[i]==='\\' && t[i + 1]==='|'){ cur += '|'; i++; } else if(t[i]==='|'){ cells.push(cur.trim()); cur = ''; } else cur += t[i]; }
   cells.push(cur.trim()); return cells;
 }
+// Reference-style links: `[text][ref]`, `[ref][]` and `[ref]`, with the address in a definition line `[ref]: https://… "title"` anywhere at the top level of the file. The definitions
+// are collected (outside code fences) and removed before the blocks are read; mdRefs holds them while one file is parsed. A label matches without regard to case or extra spaces; a
+// reference with no definition, and `[^1]` footnotes, stay as the text they are. An image reference becomes a link to the picture, like an inline image.
+let mdRefs = null;
+const mdRefKey = x=>String(x).replace(/\s+/g, ' ').trim().toLowerCase();
+function mdCollectRefs(lines){
+  const refs = {}, kept = []; let fence = null;
+  for(const line of lines){
+    const f = /^ {0,3}(`{3,}|~{3,})/.exec(line);
+    if(f){ if(!fence) fence = f[1][0]; else if(f[1][0]===fence) fence = null; kept.push(line); continue; }
+    const m = !fence && /^ {0,3}\[([^\]\[]+)\]:[ \t]*(<[^<>]*>|[^\s<>]+)(?:[ \t]+(?:"[^"]*"|'[^']*'|\([^)]*\)))?[ \t]*$/.exec(line);
+    if(m && m[1][0]!=='^'){ const k = mdRefKey(m[1]); if(!(k in refs)) refs[k] = m[2].replace(/^<(.*)>$/, '$1'); continue; }
+    kept.push(line);
+  }
+  return { lines: kept, refs };
+}
 function mdInline(s){
   s = String(s); let out = '', i = 0; const n = s.length;
   const closer = (from, d)=>{                                       // the closing delimiter, stepping over escapes and code spans
@@ -6823,6 +6839,12 @@ function mdInline(s){
       if(e>0 && s[e + 1]==='('){
         let d2 = 0, f = -1; for(let j = e + 1; j<n; j++){ if(s[j]==='\\'){ j++; continue; } if(s[j]==='(') d2++; else if(s[j]===')' && --d2===0){ f = j; break; } }
         if(f>0){ out += link(s.slice(b + 1, e) || (c==='!' ? s.slice(e + 2, f) : ''), s.slice(e + 2, f)); i = f + 1; continue; }
+      }
+      if(e>0 && mdRefs){                                          // [text][ref], [ref][] and [ref]: the address comes from a definition
+        const text = s.slice(b + 1, e); let key = text, end = e;
+        if(s[e + 1]==='['){ const cl = s.indexOf(']', e + 2); if(cl>0){ key = s.slice(e + 2, cl) || text; end = cl; } }
+        const url = Object.prototype.hasOwnProperty.call(mdRefs, mdRefKey(key)) ? mdRefs[mdRefKey(key)] : null;
+        if(url!==null){ out += link(text, url); i = end + 1; continue; }
       }
       out += esc(c); i++; continue;
     }
@@ -6916,10 +6938,13 @@ function noteImportParse(name, text){
   if(/^(md|markdown|mdown)$/i.test(ext)){
     let title = '', lines = text.split('\n');
     if(lines[0]==='---'){ const e = lines.indexOf('---', 1); if(e>0){ const t = lines.slice(1, e).map(l=>/^title:\s*(.+)$/i.exec(l)).find(Boolean); if(t) title = t[1].replace(/^["']|["']$/g, '').trim(); lines = lines.slice(e + 1); } }
-    let k = 0; while(k<lines.length && !lines[k].trim()) k++;
-    const h = /^ {0,3}#\s+(.*?)\s*#*\s*$/.exec(lines[k] || '');
-    if(h && !title){ title = mdTextOfHtml(mdInline(h[1])).trim(); lines = lines.slice(k + 1); }
-    return { title: (title || base).slice(0, 200), body: noteTrailingLine(sanitizeNoteHtml(mdBlocks(lines))) };
+    const col = mdCollectRefs(lines); lines = col.lines; mdRefs = col.refs;
+    try{
+      let k = 0; while(k<lines.length && !lines[k].trim()) k++;
+      const h = /^ {0,3}#\s+(.*?)\s*#*\s*$/.exec(lines[k] || '');
+      if(h && !title){ title = mdTextOfHtml(mdInline(h[1])).trim(); lines = lines.slice(k + 1); }
+      return { title: (title || base).slice(0, 200), body: noteTrailingLine(sanitizeNoteHtml(mdBlocks(lines))) };
+    } finally { mdRefs = null; }
   }
   const paras = text.split(/\n{2,}/).map(p=>p.replace(/^\n+|\n+$/g, '')).filter(p=>p.trim());
   return { title: base.slice(0, 200), body: sanitizeNoteHtml(paras.map(p=>'<p>' + p.split('\n').map(esc).join('<br>') + '</p>').join('')) };

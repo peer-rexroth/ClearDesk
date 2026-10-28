@@ -108,3 +108,20 @@ test('column alignment helpers: a column\'s shared alignment, mixed, and the lef
   if(!t || !t.rows) return;                                          // the fake DOM has no table model: the pure parts above are what this file can check
   assertEqual(tblColAlign(t, 0, 0), 'center'); assertEqual(tblColAlign(t, 1, 1), null); assertEqual(tblColAlign(t, 0, 1), null);
 });
+test('Markdown reference-style links: full, collapsed and shortcut forms, case-insensitive, definitions removed', function(){
+  var h = function(md){ return noteImportParse('n.md', md).body; };
+  var md = 'See [the docs][Docs], [Home][] and [site].\n\n[docs]: https://example.com/docs "Docs title"\n[home]: <https://example.com/>\n[SITE]:   https://example.org/a\n';
+  var b = h(md);
+  assertIncludes(b, 'href="https://example.com/docs" target="_blank" rel="noopener noreferrer">the docs</a>'); assertIncludes(b, 'href="https://example.com/" target="_blank" rel="noopener noreferrer">Home</a>'); assertIncludes(b, 'href="https://example.org/a" target="_blank" rel="noopener noreferrer">site</a>');
+  assertEqual(/\[docs\]:|example.com\/docs "/.test(b), false, 'the definition lines are not shown');
+});
+test('Markdown reference links: unknown references, footnotes, checklists and code stay as they are; unsafe addresses lose the link', function(){
+  var h = function(md){ return noteImportParse('n.md', md).body; };
+  assertIncludes(h('A [missing][nope] and [also] one.'), '[missing][nope] and [also] one.');
+  assertIncludes(h('Note[^1] here.\n\n[^1]: the footnote'), 'Note[^1] here.'); assertIncludes(h('Note[^1] here.\n\n[^1]: the footnote'), '[^1]: the footnote');
+  assertIncludes(h('- [ ] todo\n- [x] done\n\n[x]: https://example.com'), 'done');
+  var code = h('```\n[a]: https://example.com\n```\n\nuse [a]'); assertIncludes(code, '[a]: https://example.com'); assertIncludes(code, 'use [a]');
+  var bad = h('[x][r]\n\n[r]: javascript:alert(1)'); assertEqual(bad, '<p>x</p>', 'an unsafe address keeps the words only');
+  assertIncludes(h('![pic][p]\n\n[p]: https://example.com/p.png'), 'href="https://example.com/p.png" target="_blank" rel="noopener noreferrer">pic</a>', 'an image reference becomes a link to the picture');
+  assertEqual(mdRefs, null, 'the definitions do not leak into the next file');
+});
