@@ -52,7 +52,7 @@ test('notes import: bodies are cleaned, bad ids replaced, deleted ids come back'
 });
 test('the note menus offer the ClearDesk file and the folder menu Import Here / Export Folder', function(){
   nfSeed();
-  assertIncludes(noteMenuHtml('n1'), 'ClearDesk Note (.json)'); assertIncludes(noteMenuHtml('n1'), "noteMenuRun('exportas','json')");
+  assertIncludes(noteMenuHtml('n1'), 'Note File (.json)'); assertIncludes(noteMenuHtml('n1'), "noteMenuRun('exportas','json')");
   var f = folderMenuHtml('f-work'); assertIncludes(f, 'Import Notes Here…'); assertIncludes(f, 'Export Folder');
   assertTrue(globalThis.__APP_HTML.indexOf('id="noteImportInput"') > -1);
 });
