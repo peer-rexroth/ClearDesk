@@ -37,7 +37,7 @@ test('Markdown inline: unsafe links and images lose the address, not the words',
 test('Markdown blocks: headings, paragraphs, rules, quotes, code', function(){
   var h = function(md){ return noteImportParse('n.md', md).body; };
   assertEqual(h('## Heading\n\nA line\nwraps here.\n\n---\n\n> quoted\n> more'), '<h2>Heading</h2><p>A line wraps here.</p><hr><blockquote><p>quoted more</p></blockquote>');
-  assertEqual(h('#### four'), '<h3>four</h3>', 'levels below 3 become Subheadings');
+  assertEqual(h('#### four'), '<h4>four</h4>', 'levels 4 to 6 are their own levels'); assertEqual(h('###### six'), '<h6>six</h6>');
   assertEqual(h('line one  \nline two'), '<p>line one<br>line two</p>', 'two spaces make a line break');
   assertEqual(h('Title\n=====\n\ntext'), '<h1>Title</h1><p>text</p>');
   assertEqual(h('```js\nlet a = 1 < 2;\n\nb()\n```'), '<pre><code>let a = 1 &lt; 2;\n\nb()</code></pre><p><br></p>', 'a code block keeps its blank line; a trailing line follows it');
@@ -84,4 +84,27 @@ test('typing shortcuts: no formatting where it would be wrong', function(){
   assertEqual(noteInlineMatch('a ** b **'), null, 'a space inside the delimiters');
   assertEqual(noteInlineMatch('a*b*'), null, 'the opening asterisk must start a word');
   assertEqual(noteInlineMatch('``'), null);
+});
+test('Markdown tables: the separator row sets each column\'s alignment, and it survives the sanitizer', function(){
+  var h = function(md){ return noteImportParse('n.md', md).body; };
+  var t = h('| a | b | c | d |\n|:--|:-:|--:|---|\n| 1 | 2 | 3 | 4 |');
+  assertIncludes(t, '<th>a</th>'); assertIncludes(t, '<th data-al="center">b</th>'); assertIncludes(t, '<th data-al="right">c</th>'); assertIncludes(t, '<th>d</th>');
+  assertIncludes(t, '<td data-al="center">2</td>'); assertIncludes(t, '<td data-al="right">3</td>'); assertIncludes(t, '<td>4</td>');
+  assertEqual(sanitizeNoteHtml(t), t, 'stored as it is');
+});
+test('pasted HTML cells keep centre / right from align= and text-align, nothing else of the style; a made-up value is dropped', function(){
+  var s = sanitizeNoteHtml('<table><tr><td align="center" style="color:red">x</td><td style="text-align: right;background:url(x)">y</td><td data-al="evil">z</td><td style="text-align:left">w</td></tr></table>');
+  assertIncludes(s, '<td data-al="center">x</td>'); assertIncludes(s, '<td data-al="right">y</td>'); assertIncludes(s, '<td>z</td>'); assertIncludes(s, '<td>w</td>');
+  assertEqual(/style|color|evil/.test(s), false);
+});
+test('heading levels 4 to 6 survive the sanitizer, count as text and as a line in a note', function(){
+  var s = sanitizeNoteHtml('<h4>four</h4><h5>five</h5><h6>six</h6><h7>seven</h7>');
+  assertEqual(s, '<h4>four</h4><h5>five</h5><h6>six</h6>seven');
+  assertEqual(noteText('<h4>four</h4><h5>five</h5>'), 'four five');
+});
+test('column alignment helpers: a column\'s shared alignment, mixed, and the left default', function(){
+  var holder = document.createElement('div'); holder.innerHTML = '<table><tbody><tr><td data-al="center">a</td><td>b</td></tr><tr><td data-al="center">c</td><td data-al="right">d</td></tr></tbody></table>';
+  var t = holder.querySelector('table');
+  if(!t || !t.rows) return;                                          // the fake DOM has no table model: the pure parts above are what this file can check
+  assertEqual(tblColAlign(t, 0, 0), 'center'); assertEqual(tblColAlign(t, 1, 1), null); assertEqual(tblColAlign(t, 0, 1), null);
 });

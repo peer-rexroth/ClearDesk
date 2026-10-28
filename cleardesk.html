@@ -1429,6 +1429,11 @@ const ICONS = {
   .note-body h1 { font-size: var(--fs-22); font-weight: 700; line-height: 1.3; margin: .9em 0 .35em; }
   .note-body h2 { font-size: var(--fs-22); font-weight: 700; line-height: 1.3; margin: .85em 0 .3em; }
   .note-body h3 { font-size: var(--fs-15); font-weight: 700; line-height: 1.35; margin: .8em 0 .25em; }
+  .note-body h4 { font-size: var(--fs-15); font-weight: 600; line-height: 1.4; margin: .75em 0 .2em; }                                /* levels 4 to 6 step down by weight, size and colour only, as the template field does */
+  .note-body h5 { font-size: var(--fs-14); font-weight: 600; line-height: 1.4; margin: .7em 0 .2em; color: var(--text-2); }
+  .note-body h6 { font-size: var(--fs-13); font-weight: 600; line-height: 1.4; margin: .7em 0 .2em; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+  .note-body :is(td, th)[data-al="center"] { text-align: center; }
+  .note-body :is(td, th)[data-al="right"] { text-align: right; }
   .note-body ul, .note-body ol { margin: .2em 0 .5em; padding-left: 26px; }
   .note-body li { margin: .1em 0; }
   .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
@@ -2292,7 +2297,7 @@ const ICONS = {
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
           <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"/><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"/></svg></button>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
-            <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="blockquote">Quote</option><option value="pre">Code</option>
+            <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="h4">Heading 4</option><option value="h5">Heading 5</option><option value="h6">Heading 6</option><option value="blockquote">Quote</option><option value="pre">Code</option>
           </select>
           <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
@@ -2659,7 +2664,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong>, <strong>Notes</strong> and <strong>Prompts</strong> with the three icons at the top of the sidebar (a circled check, a note and curly braces; hover one for its name) or with <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
-          <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
+          <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading, then Heading 4 to 6), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a note moves it to <em>Recently Deleted</em> at the bottom of the sidebar, where it stays for 30 days. Open it there to <em>Restore</em> it or <em>Delete Now</em>; <em>Delete All</em> empties the list. Deleting a note that is already there removes it for good.</span></div>
@@ -2672,7 +2677,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Delete and Delete table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links, lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, and headings below level 3 become Subheadings. One <em>Undo</em> takes the whole import back.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links, lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
@@ -6139,7 +6144,7 @@ let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRan
 // merge in, so every path (paste, drop, save, load, merge) goes through this: only the tags below survive, attributes are
 // rebuilt from scratch (never copied), and a link must be http(s) or mailto. It is string-based on purpose: it also runs in the
 // test harness, which has no DOM. ----
-const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','span','mark','table','colgroup','col','thead','tbody','tr','th','td']);
+const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','h4','h5','h6','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','span','mark','table','colgroup','col','thead','tbody','tr','th','td']);
 const NOTE_VOID = new Set(['br','hr','col']);
 // The same thin outline icons as the toolbar's other buttons (18px, 2 stroke), so the round buttons and the new copy chip match them; used from JS too.
 const ICO_LOCK = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></svg>', ICO_LOCK_OPEN = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg>', ICO_COPY = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg>', ICO_CHECK = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4.2 4.2 8.8-9.5"/></svg>';
@@ -6227,6 +6232,10 @@ function sanitizeNoteHtml(html){
       const wm = /\bwidth\s*:\s*(\d{1,3}(?:\.\d{1,4})?)%/i.exec(attrs), wv = wm ? parseFloat(wm[1]) : 0;
       out += wv>0 && wv<=100 ? `<col style="width:${wv}%">` : '<col>';
     }
+    else if(name==='td' || name==='th'){                      // a column's alignment survives (centre / right; left is the default): ours, an align attribute, or a plain text-align from pasted HTML
+      const am = /\bdata-al\s*=\s*["']?(center|right)|\balign\s*=\s*["']?(center|right)|\btext-align\s*:\s*(center|right)/i.exec(attrs), al = am ? (am[1] || am[2] || am[3]).toLowerCase() : '';
+      out += al ? `<${name} data-al="${al}">` : `<${name}>`;
+    }
     else if(name==='li') out += /\bdata-done\s*=\s*["']?1/i.test(attrs) ? '<li data-done="1">' : '<li>';
     else if(name==='ul' || name==='ol'){
       const lm = /\bdata-ls\s*=\s*["']?([a-z]+)/i.exec(attrs), ls = lm ? lm[1].toLowerCase() : '';
@@ -6240,7 +6249,7 @@ function sanitizeNoteHtml(html){
 }
 function noteText(body){
   return String(body||'')
-    .replace(/<(br|\/p|\/div|\/li|\/t[dh]|\/tr|\/h[1-3]|\/blockquote|\/pre)[^>]*>/gi, ' ')
+    .replace(/<(br|\/p|\/div|\/li|\/t[dh]|\/tr|\/h[1-6]|\/blockquote|\/pre)[^>]*>/gi, ' ')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&amp;/g, '&')
     .replace(/\s+/g, ' ').trim();
@@ -6505,7 +6514,7 @@ function noteToPlainText(root){
       if(tag==='HR'){ flush(); lines.push(indent + '---'); return; }
       if(tag==='PRE'){ flush(); n.textContent.split('\n').forEach(l=>lines.push(indent + l)); return; }
       if(tag==='BLOCKQUOTE'){ flush(); const at = lines.length; walk(n, indent); for(let i = at; i<lines.length; i++) if(lines[i]) lines[i] = indent + '> ' + lines[i].slice(indent.length); return; }
-      if(/^(P|DIV|H1|H2|H3)$/.test(tag)){ flush(); const head = /^H/.test(tag); if(head) blank(); const at = lines.length; walk(n, indent); if(head && lines.length>at) blank(); return; }
+      if(/^(P|DIV|H[1-6])$/.test(tag)){ flush(); const head = /^H/.test(tag); if(head) blank(); const at = lines.length; walk(n, indent); if(head && lines.length>at) blank(); return; }
       buf += noteCopyInline(n);                                  // an inline element in the middle of a line
     });
     flush();
@@ -6549,6 +6558,9 @@ function noteToMailHtml(root){
       case 'H1': return `<div style="font-size:20px;font-weight:700;margin:12px 0 6px">${kids(n)}</div>`;
       case 'H2': return `<div style="font-size:17px;font-weight:700;margin:10px 0 4px">${kids(n)}</div>`;
       case 'H3': return `<div style="font-size:15px;font-weight:700;margin:8px 0 4px">${kids(n)}</div>`;
+      case 'H4': return `<div style="font-size:15px;font-weight:600;margin:8px 0 4px">${kids(n)}</div>`;
+      case 'H5': return `<div style="font-size:14px;font-weight:600;color:#555;margin:8px 0 4px">${kids(n)}</div>`;
+      case 'H6': return `<div style="font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.04em;margin:8px 0 4px">${kids(n)}</div>`;
       case 'BLOCKQUOTE': return `<blockquote style="margin:6px 0;padding-left:12px;border-left:3px solid #c8c8cc;color:#555">${kids(n)}</blockquote>`;
       case 'PRE': return `<pre style="font-family:Menlo,monospace;font-size:13px;background:#f4f4f6;padding:8px 10px;border-radius:6px;white-space:pre-wrap">${esc(n.textContent)}</pre>`;
       case 'CODE': return `<code style="font-family:Menlo,monospace;font-size:.9em;background:#f4f4f6;padding:1px 4px;border-radius:3px">${kids(n)}</code>`;
@@ -6571,8 +6583,8 @@ function noteToMailHtml(root){
       case 'COL': { const wm = /width\s*:\s*([\d.]+)%/.exec(n.getAttribute('style') || ''); return wm ? `<col style="width:${wm[1]}%">` : '<col>'; }
       case 'THEAD': case 'TBODY': return `<${t.toLowerCase()}>${kids(n)}</${t.toLowerCase()}>`;
       case 'TR': return `<tr>${kids(n)}</tr>`;
-      case 'TH': return `<th style="${CELL};background:#f2f2f4;font-weight:600">${kids(n)}</th>`;
-      case 'TD': return `<td style="${CELL}">${kids(n)}</td>`;
+      case 'TH': return `<th style="${CELL};background:#f2f2f4;font-weight:600${noteCellAlignCss(n)}">${kids(n)}</th>`;
+      case 'TD': return `<td style="${CELL}${noteCellAlignCss(n)}">${kids(n)}</td>`;
       default: return kids(n);
     }
   };
@@ -6646,13 +6658,13 @@ function noteToMarkdown(root){
       if(tag==='UL' || tag==='OL'){ flush(); list(n, ''); return; }
       if(tag==='TABLE'){
         flush(); const rows = [...n.rows].map(r=>[...r.cells].map(c=>inline(c).replace(/\s+/g, ' ').replace(/\|/g, '\\|').trim()));
-        if(rows.length){ const head = rows[0], cols = head.length; blocks.push({ text: ['| ' + head.join(' | ') + ' |', '| ' + head.map(()=>'---').join(' | ') + ' |', ...rows.slice(1).map(r=>'| ' + Array.from({length: cols}, (_, i)=>r[i] || '').join(' | ') + ' |')].join('\n') }); }
+        if(rows.length){ const head = rows[0], cols = head.length; blocks.push({ text: ['| ' + head.join(' | ') + ' |', '| ' + head.map((_, i)=>{ const a = n.rows[0].cells[i] && n.rows[0].cells[i].getAttribute('data-al'); return a==='center' ? ':---:' : a==='right' ? '---:' : '---'; }).join(' | ') + ' |', ...rows.slice(1).map(r=>'| ' + Array.from({length: cols}, (_, i)=>r[i] || '').join(' | ') + ' |')].join('\n') }); }
         return;
       }
       if(tag==='HR'){ flush(); blocks.push({ text: '---' }); return; }
       if(tag==='PRE'){ flush(); blocks.push({ text: '```\n' + n.textContent.replace(/\n$/, '') + '\n```' }); return; }
       if(tag==='BLOCKQUOTE'){ flush(); const sub = noteToMarkdown(n); if(sub) blocks.push({ text: sub.split('\n').map(l=>l ? '> ' + l : '>').join('\n') }); return; }
-      if(/^H[1-3]$/.test(tag)){ flush(); const t = inline(n).replace(/\s+/g, ' ').trim(); if(t) blocks.push({ text: '#'.repeat(+tag[1]) + ' ' + t }); return; }
+      if(/^H[1-6]$/.test(tag)){ flush(); const t = inline(n).replace(/\s+/g, ' ').trim(); if(t) blocks.push({ text: '#'.repeat(+tag[1]) + ' ' + t }); return; }
       if(tag==='P' || tag==='DIV'){ flush(); walk(n); return; }
       buf += inline(n);
     });
@@ -6672,6 +6684,7 @@ const NOTE_FORMATS = {
   markdown: { label: 'Markdown', ext: '.md', mime: 'text/markdown' },
   html: { label: 'HTML', ext: '.html', mime: 'text/html' }
 };
+const noteCellAlignCss = c=>{ const a = c.getAttribute && c.getAttribute('data-al'); return a==='center' || a==='right' ? ';text-align:' + a : ''; };   // a mail client cannot read the editor's data-al
 function noteFormatText(n, kind){                                    // no trailing line break: that is for the file
   const holder = document.createElement('div'); holder.innerHTML = sanitizeNoteHtml(n.body);
   const title = (n.title || '').trim();
@@ -6735,7 +6748,7 @@ function noteExportAs(id, kind){
 const noteExportMarkdown = id=>noteExportAs(id, 'markdown');
 // ---- Markdown in and out of notes: escaping on export, reading on import, and the typing shortcuts ----
 // All of this is pure text (strings in, strings out) so it is tested; it never touches the DOM. What is read in goes through sanitizeNoteHtml like every other way a body arrives.
-// Not read: images (kept as a link to the picture), headings below level 3 (they become Subheadings), table alignment, footnotes, raw HTML (shown as text, except <u>).
+// Not read: images (kept as a link to the picture), footnotes, raw HTML (shown as text, except <u>).
 const mdWord = c=>!!c && /[\p{L}\p{N}]/u.test(c);
 // A text node as Markdown text: the characters that would turn into formatting when the file is read again are backslash-escaped. An underscore inside a word (snake_case) is left alone.
 function mdEscapeText(s){
@@ -6863,13 +6876,13 @@ function mdBlocks(lines){
       while(i<lines.length && !new RegExp('^ {0,3}' + fence[0] + '{' + fence.length + ',}\\s*$').test(lines[i])){ body.push(lines[i]); i++; }
       i++; out.push('<pre><code>' + esc(body.join('\n')) + '</code></pre>'); continue;
     }
-    if((m = /^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line)) || (m = /^ {0,3}(#{1,6})\s*$/.exec(line))){ const lv = Math.min(3, m[1].length); out.push(`<h${lv}>${mdInline(m[2] || '')}</h${lv}>`); i++; continue; }
+    if((m = /^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line)) || (m = /^ {0,3}(#{1,6})\s*$/.exec(line))){ const lv = m[1].length; out.push(`<h${lv}>${mdInline(m[2] || '')}</h${lv}>`); i++; continue; }
     if(/^ {0,3}([-*_])( *\1){2,} *$/.test(line)){ out.push('<hr>'); i++; continue; }
     if(/^ {0,3}>/.test(line)){ const q = []; while(i<lines.length && /^ {0,3}>/.test(lines[i])){ q.push(lines[i].replace(/^ {0,3}> ?/, '')); i++; } out.push('<blockquote>' + mdBlocks(q) + '</blockquote>'); continue; }
     if(line.includes('|') && i + 1<lines.length && lines[i + 1].includes('-') && /^ {0,3}\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(lines[i + 1])){
-      const head = mdSplitRow(line), rows = []; i += 2;
+      const head = mdSplitRow(line), rows = [], aligns = mdSplitRow(lines[i + 1]).map(x=>/^:-+:$/.test(x) ? 'center' : /^-+:$/.test(x) ? 'right' : ''); i += 2;
       while(i<lines.length && lines[i].trim() && lines[i].includes('|')){ rows.push(mdSplitRow(lines[i])); i++; }
-      const cols = head.length, row = (cs, tag)=>'<tr>' + Array.from({ length: cols }, (_, k)=>`<${tag}>${mdInline(cs[k] || '') || '<br>'}</${tag}>`).join('') + '</tr>';
+      const cols = head.length, row = (cs, tag)=>'<tr>' + Array.from({ length: cols }, (_, k)=>`<${tag}${aligns[k] ? ` data-al="${aligns[k]}"` : ''}>${mdInline(cs[k] || '') || '<br>'}</${tag}>`).join('') + '</tr>';
       out.push('<table><tbody>' + row(head, 'th') + rows.map(r=>row(r, 'td')).join('') + '</tbody></table>'); continue;
     }
     if(MD_LIST.test(line)){ const r = mdList(lines, i); out.push(r.html); i = r.next; continue; }
@@ -7977,7 +7990,7 @@ const promptFindBar = makeFindBar({
 // ---- the open note: the text is the body's text nodes joined, with a line break between blocks (so a match never runs across two paragraphs); matches are DOM ranges, tinted with the CSS
 // Custom Highlight API (nothing is added to the note). One Replace is execCommand on the range; Replace All edits a clone's text nodes and swaps the whole body in with insertHTML (the
 // idiom every table edit uses), so it is one undo step. Where the highlight API is missing the bar still counts, steps and replaces; it just shows no tint. ----
-const NOTE_FIND_BLOCKS = new Set(['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'PRE', 'BLOCKQUOTE', 'TD', 'TH', 'TR', 'UL', 'OL', 'TABLE', 'HR']);
+const NOTE_FIND_BLOCKS = new Set(['P', 'DIV', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'PRE', 'BLOCKQUOTE', 'TD', 'TH', 'TR', 'UL', 'OL', 'TABLE', 'HR']);
 function noteFindMap(root){
   const segs = []; let text = '', lastBlock = null;
   const blockOf = n=>{ for(let e = n.parentNode; e && e!==root; e = e.parentNode) if(e.nodeType===1 && NOTE_FIND_BLOCKS.has(e.tagName)) return e; return root; };
@@ -9524,7 +9537,7 @@ function noteApplyColor(kind, name){
   // [its colour before the selection] + [the selection in the new colour] + [its colour after it]. Replacing only the run would inherit its colour.
   let anc = range.commonAncestorContainer; anc = anc.nodeType===1 ? anc : anc.parentNode;
   anc = anc && anc.closest ? anc.closest(sel_) : null;
-  const block = anc && body.contains(anc) ? anc.closest('p, div, li, td, th, h1, h2, h3, blockquote') : null;
+  const block = anc && body.contains(anc) ? anc.closest('p, div, li, td, th, h1, h2, h3, h4, h5, h6, blockquote') : null;
   if(anc && block && body.contains(block) && block!==body){
     const old = anc.getAttribute(attr), part = (fn)=>{ const r = document.createRange(); fn(r); const d = document.createElement('div'); d.appendChild(r.cloneContents()); return d.innerHTML ? `<${tag} ${attr}="${old}">${d.innerHTML}</${tag}>` : ''; };
     const before = part(r=>{ r.selectNodeContents(anc); r.setEnd(range.startContainer, range.startOffset); });
@@ -9621,7 +9634,7 @@ function noteAutoLinkDom(body){
     after.parentNode.insertBefore(a, after); node.nextSibling && node.nextSibling!==a && node.parentNode.removeChild(node.nextSibling);
   }
 }
-const NOTE_LINE_TAGS = /^(P|DIV|LI|H1|H2|H3|TD|TH|BLOCKQUOTE|PRE)$/;
+const NOTE_LINE_TAGS = /^(P|DIV|LI|H1|H2|H3|H4|H5|H6|TD|TH|BLOCKQUOTE|PRE)$/;
 function noteLineOf(node){
   const body = document.getElementById('noteBody');
   let n = node && node.nodeType===3 ? node.parentNode : node;
@@ -9800,7 +9813,7 @@ function noteTableEdit(op, ref){
     const anchor = clone.rows[op==='rowBefore' ? rowLo : rowHi], headCol = tblHeadCol(clone);   // a header column keeps its header cell in the new rows
     for(let k=0; k<nRows; k++){
       const tr = document.createElement('tr');
-      for(let i=0; i<colsN; i++) tr.appendChild(mk(i===0 && headCol ? 'th' : 'td'));
+      for(let i=0; i<colsN; i++){ const nc = mk(i===0 && headCol ? 'th' : 'td'), al = anchor.cells[i] && anchor.cells[i].getAttribute('data-al'); if(al) nc.setAttribute('data-al', al); tr.appendChild(nc); }   // a new row keeps each column's alignment
       if(op==='rowBefore') anchor.before(tr); else anchor.after(tr);
     }
     focusR = op==='rowBefore' ? rowLo : rowHi + 1;
@@ -9820,6 +9833,10 @@ function noteTableEdit(op, ref){
   else if(op==='header'){
     const first = [...clone.rows[0].cells], allTh = first.every(x=>x.tagName==='TH'), keepFirst = tblHeadCol(clone);   // with a header column, the corner cell stays a header
     first.forEach((x, i)=>{ if(allTh){ if(!(i===0 && keepFirst)) swap(x, 'td'); } else if(x.tagName!=='TH') swap(x, 'th'); });
+  }
+  else if(op==='alignLeft' || op==='alignCenter' || op==='alignRight'){
+    const al = op==='alignCenter' ? 'center' : op==='alignRight' ? 'right' : '';
+    [...clone.rows].forEach(row=>{ for(let k=colLo; k<=colHi; k++){ const x = row.cells[k]; if(!x) continue; if(al) x.setAttribute('data-al', al); else x.removeAttribute('data-al'); } });
   }
   else if(op==='widen' || op==='narrow'){
     const nw = noteTableNextWidth(clone, op==='widen' ? 1 : -1); if(nw===null) return;
@@ -9882,6 +9899,23 @@ const tblHeadCol = table=>table.rows.length>1 && [...table.rows].slice(1).every(
 // The four table menus (toolbar menu, row grip, column grip, whole-table grip) share one grammar and one item builder, so they look and read alike:
 //   Insert (row above/below, column left/right)  |  Header toggle(s)  |  [Cut / Copy]  |  Delete (the selection first, then Delete table)
 // A state (header on) is a ✓ at the right; delete items are red; icons are the same everywhere (minus for a row/column, outline trash can for the table).
+// Alignment icon: four lines of different lengths, set against the left edge, the middle or the right, as in a text editor; same size and class as the other table icons.
+const tblAlignIcon = kind=>{
+  const L = kind==='right' ? [[5, 16.5], [9, 16.5], [5, 16.5], [11, 16.5]] : kind==='center' ? [[4, 16], [7, 13], [4, 16], [8, 12]] : [[3.5, 15], [3.5, 11], [3.5, 15], [3.5, 9]];
+  return `<svg class="tbl-ins" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="${L.map((l, i)=>`M${l[0]} ${4.5 + i * 3.7}H${l[1]}`).join('')}" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+};
+// The alignment shared by the cells of columns lo..hi ('' = left, the default; null = mixed).
+function tblColAlign(table, lo, hi){
+  let seen;
+  for(const row of table.rows) for(let k = lo; k<=hi; k++){ const x = row.cells[k]; if(!x) continue; const a = x.getAttribute('data-al') || ''; if(seen===undefined) seen = a; else if(seen!==a) return null; }
+  return seen===undefined ? '' : seen;
+}
+const tblAlignItems = (table, lo, hi, run)=>{
+  const cur = tblColAlign(table, lo, hi), item = rowMenuItem;
+  return [item(tblAlignIcon('left'), 'Align Left', run('alignLeft'), tblTick(cur===''))
+    , item(tblAlignIcon('center'), 'Align Center', run('alignCenter'), tblTick(cur==='center'))
+    , item(tblAlignIcon('right'), 'Align Right', run('alignRight'), tblTick(cur==='right'))];
+};
 const tblMenuSep = '<div class="row-menu-sep"></div>';
 const tblMenuJoin = groups=>groups.map(g=>g.filter(Boolean)).filter(g=>g.length).map(g=>g.join('')).join(tblMenuSep);
 function tidyMenuSeps(html){ const SEP = '<div class="row-menu-sep"></div>'; return String(html).split(SEP).filter(x=>x.trim()!=='').join(SEP); }
@@ -9905,6 +9939,7 @@ function noteTableMenuHtml(){
      item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter'))],
     [item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: cr!==0}),                 // the header toggles stay in the menu but are dimmed away from the first row / first column
      item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: cc!==0 || table.rows.length<2})],
+    tblAlignItems(table, cc, cc, run),
     [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {off: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {off: noteTableNextWidth(table, -1)===null})],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
@@ -10135,6 +10170,7 @@ function tblGripMenuHtml(kind, sel, table){
     [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), `Insert ${nounN} ${col ? 'left' : 'above'}`, run(col ? 'colBefore' : 'rowBefore')),
      item(tblInsIcon(col ? 'colRight' : 'rowBelow'), `Insert ${nounN} ${col ? 'right' : 'below'}`, run(col ? 'colAfter' : 'rowAfter'))],
     table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: a!==0})] : [],   // dimmed except on the first row / column
+    table && col ? tblAlignItems(table, a, b, run) : [],
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true}), item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
 }
@@ -10442,7 +10478,7 @@ function updateNoteToolbarState(){
   set('table', !!noteSelectedCell() || !!tblWholeSelected()); set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
   const style = document.getElementById('noteStyleSelect');
-  if(style) style.value = /^h[1-3]$/.test(v) ? v : noteClosest(sel.anchorNode, 'BLOCKQUOTE') ? 'blockquote' : noteClosest(sel.anchorNode, 'PRE') ? 'pre' : 'p';
+  if(style) style.value = /^h[1-6]$/.test(v) ? v : noteClosest(sel.anchorNode, 'BLOCKQUOTE') ? 'blockquote' : noteClosest(sel.anchorNode, 'PRE') ? 'pre' : 'p';
 }
 // The first line of a note is a paragraph like every other one. Typing into an EMPTY editor puts the text straight into the editor with nothing around it (the browser only
 // makes paragraphs from the second line on), and a bare first line has no margin below it, so the gap to the second line was smaller than all the others. So an empty editor
@@ -10529,7 +10565,7 @@ function noteAutoBullet(e){
   if(n.nodeType!==3) return false;
   const marker = n.textContent.slice(0, sel.anchorOffset);
   let kind = null, block = null;                                    // kind: numbered style this marker asks for (null = bullet); block: a Markdown block marker
-  if(/^#{1,3}$/.test(marker)) block = 'h' + marker.length;           // "# " Title, "## " Heading, "### " Subheading
+  if(/^#{1,6}$/.test(marker)) block = 'h' + marker.length;           // "# " Title, "## " Heading, "### " Subheading, "#### " to "###### " levels 4 to 6
   else if(/^(\[\]|\[ \])$/.test(marker)) block = 'check';              // "[] " or "[ ] " a checklist
   else if(marker==='>') block = 'blockquote';                         // "> " a quote
   else if(/^\d{1,3}[.)]$/.test(marker)) kind = 'decimal';
