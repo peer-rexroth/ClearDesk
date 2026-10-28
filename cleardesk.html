@@ -2052,7 +2052,7 @@ const ICONS = {
     <button type="button" class="btn btn-primary btn-sm" onclick="applyNoteLink()">Done</button>
   </div>
 </div>
-<input type="file" id="fileInput" accept=".json" style="display:none" onchange="handleFileImport(event)">
+<input type="file" id="fileInput" accept=".json,.md,.markdown,.txt,.html,.htm" multiple style="display:none" onchange="handleFileImport(event)">
 
 <div class="layout">
 <!-- Collapsed sidebar: a floating toggle plus a small mirror of the file-sync status (so "Link file / Linked" is never hidden) -->
@@ -2667,6 +2667,8 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Delete and Delete table. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links, lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, and headings below level 3 become Subheadings. One <em>Undo</em> takes the whole import back.</span></div>
+          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Duplicate, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -6601,8 +6603,9 @@ function noteWriteClipboard(html, plain){
 // (checklists as - [ ] / - [x]), tables as pipe tables, quotes >, code blocks as fences, rules ---. Colours and highlights are dropped (plain Markdown has none).
 function noteToMarkdown(root){
   const inline = n=>{
-    if(n.nodeType===3) return n.nodeValue.replace(/[ ]/g, ' ');
+    if(n.nodeType===3) return mdEscapeText(n.nodeValue.replace(/[ ]/g, ' '));
     if(n.nodeType!==1) return '';
+    if(n.tagName==='CODE'){ const t = n.textContent, tick = /`/.test(t) ? '``' : '`'; return tick + (tick.length>1 ? ' ' + t + ' ' : t) + tick; }   // code is written as it is, never escaped
     const kids = [...n.childNodes].map(inline).join('');
     switch(n.tagName){
       case 'BR': return '  \n';
@@ -6610,7 +6613,6 @@ function noteToMarkdown(root){
       case 'I': case 'EM': return kids.trim() ? `_${kids}_` : kids;
       case 'S': case 'STRIKE': return kids.trim() ? `~~${kids}~~` : kids;
       case 'U': return kids.trim() ? `<u>${kids}</u>` : kids;
-      case 'CODE': return '`' + kids + '`';
       case 'A': { const h = n.getAttribute('href') || ''; return h ? `[${kids}](${h})` : kids; }
       default: return kids;
     }
@@ -6625,15 +6627,15 @@ function noteToMarkdown(root){
       i++;
       const own = [...li.childNodes].filter(c=>!noteCopyIsList(c)).map(inline).join('').replace(/\s+/g, ' ').trim();
       const mark = cl ? (li.getAttribute('data-done')==='1' ? '- [x]' : '- [ ]') : ol ? `${i}.` : '-';
-      blocks.push({ lid, text: `${indent}${mark} ${own}` });
+      blocks.push({ lid, text: `${indent}${mark} ${mdEscapeBlockStart(own)}` });
       [...li.childNodes].filter(noteCopyIsList).forEach(sub=>list(sub, indent + '  ', lid));
     });
   };
   const walk = parent=>{
     let buf = '';
-    const flush = ()=>{ const t = buf.replace(/[ \t\r\n]+/g, ' ').trim(); if(t) blocks.push({ text: t }); buf = ''; };
+    const flush = ()=>{ const t = buf.replace(/[ \t\r\n]+/g, ' ').trim(); if(t) blocks.push({ text: mdEscapeBlockStart(t) }); buf = ''; };
     [...parent.childNodes].forEach(n=>{
-      if(n.nodeType===3){ buf += n.nodeValue; return; }
+      if(n.nodeType===3){ buf += mdEscapeText(n.nodeValue); return; }
       if(n.nodeType!==1) return;
       const tag = n.tagName;
       if(tag==='UL' || tag==='OL'){ flush(); list(n, ''); return; }
@@ -6668,7 +6670,7 @@ const NOTE_FORMATS = {
 function noteFormatText(n, kind){                                    // no trailing line break: that is for the file
   const holder = document.createElement('div'); holder.innerHTML = sanitizeNoteHtml(n.body);
   const title = (n.title || '').trim();
-  if(kind==='markdown') return (title ? '# ' + title + '\n\n' : '') + noteToMarkdown(holder);
+  if(kind==='markdown') return (title ? '# ' + mdEscapeText(title) + '\n\n' : '') + noteToMarkdown(holder);
   if(kind==='html') return noteCopyContent(n).html.replace(/(<div style="margin:0 0 6px"><br><\/div>)+(?=<\/div>$)/, '');   // the note's own empty last line is not part of the markup you paste
   return [title, noteToPlainText(holder)].filter(Boolean).join('\n\n');
 }
@@ -6726,6 +6728,215 @@ function noteExportAs(id, kind){
   showToast(`Saved ${a.download}`);
 }
 const noteExportMarkdown = id=>noteExportAs(id, 'markdown');
+// ---- Markdown in and out of notes: escaping on export, reading on import, and the typing shortcuts ----
+// All of this is pure text (strings in, strings out) so it is tested; it never touches the DOM. What is read in goes through sanitizeNoteHtml like every other way a body arrives.
+// Not read: images (kept as a link to the picture), headings below level 3 (they become Subheadings), table alignment, footnotes, raw HTML (shown as text, except <u>).
+const mdWord = c=>!!c && /[\p{L}\p{N}]/u.test(c);
+// A text node as Markdown text: the characters that would turn into formatting when the file is read again are backslash-escaped. An underscore inside a word (snake_case) is left alone.
+function mdEscapeText(s){
+  s = String(s); let out = '';
+  for(let i = 0; i<s.length; i++){
+    const c = s[i], p = s[i - 1] || '', n = s[i + 1] || '';
+    if(c==='\\' || c==='`' || c==='*' || c==='[' || c===']') out += '\\' + c;
+    else if(c==='_') out += mdWord(p) && mdWord(n) ? c : '\\_';
+    else if(c==='~') out += (p==='~' || n==='~') ? '\\~' : c;
+    else if(c==='<') out += /[A-Za-z\/!?]/.test(n) ? '\\<' : c;
+    else out += c;
+  }
+  return out;
+}
+// A paragraph that would start a block when read again (a "# ", "> ", "- ", "1. " or a rule) gets its first character escaped.
+function mdEscapeBlockStart(t){
+  return t.replace(/^(#{1,6})(\s|$)/, '\\$1$2').replace(/^>/, '\\>').replace(/^([-+])(\s)/, '\\$1$2').replace(/^(\d+)([.)])(\s)/, '$1\\$2$3').replace(/^(={3,}|-{3,})$/, '\\$1');
+}
+const mdTextOfHtml = h=>String(h).replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');   // the text of markup our own writers produced (they escape only these)
+// -- reading --
+function mdSplitRow(r){
+  let t = r.trim(); if(t[0]==='|') t = t.slice(1); if(t.endsWith('|') && !t.endsWith('\\|')) t = t.slice(0, -1);
+  const cells = []; let cur = '';
+  for(let i = 0; i<t.length; i++){ if(t[i]==='\\' && t[i + 1]==='|'){ cur += '|'; i++; } else if(t[i]==='|'){ cells.push(cur.trim()); cur = ''; } else cur += t[i]; }
+  cells.push(cur.trim()); return cells;
+}
+function mdInline(s){
+  s = String(s); let out = '', i = 0; const n = s.length;
+  const closer = (from, d)=>{                                       // the closing delimiter, stepping over escapes and code spans
+    for(let j = from; j<n; j++){
+      const c = s[j];
+      if(c==='\\'){ j++; continue; }
+      if(c==='`'){ let k = j; while(s[k]==='`') k++; const run = s.slice(j, k), e = s.indexOf(run, k); j = e>=0 ? e + run.length - 1 : k - 1; continue; }
+      if(s.startsWith(d, j)){
+        if(d.length===1 && (s[j + 1]===d || s[j - 1]===d)){ let k = j; while(s[k]===d) k++; j = k - 1; continue; }
+        return j;
+      }
+    }
+    return -1;
+  };
+  const link = (label, url)=>{
+    const raw = String(url).trim().replace(/^<(.*)>$/, '$1').split(/\s+/)[0] || '', href = safeNoteHref(raw);
+    return href ? `<a href="${esc(href)}">${mdInline(label)}</a>` : mdInline(label);
+  };
+  while(i<n){
+    const c = s[i];
+    if(c==='\\' && i + 1<n && /[\\`*_{}\[\]()#+\-.!|<>~]/.test(s[i + 1])){ out += esc(s[i + 1]); i += 2; continue; }
+    if(c==='\\' && s[i + 1]==='\n'){ out += '\u0001'; i += 2; continue; }
+    if(c==='`'){
+      let k = i; while(s[k]==='`') k++;
+      const run = s.slice(i, k), e = s.indexOf(run, k);
+      if(e>0){ out += '<code>' + esc(s.slice(k, e).replace(/^ (.*) $/, '$1')) + '</code>'; i = e + run.length; continue; }
+      out += run; i = k; continue;
+    }
+    if(c==='*' || c==='_' || c==='~'){
+      const d = (s[i + 1]===c && (c!=='~' || true)) ? c + c : c;
+      const len = d.length;
+      if(c==='~' && len===1){ out += c; i++; continue; }
+      const next = s[i + len];
+      if(next && !/\s/.test(next) && next!==c && !(c==='_' && mdWord(s[i - 1]))){
+        const j = closer(i + len, d);
+        if(j>i + len && !/\s/.test(s[j - 1]) && !(c==='_' && mdWord(s[j + len]))){
+          const tag = c==='~' ? 's' : len===2 ? 'b' : 'i';
+          out += `<${tag}>${mdInline(s.slice(i + len, j))}</${tag}>`; i = j + len; continue;
+        }
+      }
+      out += esc(d); i += len; continue;
+    }
+    if(c==='[' || (c==='!' && s[i + 1]==='[')){
+      const b = c==='!' ? i + 1 : i; let depth = 0, e = -1;
+      for(let j = b; j<n; j++){ if(s[j]==='\\'){ j++; continue; } if(s[j]==='[') depth++; else if(s[j]===']' && --depth===0){ e = j; break; } }
+      if(e>0 && s[e + 1]==='('){
+        let d2 = 0, f = -1; for(let j = e + 1; j<n; j++){ if(s[j]==='\\'){ j++; continue; } if(s[j]==='(') d2++; else if(s[j]===')' && --d2===0){ f = j; break; } }
+        if(f>0){ out += link(s.slice(b + 1, e) || (c==='!' ? s.slice(e + 2, f) : ''), s.slice(e + 2, f)); i = f + 1; continue; }
+      }
+      out += esc(c); i++; continue;
+    }
+    if(c==='<'){
+      const m = /^<((?:https?:\/\/|mailto:)[^\s<>]+)>/i.exec(s.slice(i));
+      if(m){ const h = safeNoteHref(m[1]); out += h ? `<a href="${esc(h)}">${esc(m[1])}</a>` : esc(m[0]); i += m[0].length; continue; }
+      if(s.startsWith('<u>', i)){ const e = s.indexOf('</u>', i + 3); if(e>0){ out += '<u>' + mdInline(s.slice(i + 3, e)) + '</u>'; i = e + 4; continue; } }
+      out += '&lt;'; i++; continue;
+    }
+    out += esc(c); i++;
+  }
+  return out;
+}
+const MD_LIST = /^( {0,3})([-+*]|\d{1,9}[.)])( +|$)(.*)$/;
+const mdStartsBlock = l=>/^ {0,3}(#{1,6}\s|>|`{3,}|~{3,})/.test(l) || /^ {0,3}([-*_])( *\1){2,} *$/.test(l) || MD_LIST.test(l);
+function mdList(lines, i0){
+  const first = MD_LIST.exec(lines[i0]), ordered = /\d/.test(first[2]), items = [];
+  let i = i0;
+  while(i<lines.length){
+    const m = MD_LIST.exec(lines[i]); if(!m || /\d/.test(m[2])!==ordered) break;
+    const contentIndent = m[1].length + m[2].length + Math.max(1, Math.min(4, m[3].length)), own = [m[4]];
+    i++;
+    while(i<lines.length){
+      const l = lines[i];
+      if(!l.trim()){ let k = i; while(k<lines.length && !lines[k].trim()) k++; if(k<lines.length && lines[k].search(/\S/)>=contentIndent){ for(; i<k; i++) own.push(''); continue; } break; }
+      const ind = l.search(/\S/);
+      if(ind>=contentIndent){ own.push(l.slice(contentIndent)); i++; continue; }
+      if(MD_LIST.test(l) || mdStartsBlock(l)) break;
+      own.push(l.trim()); i++;                                      // a lazy continuation of the item's text
+    }
+    items.push(own);
+  }
+  let task = false;
+  const lis = items.map(own=>{
+    let t = null; const mt = /^\[([ xX])\]\s+(.*)$/.exec(own[0]);
+    if(mt){ t = mt[1]!==' '; own[0] = mt[2]; task = true; }
+    let inner = mdBlocks(own).replace(/^<p>([\s\S]*?)<\/p>/, '$1');
+    if(!inner) inner = '<br>';
+    return `<li${t ? ' data-done="1"' : ''}>${inner}</li>`;
+  });
+  return { html: `<${ordered ? 'ol' : task ? 'ul class="cl"' : 'ul'}>${lis.join('')}</${ordered ? 'ol' : 'ul'}>`, next: i };
+}
+function mdBlocks(lines){
+  const out = []; let i = 0;
+  while(i<lines.length){
+    const line = lines[i];
+    if(!line.trim()){ i++; continue; }
+    let m;
+    if((m = /^ {0,3}(`{3,}|~{3,})\s*([^`]*)$/.exec(line))){
+      const fence = m[1], body = []; i++;
+      while(i<lines.length && !new RegExp('^ {0,3}' + fence[0] + '{' + fence.length + ',}\\s*$').test(lines[i])){ body.push(lines[i]); i++; }
+      i++; out.push('<pre><code>' + esc(body.join('\n')) + '</code></pre>'); continue;
+    }
+    if((m = /^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line)) || (m = /^ {0,3}(#{1,6})\s*$/.exec(line))){ const lv = Math.min(3, m[1].length); out.push(`<h${lv}>${mdInline(m[2] || '')}</h${lv}>`); i++; continue; }
+    if(/^ {0,3}([-*_])( *\1){2,} *$/.test(line)){ out.push('<hr>'); i++; continue; }
+    if(/^ {0,3}>/.test(line)){ const q = []; while(i<lines.length && /^ {0,3}>/.test(lines[i])){ q.push(lines[i].replace(/^ {0,3}> ?/, '')); i++; } out.push('<blockquote>' + mdBlocks(q) + '</blockquote>'); continue; }
+    if(line.includes('|') && i + 1<lines.length && lines[i + 1].includes('-') && /^ {0,3}\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(lines[i + 1])){
+      const head = mdSplitRow(line), rows = []; i += 2;
+      while(i<lines.length && lines[i].trim() && lines[i].includes('|')){ rows.push(mdSplitRow(lines[i])); i++; }
+      const cols = head.length, row = (cs, tag)=>'<tr>' + Array.from({ length: cols }, (_, k)=>`<${tag}>${mdInline(cs[k] || '') || '<br>'}</${tag}>`).join('') + '</tr>';
+      out.push('<table><tbody>' + row(head, 'th') + rows.map(r=>row(r, 'td')).join('') + '</tbody></table>'); continue;
+    }
+    if(MD_LIST.test(line)){ const r = mdList(lines, i); out.push(r.html); i = r.next; continue; }
+    const para = [line]; i++; let level = 0;
+    while(i<lines.length && lines[i].trim()){
+      if(/^ {0,3}=+ *$/.test(lines[i])){ level = 1; i++; break; }
+      if(/^ {0,3}-+ *$/.test(lines[i])){ level = 2; i++; break; }
+      if(mdStartsBlock(lines[i])) break;
+      para.push(lines[i]); i++;
+    }
+    const text = para.map((l, k)=>{ const t = l.replace(/^\s+/, ''); return k<para.length - 1 ? (/( {2,}|\\)$/.test(t) ? t.replace(/( {2,}|\\)$/, '') + '\u0001' : t.replace(/\s+$/, '') + ' ') : t.replace(/\s+$/, ''); }).join('');
+    const html = mdInline(text).replace(/\u0001/g, '<br>');
+    out.push(level ? `<h${level}>${html}</h${level}>` : `<p>${html}</p>`);
+  }
+  return out.join('');
+}
+const noteTrailingLine = h=>/(<\/table>|<\/pre>|<hr>)$/.test(h) ? h + '<p><br></p>' : h;
+// A file read as a note: {title, body}. The kind comes from the extension; the title is a first "# heading" (Markdown), <title> or first <h1> (HTML), a front-matter "title:", else the file name.
+function noteImportParse(name, text){
+  const ext = (/\.([a-z]+)$/i.exec(name) || [])[1] || '', base = String(name).replace(/\.[^.]*$/, '').trim() || 'Imported note';
+  text = String(text).replace(/^\ufeff/, '').replace(/\r\n?/g, '\n');
+  if(/^html?$/i.test(ext)){
+    const tt = /<title[^>]*>([\s\S]*?)<\/title>/i.exec(text);
+    let b = text.replace(/<!--[\s\S]*?-->/g, '').replace(/<(script|style|head|title)\b[\s\S]*?<\/\1>/gi, '');
+    const bm = /<body[^>]*>([\s\S]*?)<\/body>/i.exec(b); if(bm) b = bm[1];
+    let body = sanitizeNoteHtml(b), title = tt ? decodeHtmlEntities(tt[1]).trim() : '';
+    const h1 = /^\s*<h1>([\s\S]*?)<\/h1>/.exec(body);
+    if(h1){ if(!title || mdTextOfHtml(h1[1]).trim()===title){ title = mdTextOfHtml(h1[1]).trim() || title; body = body.slice(h1[0].length); } }
+    return { title: (title || base).slice(0, 200), body: noteTrailingLine(body) };
+  }
+  if(/^(md|markdown|mdown)$/i.test(ext)){
+    let title = '', lines = text.split('\n');
+    if(lines[0]==='---'){ const e = lines.indexOf('---', 1); if(e>0){ const t = lines.slice(1, e).map(l=>/^title:\s*(.+)$/i.exec(l)).find(Boolean); if(t) title = t[1].replace(/^["']|["']$/g, '').trim(); lines = lines.slice(e + 1); } }
+    let k = 0; while(k<lines.length && !lines[k].trim()) k++;
+    const h = /^ {0,3}#\s+(.*?)\s*#*\s*$/.exec(lines[k] || '');
+    if(h && !title){ title = mdTextOfHtml(mdInline(h[1])).trim(); lines = lines.slice(k + 1); }
+    return { title: (title || base).slice(0, 200), body: noteTrailingLine(sanitizeNoteHtml(mdBlocks(lines))) };
+  }
+  const paras = text.split(/\n{2,}/).map(p=>p.replace(/^\n+|\n+$/g, '')).filter(p=>p.trim());
+  return { title: base.slice(0, 200), body: sanitizeNoteHtml(paras.map(p=>'<p>' + p.split('\n').map(esc).join('<br>') + '</p>').join('')) };
+}
+// -- typing: "**bold**", "_italic_", "`code`", "~~strike~~" and "[text](address)" become formatting the moment the closing character is typed --
+function noteAutoInline(e){
+  if(!e || e.inputType!=='insertText' || !e.data || !/^[*_`~)]$/.test(e.data)) return;
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || noteIsLocked(noteEditorId)) return;
+  const node = sel.anchorNode, off = sel.anchorOffset;
+  if(!node || node.nodeType!==3 || !body.contains(node) || (node.parentNode.closest && node.parentNode.closest('pre, code, a'))) return;
+  const m = noteInlineMatch(node.nodeValue.slice(0, off)); if(!m) return;
+  let html;
+  if(m.kind==='link'){ const c = noteLinkClassify(m.href); if(!c.href) return; html = `<a href="${esc(c.href)}">${esc(m.text)}</a>`; }
+  else { const tag = { bold: 'b', italic: 'i', strike: 's', code: 'code' }[m.kind]; html = `<${tag}>${esc(m.text)}</${tag}>` + (m.kind==='code' ? '&nbsp;' : ''); }   // Chrome turns a lone trailing <code> into a styled span, so code keeps one space after it (which also leaves the caret outside)
+  const r = document.createRange(); r.setStart(node, m.start); r.setEnd(node, off);
+  sel.removeAllRanges(); sel.addRange(r);
+  document.execCommand('insertHTML', false, html);                      // one editing command: native Undo takes the formatting back
+  const q = window.getSelection(), a = q.anchorNode, el = a && (a.nodeType===3 ? a.parentNode : a), fmt = el && el.closest ? el.closest('b, i, s, code, a') : null;
+  if(fmt && body.contains(fmt) && q.isCollapsed){                         // what is typed next is not part of it: the caret steps out, and the typing style is switched off
+    const c = document.createRange(); c.setStartAfter(fmt); c.collapse(true); q.removeAllRanges(); q.addRange(c);
+    const cmd = { b: 'bold', i: 'italic', s: 'strikeThrough' }[fmt.tagName.toLowerCase()];
+    if(cmd && document.queryCommandState(cmd)) document.execCommand(cmd);
+  }
+}
+function noteInlineMatch(before){
+  const o = '(^|[\\s(\\[{>"\'\u201c\u2018])';
+  let m = /\[([^\[\]\n]+)\]\(([^()\s]+)\)$/.exec(before);
+  if(m) return { kind: 'link', start: m.index, text: m[1], href: m[2] };
+  if((m = new RegExp(o + '`([^`\\n]+)`$').exec(before))) return { kind: 'code', start: m.index + m[1].length, text: m[2] };
+  if((m = new RegExp(o + '(\\*\\*|__)(\\S|\\S[^\\n]*?\\S)\\2$').exec(before))) return { kind: 'bold', start: m.index + m[1].length, text: m[3] };
+  if((m = new RegExp(o + '~~(\\S|\\S[^\\n]*?\\S)~~$').exec(before))) return { kind: 'strike', start: m.index + m[1].length, text: m[2] };
+  if((m = new RegExp(o + '(\\*|_)([^\\s*_]|[^\\s*_][^\\n]*?[^\\s*_])\\2$').exec(before))) return { kind: 'italic', start: m.index + m[1].length, text: m[3] };
+  return null;
+}
 function copyNote(id){
   const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
   if(n.id===noteEditorId) flushNoteEdit();                          // what is on screen, not the last autosave
@@ -10243,6 +10454,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   noteEditCount++;
+  noteAutoInline(e);
   if(noteFindBar.state.open) noteFindBar.run(false);     // the note changed under the find bar: its matches follow
   noteSlashUpdate(e);
   noteCodeCopyQueue();
@@ -11612,8 +11824,46 @@ function importKindOf(data){
   if(Array.isArray(data.prompts) && !Array.isArray(data.tasks) && !Array.isArray(data.projects)) return 'prompts';
   return (Array.isArray(data.tasks) && Array.isArray(data.projects)) ? 'backup' : null;
 }
+// Notes come in from .md / .markdown, .txt and .html files (several at once) through the same Import… door as a ClearDesk file, or dropped on the notes list. Each file becomes a note in the
+// folder you are looking at (the default folder from All Notes, Pinned or Recently Deleted); the last one is selected. One toast Undo takes them all back.
+const NOTE_IMPORT_RE = /\.(md|markdown|mdown|txt|text|html?)$/i, NOTE_IMPORT_MAX = 50, NOTE_IMPORT_BYTES = 2000000;
+function importNoteFiles(files){
+  const list = [...files].filter(f=>NOTE_IMPORT_RE.test(f.name));
+  if(!list.length){ showToast('Nothing to import: notes come in as .md, .txt or .html files', true); return; }
+  const take = list.slice(0, NOTE_IMPORT_MAX), big = take.filter(f=>f.size>NOTE_IMPORT_BYTES);
+  flushNoteEdit();
+  Promise.all(take.filter(f=>f.size<=NOTE_IMPORT_BYTES).map(f=>f.text().then(t=>({ name: f.name, text: t }), ()=>null))).then(res=>{
+    const now = Date.now(), folderId = folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, made = [];
+    res.filter(Boolean).forEach((r, i)=>{
+      const p = noteImportParse(r.name, r.text); if(!p.title && !p.body) return;
+      made.push({ id: genId(), title: p.title, body: p.body, folderId, createdAt: now + i, updatedAt: now + i });
+    });
+    if(!made.length){ showToast('Nothing could be imported from that file', true); return; }
+    const leaving = selectedNoteId;
+    made.forEach(n=>notes.push(n));
+    if(appMode!=='notes') setAppMode('notes');
+    if(noteFolderFilter==='trash' || noteFolderFilter==='pinned') noteFolderFilter = 'all';
+    selectedNoteId = made[made.length - 1].id; noteEditorId = null; noteSearchQuery = ''; syncSearchBox();
+    if(leaving) removeIfEmptyNote(leaving);
+    save(); render();
+    const skipped = list.length - take.length + big.length;
+    showToast(`Imported ${made.length} ${made.length===1 ? 'note' : 'notes'}${skipped ? `; ${skipped} skipped (too many or too large)` : ''}`, false, ()=>{
+      made.forEach(n=>{ const i = notes.findIndex(x=>x.id===n.id); if(i>=0){ notes.splice(i, 1); tombstone(deletedNoteIds, n.id); } });
+      if(!notes.some(x=>x.id===selectedNoteId)) selectedNoteId = null; noteEditorId = null; save(); render(); showToast('Import undone');
+    });
+  });
+}
+// Files dropped on the notes list (or the empty editor) are imported as notes; a note dragged from the list and text dragged inside the editor are not files and are left alone.
+['dragover', 'drop'].forEach(type=>document.addEventListener(type, e=>{
+  const dt = e.dataTransfer; if(appMode!=='notes' || !dt || ![...(dt.types || [])].includes('Files')) return;
+  const zone = e.target.closest && e.target.closest('#notesMain .notes-list-pane, #notesEmpty, #noteEmptyBar'); if(!zone) return;
+  e.preventDefault();
+  if(type==='drop') importNoteFiles(dt.files);
+}));
 function handleFileImport(event){
-  const file = event.target.files[0]; if(!file) return;
+  const picked = [...event.target.files]; event.target.value = '';
+  if(picked.length && picked.every(f=>NOTE_IMPORT_RE.test(f.name))){ importNoteFiles(picked); return; }   // notes
+  const file = picked.find(f=>/\.json$/i.test(f.name)) || picked[0]; if(!file) return;
   const reader = new FileReader();
   reader.onload = e=>{
     try{
@@ -11625,7 +11875,6 @@ function handleFileImport(event){
     }catch(err){ showToast('Invalid ClearDesk file', true); }
   };
   reader.readAsText(file);
-  event.target.value = '';
 }
 // Additive merge used by every "read data from outside localStorage" path
 // (linkFile, reconnectFile, initFileSync, fileSyncWrite's cross-tab merge,
