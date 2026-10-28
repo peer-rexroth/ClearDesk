@@ -2661,7 +2661,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>The / menu</strong>: type <kbd>/</kbd> at the start of a line (or after a space) to insert a title, heading, checklist, list, quote, code block, table, divider or today's date. Keep typing to narrow the list (<kbd>/ta</kbd> finds Table), <kbd>↑</kbd> <kbd>↓</kbd> move, <kbd>↵</kbd> or <kbd>Tab</kbd> inserts, <kbd>Esc</kbd> closes it and leaves the slash as text. It stays out of code blocks and locked notes.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading, <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Export and print</strong>: <strong>⋯</strong> → <em>Export</em> saves the note as a Markdown file or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. <em>Copy note</em> puts it on the clipboard for pasting into Mail.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Copy, export and print</strong>: <strong>⋯</strong> → <em>Copy Note</em> puts the note on the clipboard for pasting into Mail; <em>Copy As</em> puts it there as <em>Rich Text</em>, <em>Plain Text</em>, <em>Markdown</em> or <em>HTML</em> (the HTML is the same inline-styled markup Mail gets, as source text). With text selected in the note, <em>Copy Selection As</em> does the same for just that text. <em>Export</em> saves it as a <em>.txt</em>, <em>.md</em> or <em>.html</em> file, or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
@@ -6657,28 +6657,75 @@ function noteToMarkdown(root){
   return md;
 }
 function noteFileName(n, ext){ return ((n.title || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80) || 'Note') + ext; }
-function noteExportMarkdown(id){
-  const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
-  if(n.id===noteEditorId) flushNoteEdit();
-  const m = notes.find(x=>x.id===n.id), holder = document.createElement('div');
-  holder.innerHTML = sanitizeNoteHtml(m.body);
-  const md = ((m.title || '').trim() ? '# ' + m.title.trim() + '\n\n' : '') + noteToMarkdown(holder) + '\n';
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown;charset=utf-8' })); a.download = noteFileName(m, '.md');
+// ---- the note in other formats: Copy As (the clipboard) and Export (a file), Plain Text / Markdown / HTML; Rich Text is Copy Note ----
+// Every format is built from the same sanitised body as Copy Note, so none of the editor's own markup leaks out. Plain text and Markdown are the converters above; the HTML is the
+// mail-safe markup (inline styles, light colours) that Copy Note puts on the clipboard, as a fragment for Copy As and wrapped in a small document for the .html file.
+const NOTE_FORMATS = {
+  plain: { label: 'Plain Text', ext: '.txt', mime: 'text/plain' },
+  markdown: { label: 'Markdown', ext: '.md', mime: 'text/markdown' },
+  html: { label: 'HTML', ext: '.html', mime: 'text/html' }
+};
+function noteFormatText(n, kind){                                    // no trailing line break: that is for the file
+  const holder = document.createElement('div'); holder.innerHTML = sanitizeNoteHtml(n.body);
+  const title = (n.title || '').trim();
+  if(kind==='markdown') return (title ? '# ' + title + '\n\n' : '') + noteToMarkdown(holder);
+  if(kind==='html') return noteCopyContent(n).html.replace(/(<div style="margin:0 0 6px"><br><\/div>)+(?=<\/div>$)/, '');   // the note's own empty last line is not part of the markup you paste
+  return [title, noteToPlainText(holder)].filter(Boolean).join('\n\n');
+}
+function noteHtmlDocument(n, fragment){
+  return `<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>${esc((n.title || '').trim() || 'Note')}</title>\n</head>\n<body style="max-width:720px;margin:32px auto;padding:0 16px">\n${fragment}\n</body>\n</html>\n`;
+}
+function noteSaved(id){ const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return null; if(n.id===noteEditorId) flushNoteEdit(); return notes.find(x=>x.id===n.id); }   // what is on screen, not the last autosave
+// With text selected in the open note, the ⋯ menu's Copy As acts on the selection (Copy Note stays the whole note): the selection is captured as markup when the menu opens (picking
+// an item can move it), and goes through the same converters as the whole note, without the title.
+let noteMenuSel = null;
+function noteSelectionHtml(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  if(!body || !sel || !sel.rangeCount || sel.isCollapsed || !body.contains(sel.anchorNode) || !body.contains(sel.focusNode)) return '';
+  const range = sel.getRangeAt(0); let content = range.cloneContents(), anc = range.commonAncestorContainer;
+  if(anc.nodeType===3) anc = anc.parentNode;
+  for(; anc && anc!==body; anc = anc.parentNode){                         // rows, cells or list items on their own lose their table / list: put those back around them
+    if(!/^(TR|TBODY|THEAD|TABLE|UL|OL)$/.test(anc.tagName)) continue;
+    const wrap = anc.cloneNode(false); wrap.appendChild(content); content = wrap;
+  }
+  const holder = document.createElement('div'); holder.appendChild(content);
+  return holder.textContent.trim() || holder.querySelector('img, hr, table') ? sanitizeNoteHtml(holder.innerHTML) : '';
+}
+function noteSelectionText(html, kind){
+  const holder = document.createElement('div'); holder.innerHTML = html;
+  if(kind==='markdown') return noteToMarkdown(holder).trim();
+  if(kind==='html') return `<div style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#1d1d1f">${noteToMailHtml(holder)}</div>`;
+  return noteToPlainText(holder).trim();
+}
+function copySelectionAs(kind){
+  const html = noteMenuSel; noteMenuSel = null; if(!html) return;
+  if(kind==='rich'){
+    const holder = document.createElement('div'); holder.innerHTML = html;
+    const plain = noteToPlainText(holder).trim(), rich = noteSelectionText(html, 'html');
+    if(!plain){ showToast('Nothing to copy: the selection is empty'); return; }
+    noteWriteClipboard(rich, plain).then(ok=>showToast(ok ? 'Selection copied' : 'Could not use the clipboard here', !ok)); return;
+  }
+  const f = NOTE_FORMATS[kind]; if(!f) return;
+  const text = noteSelectionText(html, kind);
+  if(!text){ showToast('Nothing to copy: the selection is empty'); return; }
+  noteWriteText(text).then(ok=>showToast(ok ? `Selection copied as ${f.label}` : 'Could not use the clipboard here', !ok));
+}
+function copyNoteAs(id, kind){
+  if(kind==='rich'){ copyNote(id); return; }
+  const f = NOTE_FORMATS[kind], m = f && noteSaved(id); if(!m) return;
+  const text = noteFormatText(m, kind);
+  if(!text.trim()){ showToast('Nothing to copy: the note is empty'); return; }
+  noteWriteText(text).then(ok=>showToast(ok ? `Copied as ${f.label}` : 'Could not use the clipboard here', !ok));
+}
+function noteExportAs(id, kind){
+  const f = NOTE_FORMATS[kind], m = f && noteSaved(id); if(!m) return;
+  let text = noteFormatText(m, kind);
+  if(kind==='html') text = noteHtmlDocument(m, text);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text + (kind==='html' ? '' : '\n')], { type: f.mime + ';charset=utf-8' })); a.download = noteFileName(m, f.ext);
   document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
   showToast(`Saved ${a.download}`);
 }
-// Print / Save as PDF: the note's mail-safe HTML goes into #notePrintArea, which only shows when printing (the rest of the app is hidden by the print CSS).
-function noteExportPrint(id){
-  const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
-  if(n.id===noteEditorId) flushNoteEdit();
-  let area = document.getElementById('notePrintArea');
-  if(!area){ area = document.createElement('div'); area.id = 'notePrintArea'; document.body.appendChild(area); }
-  area.innerHTML = noteCopyContent(notes.find(x=>x.id===n.id)).html;
-  document.title = noteFileName(n, '').replace(/ $/, '');                                       // the PDF's suggested file name
-  const done = ()=>{ area.innerHTML = ''; document.title = 'ClearDesk'; window.removeEventListener('afterprint', done); };
-  window.addEventListener('afterprint', done);
-  window.print();
-}
+const noteExportMarkdown = id=>noteExportAs(id, 'markdown');
 function copyNote(id){
   const n = notes.find(x=>x.id===(id || selectedNoteId)); if(!n) return;
   if(n.id===noteEditorId) flushNoteEdit();                          // what is on screen, not the last autosave
@@ -6718,7 +6765,9 @@ function noteMenuHtml(id, opts){
     ...(opts && opts.noLock ? [] : [item(n.locked ? 'fa-solid fa-lock-open' : 'fa-solid fa-lock', n.locked ? 'Unlock' : 'Lock', `noteMenuRun('lock')`)]),   // the toolbar has its own lock button
     sep,
     item('fa-regular fa-copy', 'Copy Note', `noteMenuRun('copy')`),
-    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportmd')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
+    ...(opts && opts.selection ? [rowMenuSub('fa-regular fa-copy', 'Copy Selection As', ['rich:Rich Text', 'plain:Plain Text', 'markdown:Markdown', 'html:HTML'].map(x=>menuOpt(`noteMenuRun('copyselas','${x.split(':')[0]}')`, {none: true}, x.split(':')[1])).join(''))] : []),
+    rowMenuSub('fa-regular fa-copy', 'Copy As', menuOpt(`noteMenuRun('copyas','rich')`, {none: true}, 'Rich Text') + menuOpt(`noteMenuRun('copyas','plain')`, {none: true}, 'Plain Text') + menuOpt(`noteMenuRun('copyas','markdown')`, {none: true}, 'Markdown') + menuOpt(`noteMenuRun('copyas','html')`, {none: true}, 'HTML')),
+    rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…')),
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
@@ -6740,7 +6789,9 @@ function noteMenuRun(kind, value){
   if(kind==='lock') toggleNoteLock(id);
   else if(kind==='copy') copyNote(id);
   else if(kind==='pin') toggleNotePin(id);
-  else if(kind==='exportmd') noteExportMarkdown(id);
+  else if(kind==='copyas') copyNoteAs(id, value);
+  else if(kind==='copyselas') copySelectionAs(value);
+  else if(kind==='exportas') noteExportAs(id, value);
   else if(kind==='print') noteExportPrint(id);
   else if(kind==='restore') restoreNote(id);
   else if(kind==='clone') cloneNote(id);
@@ -10026,7 +10077,8 @@ function openNoteMoreMenu(e){
   const menu = document.getElementById('rowMenu'), id = noteEditorId; if(!menu || !id) return;
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   noteMenuId = id; folderMenuId = null;
-  menu.innerHTML = tidyMenuSeps(noteMenuHtml(id, {noLock:true}));
+  noteMenuSel = noteSelectionHtml();                                              // text selected in the note: Copy Selection As
+  menu.innerHTML = tidyMenuSeps(noteMenuHtml(id, {noLock:true, selection: !!noteMenuSel}));
   const btn = e.currentTarget, r = btn.getBoundingClientRect();
   menu.classList.add('open');                                                    // to measure its real width (it is not a fixed 220px: the hint text and the text size change it)
   const k = btn.offsetWidth ? r.width / btn.offsetWidth : 1;

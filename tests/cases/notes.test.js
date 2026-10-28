@@ -973,3 +973,20 @@ test('the app reopens on the note you had open, once; a note that is gone or in 
   assertEqual(selectedNoteId, 'n3', 'a note that is not in the open folder: the top of that folder');
   noteFolderFilter = 'all'; selectedNoteId = null;
 });
+
+test('Copy As and Export offer Plain Text, Markdown and HTML (audit: copy-paste formats)', function(){
+  assertEqual(Object.keys(NOTE_FORMATS).join(','), 'plain,markdown,html');
+  assertEqual(NOTE_FORMATS.plain.ext + NOTE_FORMATS.markdown.ext + NOTE_FORMATS.html.ext, '.txt.md.html');
+  notes = [{ id: 'nf1', title: 'T', body: '<p>x</p>', folderId: 'nf-notes', created: 1, updated: 1 }];
+  var m = noteMenuHtml('nf1');
+  ['Copy As', 'Rich Text', 'Plain Text', 'Markdown', 'HTML', 'Plain Text (.txt)', 'Markdown (.md)', 'HTML (.html)', 'Print / Save as PDF'].forEach(function(l){ assertIncludes(m, l, l); });
+  assertIncludes(m, "noteMenuRun('copyas','plain')"); assertIncludes(m, "noteMenuRun('exportas','html')");
+  assertEqual(noteHtmlDocument({ title: 'A <b>' }, '<p>x</p>').indexOf('<title>A &lt;b&gt;</title>') > -1, true, 'the title is escaped in the document');
+});
+
+test('with a selection, the note menu offers Copy Selection As (and without one it does not)', function(){
+  notes = [{ id: 'nf2', title: 'T', body: '<p>x</p>', folderId: 'nf-notes', created: 1, updated: 1 }];
+  assertNotIncludes(noteMenuHtml('nf2', { noLock: true }), 'Copy Selection As');
+  var m = noteMenuHtml('nf2', { noLock: true, selection: true });
+  assertIncludes(m, 'Copy Selection As'); assertIncludes(m, "noteMenuRun('copyselas','markdown')"); assertIncludes(m, 'Copy As');
+});
