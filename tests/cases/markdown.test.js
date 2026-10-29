@@ -27,7 +27,7 @@ test('Markdown inline: bold, italic, strike, code, links, escapes', function(){
   assertEqual(mdInline('\\*not\\* bold'), '*not* bold');
   assertEqual(mdInline('**bold _and italic_**'), '<b>bold <i>and italic</i></b>');
   assertEqual(mdInline('<u>under</u>'), '<u>under</u>');
-  assertEqual(mdInline('<b>raw</b>'), '&lt;b&gt;raw&lt;/b&gt;', 'raw HTML is shown as text');
+  assertEqual(mdInline('<div>raw</div>'), '&lt;div&gt;raw&lt;/div&gt;', 'raw HTML other than the plain inline tags is shown as text'); assertEqual(mdInline('<script>x</script>'), '&lt;script&gt;x&lt;/script&gt;');
 });
 test('Markdown inline: unsafe links and images lose the address, not the words', function(){
   assertEqual(mdInline('[x](javascript:alert(1))'), 'x');
@@ -40,7 +40,7 @@ test('Markdown blocks: headings, paragraphs, rules, quotes, code', function(){
   assertEqual(h('#### four'), '<h4>four</h4>', 'levels 4 to 6 are their own levels'); assertEqual(h('###### six'), '<h6>six</h6>');
   assertEqual(h('line one  \nline two'), '<p>line one<br>line two</p>', 'two spaces make a line break');
   assertEqual(h('Title\n=====\n\ntext'), '<h1>Title</h1><p>text</p>');
-  assertEqual(h('```js\nlet a = 1 < 2;\n\nb()\n```'), '<pre><code>let a = 1 &lt; 2;\n\nb()</code></pre><p><br></p>', 'a code block keeps its blank line; a trailing line follows it');
+  assertEqual(h('```js\nlet a = 1 < 2;\n\nb()\n```'), '<pre data-lang="js"><code>let a = 1 &lt; 2;\n\nb()</code></pre><p><br></p>', 'a code block keeps its blank line; a trailing line follows it');
 });
 test('Markdown lists: bullets, numbers, nesting, checklists', function(){
   var h = function(md){ return noteImportParse('n.md', md).body; };
@@ -124,4 +124,31 @@ test('Markdown reference links: unknown references, footnotes, checklists and co
   var bad = h('[x][r]\n\n[r]: javascript:alert(1)'); assertEqual(bad, '<p>x</p>', 'an unsafe address keeps the words only');
   assertIncludes(h('![pic][p]\n\n[p]: https://example.com/p.png'), 'href="https://example.com/p.png" target="_blank" rel="noopener noreferrer">pic</a>', 'an image reference becomes a link to the picture');
   assertEqual(mdRefs, null, 'the definitions do not leak into the next file');
+});
+
+test('Markdown: a code fence keeps its language, the sanitizer allows only a plain word', function(){
+  var h = function(md){ return noteImportParse('n.md', md).body; };
+  assertIncludes(h('```python\nprint(1)\n```'), '<pre data-lang="python"><code>print(1)</code></pre>');
+  assertIncludes(h('~~~ c++ title="x"\nint a;\n~~~'), '<pre data-lang="c++">');
+  assertIncludes(h('```\nplain\n```'), '<pre><code>plain</code></pre>');
+  assertEqual(sanitizeNoteHtml('<pre data-lang="js">x</pre><pre data-lang="a b<c">y</pre><pre data-lang="' + 'x'.repeat(30) + '">z</pre>'), '<pre data-lang="js">x</pre><pre data-lang="a">y</pre><pre data-lang="' + 'x'.repeat(20) + '">z</pre>', 'the name is cut to a plain word of at most 20 characters');
+  assertEqual(/script|onerror/.test(sanitizeNoteHtml('<pre data-lang="x" onclick="alert(1)">z</pre>')), false);
+});
+test('Markdown ==highlight==: read, kept out of words and code, escaped on export', function(){
+  assertEqual(mdInline('a ==marked== b'), 'a <mark data-hl="yellow">marked</mark> b');
+  assertEqual(mdInline('==**bold** inside=='), '<mark data-hl="yellow"><b>bold</b> inside</mark>');
+  assertEqual(mdInline('x==y==z'), 'x==y==z', 'inside a word it stays text');
+  assertEqual(mdInline('a == b == c'), 'a == b == c', 'spaced equals signs are not a highlight');
+  assertEqual(mdInline('`==code==`'), '<code>==code==</code>');
+  assertEqual(mdInline('\\==not=='), '==not==', 'a backslash keeps the characters');
+  assertEqual(mdEscapeText('a == b'), 'a \\=\\= b'); assertEqual(mdEscapeText('a = b'), 'a = b');
+  assertEqual(noteInlineMatch('say ==this==').kind, 'highlight'); assertEqual(noteInlineMatch('say ==this==').text, 'this'); assertEqual(noteInlineMatch('a == b =='), null);
+});
+test('Markdown: a few plain inline HTML tags are read; anything else stays text', function(){
+  assertEqual(mdInline('a <b>b</b> <strong>s</strong> <i>i</i> <em>e</em> <u>u</u> <del>d</del> <s>s</s>'), 'a <b>b</b> <b>s</b> <i>i</i> <i>e</i> <u>u</u> <s>d</s> <s>s</s>');
+  assertEqual(mdInline('<mark>m</mark> and <code>a<b</code>'), '<mark data-hl="yellow">m</mark> and <code>a&lt;b</code>');
+  assertEqual(mdInline('<B>up</B>'), '<b>up</b>', 'tag names are not case sensitive');
+  assertEqual(mdInline('<a href="x">l</a> <img src=x onerror=alert(1)> <b onclick="x">z</b>'), '&lt;a href=&quot;x&quot;&gt;l&lt;/a&gt; &lt;img src=x onerror=alert(1)&gt; &lt;b onclick=&quot;x&quot;&gt;z&lt;/b&gt;', 'tags with attributes and other tags are shown as text');
+  assertEqual(mdInline('<b>unclosed'), '&lt;b&gt;unclosed');
+  assertIncludes(noteImportParse('n.md', 'one<br>two<br/>three').body, 'one<br>two<br>three');
 });

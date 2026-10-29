@@ -1439,6 +1439,7 @@ const ICONS = {
   .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
   .note-body code { font-family: var(--mono); font-size: .88em; padding: 1px 6px; border-radius: var(--r-xs); background: var(--bg-3); }
+  .note-body pre[data-lang]::before { content: attr(data-lang); display: block; margin: 0 0 4px; font-family: var(--font); font-size: var(--fs-11); font-weight: 600; letter-spacing: .02em; color: var(--text-2); user-select: none; -webkit-user-select: none; }   /* the language, small, above the code (not part of the text) */
   .note-body pre code { padding: 0; border-radius: 0; background: none; }   /* inside a code block the block is the box: no second, inline-code box behind the text (or behind an empty block's caret) */
   .note-body pre { font-family: var(--mono); font-size: var(--fs-13); padding: 10px 40px 10px 12px; border-radius: var(--r-s); background: var(--bg-2); overflow-x: auto; white-space: pre-wrap; }
   .note-body hr { border: 0; border-top: 1px solid var(--border-2); margin: 1em 0; }
@@ -2670,15 +2671,15 @@ const ICONS = {
           <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Recently Deleted</strong>: deleting a note moves it to <em>Recently Deleted</em> at the bottom of the sidebar, where it stays for 30 days. Open it there to <em>Restore</em> it or <em>Delete Now</em>; <em>Delete All</em> empties the list. Deleting a note that is already there removes it for good.</span></div>
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>The / menu</strong>: type <kbd>/</kbd> at the start of a line (or after a space) to insert a title, heading, checklist, list, quote, code block, table, divider or today's date. Keep typing to narrow the list (<kbd>/ta</kbd> finds Table), <kbd>↑</kbd> <kbd>↓</kbd> move, <kbd>↵</kbd> or <kbd>Tab</kbd> inserts, <kbd>Esc</kbd> closes it and leaves the slash as text. It stays out of code blocks and locked notes.</span></div>
-          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading (<kbd>#### </kbd> to <kbd>###### </kbd> make Heading 4 to 6; they are not in the style menu, but it names the one your cursor is in), <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block. <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
+          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading (<kbd>#### </kbd> to <kbd>###### </kbd> make Heading 4 to 6; they are not in the style menu, but it names the one your cursor is in), <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block (<kbd>```js</kbd> then <kbd>↵</kbd> remembers the language and shows it above the code). <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Copy, export and print</strong>: <strong>⋯</strong> → <em>Copy Note</em> puts the note on the clipboard for pasting into Mail; <em>Copy As</em> puts it there as <em>Rich Text</em>, <em>Plain Text</em>, <em>Markdown</em> or <em>HTML</em> (the HTML is the same inline-styled markup Mail gets, as source text). With text selected in the note, <em>Copy Selection As</em> does the same for just that text. <em>Export</em> saves it as a <em>.txt</em>, <em>.md</em> or <em>.html</em> file, as a <em>Note File (.json)</em> that ClearDesk can import again, or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
           <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Align Left / Center / Right for the column, Delete and Delete table. A Markdown table's <code>:---:</code> markers set each column's alignment when you import it. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links (also reference-style <code>[text][ref]</code> with its <code>[ref]: address</code> line), lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
-          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links (also reference-style <code>[text][ref]</code> with its <code>[ref]: address</code> line), lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, a code block keeps its language, <code>==highlight==</code> and simple tags like <code>&lt;b&gt;</code> and <code>&lt;br&gt;</code> are read, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
+          <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code>, <code>==highlight==</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Duplicate, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -6233,6 +6234,10 @@ function sanitizeNoteHtml(html){
       const wm = /\bwidth\s*:\s*(\d{1,3}(?:\.\d{1,4})?)%/i.exec(attrs), wv = wm ? parseFloat(wm[1]) : 0;
       out += wv>0 && wv<=100 ? `<col style="width:${wv}%">` : '<col>';
     }
+    else if(name==='pre'){                                    // a code block keeps its language name (a plain word; it is shown small in the block and written after the fence)
+      const lm = /\bdata-lang\s*=\s*["']?([A-Za-z0-9+#._-]{1,20})/.exec(attrs);
+      out += lm ? `<pre data-lang="${lm[1]}">` : '<pre>';
+    }
     else if(name==='td' || name==='th'){                      // a column's alignment survives (centre / right; left is the default): ours, an align attribute, or a plain text-align from pasted HTML
       const am = /\bdata-al\s*=\s*["']?(center|right)|\balign\s*=\s*["']?(center|right)|\btext-align\s*:\s*(center|right)/i.exec(attrs), al = am ? (am[1] || am[2] || am[3]).toLowerCase() : '';
       out += al ? `<${name} data-al="${al}">` : `<${name}>`;
@@ -6618,7 +6623,7 @@ function noteWriteClipboard(html, plain){
 }
 // ---- export: Markdown file, Print / PDF ----
 // noteToMarkdown(root) walks the sanitised body: headings #, bold **, italic _, strikethrough ~~, code `, links [text](url), lists with two-space indents
-// (checklists as - [ ] / - [x]), tables as pipe tables, quotes >, code blocks as fences, rules ---. Colours and highlights are dropped (plain Markdown has none).
+// (checklists as - [ ] / - [x]), tables as pipe tables, quotes >, code blocks as fences, rules ---. Text colours are dropped (plain Markdown has none); a highlight is written ==text== whatever its colour.
 function noteToMarkdown(root){
   const inline = n=>{
     if(n.nodeType===3) return mdEscapeText(n.nodeValue.replace(/[ ]/g, ' '));
@@ -6631,6 +6636,7 @@ function noteToMarkdown(root){
       case 'I': case 'EM': return kids.trim() ? `_${kids}_` : kids;
       case 'S': case 'STRIKE': return kids.trim() ? `~~${kids}~~` : kids;
       case 'U': return kids.trim() ? `<u>${kids}</u>` : kids;
+      case 'MARK': return kids.trim() ? `==${kids}==` : kids;      // any highlight colour is written as ==text== (Markdown has one highlight)
       case 'A': { const h = n.getAttribute('href') || ''; return h ? `[${kids}](${h})` : kids; }
       default: return kids;
     }
@@ -6663,7 +6669,7 @@ function noteToMarkdown(root){
         return;
       }
       if(tag==='HR'){ flush(); blocks.push({ text: '---' }); return; }
-      if(tag==='PRE'){ flush(); blocks.push({ text: '```\n' + n.textContent.replace(/\n$/, '') + '\n```' }); return; }
+      if(tag==='PRE'){ flush(); blocks.push({ text: '```' + (n.getAttribute('data-lang') || '') + '\n' + n.textContent.replace(/\n$/, '') + '\n```' }); return; }
       if(tag==='BLOCKQUOTE'){ flush(); const sub = noteToMarkdown(n); if(sub) blocks.push({ text: sub.split('\n').map(l=>l ? '> ' + l : '>').join('\n') }); return; }
       if(/^H[1-6]$/.test(tag)){ flush(); const t = inline(n).replace(/\s+/g, ' ').trim(); if(t) blocks.push({ text: '#'.repeat(+tag[1]) + ' ' + t }); return; }
       if(tag==='P' || tag==='DIV'){ flush(); walk(n); return; }
@@ -6749,7 +6755,7 @@ function noteExportAs(id, kind){
 const noteExportMarkdown = id=>noteExportAs(id, 'markdown');
 // ---- Markdown in and out of notes: escaping on export, reading on import, and the typing shortcuts ----
 // All of this is pure text (strings in, strings out) so it is tested; it never touches the DOM. What is read in goes through sanitizeNoteHtml like every other way a body arrives.
-// Not read: images (kept as a link to the picture), footnotes, raw HTML (shown as text, except <u>).
+// Not read: images (kept as a link to the picture), footnotes, raw HTML (shown as text, except <br> and the inline tags b, strong, i, em, u, s, strike, del, mark and code).
 const mdWord = c=>!!c && /[\p{L}\p{N}]/u.test(c);
 // A text node as Markdown text: the characters that would turn into formatting when the file is read again are backslash-escaped. An underscore inside a word (snake_case) is left alone.
 function mdEscapeText(s){
@@ -6759,6 +6765,7 @@ function mdEscapeText(s){
     if(c==='\\' || c==='`' || c==='*' || c==='[' || c===']') out += '\\' + c;
     else if(c==='_') out += mdWord(p) && mdWord(n) ? c : '\\_';
     else if(c==='~') out += (p==='~' || n==='~') ? '\\~' : c;
+    else if(c==='=') out += (p==='=' || n==='=') ? '\\=' : c;
     else if(c==='<') out += /[A-Za-z\/!?]/.test(n) ? '\\<' : c;
     else out += c;
   }
@@ -6812,13 +6819,17 @@ function mdInline(s){
   };
   while(i<n){
     const c = s[i];
-    if(c==='\\' && i + 1<n && /[\\`*_{}\[\]()#+\-.!|<>~]/.test(s[i + 1])){ out += esc(s[i + 1]); i += 2; continue; }
+    if(c==='\\' && i + 1<n && /[\\`*_{}\[\]()#+\-.!|<>~=]/.test(s[i + 1])){ out += esc(s[i + 1]); i += 2; continue; }
     if(c==='\\' && s[i + 1]==='\n'){ out += '\u0001'; i += 2; continue; }
     if(c==='`'){
       let k = i; while(s[k]==='`') k++;
       const run = s.slice(i, k), e = s.indexOf(run, k);
       if(e>0){ out += '<code>' + esc(s.slice(k, e).replace(/^ (.*) $/, '$1')) + '</code>'; i = e + run.length; continue; }
       out += run; i = k; continue;
+    }
+    if(c==='=' && s[i + 1]==='=' && s[i + 2] && !/[\s=]/.test(s[i + 2]) && !mdWord(s[i - 1])){      // ==highlight==
+      const j = closer(i + 2, '==');
+      if(j>i + 2 && !/\s/.test(s[j - 1]) && !mdWord(s[j + 2])){ out += `<mark data-hl="yellow">${mdInline(s.slice(i + 2, j))}</mark>`; i = j + 2; continue; }
     }
     if(c==='*' || c==='_' || c==='~'){
       const d = (s[i + 1]===c && (c!=='~' || true)) ? c + c : c;
@@ -6852,7 +6863,16 @@ function mdInline(s){
     if(c==='<'){
       const m = /^<((?:https?:\/\/|mailto:)[^\s<>]+)>/i.exec(s.slice(i));
       if(m){ const h = safeNoteHref(m[1]); out += h ? `<a href="${esc(h)}">${esc(m[1])}</a>` : esc(m[0]); i += m[0].length; continue; }
-      if(s.startsWith('<u>', i)){ const e = s.indexOf('</u>', i + 3); if(e>0){ out += '<u>' + mdInline(s.slice(i + 3, e)) + '</u>'; i = e + 4; continue; } }
+      const br = /^<br\s*\/?>/i.exec(s.slice(i)); if(br){ out += '\u0001'; i += br[0].length; continue; }
+      const ht = /^<(b|strong|i|em|u|s|strike|del|mark|code)>/i.exec(s.slice(i));        // a few plain inline tags are read, not shown as text; every other tag stays text
+      if(ht){
+        const nm = ht[1].toLowerCase(), e = s.toLowerCase().indexOf('</' + nm + '>', i + ht[0].length);
+        if(e>0){
+          const inner = s.slice(i + ht[0].length, e), tag = { strong: 'b', em: 'i', strike: 's', del: 's' }[nm] || nm;
+          out += nm==='code' ? '<code>' + esc(inner) + '</code>' : nm==='mark' ? `<mark data-hl="yellow">${mdInline(inner)}</mark>` : `<${tag}>${mdInline(inner)}</${tag}>`;
+          i = e + nm.length + 3; continue;
+        }
+      }
       out += '&lt;'; i++; continue;
     }
     out += esc(c); i++;
@@ -6897,7 +6917,8 @@ function mdBlocks(lines){
     if((m = /^ {0,3}(`{3,}|~{3,})\s*([^`]*)$/.exec(line))){
       const fence = m[1], body = []; i++;
       while(i<lines.length && !new RegExp('^ {0,3}' + fence[0] + '{' + fence.length + ',}\\s*$').test(lines[i])){ body.push(lines[i]); i++; }
-      i++; out.push('<pre><code>' + esc(body.join('\n')) + '</code></pre>'); continue;
+      const lang = /^\{?\.?([A-Za-z0-9+#._-]{1,20})/.exec((m[2] || '').trim());
+      i++; out.push((lang ? `<pre data-lang="${lang[1]}">` : '<pre>') + '<code>' + esc(body.join('\n')) + '</code></pre>'); continue;
     }
     if((m = /^ {0,3}(#{1,6})\s+(.*?)\s*#*\s*$/.exec(line)) || (m = /^ {0,3}(#{1,6})\s*$/.exec(line))){ const lv = m[1].length; out.push(`<h${lv}>${mdInline(m[2] || '')}</h${lv}>`); i++; continue; }
     if(/^ {0,3}([-*_])( *\1){2,} *$/.test(line)){ out.push('<hr>'); i++; continue; }
@@ -6952,7 +6973,7 @@ function noteImportParse(name, text){
 }
 // -- typing: "**bold**", "_italic_", "`code`", "~~strike~~" and "[text](address)" become formatting the moment the closing character is typed --
 function noteAutoInline(e){
-  if(!e || e.inputType!=='insertText' || !e.data || !/^[*_`~)]$/.test(e.data)) return;
+  if(!e || e.inputType!=='insertText' || !e.data || !/^[*_`~)=]$/.test(e.data)) return;
   const body = document.getElementById('noteBody'), sel = window.getSelection();
   if(!body || !sel || !sel.rangeCount || !sel.isCollapsed || noteIsLocked(noteEditorId)) return;
   const node = sel.anchorNode, off = sel.anchorOffset;
@@ -6960,11 +6981,12 @@ function noteAutoInline(e){
   const m = noteInlineMatch(node.nodeValue.slice(0, off)); if(!m) return;
   let html;
   if(m.kind==='link'){ const c = noteLinkClassify(m.href); if(!c.href) return; html = `<a href="${esc(c.href)}">${esc(m.text)}</a>`; }
+  else if(m.kind==='highlight') html = `<mark data-hl="yellow">${esc(m.text)}</mark>&nbsp;`;      // like code: Chrome turns a lone trailing <mark> into a styled span the sanitizer would drop
   else { const tag = { bold: 'b', italic: 'i', strike: 's', code: 'code' }[m.kind]; html = `<${tag}>${esc(m.text)}</${tag}>` + (m.kind==='code' ? '&nbsp;' : ''); }   // Chrome turns a lone trailing <code> into a styled span, so code keeps one space after it (which also leaves the caret outside)
   const r = document.createRange(); r.setStart(node, m.start); r.setEnd(node, off);
   sel.removeAllRanges(); sel.addRange(r);
   document.execCommand('insertHTML', false, html);                      // one editing command: native Undo takes the formatting back
-  const q = window.getSelection(), a = q.anchorNode, el = a && (a.nodeType===3 ? a.parentNode : a), fmt = el && el.closest ? el.closest('b, i, s, code, a') : null;
+  const q = window.getSelection(), a = q.anchorNode, el = a && (a.nodeType===3 ? a.parentNode : a), fmt = el && el.closest ? el.closest('b, i, s, code, a, mark') : null;
   if(fmt && body.contains(fmt) && q.isCollapsed){                         // what is typed next is not part of it: the caret steps out, and the typing style is switched off
     const c = document.createRange(); c.setStartAfter(fmt); c.collapse(true); q.removeAllRanges(); q.addRange(c);
     const cmd = { b: 'bold', i: 'italic', s: 'strikeThrough' }[fmt.tagName.toLowerCase()];
@@ -6978,6 +7000,7 @@ function noteInlineMatch(before){
   if((m = new RegExp(o + '`([^`\\n]+)`$').exec(before))) return { kind: 'code', start: m.index + m[1].length, text: m[2] };
   if((m = new RegExp(o + '(\\*\\*|__)(\\S|\\S[^\\n]*?\\S)\\2$').exec(before))) return { kind: 'bold', start: m.index + m[1].length, text: m[3] };
   if((m = new RegExp(o + '~~(\\S|\\S[^\\n]*?\\S)~~$').exec(before))) return { kind: 'strike', start: m.index + m[1].length, text: m[2] };
+  if((m = new RegExp(o + '==([^\\s=]|[^\\s=][^\\n]*?[^\\s=])==$').exec(before))) return { kind: 'highlight', start: m.index + m[1].length, text: m[2] };
   if((m = new RegExp(o + '(\\*|_)([^\\s*_]|[^\\s*_][^\\n]*?[^\\s*_])\\2$').exec(before))) return { kind: 'italic', start: m.index + m[1].length, text: m[3] };
   return null;
 }
@@ -10618,11 +10641,16 @@ function noteAutoBlockAtEnter(e){
   const n = sel.anchorNode;
   if(n.nodeType!==3 || sel.anchorOffset!==n.nodeValue.length || noteClosest(n, 'LI') || noteClosest(n, 'TD') || noteClosest(n, 'TH') || noteClosest(n, 'PRE')) return false;
   const line = noteLineOf(n), text = line.textContent.trim();
-  if(line===body || !/^(---|\*\*\*|___|```)$/.test(text) || n.nodeValue.trim()!==text) return false;
+  if(line===body || !/^(---|\*\*\*|___|```[A-Za-z0-9+#._-]{0,20})$/.test(text) || n.nodeValue.trim()!==text) return false;
   e.preventDefault();
   const r = document.createRange(); r.selectNodeContents(n); sel.removeAllRanges(); sel.addRange(r);
   document.execCommand('delete', false);                                       // the typed characters go (native undo keeps them)
-  if(text==='```') noteBlock('pre'); else document.execCommand('insertHorizontalRule', false);
+  if(text.startsWith('```')){
+    noteBlock('pre');
+    const lang = text.slice(3), pre = lang ? noteClosest(window.getSelection().anchorNode, 'PRE') : null;      // "```js" + Enter: a code block that remembers its language
+    if(pre) pre.setAttribute('data-lang', lang);
+  }
+  else document.execCommand('insertHorizontalRule', false);
   onNoteInput();
   return true;
 }
