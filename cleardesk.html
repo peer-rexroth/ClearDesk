@@ -2680,6 +2680,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links (also reference-style <code>[text][ref]</code> with its <code>[ref]: address</code> line), lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, a code block keeps its language, <code>==highlight==</code> and simple tags like <code>&lt;b&gt;</code> and <code>&lt;br&gt;</code> are read, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code>, <code>==highlight==</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
+          <div class="help-row"><i class="fa-solid fa-paste"></i><span><strong>Paste Markdown</strong>: text you copy from a Markdown file or editor and paste into a note is formatted when it clearly is Markdown (a heading, a list, a code fence, a table, <code>**bold**</code>, a link): headings, lists, tables, code blocks and links come out as in an imported file, and <kbd>Cmd/Ctrl+Z</kbd> takes it back. <kbd>Shift+Cmd/Ctrl+V</kbd> pastes the text exactly as it is. A web page or another notes app keeps its own formatting, and pasting inside a code block or a table cell never converts.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Find and replace</strong> in the open note with <kbd>Cmd/Ctrl</kbd>+<kbd>F</kbd> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>F</kbd> also shows the Replace row): every match is tinted and the current one is stronger, <kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> and <kbd>Shift</kbd>+<kbd>Cmd/Ctrl</kbd>+<kbd>G</kbd> (or the arrows) move between them, and the magnifier menu sets <em>Ignore Case</em> and <em>Whole Words</em>. <em>Replace</em> changes the current match, <em>Replace All</em> every match in one undo step; formatting around a match is kept. A match never runs across two paragraphs. A locked note can be searched only. <kbd>Esc</kbd> or <em>Done</em> closes the bar and leaves the current match selected.</span></div>
           <div class="help-row"><i class="fa-regular fa-duplicate"></i><span><strong>Duplicate</strong> (in the same ⋯ menu, with Move to and Delete) makes a copy named “… (copy)” in the same folder, and opens it. The toast has an Undo.</span></div>
           <div class="help-row"><i class="fa-solid fa-computer-mouse"></i><span><strong>Right-click</strong> a note for Lock, Duplicate, Move to and Delete, or a folder for New note here, Rename and Delete.</span></div>
@@ -6041,7 +6042,7 @@ function shortcutGroups(){
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
       ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Insert a block (table, checklist, divider, date…)', ['/']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
       ['Undo typing and formatting', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Undo a delete, move or duplicate (when not typing)', [mod,'Z']],
-      ['Bold', [mod,'B']], ['Italic', [mod,'I']], ['Underline', [mod,'U']], ['Add or edit a link', [mod,'K']],
+      ['Bold', [mod,'B']], ['Italic', [mod,'I']], ['Underline', [mod,'U']], ['Add or edit a link', [mod,'K']], ['Paste text as it is, without reading Markdown', [shift,mod,'V']],
       ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print or save as PDF', [mod,'P']],
       ['Leave a table: go to the line below it', [mod,'↵']], ...(mac ? [] : [['Table options (rows, columns, header) at the caret', ['Shift','F10']]]),
       ['Next cell, adding a row after the last one', ['Tab']], ['Indent a list item', ['Tab']], ['Outdent a list item', [shift,'Tab']],
@@ -10737,6 +10738,7 @@ function noteBackspaceAfterTable(e){
   return true;
 }
 function onNoteKeydown(e){
+  if((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && (e.key || '').toLowerCase()==='v'){ notePasteRaw = true; setTimeout(()=>{ notePasteRaw = false; }, 500); }   // ⇧⌘V: the next paste is the text as it is
   if(noteSlashKey(e)) return;                                                  // the / menu owns ↑ ↓ ↵ Tab Esc while it is open
   if(noteAutoBlockAtEnter(e)) return;                                          // --- / *** / ___ / ``` + Enter
   noteAutoLinkAtSpace(e);                                                      // a web / e-mail address is linked as the space after it is typed
@@ -10821,7 +10823,38 @@ function noteCodeTextFromHtml(html){
   out = out.replace(/\n$/, '');
   return out.trim() && out.includes('\n') ? out : null;   // a single line stays inline text
 }
-function noteInsertClean(html, text){
+// Markdown pasted as text. Pasting plain text that is clearly Markdown (a heading, a list, a fence, a table, **bold**, a [link](address)) formats it, as Notes apps that read
+// Markdown do; the clipboard of an editor or a text file carries the same text in a monospace HTML wrapper, which counts as plain. Rich content (a web page, another notes app)
+// keeps its own formatting, code goes into a code block as before, and ⇧⌘V (Ctrl+Shift+V) pastes the text exactly as it is.
+const NOTE_MD_BLOCK = /^ {0,3}(#{1,6}\s+\S|[-*+]\s+\S|\d{1,3}[.)]\s+\S|>\s?\S|`{3,}|~{3,}|[-*_]( *[-*_]){2,} *$|\|.*\|\s*$)/m;
+const NOTE_MD_INLINE = /\*\*[^\s*][^\n]*?\*\*|__[^\s_][^\n]*?__|\[[^\]\n]+\]\([^)\s]+\)|(^|\s)`[^`\n]+`|~~[^\s~][^\n]*?~~|==[^\s=][^\n]*?==/;
+function noteLooksLikeMarkdown(text){
+  const t = String(text || ''); if(!t.trim() || t.length>500000) return false;
+  const lines = t.split('\n');
+  if(NOTE_MD_INLINE.test(t)) return true;
+  const hits = lines.filter(l=>NOTE_MD_BLOCK.test(l)).length;
+  if(/^ {0,3}(`{3,}|~{3,})/m.test(t) || /^ {0,3}\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$/m.test(t)) return true;     // a fence or a table separator is enough
+  return hits>=2 || (hits===1 && /^ {0,3}#{1,6}\s+\S/m.test(t));                                                      // one heading, or two block markers (one stray "- " or "1. " is just text)
+}
+const noteHtmlIsRich = html=>/<(h[1-6]|ul|ol|li|table|a|b|i|strong|em|u|s|mark|blockquote|img)\b/i.test(sanitizeNoteHtml(html || '')) || /<(h[1-6]|ul|ol|li|table|img)\b/i.test(html || '');
+function noteMarkdownToHtml(text){
+  const col = mdCollectRefs(String(text).replace(/\r\n?/g, '\n').split('\n')); mdRefs = col.refs;
+  try{
+    let html = sanitizeNoteHtml(mdBlocks(col.lines));
+    const one = /^<p>([\s\S]*)<\/p>$/.exec(html);
+    if(one && !/<\/?(p|h[1-6]|ul|ol|li|table|pre|blockquote|hr)\b/i.test(one[1])) html = one[1];           // one line of text goes in inline, it does not split the line it is pasted into
+    return html;
+  } finally { mdRefs = null; }
+}
+let notePasteRaw = false;
+function noteInsertClean(html, text, opts){
+  const body = document.getElementById('noteBody'), sel = window.getSelection();
+  const inCode = !!(sel && sel.rangeCount && (noteClosest(sel.anchorNode, 'PRE') || noteClosest(sel.anchorNode, 'TD') || noteClosest(sel.anchorNode, 'TH')));
+  if(opts && opts.raw){ document.execCommand('insertText', false, text || ''); return; }
+  if(!inCode && text && noteLooksLikeMarkdown(text) && !(html && noteHtmlIsRich(html))){
+    const md = noteMarkdownToHtml(text);
+    if(md){ document.execCommand('insertHTML', false, noteSizeNewTables(noteFillEmptyBlocks(md))); showToast('Pasted as Markdown. ' + (/Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent || '') ? '⇧⌘V' : 'Ctrl+Shift+V') + ' pastes the text as it is.'); return; }
+  }
   const code = noteCodeTextFromHtml(html);
   if(code!==null) document.execCommand('insertHTML', false, '<pre><code>' + esc(code) + '</code></pre>');
   else if(html) document.execCommand('insertHTML', false, noteSizeNewTables(noteFillEmptyBlocks(sanitizeNoteHtml(html))));
@@ -10830,7 +10863,8 @@ function noteInsertClean(html, text){
 function onNotePaste(e){
   e.preventDefault();
   const cd = e.clipboardData; if(!cd) return;
-  noteInsertClean(cd.getData('text/html'), cd.getData('text/plain'));
+  const raw = notePasteRaw; notePasteRaw = false;
+  noteInsertClean(cd.getData('text/html'), cd.getData('text/plain'), { raw });
   onNoteInput();
 }
 function onNoteDrop(e){

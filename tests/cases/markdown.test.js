@@ -152,3 +152,22 @@ test('Markdown: a few plain inline HTML tags are read; anything else stays text'
   assertEqual(mdInline('<b>unclosed'), '&lt;b&gt;unclosed');
   assertIncludes(noteImportParse('n.md', 'one<br>two<br/>three').body, 'one<br>two<br>three');
 });
+test('pasted text is read as Markdown only when it clearly is Markdown', function(){
+  var yes = ['# Title\n\nText', '- one\n- two', '1. a\n2. b', 'Use **bold** here', 'see [x](https://a.example)', '```\ncode\n```', '| a | b |\n|---|---|\n| 1 | 2 |', '> quote\n> more', '==marked== word', 'A heading\n\n## Two\n\ntext'];
+  var no = ['just a sentence', 'a - b', '- only one line', '1. only one', 'price is 5 * 3 * 2', 'a == b', 'snake_case_name and my_var', '#hashtag not a heading', '', '   '];
+  yes.forEach(function(t){ assertEqual(noteLooksLikeMarkdown(t), true, JSON.stringify(t)); });
+  no.forEach(function(t){ assertEqual(noteLooksLikeMarkdown(t), false, JSON.stringify(t)); });
+});
+test('pasted Markdown becomes the same markup as an imported file; one line stays inline', function(){
+  assertEqual(noteMarkdownToHtml('**bold** text'), '<b>bold</b> text', 'one line goes in inline so it does not split the line it is pasted into');
+  assertEqual(noteMarkdownToHtml('# T\n\nx'), '<h1>T</h1><p>x</p>');
+  assertIncludes(noteMarkdownToHtml('- a\n- b'), '<ul><li>a</li><li>b</li></ul>');
+  assertIncludes(noteMarkdownToHtml('See [d][1].\n\n[1]: https://example.com/d'), 'href="https://example.com/d"');
+  assertEqual(mdRefs, null, 'definitions do not leak out of the paste');
+  assertEqual(/<script|onerror/.test(noteMarkdownToHtml('<script>x</script> **a** ![x](javascript:alert(1))')), false);
+});
+test('the clipboard HTML of a text editor counts as plain; a real page counts as rich', function(){
+  assertEqual(noteHtmlIsRich('<meta charset="utf-8"><div style="font-family:Menlo;white-space:pre"># Title</div>'), false);
+  assertEqual(noteHtmlIsRich('<span style="color:red">x</span>'), false);
+  assertEqual(noteHtmlIsRich('<h1>Title</h1><p>text</p>'), true); assertEqual(noteHtmlIsRich('<p>a <b>b</b></p>'), true); assertEqual(noteHtmlIsRich('<ul><li>x</li></ul>'), true);
+});
