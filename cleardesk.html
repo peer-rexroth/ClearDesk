@@ -2357,7 +2357,7 @@ const ICONS = {
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing, or type / for blocks"
-                 oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()" onbeforeinput="onNoteBeforeInput(event)"></div>
+                 oninput="onNoteInput(event)" onkeydown="onNoteKeydown(event)" onmousedown="noteBodyMouseDown(event)" oncontextmenu="onNoteContextMenu(event)" onclick="onNoteBodyClick(event)" onpaste="onNotePaste(event)" oncopy="onNoteCopy(event)" oncut="onNoteCut(event)" ondrop="onNoteDrop(event)" ondragstart="noteDragFromEditor=true" ondragend="noteDragFromEditor=false" onblur="flushNoteEdit()" onbeforeinput="onNoteBeforeInput(event)"></div>
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
                         <div class="note-code-copy-layer" id="noteCodeCopyLayer"></div>
           </div>
@@ -2672,7 +2672,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-palette"></i><span><strong>Text colour and highlight</strong>: select some text and use the <strong>A</strong> button in the toolbar. The first swatch of each row removes the colour. Colours adapt to light and dark mode.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>The / menu</strong>: type <kbd>/</kbd> at the start of a line (or after a space) to insert a title, heading, checklist, list, quote, code block, table, divider or today's date. Keep typing to narrow the list (<kbd>/ta</kbd> finds Table), <kbd>↑</kbd> <kbd>↓</kbd> move, <kbd>↵</kbd> or <kbd>Tab</kbd> inserts, <kbd>Esc</kbd> closes it and leaves the slash as text. It stays out of code blocks and locked notes.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown shortcuts</strong>: at the start of a line type <kbd># </kbd> <kbd>## </kbd> <kbd>### </kbd> for a title, heading or subheading (<kbd>#### </kbd> to <kbd>###### </kbd> make Heading 4 to 6; they are not in the style menu, but it names the one your cursor is in), <kbd>[] </kbd> for a checklist, <kbd>&gt; </kbd> for a quote, <kbd>- </kbd> / <kbd>1. </kbd> for lists; <kbd>---</kbd> then <kbd>↵</kbd> makes a divider and <kbd>```</kbd> then <kbd>↵</kbd> a code block (<kbd>```js</kbd> then <kbd>↵</kbd> remembers the language and shows it above the code). <em>Quote</em> and <em>Code</em> are also in the text style menu. In a code block press <kbd>↵</kbd> twice at the end (or <kbd>⌘↵</kbd>) to carry on below it, and <kbd>⌫</kbd> at its start turns it back into normal text.</span></div>
-          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Copy, export and print</strong>: <strong>⋯</strong> → <em>Copy Note</em> puts the note on the clipboard for pasting into Mail; <em>Copy As</em> puts it there as <em>Rich Text</em>, <em>Plain Text</em>, <em>Markdown</em> or <em>HTML</em> (the HTML is the same inline-styled markup Mail gets, as source text). With text selected in the note, <em>Copy Selection As</em> does the same for just that text. <em>Export</em> saves it as a <em>.txt</em>, <em>.md</em> or <em>.html</em> file, as a <em>Note File (.json)</em> that ClearDesk can import again, or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only.</span></div>
+          <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span><strong>Copy, export and print</strong>: <strong>⋯</strong> → <em>Copy Note</em> puts the note on the clipboard for pasting into Mail; <em>Copy As</em> puts it there as <em>Rich Text</em>, <em>Plain Text</em>, <em>Markdown</em> or <em>HTML</em> (the HTML is the same inline-styled markup Mail gets, as source text). With text selected in the note, <em>Copy Selection As</em> does the same for just that text. <em>Export</em> saves it as a <em>.txt</em>, <em>.md</em> or <em>.html</em> file, as a <em>Note File (.json)</em> that ClearDesk can import again, or opens <em>Print / Save as PDF</em> (<kbd>⌘P</kbd>) for this note only. Plain <kbd>Cmd/Ctrl+C</kbd> on selected text also gives Mail readable formatting (dark text, no background), even when ClearDesk is in dark mode.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
@@ -6725,6 +6725,24 @@ function noteSelectionText(html, kind){
   if(kind==='html') return `<div style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#1d1d1f">${noteToMailHtml(holder)}</div>`;
   return noteToPlainText(holder).trim();
 }
+// ⌘C / ⌘X in the editor. The browser's own copy puts the computed look of the selection on the clipboard, which in the dark theme is light text on a dark background: Outlook and
+// other mail apps then show it inverted (white). So the clipboard gets the same mail-safe markup as Copy As (fixed dark ink on no background, inline styles), a plain-text version,
+// and the note's own markup under a private type, which a paste back into a note prefers (headings, checklists and colours survive a copy and paste inside the app).
+const NOTE_OWN_CLIP = 'application/x-cleardesk-note';
+function noteClipboardFill(e, cut){
+  const cd = e && e.clipboardData; if(!cd) return false;
+  const own = noteSelectionHtml(); if(!own) return false;                        // nothing worth rewriting (an empty selection, an empty checklist …): the browser's copy stands
+  const holder = document.createElement('div'); holder.innerHTML = own;
+  const plain = noteToPlainText(holder).trim();
+  const inlineOnly = ![...holder.children].some(c=>/^(P|DIV|H[1-6]|UL|OL|TABLE|TBODY|THEAD|TR|PRE|BLOCKQUOTE|HR)$/.test(c.tagName));
+  const html = inlineOnly ? `<span style="color:#1d1d1f">${noteToMailHtml(holder)}</span>` : noteSelectionText(own, 'html');          // a part of one line stays a span, so it pastes into a sentence without breaking it
+  e.preventDefault();
+  cd.setData('text/html', html); cd.setData('text/plain', plain); cd.setData(NOTE_OWN_CLIP, own);
+  if(cut && !noteIsLocked(noteEditorId)){ document.execCommand('delete'); onNoteInput(); }
+  return true;
+}
+function onNoteCopy(e){ noteClipboardFill(e, false); }
+function onNoteCut(e){ noteClipboardFill(e, true); }
 function copySelectionAs(kind){
   const html = noteMenuSel; noteMenuSel = null; if(!html) return;
   if(kind==='rich'){
@@ -10863,7 +10881,8 @@ function noteInsertClean(html, text, opts){
 function onNotePaste(e){
   e.preventDefault();
   const cd = e.clipboardData; if(!cd) return;
-  const raw = notePasteRaw; notePasteRaw = false;
+  const raw = notePasteRaw, own = notePasteRaw ? '' : cd.getData(NOTE_OWN_CLIP); notePasteRaw = false;
+  if(own){ document.execCommand('insertHTML', false, noteSizeNewTables(sanitizeNoteHtml(own))); onNoteInput(); return; }      // copied from a note in this app: its own markup, not the mail version
   noteInsertClean(cd.getData('text/html'), cd.getData('text/plain'), { raw });
   onNoteInput();
 }
