@@ -2816,7 +2816,7 @@ const ICONS = {
       </button>
       <button type="button" class="sync-row" onclick="closeFileSyncModal();createNewLinkedFile()">
         <span class="sync-ico"><i class="fa-solid fa-file-circle-plus"></i></span>
-        <span class="sync-text"><strong>Create new file</strong><span>Choose a folder; daily backups go in its Backup subfolder</span></span>
+        <span class="sync-text"><strong>Create new file</strong><span>Choose a folder; daily backups go in its Backups subfolder</span></span>
         <i class="fa-solid fa-chevron-right sync-chev"></i>
       </button>
     </div>
@@ -12326,7 +12326,7 @@ let pendingNewFileDir = null;
 async function createNewLinkedFile(){
   const dir = await pickDataFolder(); if(!dir) return;
   pendingNewFileDir = dir;
-  document.getElementById('newFileFolder').textContent = `In ${dir.name}. Daily backups go in its Backup subfolder.`;
+  document.getElementById('newFileFolder').textContent = `In ${dir.name}. Daily backups go in its Backups subfolder.`;
   const inp = document.getElementById('newFileName'); inp.value = 'cleardesk-data';
   document.getElementById('newFileError').textContent = '';
   document.getElementById('newFileModalBg').classList.add('open');
@@ -12399,7 +12399,7 @@ async function unlinkFile(){
 async function reconnectFile(){
   if(!fileHandle) return;
   try{
-    if(dirHandle) await dirHandle.requestPermission({mode:'readwrite'});       // the folder's grant covers the file and the Backup subfolder
+    if(dirHandle) await dirHandle.requestPermission({mode:'readwrite'});       // the folder's grant covers the file and the Backups subfolder
     const perm = await fileHandle.requestPermission({mode:'readwrite'});
     if(perm!=='granted'){ showToast('Permission denied', true); return; }
     const text = await (await fileHandle.getFile()).text();
@@ -12483,7 +12483,7 @@ function updateFileSyncUI(){
 // Modelled on Milestone / Pulse: a dated copy of the data goes into a "Backup" subfolder of the LINKED folder, once a day, kept forever.
 // Best-effort and silent (the save that triggered it already succeeded); never prompts. If today's file is already on disk (another
 // tab or device wrote it) it is left alone: the first writer each day wins.
-const FILE_BACKUP_SUB = 'Backup', FILE_BACKUP_RE = /^.+-\d{4}-\d{2}-\d{2}\.json$/;
+const FILE_BACKUP_SUB = 'Backups', FILE_BACKUP_RE = /^.+-\d{4}-\d{2}-\d{2}\.json$/;
 let lastFileBackupDay = null;
 const _fsGetK = k => _fsIdb('readonly',  (s,r,j)=>{ const q=s.get(k);   q.onsuccess=()=>r(q.result); q.onerror=()=>j(q.error); });
 const _fsPutK = (k,h) => _fsIdb('readwrite', (s,r,j)=>{ const q=s.put(h,k); q.onsuccess=()=>r();         q.onerror=()=>j(q.error); });
