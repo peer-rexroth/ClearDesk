@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cleardesk-cache-v3';
+const CACHE_NAME = 'cleardesk-cache-v4';
 const APP_SHELL = [
   'cleardesk.html',
   'manifest.json',
@@ -62,6 +62,8 @@ self.addEventListener('fetch', (event) => {
       // would otherwise keep handing back an old cleardesk.html after an edit.
       fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
+          // An error page (404/500 from a dead or misconfigured server) must not replace the good saved copy or count as the running version.
+          if (!res.ok) throw new Error('bad navigation response ' + res.status);
           remember(res, 'network');
           const copy = res.clone();   // clone before returning: cloning later races the page reading the body
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
@@ -80,7 +82,7 @@ self.addEventListener('fetch', (event) => {
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req)
         .then((res) => {
-          caches.open(CACHE_NAME).then((cache) => cache.put(req, res.clone()));
+          if (res.ok) caches.open(CACHE_NAME).then((cache) => cache.put(req, res.clone()));
           return res;
         })
         .catch(() => cached);
