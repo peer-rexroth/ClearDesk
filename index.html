@@ -784,6 +784,13 @@ const ICONS = {
   .sync-banner .icon-btn { color: var(--text-3); }
   .update-banner > i:first-child { color: var(--accent); }
   .split-btn-menu-item.notes-only { border-top: 0.5px solid var(--border-2); }   /* Export Notes / Prompts follow the general items after a hairline */
+  /* Data menu (export / import): one line per item, groups split by a single hairline, an inset rounded accent highlight under the pointer — as a macOS menu */
+  #libMenu { padding: 4px; min-width: 0; width: max-content; }
+  #libMenu .split-btn-menu-item { align-items: center; padding: 5px 10px; border-radius: var(--r-s); border-top: 0; }
+  #libMenu .split-btn-menu-item:hover { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
+  #libMenu .split-btn-menu-item:hover :is(.split-btn-menu-icon, .split-btn-menu-desc) { color: inherit; }
+  #libMenu .split-btn-menu-icon { margin-top: 0; }
+  .split-btn-menu-sep { height: 0.5px; background: var(--border-2); margin: 4px 8px; }
 
   .filter-menu { width: max-content; max-width: calc(100vw - 24px); }   /* fits its chips (a min-width left a wide empty strip); max-content because the menu's containing block is the small Filter button */
   .filter-menu-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
@@ -2188,22 +2195,24 @@ const ICONS = {
     <div class="lib-dropdown" id="libDropdown">
       <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleLibMenu()" title="Data — export, import, backups" aria-haspopup="menu"><i class="fa-regular fa-hard-drive"></i></button>
       <div class="split-btn-menu" id="libMenu" style="left:auto;right:0">
-        <div class="split-btn-menu-item" onclick="exportLibrary();closeLibMenu()">
+        <div class="split-btn-menu-item" title="Full backup as a .json file" onclick="exportLibrary();closeLibMenu()">
           <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export All Data</div><div class="split-btn-menu-desc">Full backup as a .json file</div></div>
+          <div class="split-btn-menu-label">Export All Data…</div>
         </div>
-        <div class="split-btn-menu-item" onclick="triggerImport();closeLibMenu()">
+        <div class="split-btn-menu-item notes-only" title="Notes as a .json file" onclick="exportNotes('all');closeLibMenu()">
+          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
+          <div class="split-btn-menu-label">Export Notes…</div>
+        </div>
+        <div class="split-btn-menu-item prompts-only" title="Prompts as a .json file" onclick="exportPrompts('all');closeLibMenu()">
+          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
+          <div class="split-btn-menu-label">Export Prompts…</div>
+        </div>
+        <div class="split-btn-menu-sep" role="separator"></div>
+        <div class="split-btn-menu-item" title="A backup, a prompts or notes file, or .md / .txt / .html notes" onclick="triggerImport();closeLibMenu()">
           <i class="fa-solid fa-arrow-down-to-bracket split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Import…</div><div class="split-btn-menu-desc">A backup, a prompts or notes file, or .md / .txt / .html notes</div></div>
+          <div class="split-btn-menu-label">Import…</div>
         </div>
-        <div class="split-btn-menu-item notes-only" onclick="exportNotes('all');closeLibMenu()">
-          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export Notes</div><div class="split-btn-menu-desc">Notes as a .json file</div></div>
-        </div>
-        <div class="split-btn-menu-item prompts-only" onclick="exportPrompts('all');closeLibMenu()">
-          <i class="fa-solid fa-arrow-up-from-bracket split-btn-menu-icon"></i>
-          <div><div class="split-btn-menu-label">Export Prompts</div><div class="split-btn-menu-desc">Prompts as a .json file</div></div>
-        </div>
+        <div class="split-btn-menu-sep" role="separator" id="fileBackupSep" style="display:none"></div>
         <div class="split-btn-menu-item" id="fileBackupItem" style="display:none" onclick="fileBackupMenuAction();closeLibMenu()">
           <i class="fa-regular fa-folder-open split-btn-menu-icon"></i>
           <div><div class="split-btn-menu-label" id="fileBackupLabel">Daily file backup</div><div class="split-btn-menu-desc" id="fileBackupDesc">Link a data file to enable</div></div>
@@ -12574,6 +12583,7 @@ async function updateFileBackupUI(){
     if(perm!=='granted'){ l.textContent = 'Resume daily file backup'; d.textContent = `Permission needed for ${dirHandle.name}`; need = 'x'; }
   }
   item.style.display = need ? '' : 'none';
+  const sep = document.getElementById('fileBackupSep'); if(sep) sep.style.display = need ? '' : 'none';
 }
 async function initFileSync(){
   if(!window.showOpenFilePicker) return;
