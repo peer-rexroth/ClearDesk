@@ -8,6 +8,10 @@
 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1e1f24" media="(prefers-color-scheme: dark)">
 <title>ClearDesk</title>
+<meta name="description" content="A local-first workspace for tasks, notes and reusable prompt templates. Everything is stored on your own device; there are no accounts and nothing is sent to a server.">
+<meta property="og:title" content="ClearDesk — tasks, notes and prompts">
+<meta property="og:description" content="A local-first workspace for tasks, notes and reusable prompt templates. Everything is stored on your own device; there are no accounts and nothing is sent to a server.">
+<meta property="og:type" content="website">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <link rel="icon" type="image/svg+xml" href="icons/favicon.svg">
@@ -239,6 +243,10 @@ const ICONS = {
   .split-btn-menu-icon { flex-shrink: 0; width: 14px; margin-top: 1px; color: var(--text-2); font-size: var(--ico-16); }
   .split-btn-menu-label { font-size: var(--fs-12); font-weight: 500; }
   .split-btn-menu-desc { font-size: var(--fs-11); color: var(--text-3); margin-top: 1px; }
+  .split-btn-menu-hint { margin-left: auto; padding-left: 16px; font-size: var(--fs-12); color: var(--text-3); }
+  /* the Help menu groups its items (help · about) with one divider, like a macOS Help menu, instead of a rule between every row */
+  #helpMenu .split-btn-menu-item + .split-btn-menu-item { border-top: 0; }
+  #helpMenu .split-btn-menu-item.grp-start { border-top: 0.5px solid var(--border); margin-top: 4px; }
 
   /* layout */
   .layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 52px); }
@@ -2051,6 +2059,7 @@ const ICONS = {
 </style>
 </head>
 <body>
+<noscript><main style="font:16px/1.5 -apple-system,system-ui,sans-serif;max-width:640px;margin:15vh auto;padding:0 20px"><h1>ClearDesk</h1><p>ClearDesk is a personal workspace that runs entirely in your browser: tasks with due dates and subtasks, rich notes, and reusable prompt templates. Everything stays on your own device (or in a file you choose); there are no accounts, no tracking and no data is sent to a server.</p><p>ClearDesk needs JavaScript to run. Questions: <a href="mailto:peer.rexroth@gmail.com">peer.rexroth@gmail.com</a>.</p></main></noscript>
 
 <div class="sync-banner" id="syncBanner" role="status"></div>
 <div class="sync-banner update-banner" id="updateBanner" role="status"></div>
@@ -2209,9 +2218,9 @@ const ICONS = {
     <div class="lib-dropdown" id="helpDropdown">
       <button type="button" class="tool-btn" onclick="event.stopPropagation();toggleHelpMenu()" title="Help, shortcuts and about" aria-haspopup="menu"><i class="fa-regular fa-circle-question"></i></button>
       <div class="split-btn-menu" id="helpMenu" style="left:auto;right:0">
-        <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Help guide</div></div></div>
-        <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard shortcuts</div></div></div>
-        <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About</div></div></div>
+        <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">ClearDesk Help</div></div></div>
+        <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard Shortcuts</div></div><span class="split-btn-menu-hint">?</span></div>
+        <div class="split-btn-menu-item grp-start" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About ClearDesk</div></div></div>
         <div class="split-btn-menu-item" onclick="closeHelpMenu();checkForUpdatesNow()"><i class="fa-solid fa-rotate-right split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Check for Updates</div></div></div>
       </div>
     </div>
