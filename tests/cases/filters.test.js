@@ -118,3 +118,37 @@ test('smart sort still falls back to createdAt when priority, due date, and stat
   const sorted = getFilteredSortedTasks();
   assertEqual(sorted[0].id, 't2', 'newest-created should still win the final tiebreak');
 });
+
+// Filter chips: "All" is the unfiltered state (pickFilterValue)
+test('choosing an option while All is on selects just that option', function () {
+  const all = ['todo', 'doing', 'done'];
+  assertEqual(JSON.stringify(pickFilterValue(all, all, 'doing')), JSON.stringify(['doing']));
+});
+
+test('choosing more options adds to the subset; undoing the last one goes back to All', function () {
+  const all = ['todo', 'doing', 'done'];
+  let cur = pickFilterValue(all, all, 'doing');
+  cur = pickFilterValue(cur, all, 'done');
+  assertEqual(JSON.stringify(cur), JSON.stringify(['doing', 'done']));
+  cur = pickFilterValue(cur, all, 'done');
+  assertEqual(JSON.stringify(cur), JSON.stringify(['doing']));
+  cur = pickFilterValue(cur, all, 'doing');
+  assertEqual(JSON.stringify(cur), JSON.stringify(all), 'an empty filter is never left behind');
+});
+
+test('choosing every option, or All, gives All', function () {
+  const all = ['todo', 'doing', 'done'];
+  assertEqual(JSON.stringify(pickFilterValue(['todo', 'doing'], all, 'done')), JSON.stringify(all));
+  assertEqual(JSON.stringify(pickFilterValue(['todo'], all, null)), JSON.stringify(all));
+  assertEqual(JSON.stringify(pickFilterValue(all, all, null)), JSON.stringify(all), 'All while on stays on (it used to empty the filter)');
+});
+
+test('the status and priority chips use the same rule', function () {
+  filterStatus = STATUSES.map(x => x.id); filterPriority = PRIORITIES.map(x => x.id);
+  setStatusFilter('done'); setPriorityFilter('high');
+  assertEqual(JSON.stringify(filterStatus), JSON.stringify(['done']));
+  assertEqual(JSON.stringify(filterPriority), JSON.stringify(['high']));
+  setStatusFilter(null); setPriorityFilter(null);
+  assertEqual(filterStatus.length, STATUSES.length);
+  assertEqual(filterPriority.length, PRIORITIES.length);
+});

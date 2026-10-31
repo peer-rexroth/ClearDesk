@@ -778,9 +778,18 @@ const ICONS = {
   .update-banner > i:first-child { color: var(--accent); }
   .split-btn-menu-item.notes-only { border-top: 0.5px solid var(--border-2); }   /* Export Notes / Prompts follow the general items after a hairline */
 
-  .filter-menu { min-width: 280px; }
+  .filter-menu { width: max-content; max-width: calc(100vw - 24px); }   /* fits its chips (a min-width left a wide empty strip); max-content because the menu's containing block is the small Filter button */
   .filter-menu-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
   .filter-menu-body .toolbar-filter-label:not(:first-child) { margin-top: 4px; }
+  /* quiet sentence-case section labels, as in a macOS popover (the sidebar keeps its small caps) */
+  .filter-menu .toolbar-filter-label { text-transform: none; letter-spacing: 0; font-weight: 500; color: var(--text-2); }
+  /* a chosen option is unmistakable: accent tint, accent text and a check (the grey fill alone was too close to the unchosen ones) */
+  .filter-menu .f-chip { font-size: var(--fs-12); padding: 4px 10px; }
+  .filter-menu .f-chip.active { background: var(--accent-tint); color: var(--accent); border-color: transparent; }
+  /* Reset is a quiet secondary action: plain accent text, no raised pill; off when nothing is filtered */
+  html[data-scheme] .filter-menu .btn.filter-reset:not(.btn-primary) { background: transparent; border-color: transparent; box-shadow: none; color: var(--accent); padding-left: 0; }
+  html[data-scheme] .filter-menu .btn.filter-reset:not(.btn-primary):hover:not(:disabled) { background: var(--accent-tint); padding-left: 8px; }
+  html[data-scheme] .filter-menu .btn.filter-reset:not(.btn-primary):disabled { color: var(--text-3); opacity: .6; }
   .filter-count:not(:empty) { display: inline-block; min-width: 18px; padding: 0 6px; border-radius: 999px; background: var(--text); color: var(--bg); font-size: var(--fs-11); line-height: 18px; text-align: center; }
   #filterBtn.has-filters { border-color: var(--text); }
 
@@ -2238,7 +2247,7 @@ const ICONS = {
               <div class="filter-chips" id="statusChips"></div>
               <div class="toolbar-filter-label">Priority</div>
               <div class="filter-chips" id="priorityChips"></div>
-              <button class="btn btn-sm" onclick="clearFilters()"><i class="fa-solid fa-rotate-left"></i> Reset filters</button>
+              <button class="btn btn-sm filter-reset" id="filterResetBtn" onclick="clearFilters()" disabled>Reset filters</button>
             </div>
           </div>
         </div>
@@ -3597,18 +3606,19 @@ function renderSidebar(){
   const fc = document.getElementById('filterCount'); if(fc) fc.textContent = activeFilterCount ? String(activeFilterCount) : '';
   document.getElementById('filterBtn')?.classList.toggle('has-filters', activeFilterCount>0);
   const fcb = document.getElementById('filterClearBtn'); if(fcb) fcb.style.display = activeFilterCount ? '' : 'none';
+  const frb = document.getElementById('filterResetBtn'); if(frb) frb.disabled = !activeFilterCount;
   document.getElementById('tagsSection')?.classList.toggle('collapsed', tagsCollapsed);
   document.getElementById('statusChips').innerHTML = `
     <div class="f-chip ${filterStatus.length===STATUSES.length?'active':''}" role="button" tabindex="0" aria-pressed="${filterStatus.length===STATUSES.length}" onclick="setStatusFilter(null)">All</div>
   ` + STATUSES.map(s=>{
-    const active = filterStatus.includes(s.id);
+    const active = filterStatus.length!==STATUSES.length && filterStatus.includes(s.id);
     return `<div class="f-chip ${active?'active':''}" role="button" tabindex="0" aria-pressed="${active}" onclick="setStatusFilter('${s.id}')">${esc(s.label)}</div>`;
   }).join('');
 
   document.getElementById('priorityChips').innerHTML = `
     <div class="f-chip ${filterPriority.length===PRIORITIES.length?'active':''}" role="button" tabindex="0" aria-pressed="${filterPriority.length===PRIORITIES.length}" onclick="setPriorityFilter(null)">All</div>
   ` + PRIORITIES.map(p=>{
-    const active = filterPriority.includes(p.id);
+    const active = filterPriority.length!==PRIORITIES.length && filterPriority.includes(p.id);
     return `<div class="f-chip ${active?'active':''}" role="button" tabindex="0" aria-pressed="${active}" onclick="setPriorityFilter('${p.id}')">${esc(p.label)}</div>`;
   }).join('');
 
@@ -5875,20 +5885,19 @@ function setProjectFilter(id){ filterProjectId = id; clearSpecialViews(); save()
 function setMyDayFilter(){ clearSpecialViews(); myDayFilter = true; filterProjectId = null; save(); render(); }
 function setThisWeekFilter(){ clearSpecialViews(); thisWeekFilter = true; filterProjectId = null; save(); render(); }
 function setOverdueFilter(){ clearSpecialViews(); overdueFilter = true; filterProjectId = null; save(); render(); }
+// "All" is the unfiltered state. Choosing an option while All is on selects just that option; choosing more adds to it; undoing the last one (or
+// choosing all of them) goes back to All, so the filter can never be empty. Used by both the status and the priority chips.
+function pickFilterValue(current, all, v){
+  if(v===null || current.length===all.length) return v===null ? all : [v];
+  const next = current.includes(v) ? current.filter(x=>x!==v) : [...current, v];
+  return (next.length===0 || next.length===all.length) ? all : next;
+}
 function setStatusFilter(s){
-  if(s===null){
-    filterStatus = filterStatus.length===STATUSES.length ? [] : STATUSES.map(x=>x.id);
-    save(); render(); return;
-  }
-  filterStatus = filterStatus.includes(s) ? filterStatus.filter(x=>x!==s) : [...filterStatus, s];
+  filterStatus = pickFilterValue(filterStatus, STATUSES.map(x=>x.id), s);
   save(); render();
 }
 function setPriorityFilter(p){
-  if(p===null){
-    filterPriority = filterPriority.length===PRIORITIES.length ? [] : PRIORITIES.map(x=>x.id);
-    save(); render(); return;
-  }
-  filterPriority = filterPriority.includes(p) ? filterPriority.filter(x=>x!==p) : [...filterPriority, p];
+  filterPriority = pickFilterValue(filterPriority, PRIORITIES.map(x=>x.id), p);
   save(); render();
 }
 let tagsCollapsed = false;
