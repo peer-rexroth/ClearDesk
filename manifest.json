@@ -1,9 +1,9 @@
 {
-  "id": "./cleardesk.html",
+  "id": "./",
   "name": "ClearDesk",
   "short_name": "ClearDesk",
   "description": "A local-first workspace for tasks, notes and prompts — projects, due dates, rich notes and reusable prompt templates, stored entirely on your device.",
-  "start_url": "./cleardesk.html",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -38,7 +38,7 @@
       "name": "New Task",
       "short_name": "Task",
       "description": "Add a task",
-      "url": "./cleardesk.html?new=task",
+      "url": "./?new=task",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -51,7 +51,7 @@
       "name": "New Note",
       "short_name": "Note",
       "description": "Start a new note",
-      "url": "./cleardesk.html?new=note",
+      "url": "./?new=note",
       "icons": [
         {
           "src": "icons/icon-192.png",
@@ -64,7 +64,7 @@
       "name": "New Prompt",
       "short_name": "Prompt",
       "description": "Start a new prompt",
-      "url": "./cleardesk.html?new=prompt",
+      "url": "./?new=prompt",
       "icons": [
         {
           "src": "icons/icon-192.png",

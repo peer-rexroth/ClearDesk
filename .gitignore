@@ -2,3 +2,4 @@
 .cleardesk-server.pid
 .cleardesk-server.log
 .DS_Store
+dist/

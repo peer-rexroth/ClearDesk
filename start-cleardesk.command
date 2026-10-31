@@ -10,7 +10,7 @@ cd "$DIR"
 PORT=8934
 PID_FILE="$DIR/.cleardesk-server.pid"
 LOG_FILE="$DIR/.cleardesk-server.log"
-URL="http://127.0.0.1:$PORT/cleardesk.html"
+URL="http://127.0.0.1:$PORT/"
 
 is_up() {
   curl -fs -o /dev/null --max-time 1 "http://127.0.0.1:$PORT/manifest.json"

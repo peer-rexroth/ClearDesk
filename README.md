@@ -28,16 +28,20 @@ This serves the folder on `http://127.0.0.1:8934` and opens it in Chrome or
 Edge (Safari can't install this kind of PWA on macOS). `./stop-cleardesk.command`
 stops the server again.
 
-You can also just open `cleardesk.html` directly in a browser (`file://`) for a
+You can also just open `index.html` directly in a browser (`file://`) for a
 quick look, but installing the PWA and offline support both require the app
 to be served over `http://` rather than opened as a bare file.
 
 Once it's open, click the install icon in the browser's address bar (or
 Chrome/Edge's menu → "Install ClearDesk…") to install it as a standalone app.
 
+## Publishing (Cloudflare Pages)
+
+The app is plain static files, so any static host works. For Cloudflare Pages: connect the repo, leave the framework preset empty, set the build command to `./build-site.sh` and the output directory to `dist`. `_headers` (copied into `dist`) makes the page and service worker revalidate on every visit, so a new deploy shows up as the "new version" notice. Data lives in each browser per address, so a new address starts empty: Export on the old one, Import on the new one.
+
 ## No build step
 
-Everything — HTML, CSS, and JS — lives in the single `cleardesk.html` file.
+Everything — HTML, CSS, and JS — lives in the single `index.html` file.
 There's no bundler, no package manager, and no dependencies (no CDN either; the icons are inline). Open the file in an editor and change it directly.
 
 ## Tests

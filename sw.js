@@ -1,6 +1,6 @@
 const CACHE_NAME = 'cleardesk-cache-v4';
 const APP_SHELL = [
-  'cleardesk.html',
+  './',
   'manifest.json',
   'icons/favicon.svg',
   'icons/icon-192.png',
@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
   if (req.mode === 'navigate') {
     event.respondWith(
       // no-cache: always revalidate with the server — the plain dev server sends no cache headers, so Chrome's HTTP cache
-      // would otherwise keep handing back an old cleardesk.html after an edit.
+      // would otherwise keep handing back an old copy of the page after an edit.
       fetch(req.url, { cache: 'no-cache' })
         .then((res) => {
           // An error page (404/500 from a dead or misconfigured server) must not replace the good saved copy or count as the running version.
@@ -69,7 +69,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
           return res;
         })
-        .catch(() => caches.match(req).then((cached) => cached || caches.match('cleardesk.html')).then((cached) => {
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('./')).then((cached) => {
           if (cached) remember(cached, 'cache');
           return cached;
         }))

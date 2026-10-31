@@ -12,7 +12,7 @@ An Apple-style look for a web app (a PWA used mostly in desktop Chrome on macOS)
 | `icon-sheet.html` | a preview of every icon at 32px and the four drawn sizes (open it in a browser) |
 | `assets/` | the app-icon masters (`icon.svg`, `icon-maskable.svg`, `favicon.svg`) and `manifest.json`, as examples for section 14 |
 
-Source of truth for everything: `cleardesk.html` (CSS tokens near the top of the `<style>`, the `ICONS` registry in `<head>`), and `CLAUDE.md` for the reasons.
+Source of truth for everything: `index.html` (CSS tokens near the top of the `<style>`, the `ICONS` registry in `<head>`), and `CLAUDE.md` for the reasons.
 
 ---
 
