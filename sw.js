@@ -54,6 +54,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+  if (new URL(req.url).pathname.endsWith('/version.json')) return;   // the update check must always reach the server, never the saved copy
 
   // Page navigations: prefer a fresh copy, fall back to cache when offline.
   if (req.mode === 'navigate') {

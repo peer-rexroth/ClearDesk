@@ -152,3 +152,8 @@ test('the status and priority chips use the same rule', function () {
   assertEqual(filterStatus.length, STATUSES.length);
   assertEqual(filterPriority.length, PRIORITIES.length);
 });
+
+test('run from source (no build) the update check falls back to headers: the build id placeholder is untouched', function () {
+  assertEqual(hasBuildId, false);
+  assertEqual(BUILD_ID, '__BUILD_ID__');
+});
