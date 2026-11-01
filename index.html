@@ -134,6 +134,11 @@ const ICONS = {
   "braces": "<path d=\"M8.5 4C6.5 4 6 5 6 6.5V9c0 1.2-.8 2-2 3 1.2 1 2 1.8 2 3v2.5C6 19 6.5 20 8.5 20\"/><path d=\"M15.5 4C17.5 4 18 5 18 6.5V9c0 1.2.8 2 2 3-1.2 1-2 1.8-2 3v2.5c0 1.5-.5 2.5-2.5 2.5\"/>",
   "duplicate": "<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5\"/><path d=\"M14 11.5v5M11.5 14h5\"/>",
   "arrow-down-to-bracket": "<path d=\"M12 4.5V15M8 11.3l4 4 4-4\"/><path d=\"M6 11.5v6.2a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8v-6.2\"/>",
+  "compose": "<path d=\"M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4\"/><path d=\"M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z\"/>",
+  "eraser": "<path d=\"m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21\"/><path d=\"M22 21H7\"/><path d=\"m5 11 9 9\"/>",
+  "table-cells": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2.5\"/><path d=\"M3 9h18M3 15h18M9 3v18\"/>",
+  "chevrons-up-down": "<path d=\"m8.5 9.5 3.5-3.5 3.5 3.5M8.5 14.5l3.5 3.5 3.5-3.5\"/>",
+  "check-thin": "<path d=\"m5.5 12.5 4.2 4.2 8.8-9.5\"/>"
 };
 (function(){
   try {
@@ -197,7 +202,7 @@ const ICONS = {
 
   html, body { height: 100%; }
   body { font-family: var(--font); background: var(--bg-2); color: var(--text); font-size: var(--fs-15); line-height: 1.5; display: flex; flex-direction: column; min-height: 100vh; }
-  body, .topbar, .sidebar, .main, .project-row, .nav-item,
+  body, .topbar, .sidebar, .main,
   .modal, .task-list-header, .quickadd,
   input, select, textarea {
     transition: background-color var(--dur-base) ease, color var(--dur-base) ease, border-color var(--dur-base) ease;
@@ -1232,7 +1237,7 @@ const ICONS = {
   .drow-skip::before { content: ""; position: absolute; inset: -3px -2px; }   /* 54 x 18 measured: now at least 20 high */
   .dsec { display: flex; align-items: baseline; justify-content: space-between; padding: 0 6px 6px; font-size: var(--fs-13); font-weight: 600; color: var(--text-2); }
   .dsec small { font-weight: 400; color: var(--text-3); font-size: var(--fs-12); margin: 0; }
-  .drawer .drawer-close { width: 26px; height: 26px; border-radius: 50%; background: var(--hover); font-size: var(--ico-12); }
+  .drawer .drawer-close { width: var(--ib-m); height: var(--ib-m); border-radius: 50%; background: var(--hover); font-size: var(--ico-12); }
   .drawer .df-actions { display: flex; gap: 8px; align-items: center; }
   .drawer .drawer-footer .btn { border-radius: 999px; }
   html[data-scheme="glass"] .drawer .btn.btn-text-danger { background: transparent; border-color: transparent; box-shadow: none; color: var(--red-text); }   /* destructive but quiet: plain red text, as Apple does, instead of a solid red button */
@@ -1900,7 +1905,7 @@ const ICONS = {
   /* Recently Deleted (Tasks): replaces the list, board, quick-add and the selection tools while it is open */
   .task-trash-list { display: none; flex: 1; min-height: 0; overflow-y: auto; padding: 6px 10px 16px; }
   html.task-trash .task-trash-list { display: block; }
-  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, #sortSelect, #collapseAllBtnBoard) { display: none !important; }
+  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, .sort-wrap, #collapseAllBtnBoard) { display: none !important; }
   #trashTools { display: none; }
   html.task-trash #trashTools { display: inline-flex; }
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
@@ -1938,8 +1943,15 @@ const ICONS = {
   .main-toolbar-right { flex-wrap: nowrap; flex: 0 0 auto; }
   @container mainpane (max-width: 900px) { #filterBtn .tb-label { display: none; } }
   @container mainpane (max-width: 880px) { #selToolbar { display: none; } }
-  @container mainpane (max-width: 780px) { #sortSelect { max-width: 112px; text-overflow: ellipsis; } }
-  @container mainpane (max-width: 560px) { #sortSelect { max-width: 84px; } #boardGroupSwitch { display: none !important; } }
+  .sort-wrap { position: relative; display: inline-flex; }
+  .sort-ico { display: none; }
+  /* Below the Filter step the Sort pull-down is an icon (its value is in the tooltip): a value cut to "Smart ord…" reads as a bug */
+  @container mainpane (max-width: 780px) {
+    .sort-wrap #sortSelect { width: var(--bar-ctl-h, 36px); padding: 0; color: transparent; background-image: none !important; }
+    .sort-wrap #sortSelect option { color: var(--text); background-color: var(--bg); }
+    .sort-wrap .sort-ico { display: block; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; color: var(--text-2); pointer-events: none; }
+  }
+  @container mainpane (max-width: 560px) { #boardGroupSwitch { display: none !important; } }
   .pr-split.insp-closed .pr-insp-inner { opacity: 0; pointer-events: none; }
   .pr-insp-head { font-size: var(--fs-17); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
   .pr-insp-sub { font-size: var(--fs-12); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
@@ -2095,9 +2107,9 @@ const ICONS = {
     <div class="sb-head" id="sbHead">
       <button class="btn btn-icon btn-sm sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" aria-expanded="true" title="Hide sidebar"><svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.33" stroke-linecap="round" aria-hidden="true"><rect x="1.5" y="2.5" width="13" height="11" rx="2.5"/><path d="M6 2.5v11"/></svg></button>
     <div class="view-switch mode-switch" id="modeSwitch" role="group" aria-label="Tasks, Notes or Prompts">
-      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')" title="Tasks" aria-label="Tasks"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.3 2.5 2.5 4.6-5"/></svg></button>
-      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')" title="Notes" aria-label="Notes"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 4.5h11a2 2 0 0 1 2 2V14l-5.5 5.5H6.5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2z"/><path d="M19.5 14H15a1 1 0 0 0-1 1v4.5"/></svg></button>
-      <button type="button" class="view-switch-btn" data-mode="prompts" onclick="setAppMode('prompts')" title="Prompts" aria-label="Prompts"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4C6.5 4 6 5 6 6.5V9c0 1.2-.8 2-2 3 1.2 1 2 1.8 2 3v2.5C6 19 6.5 20 8.5 20"/><path d="M15.5 4C17.5 4 18 5 18 6.5V9c0 1.2.8 2 2 3-1.2 1-2 1.8-2 3v2.5c0 1.5-.5 2.5-2.5 2.5"/></svg></button>
+      <button type="button" class="view-switch-btn" data-mode="tasks" onclick="setAppMode('tasks')" title="Tasks" aria-label="Tasks"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="circle-check"></svg></button>
+      <button type="button" class="view-switch-btn" data-mode="notes" onclick="setAppMode('notes')" title="Notes" aria-label="Notes"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="note-sticky"></svg></button>
+      <button type="button" class="view-switch-btn" data-mode="prompts" onclick="setAppMode('prompts')" title="Prompts" aria-label="Prompts"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="braces"></svg></button>
     </div>
     </div>
     <div class="sidebar-search">
@@ -2278,7 +2290,7 @@ const ICONS = {
           <button class="view-switch-btn" data-group="project" onclick="setBoardGroup('project')" title="One column per project">Project</button>
           <button class="view-switch-btn" data-group="status" onclick="setBoardGroup('status')" title="One column per status">Status</button>
         </div>
-        <select id="sortSelect" onchange="setSortBy(this.value)">
+        <span class="sort-wrap"><select id="sortSelect" onchange="setSortBy(this.value)" title="Sort by">
           <option value="smart">Smart order</option>
           <option value="due">Due date</option>
           <option value="priority">Priority</option>
@@ -2286,7 +2298,7 @@ const ICONS = {
           <option value="alpha">Alphabetical</option>
           <option value="project">Project</option>
           <option value="status">Status</option>
-        </select>
+        </select><i class="fa-solid fa-arrow-down-wide-short sort-ico" aria-hidden="true"></i></span>
       </div>
     </div>
     <div class="quickadd">
@@ -2318,18 +2330,18 @@ const ICONS = {
     <div class="notes-editor-pane">
       <!-- with no note open (an empty folder, or nothing selected) the bar stays, so New note is always one click away -->
       <div class="note-toolbar note-empty-bar" id="noteEmptyBar">
-        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"/><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"/></svg></button>
+        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button>
       </div>
       <div class="notes-empty" id="notesEmpty"><i data-empty-ico="note-sticky"></i><div>No Note Selected</div></div>
       <div class="note-editor" id="noteEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
-          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"/><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"/></svg></button>
+          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="blockquote">Quote</option><option value="pre">Code</option>
           </select>
           <div class="tool-group note-fmt">
-            <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
-            <button type="button" class="tool-btn" id="noteRedoBtn" onclick="noteCmd('redo')" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+            <button type="button" class="tool-btn" id="noteUndoBtn" onclick="noteCmd('undo')" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="undo"></svg></button>
+            <button type="button" class="tool-btn" id="noteRedoBtn" onclick="noteCmd('redo')" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="redo"></svg></button>
           </div>
           <div class="tool-group note-fmt">
             <button type="button" class="tool-btn" data-cmd="bold" onclick="noteCmd('bold')" title="Bold (⌘B)" aria-label="Bold"><span class="tb-txt tb-b">B</span></button>
@@ -2343,20 +2355,20 @@ const ICONS = {
           </div>
           <div class="tool-group note-fmt">
             <div class="lib-dropdown" id="noteListDropdown">
-              <span class="tool-split"><button type="button" class="tool-btn list-main" data-cmd="list" onclick="event.stopPropagation();noteListStyle(noteBulletKind)" title="Bulleted list (click to toggle; the arrow picks a style)" aria-label="Bulleted list"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></button><button type="button" class="tool-btn list-caret" onclick="event.stopPropagation();toggleNoteListMenu()" title="List styles" aria-label="List styles" aria-haspopup="menu"><svg viewBox="0 0 10 6" width="8" height="5" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span>
+              <span class="tool-split"><button type="button" class="tool-btn list-main" data-cmd="list" onclick="event.stopPropagation();noteListStyle(noteBulletKind)" title="Bulleted list (click to toggle; the arrow picks a style)" aria-label="Bulleted list"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="list-ul"></svg></button><button type="button" class="tool-btn list-caret" onclick="event.stopPropagation();toggleNoteListMenu()" title="List styles" aria-label="List styles" aria-haspopup="menu"><svg viewBox="0 0 10 6" width="8" height="5" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></span>
               <div class="split-btn-menu tool-menu note-list-menu" id="noteListMenu" role="menu"></div>
             </div>
-            <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2"/><path d="m8.6 12.2 2.4 2.4 4.4-4.8"/></svg></button>
+            <button type="button" class="tool-btn" data-cmd="checklist" onclick="noteChecklist()" title="Checklist" aria-label="Checklist"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="circle-check"></svg></button>
             <div class="lib-dropdown" id="noteTableDropdown">
-              <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2.5"/><path d="M3 9h18M3 15h18M9 3v18"/></svg></button>
+              <button type="button" class="tool-btn" data-cmd="table" onclick="event.stopPropagation();toggleNoteTableMenu()" title="Table" aria-label="Table" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="table-cells"></svg></button>
               <div class="split-btn-menu tool-menu note-table-menu" id="noteTableMenu" role="menu"></div>
             </div>
-            <button type="button" class="tool-btn" id="noteLinkBtn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link" aria-haspopup="dialog"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></button>
-            <button type="button" class="tool-btn note-clear-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/></svg></button>
+            <button type="button" class="tool-btn" id="noteLinkBtn" onclick="openNoteLinkBar()" title="Link (⌘K)" aria-label="Link" aria-haspopup="dialog"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="link"></svg></button>
+            <button type="button" class="tool-btn note-clear-btn" onclick="noteClearFormat()" title="Clear formatting" aria-label="Clear formatting"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="eraser"></svg></button>
           </div>
                     <span class="note-toolbar-grow"></span>
-          <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg></button>
-          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><g fill="currentColor" stroke="none"><circle cx="5.5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="18.5" cy="12" r="1.7"/></g></svg></button>
+          <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="lock-open"></svg></button>
+          <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="ellipsis"></svg></button>
         </div>
         <div class="find-bar" id="ntFind" role="search" aria-label="Find in the note" hidden>
           <div class="find-row">
@@ -2366,8 +2378,8 @@ const ICONS = {
               <span class="find-count" id="ntFindCount" aria-live="polite"></span>
             </div>
             <div class="tool-group" role="group" aria-label="Move between matches">
-              <button type="button" class="tool-btn" id="ntFindPrev" onclick="noteFindBar.step(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"></path></svg></button>
-              <button type="button" class="tool-btn" id="ntFindNext" onclick="noteFindBar.step(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"></path></svg></button>
+              <button type="button" class="tool-btn" id="ntFindPrev" onclick="noteFindBar.step(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-up"></svg></button>
+              <button type="button" class="tool-btn" id="ntFindNext" onclick="noteFindBar.step(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-down"></svg></button>
             </div>
             <button type="button" class="btn btn-sm find-toggle" id="ntFindRepToggle" onclick="noteFindBar.option('replace')" aria-pressed="false" title="Show the Replace row (⌥⌘F)">Replace…</button>
             <button type="button" class="btn btn-sm" onclick="noteFindBar.close()" title="Close the find bar (Esc)">Done</button>
@@ -2403,15 +2415,15 @@ const ICONS = {
     <div class="notes-list-resizer" id="promptsListResizer" role="separator" aria-orientation="vertical" aria-label="Resize the prompts list" aria-valuemin="200" aria-valuemax="600" tabindex="0" title="Drag to resize (double-click to reset)"></div>
     <div class="notes-editor-pane">
       <div class="note-toolbar note-empty-bar" id="pEmptyBar">
-        <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
+        <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button>
       </div>
       <div class="notes-empty" id="pEmpty"><i data-empty-ico="braces"></i><div>No Prompt Selected</div></div>
       <div class="note-editor" id="pEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Prompt tools" onmousedown="if(!event.target.closest('select,input,textarea'))event.preventDefault()">
-          <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4"></path><path d="M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z"></path></svg></button>
+          <button type="button" class="btn note-new-btn" onclick="createPrompt()" title="New prompt (N)" aria-label="New prompt"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button>
           <div class="tool-group note-fmt" role="group" aria-label="Undo">
-            <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"></path></svg></button>
-            <button type="button" class="tool-btn" onclick="promptUndo('redo')" title="Redo (⇧⌘Z)" aria-label="Redo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"></path></svg></button>
+            <button type="button" class="tool-btn" onclick="promptUndo('undo')" title="Undo (⌘Z)" aria-label="Undo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="undo"></svg></button>
+            <button type="button" class="tool-btn" onclick="promptUndo('redo')" title="Redo (⇧⌘Z)" aria-label="Redo"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="redo"></svg></button>
           </div>
           <div class="tool-group note-fmt pr-insert-group" role="group" aria-label="Insert a variable">
             <button type="button" class="tool-btn pr-insert" onclick="insertPromptVar('option')" title="Insert a choice variable: {{name}}" aria-label="Insert a choice variable"><span class="tb-txt pr-tb-mono">{{ }}</span></button>
@@ -2427,7 +2439,7 @@ const ICONS = {
           <button type="button" class="btn note-more-btn" id="pFavBtn" onclick="togglePromptFavorite()" title="Add to Favorites" aria-label="Favorite" aria-pressed="false"><i class="fa-solid fa-star"></i></button>
           <button type="button" class="btn note-more-btn note-lock-btn" id="pLockBtn" onclick="togglePromptLock()" title="Lock" aria-label="Lock" aria-pressed="false"></button>
           <div class="tool-group note-fmt pr-more-group" role="group" aria-label="Open in and more">
-            <button type="button" class="tool-btn" id="pOpenBtn" onclick="openPromptAiMenu(event)" title="Open in… (copies the prompt, then opens an AI app; ⇧⌘↵ for the first one)" aria-label="Open in an AI app" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4.5h5.5V10M19.5 4.5l-8 8"/><path d="M18 14v3.5a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2H10"/></svg></button>
+            <button type="button" class="tool-btn" id="pOpenBtn" onclick="openPromptAiMenu(event)" title="Open in… (copies the prompt, then opens an AI app; ⇧⌘↵ for the first one)" aria-label="Open in an AI app" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="arrow-up-right-from-square"></svg></button>
             <button type="button" class="tool-btn" id="pMoreBtn" onclick="openPromptMenu(event, promptEditorId)" title="More" aria-label="More" aria-haspopup="menu"><i class="fa-solid fa-ellipsis"></i></button>
           </div>
           <button type="button" class="btn btn-primary btn-copy" id="pCopyBtn" onclick="copyPrompt()" title="Copy the finished prompt (⌘↵)" aria-label="Copy Prompt"><i class="fa-solid fa-copy"></i><span class="pr-copy-label"> Copy Prompt</span></button>
@@ -2441,8 +2453,8 @@ const ICONS = {
               <span class="find-count" id="prFindCount" aria-live="polite"></span>
             </div>
             <div class="tool-group" role="group" aria-label="Move between matches">
-              <button type="button" class="tool-btn" id="prFindPrev" onclick="promptFindBar.step(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 14.5 5.5-5.5 5.5 5.5"></path></svg></button>
-              <button type="button" class="tool-btn" id="prFindNext" onclick="promptFindBar.step(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 9.5 5.5 5.5 5.5-5.5"></path></svg></button>
+              <button type="button" class="tool-btn" id="prFindPrev" onclick="promptFindBar.step(-1)" title="Previous match (⇧⌘G)" aria-label="Previous match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-up"></svg></button>
+              <button type="button" class="tool-btn" id="prFindNext" onclick="promptFindBar.step(1)" title="Next match (⌘G)" aria-label="Next match"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-down"></svg></button>
             </div>
             <button type="button" class="btn btn-sm find-toggle" id="prFindRepToggle" onclick="promptFindBar.option('replace')" aria-pressed="false" title="Show the Replace row (⌥⌘F)">Replace…</button>
             <button type="button" class="btn btn-sm" onclick="promptFindBar.close()" title="Close the find bar (Esc)">Done</button>
@@ -2876,15 +2888,15 @@ const ICONS = {
       <h3 id="pdfTitle">Compare Prompts</h3>
       <div class="pdiff-tools" role="toolbar" aria-label="Comparison">
         <span class="tool-group" role="group" aria-label="Differences">
-          <button type="button" class="tool-btn" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14.5 6-6 6 6"/></svg></button>
-          <button type="button" class="tool-btn" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9.5 6 6 6-6"/></svg></button>
+          <button type="button" class="tool-btn" id="pdfPrev" onclick="pdfNav(-1)" title="Previous difference (Shift+F7)" aria-label="Previous difference"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-up"></svg></button>
+          <button type="button" class="tool-btn" id="pdfNext" onclick="pdfNav(1)" title="Next difference (F7)" aria-label="Next difference"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-down"></svg></button>
         </span>
         <span class="pdiff-count" id="pdfCount" role="status"></span>
         <span class="tool-group" role="group" aria-label="Undo">
-          <button type="button" class="tool-btn" id="pdfUndo" onclick="pdfUndo()" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
-          <button type="button" class="tool-btn" id="pdfRedo" onclick="pdfRedo()" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+          <button type="button" class="tool-btn" id="pdfUndo" onclick="pdfUndo()" title="Undo (⌘Z)" aria-label="Undo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="undo"></svg></button>
+          <button type="button" class="tool-btn" id="pdfRedo" onclick="pdfRedo()" title="Redo (⇧⌘Z)" aria-label="Redo" disabled><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="redo"></svg></button>
         </span>
-        <span class="tool-group"><button type="button" class="tool-btn" id="pdfOpts" onclick="openPdfOptionsMenu(event)" title="Comparison options" aria-label="Comparison options" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/></svg></button></span>
+        <span class="tool-group"><button type="button" class="tool-btn" id="pdfOpts" onclick="openPdfOptionsMenu(event)" title="Comparison options" aria-label="Comparison options" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="sliders"></svg></button></span>
       </div>
     </div>
     <div class="pdiff-sels"><div class="pdiff-name" id="pdfNameA"></div><span></span><div class="pdiff-name" id="pdfNameB"></div></div>
@@ -3007,8 +3019,27 @@ function iconButtonLabel(el){
   if(String(el.textContent||'').trim()) return null;
   return own===title ? null : title;
 }
+// One place draws an icon from the registry: markup says <svg data-ico="name"> and this fills it; script builds them with iconSvg(). No drawing lives outside ICONS (the few 10-grid chevrons excepted).
+function iconSvg(name, cls){ return `<svg class="${cls || 'tb-ico2'}" viewBox="0 0 24 24" aria-hidden="true" data-ico="${name}">${ICONS[name] || ''}</svg>`; }
+function hydrateIcons(root){
+  if(!root || !root.querySelectorAll) return;
+  const list = root.querySelectorAll('svg[data-ico]');
+  for(let i=0;i<list.length;i++){ if(!list[i].firstChild){ const d = ICONS[list[i].getAttribute('data-ico')]; if(d) list[i].innerHTML = d; } }
+}
+// Tooltips are written with Mac key glyphs ("Undo (⌘Z)"); elsewhere they read as Ctrl+Z (the Shortcuts dialog does the same for its rows: ⌘ → Ctrl, ⌥ → Alt, ⇧ → Shift, and ⌃ beside ⌘ → Alt as there).
+function platformKeyTitle(t){
+  return String(t).replace(/([⌃⌥⇧⌘]+)([A-Za-z0-9\[\]\\\/,.;'=\-↵⌫⎋⇥])/g, (m, mods, key)=>{
+    const p = [];
+    if(mods.includes('⌘') || (mods.includes('⌃') && !mods.includes('⌘'))) p.push('Ctrl');
+    if(mods.includes('⌥') || (mods.includes('⌃') && mods.includes('⌘'))) p.push('Alt');
+    if(mods.includes('⇧')) p.push('Shift');
+    return p.join('+') + '+' + ({ '↵': 'Enter', '⌫': 'Backspace', '⎋': 'Esc', '⇥': 'Tab' }[key] || key);
+  });
+}
+const titleMacKeys = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
 function labelIconButtons(root){
   if(!root || !root.querySelectorAll) return;
+  if(!titleMacKeys){ const ts = root.querySelectorAll('[title]'); for(let i=0;i<ts.length;i++){ const v = ts[i].getAttribute('title'); if(v && /[⌃⌥⇧⌘]/.test(v)){ const w = platformKeyTitle(v); if(w!==v) ts[i].setAttribute('title', w); } } }
   const list = root.querySelectorAll('button[title], [role="button"][title]');
   for(let i=0;i<list.length;i++){
     const t = iconButtonLabel(list[i]);
@@ -3018,10 +3049,10 @@ function labelIconButtons(root){
 (function(){
   if(typeof MutationObserver==='undefined' || !document.body) return;
   let queued = false;
-  const run = ()=>{ queued = false; labelIconButtons(document.body); };
+  const run = ()=>{ queued = false; hydrateIcons(document.body); labelIconButtons(document.body); };
   new MutationObserver(()=>{ if(!queued){ queued = true; requestAnimationFrame(run); } })
     .observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['title'] });
-  labelIconButtons(document.body);
+  hydrateIcons(document.body); labelIconButtons(document.body);
 })();
 // Sidebar width: drag the sidebar's right edge (or use the arrow keys on it); a per-device display preference like the collapse state.
 const SIDEBAR_W_KEY = 'cleardesk_sidebar_w', SIDEBAR_W_DEFAULT = 300, SIDEBAR_W_MIN = 260, SIDEBAR_W_MAX = 480;   // 260 = the widest the tools bar needs (Reconnect chip + Data / Appearance / Help = 259px), so nothing runs past the edge
@@ -3663,7 +3694,7 @@ function renderSidebar(){
   document.getElementById('sidebarFooter').textContent = `${total} task${total===1?'':'s'} · ${done} done`;
 
   document.getElementById('mainTitle').textContent = trashFilter ? 'Recently Deleted' : myDayFilter ? 'My Day' : thisWeekFilter ? 'This Week' : overdueFilter ? 'Overdue' : (filterProjectId ? (projById(filterProjectId)?.name || 'All Tasks') : 'All Tasks');
-  document.getElementById('sortSelect').value = sortBy.replace(':desc','');
+  { const ss = document.getElementById('sortSelect'); ss.value = sortBy.replace(':desc',''); const o = ss.options && ss.options[ss.selectedIndex]; ss.title = 'Sort by: ' + (o ? o.text : ss.value); }
   renderSortHeaders();
   renderQuickAddProject();
   updateSelectionToolbar();
@@ -4036,8 +4067,9 @@ function handleBoardKeyNav(e){
   }
 
   if(e.key==='Tab'){
+    const ae = document.activeElement;   // Tab adds a subtask only with a card selected and nothing else focused; on any control it is plain focus movement
+    if(colIdx===-1 || (ae && ae!==document.body && !ae.closest('.board-card'))) return;
     e.preventDefault();
-    if(colIdx===-1) return;
     inlineAddSubtaskTaskId = kbdSelectedTaskId;
     inlineAddParentSubId = null;
     inlineAddParentStepId = null;
@@ -4553,8 +4585,8 @@ function renderDrawer(){
   const subTotal = (t.subtasks||[]).length;
 
   // The inspector is grouped rows (label left, value right, hairlines between), as in Reminders / System Settings. Each pop-up row keeps a real <select> laid invisibly over the whole row, so the OS menu, keyboard and screen readers work and the whole row is the click target; the visible value is plain text with the stacked chevrons.
-  const STACK = '<svg class="stack" viewBox="0 0 24 24" aria-hidden="true"><path d="m8.5 9.5 3.5-3.5 3.5 3.5M8.5 14.5l3.5 3.5 3.5-3.5"/></svg>';
-  const CAL = '<svg class="stack" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.5 3.8v3.4M15.5 3.8v3.4"/></svg>';
+  const STACK = iconSvg('chevrons-up-down', 'stack');
+  const CAL = iconSvg('calendar', 'stack');
   const selRow = (label, shown, dot, opts, onchange, extra)=>`<div class="drow"><span class="k">${label}${extra||''}</span><span class="v">${dot ? `<i class="dot" style="background:${dot}"></i>` : ''}<span class="vt">${esc(shown)}</span>${STACK}</span><select class="drow-sel" aria-label="${label}" onchange="${onchange}">${opts}</select></div>`;
   const projShown = abbreviateName((projById(t.projectId) || {name:''}).name, 24);
   const statusShown = (STATUSES.find(s=>s.id===t.status) || {label:''}).label, priorityShown = (PRIORITIES.find(p=>p.id===t.priority) || {label:''}).label, repeatShown = (REPEATS.find(r=>r.id===(t.repeat||'none')) || {label:''}).label;
@@ -4803,11 +4835,7 @@ function leaveTasksToQuickAdd(){
 }
 function quickAddTask(event){
   if(event.key==='ArrowDown' && !event.shiftKey && !event.altKey && !event.ctrlKey && !event.metaKey){ event.preventDefault(); event.stopPropagation(); selectFirstTaskFromQuickAdd(); return; }   // stopPropagation: the field is blurred by now, so the list's own arrow handler would otherwise take this same keypress and move one row further
-  // Tab is a no-op here: this is a single-purpose field with no adjacent
-  // field to tab into, so pressing Tab (unlike Enter) shouldn't hand focus
-  // off to whatever happens to be next in DOM order (the collapse-all
-  // button, then into the task rows) — it should just stay put.
-  if(event.key==='Tab'){ event.preventDefault(); return; }
+  // Tab and Shift+Tab move focus as in any field (a field that swallows them is a keyboard dead end); Enter and ↓ are the quick routes.
   if(event.key!=='Enter') return;
   const input = event.target;
   const typed = input.value.trim();
@@ -6177,7 +6205,7 @@ let noteEditorId = null, noteEditorStamp = 0, noteSaveTimer = null, noteSavedRan
 const NOTE_TAGS = new Set(['b','strong','i','em','u','s','strike','h1','h2','h3','h4','h5','h6','p','div','br','ul','ol','li','a','blockquote','code','pre','hr','span','mark','table','colgroup','col','thead','tbody','tr','th','td']);
 const NOTE_VOID = new Set(['br','hr','col']);
 // The same thin outline icons as the toolbar's other buttons (18px, 2 stroke), so the round buttons and the new copy chip match them; used from JS too.
-const ICO_LOCK = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10"/></svg>', ICO_LOCK_OPEN = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="10" width="15" height="10.5" rx="3"/><path d="M8 10V7.5a4 4 0 0 1 7.6-1.7"/></svg>', ICO_COPY = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5"/></svg>', ICO_CHECK = '<svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4.2 4.2 8.8-9.5"/></svg>';
+const ICO_LOCK = iconSvg('lock'), ICO_LOCK_OPEN = iconSvg('lock-open'), ICO_COPY = iconSvg('copy'), ICO_CHECK = iconSvg('check-thin');
 // the names a note may carry as text colour / highlight (see noteApplyColor); defined with the sanitizer that needs them
 const NOTE_TEXT_COLORS = ['red', 'orange', 'green', 'blue', 'purple', 'gray'], NOTE_HL_COLORS = ['yellow', 'green', 'blue', 'pink', 'purple', 'gray'];
 
@@ -11348,7 +11376,7 @@ function renderGlobalsModal(focusName){
     return;
   }
   detail.innerHTML = `<label class="pr-g-label" for="pgName">Name</label>
-    <input type="text" id="pgName" class="pr-g-name" value="${esc(g.name)}" maxlength="40" spellcheck="false" autocomplete="off" aria-label="Variable name" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=this.defaultValue;event.stopPropagation();this.blur()}" onblur="commitGlobalName()">
+    <input type="text" id="pgName" class="pr-g-name" value="${esc(g.name)}" maxlength="40" spellcheck="false" autocomplete="off" aria-label="Variable name" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}else if(event.key==='Escape'){this.value=this.defaultValue;this.blur()}" onblur="commitGlobalName()">
     <div class="pr-g-hint">Use it in a template as <code>{{@${esc(g.name)}}}</code>.</div>
     <div class="pr-g-label pr-g-label-values">Values</div>
     <div class="pr-g-values" id="pgValues" role="listbox" aria-label="Values">${g.options.map((o, i)=>`<div class="pr-g-val${i===globalsValSel ? ' on' : ''}" role="option" aria-selected="${i===globalsValSel}" tabindex="0" data-i="${i}" onclick="selectGlobalValue(${i})" ondblclick="startGlobalValueRename(this,${i})" onkeydown="globalValueKey(event,${i})" draggable="true" ondragstart="globalDragStart(event,${i})" ondragover="globalDragOver(event)" ondragleave="promptDragLeave(event)" ondrop="globalDrop(event,${i})" ondragend="promptDragEnd()">${esc(o)}</div>`).join('') || `<div class="pr-g-empty-list">No values yet. Click + to add one.</div>`}</div>`;
@@ -11900,8 +11928,9 @@ function handleListKeyNav(e){
     return;
   }
   if(e.key==='Tab'){
+    const ae = document.activeElement;   // Tab adds a subtask only with a row selected and nothing else focused; on any control it is plain focus movement
+    if(!kbdSelectedTaskId || !list.some(t=>t.id===kbdSelectedTaskId) || (ae && ae!==document.body && !ae.closest('.task-row'))) return;
     e.preventDefault();
-    if(!kbdSelectedTaskId || !list.some(t=>t.id===kbdSelectedTaskId)) return;
     inlineAddSubtaskTaskId = kbdSelectedTaskId;
     inlineAddParentSubId = null;
     inlineAddParentStepId = null;
@@ -12498,7 +12527,7 @@ function showSyncBanner(handle){
   const el = document.getElementById('syncBanner'); if(!el) return;
   el.innerHTML = handle
     ? `<i class="fa-solid fa-triangle-exclamation"></i><span>Sync is paused — <strong>${esc(handle.name)}</strong> needs permission again.</span><button class="btn btn-sm" onclick="openFileSyncModal(syncBannerHandle)">Reconnect</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss"><i class="fa-solid fa-xmark"></i></button>`
-    : `<i class="fa-solid fa-triangle-exclamation"></i><span>Your tasks are only saved in this browser. Link a file to back them up.</span><button class="btn btn-sm" onclick="openFileSyncModal()">Link a file</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss until next session"><i class="fa-solid fa-xmark"></i></button>`;
+    : `<i class="fa-solid fa-triangle-exclamation"></i><span>Your data is only saved in this browser. Link a file to back it up.</span><button class="btn btn-sm" onclick="openFileSyncModal()">Link a file</button><button class="icon-btn" onclick="dismissSyncBanner()" title="Dismiss until next session"><i class="fa-solid fa-xmark"></i></button>`;
   el.classList.add('show');
 }
 function hideSyncBanner(){ const el = document.getElementById('syncBanner'); if(!el) return; el.classList.remove('show'); el.innerHTML = ''; }

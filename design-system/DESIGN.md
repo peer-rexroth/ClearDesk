@@ -8,7 +8,7 @@ An Apple-style look for a web app (a PWA used mostly in desktop Chrome on macOS)
 |---|---|
 | `DESIGN.md` | this guide |
 | `tokens.css` | every colour, size, radius, shadow and motion token, light and dark, extracted from the app |
-| `icons.json` | the whole icon set (118 icons): name → inner SVG markup on a 24 grid |
+| `icons.json` | the whole icon set (121 icons): name → inner SVG markup on a 24 grid |
 | `icon-sheet.html` | a preview of every icon at 32px and the four drawn sizes (open it in a browser) |
 | `assets/` | the app-icon masters (`icon.svg`, `icon-maskable.svg`, `favicon.svg`) and `manifest.json`, as examples for section 14 |
 
@@ -22,7 +22,7 @@ Source of truth for everything: `index.html` (CSS tokens near the top of the `<s
 2. **Quiet by default, controls appear when you point at them.** Row actions, remove buttons, hierarchy buttons and "add" toggles show on hover/focus only. The resting screen is text and a few pills.
 3. **Few boxes.** Inputs inside lists are "ghost" fields (no border, a faint tint on focus). Boxed fields exist only inside dialogs. The detail panel is grouped rows (label left, value right, hairlines), not a form.
 4. **Flat fills and crisp rings, no coloured glows.** No blurred coloured shadows, no gradients on buttons. Hover darkens or tints; it does not grow a shadow.
-5. **The arrow cursor, everywhere.** The hand is for links only. Never `cursor: pointer` on a control. The exceptions are the system's own: `text` over a text field or editor, `col-resize` / `row-resize` on a resize edge, `not-allowed` on a refused drop target; there is no `grab` cursor (an invisible handle must not change the pointer).
+5. **The arrow cursor, everywhere.** The hand is for links only (a link-styled button in running text, `.help-jump`, counts as a link). Never `cursor: pointer` on a control. The exceptions are the system's own: `text` over a text field or editor, `col-resize` / `row-resize` on a resize edge, `not-allowed` on a refused drop target; there is no `grab` cursor (an invisible handle must not change the pointer).
 6. **One icon per meaning, one family.** See section 4.
 7. **Undo instead of "Are you sure?"** for anything that can be undone (a toast with Undo, 6 seconds). Ask only for what cannot be undone.
 8. **Hide what does not apply, don't dim it** in context menus.
@@ -67,6 +67,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 
 - **One family:** the system stack (`--font`: `-apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif`); monospace only for code (`--mono`: `'SF Mono', 'Fira Code', 'Cascadia Code', monospace`). No serif anywhere (the toolbar's italic *I* is the system italic).
 - **Seven sizes, nothing in between:** `--fs-11` 11, `--fs-12` 12, `--fs-13` 13 (the default control text), `--fs-14` 14 (body, list rows), `--fs-15` 15 (fields in dialogs), `--fs-17` 17 (dialog titles, panel title, the window bar's title at weight 700), `--fs-22` 22 (reserved for a large page title; the bar title is 17). Monospace text (a prompt template, the Compare view) uses `--fs-13` like the rest; `em` sizes are allowed only for inline code inside running text.
+- **Windows (Help, Shortcuts)** use 22/700 for the large title and weight 700 for section titles; the toolbar's italic *I* is 16px / 500 (4.1). These are the only places outside the scale.
 - **Weights:** 400, 500, 600, 700 only. Titles and bold row text 600; pills 500–600; section labels 600 uppercase with letter-spacing `.04–.08em` at 11–12px.
 - **macOS minimums:** default 13pt, nothing below 10pt for text. Control glyphs (tick marks, tiny chevrons) are icons, not text, and use the `--gl-8…10` tokens (`--gl-8` draws about 10px, the smallest glyph anywhere; the old 6 and 7 are gone, U-10).
 - Line height 1.45–1.7 in body copy; dialogs 1.6.
@@ -77,9 +78,11 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - **Spacing scale:** 2, 4, 6, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40 (1px hairlines allowed). Odd values (3, 5, 7, 9…) are snapped to the nearest step. Reserved widths (for a capsule, a copy button) are measured, not spacing choices, and may be any number: document them.
 - **One left gutter** `--gutter` 20px: every pane's content starts 20px in, so switching modes keeps the margin.
 - **Radius ladder:** `--r-xs` 4 (chips, tiny), `--r-s` 8 (rows, controls), `--r-m` 10 (cards, fields, buttons), `--r-l` 12 (bars), `--r-xl` 16 (menus, dialogs, columns), plus `999px` for pills and capsules and `50%` for circles. One name per value; do not invent radii.
+- **Nested shapes and marks:** a shape inside another uses the parent's radius minus the inset (`calc(var(--r-m) - 3px)`); inline marks (find and syntax highlights, drop lines, the "A" colour bar) use 1–3px. No other literal radii.
 - **Toolbar controls are capsules** (fully rounded); content uses the ladder.
 - **Elevation:** three levels `--elev-1/2/3` (only `--elev-2` is used so far; `--shadow` is the resting button shadow and `--glass-lift-1/2` lift a board tile) (`0 1px 2px .12`, `0 6px 18px .14`, `0 8px 32px .18`); menus and dialogs use `--glass-shadow` plus an inner top highlight `--glass-rim` (a 1px inset white line, the "lit edge"). Dark mode shadows are stronger, rims weaker.
 - **Hairlines, not borders:** 1px, `--border`. Cards and board tiles have *no* outline: they are set off by fill (`--bg` on a `--bg-2` column) and a whisper of shadow in light mode.
+- **Measured values and stacking:** reserved widths that are not on the spacing scale: 21 (indent of a subtask list), 44 (sub-folder indent), 47 (the replace row under the find text), 76 / 96 (room for a row's hover capsule), 104 / 112 (title-bar room while the sidebar is hidden). Stacking: content 1–6, sticky bars 30–70, menus 80 and 300–410, drawers 140–151, dialogs 200, confirm 210.
 
 ### 2.4 Materials (the glass)
 
@@ -95,6 +98,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - **No overshoot, no spring, no bounce.** (A `cubic-bezier(.34,1.56,.64,1)` on buttons was removed.)
 - **The checkbox pop** is 1.15× over 200ms and plays only for the box you just ticked, never on a re-render or a view switch.
 - **Selection and hover are instant:** no colour transition on rows or cards (a 120ms fade left a trail of half-faded rows when moving the pointer or holding an arrow key).
+- **Rows never fade, sidebar rows included.** A theme switch may fade the page's own surfaces for 200ms (`body`, bars, panels, fields); no row or card carries a colour transition.
 - **Exit easing and press state:** a row that leaves (delete, complete in a filtered view) fades and slides out over `--dur-fast` with `ease-in` (leaving things accelerate away); pressing a button, segment or chip scales it to .94 for as long as it is held (`:active`), with no transition of its own. No rule uses `transition: all`: the filter chips list `background-color, color, border-color` and the toast `transform, opacity`.
 - `prefers-reduced-motion` collapses every animation and transition to ~0.
 - A scrolling column pauses hover (`pointer-events: none` on its cards for 140ms after the last scroll event) so the card under a still pointer does not repaint every frame.
@@ -105,7 +109,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - Every column starts with its own **52px bar** with a hairline under it, so baselines line up across sidebar header, list header and editor toolbar.
 - A **docked detail panel** (420px) beside the list, not an overlay: the list stays visible, ↑/↓ move the selection and the panel together, Esc closes it. Under 800px it floats.
 - Three-pane shape for document modes: list (300, resizable 200–600) + editor (text capped at 900px, left-aligned) + optional inspector (340, resizable 260–560; floats over the editor under 740px).
-- The sidebar collapses (⌥⌘S) and floats below 1100px (a docked 300px sidebar leaves a bar under 680px; it starts hidden there, hides when you resize across the line and is not saved), so every bar keeps one row. The detail panel is `clamp(340px, 36vw, 420px)`. A bar steps down on **its own pane's width** (container queries), never by wrapping.
+- The sidebar collapses (⌥⌘S) and floats at or below 1100px (`SIDEBAR_FLOAT_W`) (a docked 300px sidebar leaves a bar under 680px; it starts hidden there, hides when you resize across the line and is not saved), so every bar keeps one row. The detail panel is `clamp(340px, 36vw, 420px)`. A bar steps down on **its own pane's width** (container queries), never by wrapping.
 - **Navigation details are in section 19; a general, rearrangeable layout system (Xcode / Pages / Mail style regions) is in section 20.**
 
 ---
@@ -132,7 +136,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - Keep drawings inside the 4–20 box so optical size is the same across icons (a rounded square is `4.5…19.5`).
 - **Four drawn sizes:** 12 (chevrons, tiny marks), 14 (badges, chips, row marks), 16 (lists, sidebar, menus, icon buttons, search fields), 18 (toolbars). Nothing else.
 - **Effective line weight scales with size** (as SF Symbols do): 1.17px at 14, 1.33px at 16, 1.5px at 18. Do not set a different stroke per context.
-- **A hand-drawn icon must render at the same line weight as a registry icon of that size** (rendered line = stroke × drawn size ÷ viewBox). Chevrons drawn as background images need their own stroke: 1.3 on a 12px-wide box, 1.2 on an 8px one. Measure the stroke of the path, not the svg element.
+- **No drawing lives outside the registry:** markup says `<svg data-ico="name">` (filled by `hydrateIcons`) and script uses `iconSvg(name)`; the only exceptions are the 10-grid chevrons of the pull-downs. **A hand-drawn icon must render at the same line weight as a registry icon of that size** (rendered line = stroke × drawn size ÷ viewBox). Chevrons drawn as background images need their own stroke: 1.3 on a 12px-wide box, 1.2 on an 8px one. Measure the stroke of the path, not the svg element.
 - **Large symbols (empty states, 45px drawn) use a thin 0.9-unit stroke** (≈1.7px). Rendering them at stroke 2 gives a 3.8px line that is heavy next to everything else.
 - **Two ways to draw the same registry:**
   - *Masked glyph:* `<i class="fa-solid fa-NAME">` with a CSS rule `.fa-NAME { --fa: url("data:image/svg+xml,…") }` and `mask: var(--fa) center / calc(1.26 * 100%) no-repeat; background: currentColor; width:1em; height:1em`. Icons draw **1.26× their font-size**, so use size tokens `--ico-12|14|16|18` (each `calc(N / 1.26)`), not raw px. Sizes follow `font-size`.
@@ -191,7 +195,7 @@ One shape per job, so the same kind of thing always looks the same:
 
 | Shape | Used for | Rule |
 |---|---|---|
-| **Disc** (circle) | every **icon-only button** (`.icon-btn`: row actions, the panel's close, delete, indent, the sidebar's + and projects-shown, the banner's ✕, hierarchy buttons, fold-all), the round bar buttons, checkboxes and subtask circles, the toolbar's round lock / ⋯ | sizes `--ib-s` 22, `--ib-m` 26, bar buttons 36 (`--bar-ctl-h`); a single base rule gives width, height, 50% radius and the `--pressed` hover. A new icon button gets `.icon-btn`, never its own radius |
+| **Disc** (circle) | every **icon-only button** (`.icon-btn`: row actions, the panel's close, delete, indent, the sidebar's + and projects-shown, the banner's ✕, hierarchy buttons, fold-all), the round bar buttons, checkboxes and subtask circles, the toolbar's round lock / ⋯ | sizes `--ib-s` 22, `--ib-m` 26 (the panel's close, the board tile's ⋯), the subtask toggle 28, bar buttons 36 (`--bar-ctl-h`); a single base rule gives width, height, 50% radius and the `--pressed` hover. A new icon button gets `.icon-btn`, never its own radius |
 | **Pill** (fully rounded, wider than tall) | priority / status / due badges, tags, filter chips, a segment inside a capsule group, pop-up buttons | tinted fill, never outlined; hover = brighten + soft pill-shaped halo |
 | **Capsule** (a pill holding several controls) | toolbar groups, the row's hover actions, the mode switch | one `--cap-fill` surface, 3px inset, each button a 22px disc inside; the hovered button fills (`--pressed`, or translucent white on a blue row), **no ring** |
 | **Rounded rectangle** | rows (`--r-s`), cards and fields (`--r-m`), bars (`--r-l`), menus / dialogs / columns (`--r-xl`) | the radius ladder in 2.3, no one-off values |
@@ -244,7 +248,7 @@ One shape per job, so the same kind of thing always looks the same:
 - **Toast:** bottom-right, glass, 13px, a live region (`role="status"`, `role="alert"` for errors). Success 2.4s, with Undo 6s; **held while the pointer or focus is on it**. **An error toast stays until dismissed** (a ✕ button), per the HIG's warning about time-boxed messages.
 - **Banners** are quiet neutral bars (a small amber icon, one pill action, ✕), not coloured blocks. A first-run notice is a banner, not a modal.
 - **Inline messages** for form validation, in red, under the field, saying what to do.
-- **A new-version banner** says a newer copy is ready and offers Reload; it stays until acted on. The reference is **the copy that actually loaded**, not the first check after load (a page started from the offline copy would otherwise take the newer stamp as its baseline and never report it was stale). The service worker remembers the stamp and source of the last page it served and answers the page. A **Check for Updates** command in the Help menu runs the same comparison on request and **always answers**: "up to date", the banner returning even if dismissed, or "could not reach the server".
+- **A new-version banner** says a newer copy is ready and offers Reload; it stays until acted on. A published build bakes a build id (a hash of `index.html`) into the page and writes the same id to `version.json`; the page fetches `version.json` (no-store) on load, on tab focus and hourly and shows the banner when the ids differ. Run from source (no id) it falls back to comparing the server's validators (`HEAD ./`) with those of the copy that loaded; an error reply is never a new version. The service worker never caches `version.json`, and an old entry name (a 404 for another `.html`) is redirected to the home address. **Help → Check for Updates** runs the same comparison and always answers.
 
 ### 5.7 Tooltips
 
@@ -284,7 +288,7 @@ An alert can open **over** a sheet (it stacks at a higher z-index and closes on 
 ### 6.2 Anatomy of a dialog
 - **Scrim:** `rgba(20,24,50,.22)` (`--scrim-glass`) plus `backdrop-filter: blur(4px)` over the whole window; fades in 120ms (`--dur-fast`); the dialog itself does not slide.
 - **Panel:** glass-strong (97%) with blur, 1px `--glass-edge`, **`--r-xl` 16px**, `--glass-shadow` and the inner top rim highlight. Padding **24px**, flex column, **gap 16px** (one padding and one gap for every `.modal`; Compare, a 1280px two-pane editor, is a window in all but name and keeps 20px / 10px).
-- **Width:** 380px standard (360 narrow lists, 420 link/sync, 860 × min(700px, 88vh) settings), `max-width: 90vw`.
+- **Width:** 380px standard (360 narrow lists, 420 link/sync, 560 AI Apps, 660 Global Variables, 860 × min(700px, 88vh) settings windows), `max-width: 90vw`.
 - **Title** 17px / 600, left-aligned, no close button on small dialogs. **Body** 14px, `--text-2`, line-height 1.6, complete sentences. An optional 13px `--text-3` sub-line under the title. A confirmation or a choice of actions is `role="alertdialog"` (Import included); a sheet is `role="dialog"`. Compare's dismiss is *Close* (it saves only on *Save*), every other sheet's is *Cancel*.
 - **Fields** boxed (5.3), full width, 15px.
 - **Button row:** right-aligned, gap 8px, **Cancel on the left, the primary action on the right** (the trailing side is the default). Title-style, one or two words, a verb that says the result ("Replace", "Create", "Save"), never "OK" except in a purely informational alert, never "Yes/No".
@@ -336,7 +340,7 @@ The first-run "link a file" prompt is a **quiet banner**, never a modal; the dia
 - Placeholders say what to type and what happens ("Add a task…", "Web address, e-mail or phone number").
 - Empty-state labels are title-style nouns ("No Prompts").
 - No "Are you sure?" copy: say what will happen and what is lost.
-- **No app name in a command's label.** Name the thing, not the product: "Note File (.json)", not "ClearDesk Note (.json)".
+- **No app name in a command's label.** Name the thing, not the product: "Note File (.json)", not "ClearDesk Note (.json)". Exception: the Help menu keeps the system names "ClearDesk Help" and "About ClearDesk".
 
 ---
 
@@ -386,7 +390,7 @@ The first-run "link a file" prompt is a **quiet banner**, never a modal; the dia
 6. Implement selection with the active/inactive (blue/grey) zones and the one focus ring.
 7. Wire the behaviours: Undo toast instead of confirms, soft delete, hide-not-dim menus, Esc/Return rules, focus return.
 8. Add the motion tokens (two durations), reduced-motion/transparency/contrast fallbacks.
-9. Run a contrast pass in both themes and a hit-area pass; add an automated scan that fails on literal colours, radii, font sizes and `cursor: pointer`.
+9. Run a contrast pass in both themes and a hit-area pass; add an automated scan that fails on literal colours, radii, font sizes and `cursor: pointer` (ClearDesk's `tokens.test.js` does all four, plus `transition: all`, token fallbacks and undefined tokens; each scan lists its documented exceptions).
 10. Write the exceptions down (the things that deliberately differ from the HIG, and why) next to the code, as ClearDesk's `CLAUDE.md` does.
 
 **Reference screens to compare against while porting:** the task list with a selected row, the task panel (grouped rows), a context menu with a submenu, the confirm dialog, the Help window, the board tile, an empty state, the Notes toolbar (letters + icons), and the Prompts toolbar (capsule groups).
@@ -454,7 +458,7 @@ Table "+" and grips: closed (U-11, U-10). Their hit areas were measured at 20×2
 - `<meta name="theme-color">` twice, one per colour scheme, matching the chrome colour (light `#ffffff`, dark `#1e1f24`). The manifest can hold only one colour (`#ffffff`), so the dark tint comes from the meta tags. The service worker precaches every icon the manifest and the page name (192, 512, 180, maskable 512, favicon).
 - **Not used on purpose:** window-controls-overlay, screenshots in the manifest.
 - **Safari cannot install this kind of PWA on macOS**; the launcher script opens it in Chrome/Edge. Offline support needs the http server (not `file://`).
-- **A new-version notice** (a quiet banner with Reload) compares the page's server headers on load, on tab focus and hourly, and when a new service worker takes over.
+- **A new-version notice** says a newer copy is ready and offers Reload; it stays until acted on. A published build bakes a build id (a hash of `index.html`) into the page and writes the same id to `version.json`; the page fetches `version.json` (no-store) on load, on tab focus and hourly and shows the banner when the ids differ. Run from source (no id) it falls back to comparing the server's validators (`HEAD ./`) with those of the copy that loaded; an error reply is never a new version. The service worker never caches `version.json`, and an old entry name (a 404 for another `.html`) is redirected to the home address. **Help → Check for Updates** runs the same comparison and always answers.
 
 ---
 
@@ -462,6 +466,7 @@ Table "+" and grips: closed (U-11, U-10). Their hit areas were measured at 20×2
 
 - **App-wide:** `/` focus search · `N` new item (or focus quick-add) · `?` shortcuts · ⌘Z undo (also undoes the last delete, move or duplicate while not typing) · Esc closes the panel/dialog, then clears the selection.
 - **Lists:** ↑ ↓ move, Return opens, Space toggles/collapses, Tab adds a child (and Tab again indents the chain), F2 renames, Delete removes, ⌘A selects all, ⌘/⇧-click extends/ranges. ↑ from the first row returns to the quick-add field.
+- **Tab and Shift+Tab always move focus between controls.** The one exception is a focused task row in the Tasks view, where Tab adds a subtask; with no row focused, or focus anywhere else (sidebar, toolbar, quick-add), they behave as on any page. A text field never swallows Tab.
 - **Mode switching: ⌥⌘1 / ⌥⌘2 / ⌥⌘3** (Ctrl+Alt on Windows). Plain ⌘1–⌘3 are the browser's tab shortcuts; ⌥⌘S toggles the sidebar (⌘B too, but not in an editor where it is Bold); ⌥⌘I toggles an inspector; ⌃⌘C (Ctrl+Alt+C) copies a note because ⌘⇧C opens Chrome's inspector.
 - **Editor:** ⌘B/I/U, ⌘K link, ⌘P print, ⌘↵ leaves a table or code block (and copies a prompt), Shift+F10 / the Menu key open the context menu for the focused item, Option+↑/↓ reorder a focused folder.
 - **Compare view:** F7 / ⇧F7 next/previous difference (⌥F5 as an alternative), ⌘S saves, Esc closes (asking first when there are changes).
@@ -539,6 +544,7 @@ HIG toolbar layout (follow it when building a bar):
 - **Trailing:** things that must always stay visible: buttons that open an **inspector**, search, the **More (⋯)** menu, and **one primary action** (Done / Save / Copy) at the far end.
 - **At most three groups**, each a joined capsule; keep text-labelled buttons apart from icon buttons; prefer symbols **without borders** (the group's capsule is the container); don't tint bars.
 - **Overflow:** define what moves into the ⋯ menu as the bar narrows; don't create layouts that overflow by default. Every toolbar command must also exist as a menu command (in a web app: in a ⋯ menu or the Shortcuts list).
+- **A value shown in a bar control is never cut with an ellipsis:** below the Filter step the Sort pull-down becomes an icon (its value in the tooltip) instead of reading "Smart ord…".
 - **ClearDesk's main bar:** title (17 / 700, `-0.01em`: a window title, not a page heading) with a 12px subtitle ("3 open · 1 overdue", plus "· K selected" for two or more) · selection capsule (Complete, Priority ▾, Due ▾, Move ▾ | Duplicate, Delete; disabled with no selection, acting on the whole selection through the same code path as the context menu) · **Filter** button (shows a count; a ✕ clears) · **view switch** (List | Board, segmented) · **Sort** pull-down (shows the base key). The board adds a **group-by** segmented control (Project | Status).
 - **Filters** live in a popover from the Filter button (chips inside), not in the sidebar.
 - **Rules:** icon-only buttons have tooltips and `aria-label`s; a disabled button stays visible (a toolbar is not a menu; do not hide toolbar items, only dim them).

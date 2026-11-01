@@ -22,12 +22,13 @@ test('quickAddTask ignores non-Enter keys', function () {
 // focus-to-next-tabbable-element behavior — this is a single-purpose field
 // with no adjacent field to tab into, so leaving it should require a click
 // or Escape, not an incidental Tab press.
-test('quickAddTask swallows Tab, preventing default so focus stays put', function () {
+test('quickAddTask leaves Tab and Shift+Tab to the browser (a field must not be a keyboard dead end), keeping the draft', function () {
   const input = document.getElementById('quickAddInput');
   input.value = 'Still typing';
-  let prevented = false;
-  quickAddTask({ key: 'Tab', target: input, preventDefault(){ prevented = true; } });
-  assertTrue(prevented, 'Tab should be preventDefault-ed instead of left to the browser');
+  let prevented = 0;
+  quickAddTask({ key: 'Tab', target: input, preventDefault(){ prevented++; } });
+  quickAddTask({ key: 'Tab', shiftKey: true, target: input, preventDefault(){ prevented++; } });
+  assertEqual(prevented, 0, 'Tab and Shift+Tab move focus as in any field');
   assertEqual(input.value, 'Still typing', 'the draft text should be untouched');
 });
 
