@@ -8003,6 +8003,7 @@ function makeFindBar(cfg){
     key(e){
       if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); bar.close(); }
       else if(e.key==='Enter' && e.target.id===cfg.pre + 'FindInput'){ e.preventDefault(); bar.step(e.shiftKey ? -1 : 1); }
+      else if((e.key==='ArrowDown' || e.key==='ArrowUp') && !e.altKey && !e.metaKey && !e.ctrlKey && e.target.id===cfg.pre + 'FindInput'){ e.preventDefault(); bar.step(e.key==='ArrowDown' ? 1 : -1); }   // ↓ next match, ↑ previous (as in Chrome's find)
       else if(e.key==='Enter' && e.target.id===cfg.pre + 'ReplaceInput'){ e.preventDefault(); if(e.altKey || e.metaKey || e.ctrlKey) bar.replaceAll(); else bar.replaceOne(); }
     },
     withFocusKept(fn){                                               // an edit takes the focus into the editor; the bar's field gets it back
@@ -8135,7 +8136,16 @@ const noteFindBar = makeFindBar({
     CSS.highlights.set('note-find', new Highlight(...matches.map(m=>m.range)));
     if(cur>=0){ const h = new Highlight(matches[cur].range); h.priority = 1; CSS.highlights.set('note-find-cur', h); }
   },
-  reveal: m=>{ const e = m.range.startContainer.nodeType===1 ? m.range.startContainer : m.range.startContainer.parentElement; if(e && e.scrollIntoView) e.scrollIntoView({ block: 'center', inline: 'nearest' }); },
+  reveal: m=>{
+    // To the match itself, not to the block that holds it: scrolling the element left a match in a long code block or paragraph anywhere off screen.
+    const body = noteFindBody(), sc = body && body.closest('.note-scroll'), rg = m.range, r = rg.getBoundingClientRect();
+    if(!sc || (!r.width && !r.height)){ const e = rg.startContainer.nodeType===1 ? rg.startContainer : rg.startContainer.parentElement; if(e && e.scrollIntoView) e.scrollIntoView({ block: 'center', inline: 'nearest' }); return; }
+    for(let e = rg.startContainer.nodeType===1 ? rg.startContainer : rg.startContainer.parentElement; e && e!==sc; e = e.parentElement){     // a code block that scrolls sideways
+      if(e.scrollWidth > e.clientWidth + 1 && /auto|scroll/.test(getComputedStyle(e).overflowX)){ const c = e.getBoundingClientRect(); if(r.left < c.left + 20 || r.right > c.right - 20) e.scrollLeft += (r.left + r.width/2) - (c.left + c.width/2); }
+    }
+    const r2 = rg.getBoundingClientRect(), c = sc.getBoundingClientRect();
+    if(r2.top < c.top + 60 || r2.bottom > c.bottom - 60) sc.scrollTop += (r2.top + r2.height/2) - (c.top + c.height/2);     // out of sight (or under the bar): centre it; a match already in view stays put
+  },
   editOne: (m, rep)=>{
     const body = noteFindBody(); if(!body || !m.range.startContainer.isConnected) return false;
     const sc = body.closest('.note-scroll'), top = sc ? sc.scrollTop : 0, sel = window.getSelection();

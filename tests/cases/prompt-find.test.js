@@ -40,3 +40,18 @@ test('the find bar keeps one set of ids and handlers per editor', function(){
   assertTrue(typeof promptFindBar.openBar==='function' && typeof noteFindBar.openBar==='function');
   assertTrue(promptFindBar.state!==noteFindBar.state, 'each editor has its own state');
 });
+
+test('find bar: ArrowDown / ArrowUp in the find field go to the next / previous match and reveal it', function(){
+  var revealed = [], bar = makeFindBar({ pre: 'zz', name: 'zzBar', label: 'x', caret: function(){ return null; }, compute: function(q, o){ return findMatches('a b a c a', q, o); },
+    paint: function(){}, reveal: function(m){ revealed.push(m.s); }, readOnly: function(){ return true; }, editorOpen: function(){ return true; }, selection: function(){ return ''; } });
+  bar.state.open = true; bar.state.q = 'a'; bar.run(false);
+  assertEqual(bar.state.cur, 0);
+  var pd = 0, key = function(k, id, mods){ var e = { key: k, target: { id: id || 'zzFindInput' }, preventDefault: function(){ pd++; } }; for(var m in (mods || {})) e[m] = mods[m]; bar.key(e); };
+  key('ArrowDown'); assertEqual(bar.state.cur, 1); key('ArrowDown'); assertEqual(bar.state.cur, 2);
+  key('ArrowDown'); assertEqual(bar.state.cur, 0, 'it wraps round at the end');
+  key('ArrowUp'); assertEqual(bar.state.cur, 2, 'and back round at the start');
+  assertDeepEqual(revealed, [4, 8, 0, 8], 'every step reveals the match it lands on');
+  assertEqual(pd, 4, 'the arrow does not also move the caret in the field');
+  key('ArrowDown', 'zzFindInput', { metaKey: true }); assertEqual(bar.state.cur, 2, 'a modified arrow (⌘↓ = jump to the end of the field) is left alone');
+  key('ArrowDown', 'zzReplaceInput'); assertEqual(bar.state.cur, 2, 'the Replace field keeps its arrows');
+});
