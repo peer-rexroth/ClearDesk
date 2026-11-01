@@ -39,6 +39,10 @@ Chrome/Edge's menu → "Install ClearDesk…") to install it as a standalone app
 
 The app is plain static files, so any static host works. For Cloudflare Pages: connect the repo, leave the framework preset empty, set the build command to `./build-site.sh` and the output directory to `dist`. `_headers` (copied into `dist`) makes the page and service worker revalidate on every visit, so a new deploy shows up as the "new version" notice. Data lives in each browser per address, so a new address starts empty: Export on the old one, Import on the new one.
 
+## Releases
+
+Every push to `main` that changes the app builds the publishable folder (`./build-site.sh`), zips it and publishes a GitHub Release named after the date and commit (for example `2026.11.02-1a2b3c4`); the newest 30 are kept. The zip is the same folder Cloudflare serves: unzip it, serve it (`python3 -m http.server` inside it) and open it in Chrome or Edge to install the app. Tests are not run there; run `./tests/run.sh` before committing.
+
 ## No build step
 
 Everything — HTML, CSS, and JS — lives in the single `index.html` file.
