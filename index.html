@@ -12691,7 +12691,9 @@ async function currentVersionStamps(){                               // {loaded,
     return { loaded: BUILD_ID, server: String((await r.json()).id || '') };
   }
   if(loadedVersionStamp===null){ const info = await askLoadedStamp(); if(info && info.stamp) loadedVersionStamp = info.stamp; }
-  const server = versionStampOf((await fetch(location.pathname, { method: 'HEAD', cache: 'no-store' })).headers);
+  const head = await fetch('./', { method: 'HEAD', cache: 'no-store' });   // the app's home address, whatever name this page was opened under; an error reply is not a version
+  if(!head.ok) throw new Error('version check ' + head.status);
+  const server = versionStampOf(head.headers);
   if(loadedVersionStamp===null) loadedVersionStamp = server;
   return { loaded: loadedVersionStamp, server };
 }
