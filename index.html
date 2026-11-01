@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="ClearDesk">
-<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#1e1f24" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f5f6f9" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#26272c" media="(prefers-color-scheme: dark)">
 <title>ClearDesk</title>
 <meta name="description" content="A local-first workspace for tasks, notes and reusable prompt templates. Everything is stored on your own device; there are no accounts and nothing is sent to a server.">
 <meta property="og:title" content="ClearDesk — tasks, notes and prompts">
@@ -2585,7 +2585,7 @@ const ICONS = {
       <div class="help-main">
         <div class="help-toolbar">
           <h3 id="helpTitle">Getting started</h3>
-          <button type="button" class="hdr-link" onclick="closeAllModals();openShortcutsModal()" title="Press ? anywhere"><i class="fa-regular fa-keyboard"></i> Keyboard shortcuts</button>
+          <button type="button" class="hdr-link" onclick="closeAllModals();openShortcutsModal()" title="Press ? anywhere"><i class="fa-regular fa-keyboard"></i> Keyboard Shortcuts</button>
         </div>
       <div class="help-panes">
         <div class="help-pane" id="helpPane-search" role="region" tabindex="0" onkeydown="helpPaneKey(event)" aria-label="Search results" aria-live="polite" hidden></div>
@@ -2783,7 +2783,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-solid fa-arrow-up-from-bracket"></i><span>The <strong>Data</strong> menu (bottom of the sidebar) has <em>Export All Data</em> (a full backup), <em>Export Notes</em> and <em>Export Prompts</em> (just that part, as a file you can share), and one <em>Import…</em> that recognises what a file is: a notes or prompts file is merged straight in (anything already here is skipped, and the toast has <em>Undo</em>), a full backup asks whether to merge with or replace what you have (a replace downloads a backup of your current data first).</span></div>
           <div class="help-row"><i class="fa-solid fa-rotate-right"></i><span><strong>Updates</strong>: when a newer copy of ClearDesk is available, a bar says so and <em>Reload</em> installs it. <em>Help</em> → <em>Check for Updates</em> checks at any time and tells you either way. If you run ClearDesk from its local server and the server is off, the app opens from its saved copy; start the server and check again.</span></div>
-          <div class="help-row"><i class="fa-regular fa-clock"></i><span><strong>Daily file backup</strong>: once a file is linked (by its folder), the first change each day also writes a copy to a <code>Backup</code> folder next to it, named with the date. Copies are kept; nothing is deleted. If the Data menu shows <em>Enable daily file backup</em> or <em>Resume</em>, click it once to give the folder permission.</span></div>
+          <div class="help-row"><i class="fa-regular fa-clock"></i><span><strong>Daily file backup</strong>: once a file is linked (by its folder), the first change each day also writes a copy to a <code>Backups</code> folder next to it, named with the date. Copies are kept; nothing is deleted. If the Data menu shows <em>Enable daily file backup</em> or <em>Resume</em>, click it once to give the folder permission.</span></div>
           </div>
           <div class="help-tip"><strong>Nothing leaves your machine.</strong> There is no server, no account and no admin rights are needed. Link a file to be safe against clearing browser data.</div>
         </div>
@@ -2826,7 +2826,7 @@ const ICONS = {
         <div class="help-nav" id="scNav" role="tablist" aria-orientation="vertical" onkeydown="scTabKey(event)"></div>
       </div>
       <div class="help-main">
-        <div class="help-toolbar"><h3 id="scTitle">Keyboard shortcuts</h3></div>
+        <div class="help-toolbar"><h3 id="scTitle">Keyboard Shortcuts</h3></div>
         <div class="help-panes" id="scPanes"></div>
       </div>
     </div>
@@ -3511,7 +3511,8 @@ function tipIfTruncated(row){
 function abbreviateName(name, maxLen=20){ return name.length > maxLen ? name.slice(0, maxLen) + '…' : name; }
 function projById(id){ return projects.find(p=>p.id===id); }
 function colorOf(name){ return CAT_COLORS.find(c=>c.name===name) || CAT_COLORS[0]; }
-function todayStr(){ return new Date().toISOString().slice(0,10); }
+function dayStr(d){ return `${String(d.getFullYear()).padStart(4,'0')}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }   // the LOCAL calendar day (toISOString() is UTC: a day late or early around midnight)
+function todayStr(){ return dayStr(new Date()); }
 function fmtDate(iso){
   if(!iso) return '';
   const [y,m,d] = iso.split('-').map(Number);
@@ -3591,7 +3592,7 @@ function isThisWeek(dueDate){
   if(!dueDate) return false;
   const today = todayStr();
   const end = new Date(today+'T00:00:00'); end.setDate(end.getDate()+6);
-  return dueDate >= today && dueDate <= end.toISOString().slice(0,10);
+  return dueDate >= today && dueDate <= dayStr(end);
 }
 
 // ── Render ────────────────────────────────────────────────────────────────────
@@ -9459,7 +9460,7 @@ function exportPrompts(scope, id){
   flushPromptEdit();
   const data = buildPromptsExport(scope, id);
   if(!data){ showToast('There are no prompts to export', true); return; }
-  const day = new Date().toISOString().slice(0, 10), name = scope==='prompt' ? promptFileSlug((prompts.find(p=>p.id===id) || {}).name) : scope==='folder' ? promptFileSlug((promptFolderById(id) || {}).name) : '';
+  const day = todayStr(), name = scope==='prompt' ? promptFileSlug((prompts.find(p=>p.id===id) || {}).name) : scope==='folder' ? promptFileSlug((promptFolderById(id) || {}).name) : '';
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }), url = URL.createObjectURL(blob), a = document.createElement('a');
   a.href = url; a.download = `cleardesk-prompt${scope==='prompt' ? '' : 's'}-${name ? name + '-' : ''}${day}.json`; a.click(); URL.revokeObjectURL(url);
   showToast(`Exported ${data.prompts.length} prompt${data.prompts.length===1 ? '' : 's'}`);
@@ -11987,6 +11988,7 @@ function osPrefersDark(){ return !!(window.matchMedia && window.matchMedia('(pre
 function applyTheme(){
   currentTheme = themePref==='auto' ? (osPrefersDark() ? 'dark' : 'light') : themePref;
   document.documentElement.setAttribute('data-theme', currentTheme);
+  for(const m of document.querySelectorAll('meta[name="theme-color"]')) m.setAttribute('content', currentTheme==='dark' ? '#26272c' : '#f5f6f9');   // (both scheme metas follow the chosen theme, not only the system one)
 }
 function setThemeMode(mode){
   themePref = (mode==='light' || mode==='dark') ? mode : 'auto';
@@ -12042,7 +12044,7 @@ function downloadBackup(proj, tsk, filename, extra){
   a.click(); URL.revokeObjectURL(url);
 }
 function exportLibrary(){
-  downloadBackup(projects, tasks, `cleardesk-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
+  downloadBackup(projects, tasks, `cleardesk-${todayStr()}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
 }
 function triggerImport(){ document.getElementById('fileInput').click(); }
 // What a chosen .json file is: a prompts file (Export Prompts / Export Prompt / Export Folder) or a full backup (Export All Data).
@@ -12080,7 +12082,7 @@ function exportNotes(scope, id){
   flushNoteEdit();
   const data = buildNotesExport(scope, id);
   if(!data){ showToast('There are no notes to export', true); return; }
-  const day = new Date().toISOString().slice(0, 10), slug = t=>String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+  const day = todayStr(), slug = t=>String(t || '').replace(/[\\/:*?"<>|\u0000-\u001f]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
   const name = scope==='note' ? slug((notes.find(n=>n.id===id) || {}).title) : scope==='folder' ? slug((folderById(id) || {}).name) : '';
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
   a.download = `cleardesk-note${scope==='note' ? '' : 's'}-${name ? name + '-' : ''}${day}.json`;
@@ -12269,7 +12271,7 @@ function mergeData(data, opts){
 function applyImport(mode){
   if(!pendingImportData) return;
   if(mode==='replace'){
-    downloadBackup(projects, tasks, `cleardesk-backup-before-replace-${new Date().toISOString().slice(0,10)}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
+    downloadBackup(projects, tasks, `cleardesk-backup-before-replace-${todayStr()}.json`, {notes, noteFolders, prompts, promptFolders, promptGlobals, trashedTasks});
     projects = pendingImportData.projects || defaultProjects();
     tasks = pendingImportData.tasks || [];
     trashedTasks = pendingImportData.trashedTasks || []; purgedTaskIds = [];
@@ -12384,7 +12386,7 @@ async function _clearFileLink(){
   updateFileSyncUI(); updateFileBackupUI();
 }
 // Linking asks for the data file's FOLDER (one permission, like Milestone): the file lives inside it, and the same grant lets the
-// daily backup write a dated copy into its "Backup" subfolder. The old file-picker flow is gone; files linked that way keep working
+// daily backup write a dated copy into its "Backups" subfolder. The old file-picker flow is gone; files linked that way keep working
 // and gain backups once their folder is linked (Data menu -> Daily file backup).
 async function pickDataFolder(){
   if(!window.showDirectoryPicker){ showToast('File linking requires Chrome or Edge', true); return null; }
@@ -12486,7 +12488,7 @@ async function reconnectFile(){
   try{
     if(dirHandle) await dirHandle.requestPermission({mode:'readwrite'});       // the folder's grant covers the file and the Backups subfolder
     const perm = await fileHandle.requestPermission({mode:'readwrite'});
-    if(perm!=='granted'){ showToast('Permission denied', true); return; }
+    if(perm!=='granted'){ showToast('Permission not granted', true); return; }
     const text = await (await fileHandle.getFile()).text();
     const data = JSON.parse(text);
     if(data.tasks && data.projects){
@@ -12565,7 +12567,7 @@ function updateFileSyncUI(){
   }).catch(()=>{ if(el) fadeSwapHTML(el, fileSyncChipHtml('unlinked')); });
 }
 // ── Daily file backup ─────────────────────────────────────────────────────────
-// Modelled on Milestone / Pulse: a dated copy of the data goes into a "Backup" subfolder of the LINKED folder, once a day, kept forever.
+// Modelled on Milestone / Pulse: a dated copy of the data goes into a "Backups" subfolder of the LINKED folder, once a day, kept forever.
 // Best-effort and silent (the save that triggered it already succeeded); never prompts. If today's file is already on disk (another
 // tab or device wrote it) it is left alone: the first writer each day wins.
 const FILE_BACKUP_SUB = 'Backups', FILE_BACKUP_RE = /^.+-\d{4}-\d{2}-\d{2}\.json$/;
