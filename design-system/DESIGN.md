@@ -245,6 +245,7 @@ One shape per job, so the same kind of thing always looks the same:
 
 - **Class map for a port** (the two apps name the same parts differently; the look is what must match): `.row-menu` / `.row-menu-item` (ClearDesk) = `.dropdown-menu` / `.dropdown-item` (Milestone); `.split-btn-menu` = a `.dropdown-menu` opened from a button. Menus, dialogs, toasts and the update banner all use the glass surface; layers: float sidebar 140, dialog scrim 200, toast 300, menu 400.
 - **"Today"** is the local calendar day (`todayStr()` / `dayStr(d)`), never `toISOString().slice(0, 10)`, which is UTC (a test scans for it).
+- **Base size:** 15px for the chrome (sidebar, menus, dialogs, toast, banners). Dense data (Milestone's task grid, Gantt and Resource Sheet) is the one deliberate exception and uses the `--fs-12` / `--fs-13` steps.
 
 ### 5.6 Feedback
 

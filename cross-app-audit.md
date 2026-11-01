@@ -11,6 +11,30 @@ Two notes on the brief:
 
 ---
 
+## Status (2026-11-02)
+
+All rows are built, decided or closed; the verdicts in the table below are as audited. Both suites pass (ClearDesk 487, Milestone 130 / 130) and `tests/browser-checks.py` passes 8 / 8.
+
+| Rows | Outcome |
+|---|---|
+| X-01, X-02, X-03, X-04 | Built in Milestone (dark accent, flat `--glass-accent`, `--shadow` meaning, greens). |
+| X-05, X-17, X-18, X-19 | Deliberate, unchanged. |
+| X-06 | Resolved by behaviour, not tokens: the inactive selection band measures the same in both apps; Milestone's inactive row kept white text on the grey band (`.grid-row.selected { color }` was not guarded), now fixed. Milestone keeps its own selection tokens. |
+| X-07 | Built: the six legacy aliases are gone (366 uses replaced), in the app, `tokens.css`, DESIGN.md and tests. |
+| X-08, X-11 | Built (15 px base text; glass menus). Line-height left at its old value: 1.5 made menu items 37 px instead of 33. |
+| X-09 | Partly built: dialog scrim 200, toast 300, menu 400 (`#cfAddMenu` moved with them). The remaining odd values (M-19) are unchanged. |
+| X-10 | The five literal `.12s` now use `var(--dur-fast)`. The 0.2 s on ClearDesk's sidebar and dialog box is a generic rule (W-03), not a design value, so Milestone did not copy it. |
+| X-12 | Built: class map in both DESIGN.md files. |
+| X-13, X-14, X-15, X-16, X-22, X-24, X-26, X-32 | Built in Milestone; toast and update banner now measure identical to ClearDesk's. |
+| X-20, X-21, X-23, X-27, X-29 | Built in ClearDesk. |
+| X-25 | No change needed: every call passes a title ("Confirm" is never shown). Two lower-case titles ("Unlink file", "Delete plan") were set to title style. |
+| X-28 | Built in both (`#f5f6f9` / `#26272c`; ClearDesk now also updates the metas when the theme is forced). |
+| X-30 | Built: `tests/browser-checks.py` in ClearDesk; Milestone's rules test gained the `transition: all`, var-fallback and undefined-token scans, and an exact list of colour literals instead of the cap of 36. |
+| X-31 | Built: sync line and the shared rules in Milestone's DESIGN.md. |
+| Extra | Dialogs in Milestone also get the glass blur and rim (same cause as X-11: the flat content scope). |
+
+---
+
 ## 1. Summary
 
 **How aligned.** Closer than two hand-built apps usually are, and closer in the data than in the feel. The plumbing is almost identical (`_headers`, `build-site.sh`, `robots.txt` byte-identical; `wrangler.jsonc`, `release.yml` and `sw.js` differ only by name and comments). The 116 icon names the apps share are drawn identically (string compare of every drawing). The colour, radius, spacing and motion tokens agree on name and, with five exceptions, on value. The two apps still feel different because of a handful of things the eye reads before any token: **body text is 15 px in ClearDesk and 14 px in Milestone, menus are glass in one and flat in the other, the toast and the update banner are built differently, and the primary colour is a different blue in dark with a gradient on the buttons.** Nothing here is broken; all of it is cheap except the font-size change.
