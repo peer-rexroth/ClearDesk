@@ -31,6 +31,8 @@ All rows are built, decided or closed; the verdicts in the table below are as au
 | X-28 | Built in both (`#f5f6f9` / `#26272c`; ClearDesk now also updates the metas when the theme is forced). |
 | X-30 | Built: `tests/browser-checks.py` in ClearDesk; Milestone's rules test gained the `transition: all`, var-fallback and undefined-token scans, and an exact list of colour literals instead of the cap of 36. |
 | X-31 | Built: sync line and the shared rules in Milestone's DESIGN.md. |
+| Extra | Help window in Milestone matches ClearDesk's: uppercase captions, "Search" placeholder, 36 px field, 236 px rail, 12 px submenu chevrons. Both Help and Shortcuts now open with focus in the search box (Milestone's M-05 behaviour, built in ClearDesk; DESIGN.md updated in both). |
+| Extra | `dayStr(d)` added to Milestone; ClearDesk's `todayStr()` no longer uses UTC. Two Milestone tests that built dates in UTC were date-proofed. |
 | Extra | Dialogs in Milestone also get the glass blur and rim (same cause as X-11: the flat content scope). |
 
 ---
