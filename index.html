@@ -400,8 +400,8 @@ const ICONS = {
   .task-subtask-row .mini-check.checked, .drawer .subtask-row .sub-check.checked { box-shadow: 0 0 0 2.5px var(--green-bg); }
   .task-subtask-row .mini-check i, .drawer .subtask-row .sub-check i { font-size: var(--gl-8); }
   .task-subtask-add-row::before, .add-row::before { border-radius: 50% !important; }
-  #taskList .task-subtask-row .subtask-toggle:has(.fa-plus) { opacity: 0; }
-  #taskList .task-subtask-row:is(:hover, :focus-within) .subtask-toggle:has(.fa-plus) { opacity: 1; }
+  #taskList .task-subtask-row .subtask-toggle.is-add { opacity: 0; }
+  #taskList .task-subtask-row:is(:hover, :focus-within) .subtask-toggle.is-add { opacity: 1; }
   .task-subtask-row span { cursor: text; }
   /* only the text itself is the rename target, as in the list: the span must not stretch across the row, or a double-click on the
      blank part of a subtask row would rename instead of opening the panel (the chevron takes the free space instead) */
@@ -841,11 +841,11 @@ const ICONS = {
 
   /* With the panel open the list loses ~420px: drop the Project column (it is
      in the panel) and tighten the rest so Priority/Status/Due stay visible. */
-  .layout:has(.drawer.open) .task-list-header,
-  .layout:has(.drawer.open) .task-row { grid-template-columns: 44px minmax(150px,1fr) 0 96px 110px 90px; column-gap: 8px; min-width: 560px; }
-  .layout:has(.drawer.open) .task-row > .task-cell:not(.priority):not(.status):not(.due),
-  .layout:has(.drawer.open) .task-list-header > :nth-child(3) { visibility: hidden; overflow: hidden; }
-  body:has(.drawer.open) .toast { right: auto; left: 24px; }
+  :root.drawer-open .layout .task-list-header,
+  :root.drawer-open .layout .task-row { grid-template-columns: 44px minmax(150px,1fr) 0 96px 110px 90px; column-gap: 8px; min-width: 560px; }
+  :root.drawer-open .layout .task-row > .task-cell:not(.priority):not(.status):not(.due),
+  :root.drawer-open .layout .task-list-header > :nth-child(3) { visibility: hidden; overflow: hidden; }
+  html.drawer-open body .toast { right: auto; left: 24px; }
 
   .file-chip.warn { color: var(--amber-text); border-color: var(--amber-text); }
   .file-chip.ok i { color: var(--green-text); }
@@ -1103,21 +1103,21 @@ const ICONS = {
      state the band is ONE opaque grey, the page colour with the text colour mixed in, so it measures like a list row. */
   :root { --sel-grey-mix: 14%; }
   html[data-theme="dark"] { --sel-grey-mix: 16%; }
-  html.sel-inactive :is(.task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks)::before, .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .board-card-top) { background: color-mix(in srgb, var(--text) var(--sel-grey-mix), var(--bg)); }
+  html.sel-inactive :is(.task-row:is(.kbd-selected, .bulk-selected).has-subs::before, .board-card:is(.kbd-selected, .bulk-selected).has-subs > .board-card-top) { background: color-mix(in srgb, var(--text) var(--sel-grey-mix), var(--bg)); }
   /* the tinted body */
-  html:not(.sel-inactive) .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
-  html[data-scheme="glass"]:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-tint); border-color: transparent; }
+  html:not(.sel-inactive) .task-row:is(.kbd-selected, .bulk-selected).has-subs,
+  html[data-scheme="glass"]:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected).has-subs { background: var(--sel-sub-tint); border-color: transparent; }
   /* on the grey selection the pills keep their hue but sit on an opaque plate (their own text colour at 15% / 20% over the page colour): their translucent tints over the grey fill dropped their text to 3.1-4.0:1, against 4.7:1 or more on an unselected row */
   html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .badge:not(.cell-pop .badge) { background: color-mix(in srgb, currentColor var(--pill-plate), var(--bg)) !important; }
-  html.sel-inactive .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks),
-  html.sel-inactive .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) { background: var(--sel-sub-grey); }
+  html.sel-inactive .task-row:is(.kbd-selected, .bulk-selected).has-subs,
+  html.sel-inactive .board-card:is(.kbd-selected, .bulk-selected).has-subs { background: var(--sel-sub-grey); }
   /* the solid band on a list row: a grid item across the whole first grid row, out to the row's edges */
-  .task-row:is(.kbd-selected, .bulk-selected):has(> .task-subtasks)::before { content: ""; grid-area: 1 / 1 / 2 / -1; align-self: stretch; margin: -5px -11px -3px; border-radius: var(--r-s) var(--r-s) 0 0; background: var(--sel-band); pointer-events: none; }
+  .task-row:is(.kbd-selected, .bulk-selected).has-subs::before { content: ""; grid-area: 1 / 1 / 2 / -1; align-self: stretch; margin: -5px -11px -3px; border-radius: var(--r-s) var(--r-s) 0 0; background: var(--sel-band); pointer-events: none; }
   /* ... and on a board tile: the top part (checkbox, title, secondary line, tags) */
-  .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .board-card-top { background: var(--sel-band); margin: -9px -11px 0; padding: 9px 11px 8px; border-radius: calc(var(--r-m) - 1px) calc(var(--r-m) - 1px) 0 0; }
+  .board-card:is(.kbd-selected, .bulk-selected).has-subs > .board-card-top { background: var(--sel-band); margin: -9px -11px 0; padding: 9px 11px 8px; border-radius: calc(var(--r-m) - 1px) calc(var(--r-m) - 1px) 0 0; }
   /* a tile's ⋯ button sits in the tinted part: it keeps its normal capsule look there */
-  .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); color: var(--ink); background: var(--bg-3); border-color: var(--ink-border); }
-  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):has(> .task-subtasks) > .row-actions .icon-btn:hover { background: var(--pressed); color: var(--ink); }
+  .board-card:is(.kbd-selected, .bulk-selected).has-subs > .row-actions { --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); color: var(--ink); background: var(--bg-3); border-color: var(--ink-border); }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected).has-subs > .row-actions .icon-btn:hover { background: var(--pressed); color: var(--ink); }
   :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtasks .mini-check:not(.checked) { background: transparent; }   /* an empty circle is see-through on the tint (no dark disc in dark mode) */
   /* inside the tint everything has its normal colours again */
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) .task-subtasks { color: var(--ink); --text: var(--ink); --text-2: var(--ink-2); --text-3: var(--ink-3); --border: var(--ink-border); --border-2: var(--ink-border-2); }
@@ -1202,8 +1202,8 @@ const ICONS = {
   .drawer .subtask-row > .sub-check { margin-left: 16px; }
   .drawer .subtask-row > .sub-step-toggle { width: 16px; height: 16px; padding: 0; font-size: var(--gl-10); text-align: center; }
   .drawer .subtask-row > .sub-step-toggle + .sub-check { margin-left: 0; }
-  .drawer .subtask-row .sub-step-toggle:has(.fa-plus) { opacity: 0; }
-  .drawer .subtask-row:is(:hover, :focus-within) .sub-step-toggle:has(.fa-plus) { opacity: 1; }
+  .drawer .subtask-row .sub-step-toggle.is-add { opacity: 0; }
+  .drawer .subtask-row:is(:hover, :focus-within) .sub-step-toggle.is-add { opacity: 1; }
   .drawer .subtask-row .sub-text { font-size: var(--fs-14); color: var(--text-2); flex: 0 1 auto; }   /* controls follow the text, as in the list, instead of hugging the far edge */
   .drawer .subtask-row.done .sub-text { color: var(--text-3); }
   .drawer :is(.task-subtask-add-row, .add-row)::before { width: 16px; height: 16px; }
@@ -1258,7 +1258,7 @@ const ICONS = {
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input):is(:focus, :focus-visible) { border: 0 !important; box-shadow: none !important; outline: none !important; }
   html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) .task-title-input { background: var(--sel-fill); }
   .task-subtask-text-input { max-width: 420px; }   /* a rename field should be a field, not a bar across the whole row */
-  html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):not(:has(> .task-subtasks)) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }   /* the on-blue look; a tile whose button sits on the light subtask tint keeps the normal one (next rules) */
+  html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):not(.has-subs) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }   /* the on-blue look; a tile whose button sits on the light subtask tint keeps the normal one (next rules) */
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected) .row-actions .icon-btn { color: var(--on-accent); }   /* the ⋯ glyph on the blue capsule was 2.9:1 at white .8 */
   html.sel-inactive :is(.task-row.kbd-selected, .task-row.bulk-selected) .badge-project { color: var(--text); }   /* grey row: text-2 over the grey fill was 4.4:1 in dark */
   /* with several rows selected the toolbar and the right-click menu act on all of them, so the per-row capsule (which would act on one row) is hidden on the selected rows */
@@ -1275,7 +1275,7 @@ const ICONS = {
   .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
   /* the capsule is centred on the task-main cell, which is 1px off the solid band's centre: plain row 1px high, row with subtasks (band 5px up / 3px down) 1px low */
   .task-row > .task-main > .row-actions { top: calc(50% + 1px); }
-  .task-row:has(> .task-subtasks) > .task-main > .row-actions { top: calc(50% - 1px); }
+  .task-row.has-subs > .task-main > .row-actions { top: calc(50% - 1px); }
   .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; padding: 0; width: 26px; height: 26px; border-radius: 50%; justify-content: center; gap: 0; }   /* one round button: a circle, not a capsule with a second shape inside it */
   .board-card > .row-actions .icon-btn { width: 100%; height: 100%; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }   /* just the more button, so little can be covered */   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
   /* the tile: title first, one quiet secondary line, then the tags */
@@ -1438,8 +1438,8 @@ const ICONS = {
     #notePrintArea { display: block !important; padding: 0; }
   }
   .note-section i { margin-right: 4px; font-size: var(--ico-12); }
-  .note-section:has(.fa-thumbtack) i { color: var(--blue-text); }   /* --accent was 2.9:1 on the dark list */
-  .note-section:has(.fa-star) i { color: var(--amber-text); }
+  .note-section.sec-pin i { color: var(--blue-text); }   /* --accent was 2.9:1 on the dark list */
+  .note-section.sec-fav i { color: var(--amber-text); }
   .note-section { padding: 10px 12px 4px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
   .notes-list-banner { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 2px 4px 6px; padding: 8px 10px; border-radius: var(--r-m); font-size: var(--fs-12); color: var(--text-2); background: color-mix(in srgb, var(--text) 5%, transparent); }
   .note-trash-bar { display: flex; align-items: center; gap: 10px; margin: 0 0 12px; padding: 8px 12px; border-radius: var(--r-m); font-size: var(--fs-12); color: var(--text-2); background: color-mix(in srgb, var(--red-text) 10%, transparent); }
@@ -1753,7 +1753,7 @@ const ICONS = {
   .pr-section-label { font-size: var(--fs-12); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin: 24px 0 8px; display: flex; align-items: center; justify-content: space-between; }
   .pr-section-label .pr-lock-hint { text-transform: none; letter-spacing: 0; font-weight: 500; }
   .pr-sub { flex: 1 1 0; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .note-row-sub:has(.pr-sub) { display: flex; min-width: 0; }
+  .note-row-sub.has-pr-sub { display: flex; min-width: 0; }
   /* the template: a transparent field laid over a layer that shows the same text with its placeholders tinted (the layer sets the height) */
   .pr-tpl { position: relative; border-radius: var(--r-s); background: var(--bg-2); }
   .pr-tpl .note-code-copy { top: 5px; right: 5px; }
@@ -3804,7 +3804,7 @@ function renderList(){
     if(t.repeat && t.repeat!=='none'){
       dueCell += `<i class="fa-solid fa-repeat due-repeat-ico" title="Repeats: ${esc(repeatSummary(t))}"></i>`;
     }
-    return `<div class="task-row ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
+    return `<div class="task-row ${t.status==='done'?'done':''} ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?'has-subs':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
       <div class="task-check-cell">
         ${subTotal>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleTaskCollapse('${t.id}');this.blur()" title="${collapsedTaskIds.has(t.id)?'Expand':'Collapse'} subtasks"><i class="fa-solid fa-chevron-${collapsedTaskIds.has(t.id)?'right':'down'}"></i></button>`:'<span class="subtask-toggle"></span>'}
         <div class="task-checkbox ${t.status==='done'?'checked':''} ${t.id===justCompletedTaskId?'pop':''}" role="checkbox" aria-checked="${t.status==='done'}" aria-label="Mark task done" tabindex="0" onclick="event.stopPropagation();toggleTaskDone('${t.id}')"><i class="fa-solid fa-check"></i></div>
@@ -3829,7 +3829,7 @@ function renderList(){
         <div class="task-subtask-row ${s.done?'done':''}" draggable="true"
           ondragstart="handleHierarchyDragStart(event,'subtask','${s.id}')" ondragend="handleHierarchyDragEnd(event)"
           ondragover="handleHierarchyDragOver(event,'subtask','${s.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','subtask','${s.id}')">
-          <button class="icon-btn subtask-toggle" onclick="event.stopPropagation();${(s.subtasks||[]).length>0?`toggleSubCollapse('${s.id}')`:`openAddStepForSubtask('${t.id}','${s.id}')`};this.blur()" title="${(s.subtasks||[]).length>0?`${collapsedSubIds.has(s.id)?'Expand':'Collapse'} steps`:'Add steps'}"><i class="fa-solid fa-${(s.subtasks||[]).length>0?`chevron-${collapsedSubIds.has(s.id)?'right':'down'}`:'plus'}"></i></button>
+          <button class="icon-btn subtask-toggle${(s.subtasks||[]).length>0?'':' is-add'}" onclick="event.stopPropagation();${(s.subtasks||[]).length>0?`toggleSubCollapse('${s.id}')`:`openAddStepForSubtask('${t.id}','${s.id}')`};this.blur()" title="${(s.subtasks||[]).length>0?`${collapsedSubIds.has(s.id)?'Expand':'Collapse'} steps`:'Add steps'}"><i class="fa-solid fa-${(s.subtasks||[]).length>0?`chevron-${collapsedSubIds.has(s.id)?'right':'down'}`:'plus'}"></i></button>
           <div class="mini-check ${s.done?'checked':''} ${s.id===justCompletedSubId?'pop':''}" role="checkbox" aria-checked="${s.done}" aria-label="Mark subtask done" tabindex="0" onclick="event.stopPropagation();toggleSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-check"></i></div>
           ${renamingSubtask && renamingSubtask.taskId===t.id && renamingSubtask.subId===s.id
             ? `<input spellcheck="true" type="text" class="task-subtask-text-input" id="renameSubtaskInputList" value="${esc(s.text)}" onclick="event.stopPropagation()" onblur="commitRenameSubtask('${t.id}','${s.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
@@ -3841,7 +3841,7 @@ function renderList(){
           <div class="task-subtask-row ${ss.done?'done':''}" draggable="true"
             ondragstart="handleHierarchyDragStart(event,'step','${s.id}','${ss.id}')" ondragend="handleHierarchyDragEnd(event)"
             ondragover="handleHierarchyDragOver(event,'step','${s.id}','${ss.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','step','${s.id}','${ss.id}')">
-            <button class="icon-btn subtask-toggle" onclick="event.stopPropagation();${(ss.subtasks||[]).length>0?`toggleSubSubCollapse('${ss.id}')`:`openAddSubStepForStep('${t.id}','${s.id}','${ss.id}')`};this.blur()" title="${(ss.subtasks||[]).length>0?`${collapsedSubSubIds.has(ss.id)?'Expand':'Collapse'} sub-steps`:'Add sub-steps'}"><i class="fa-solid fa-${(ss.subtasks||[]).length>0?`chevron-${collapsedSubSubIds.has(ss.id)?'right':'down'}`:'plus'}"></i></button>
+            <button class="icon-btn subtask-toggle${(ss.subtasks||[]).length>0?'':' is-add'}" onclick="event.stopPropagation();${(ss.subtasks||[]).length>0?`toggleSubSubCollapse('${ss.id}')`:`openAddSubStepForStep('${t.id}','${s.id}','${ss.id}')`};this.blur()" title="${(ss.subtasks||[]).length>0?`${collapsedSubSubIds.has(ss.id)?'Expand':'Collapse'} sub-steps`:'Add sub-steps'}"><i class="fa-solid fa-${(ss.subtasks||[]).length>0?`chevron-${collapsedSubSubIds.has(ss.id)?'right':'down'}`:'plus'}"></i></button>
             <div class="mini-check ${ss.done?'checked':''} ${ss.id===justCompletedSubSubId?'pop':''}" role="checkbox" aria-checked="${ss.done}" aria-label="Mark subtask done" tabindex="0" onclick="event.stopPropagation();toggleSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-check"></i></div>
             ${renamingSubSubtask && renamingSubSubtask.taskId===t.id && renamingSubSubtask.subId===s.id && renamingSubSubtask.subSubId===ss.id
               ? `<input spellcheck="true" type="text" class="task-subtask-text-input" id="renameSubSubtaskInputList" value="${esc(ss.text)}" onclick="event.stopPropagation()" onblur="commitRenameSubSubtask('${t.id}','${s.id}','${ss.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
@@ -3890,7 +3890,7 @@ function boardCardHtml(t){
   }
   if(t.repeat && t.repeat!=='none') sec.push(`<i class="fa-solid fa-repeat sec-repeat" title="Repeats: ${esc(repeatSummary(t))}"></i>`);
   const tagChips = (t.tags||[]).map(id=>{ const tg=tagById(id); if(!tg) return ''; const tc=colorOf(tg.color); return `<span class="badge badge-tag" style="background:${tc.bg};color:${tc.text}">${esc(tg.label)}</span>`; }).join('');
-  return `<div class="board-card ${t.status==='done'?'done':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" draggable="true"
+  return `<div class="board-card ${t.status==='done'?'done':''} ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?'has-subs':''} ${t.id===kbdSelectedTaskId?'kbd-selected':''} ${selectedTaskIds.has(t.id)?'bulk-selected':''}" data-id="${t.id}" draggable="true"
       ondragstart="handleCardDragStart(event,'${t.id}')" ondragend="handleCardDragEnd(event)"
       onclick="handleRowClick(event,'${t.id}')" ondblclick="openTask('${t.id}')" oncontextmenu="openRowMenu(event,'${t.id}')">
     <div class="board-card-top">
@@ -4573,9 +4573,9 @@ function bulkDelete(idsArg){
 function renderDrawer(){
   const drawer = document.getElementById('drawer');
   const t = activeTaskId ? tasks.find(x=>x.id===activeTaskId) : null;
-  if(!t){ drawer.classList.remove('open'); drawer.innerHTML=''; return; }
+  if(!t){ drawer.classList.remove('open'); document.documentElement.classList.remove('drawer-open'); drawer.innerHTML=''; return; }
 
-  drawer.classList.add('open');
+  drawer.classList.add('open'); document.documentElement.classList.add('drawer-open');   // CSS reads this instead of :has(.drawer.open): :has() on a page-wide ancestor re-checks every row on each class change
 
   const projOptions = visibleProjects().map(p=>`<option value="${p.id}" ${p.id===t.projectId?'selected':''}${p.name.length>15?` title="${esc(p.name)}"`:''}>${esc(abbreviateName(p.name, 15))}</option>`).join('');
   const statusOptions = STATUSES.map(s=>`<option value="${s.id}" ${s.id===t.status?'selected':''}>${esc(s.label)}</option>`).join('');
@@ -4629,7 +4629,7 @@ function renderDrawer(){
             ondragstart="handleHierarchyDragStart(event,'subtask','${s.id}')" ondragend="handleHierarchyDragEnd(event)"
             ondragover="handleHierarchyDragOver(event,'subtask','${s.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','subtask','${s.id}')">
             <i class="fa-solid fa-grip-vertical sub-drag-handle"></i>
-            <button class="icon-btn sub-step-toggle" onclick="toggleDrawerStepsPanel('${s.id}');this.blur()" title="${stepsOpen?'Hide':(stepCount>0?'Show':'Add')} steps"><i class="fa-solid fa-${toggleIcon}"></i></button>
+            <button class="icon-btn sub-step-toggle${toggleIcon==='plus'?' is-add':''}" onclick="toggleDrawerStepsPanel('${s.id}');this.blur()" title="${stepsOpen?'Hide':(stepCount>0?'Show':'Add')} steps"><i class="fa-solid fa-${toggleIcon}"></i></button>
             <div class="sub-check ${s.done?'checked':''} ${s.id===justCompletedSubId?'pop':''}" role="checkbox" aria-checked="${s.done}" aria-label="Mark subtask done" tabindex="0" onclick="toggleSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-check"></i></div>
             ${renamingSubtask && renamingSubtask.taskId===t.id && renamingSubtask.subId===s.id
               ? `<input spellcheck="true" type="text" class="sub-text-input" id="renameSubtaskInputDrawer" value="${esc(s.text)}" onblur="commitRenameSubtask('${t.id}','${s.id}', this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
@@ -4648,7 +4648,7 @@ function renderDrawer(){
                 ondragstart="handleHierarchyDragStart(event,'step','${s.id}','${ss.id}')" ondragend="handleHierarchyDragEnd(event)"
                 ondragover="handleHierarchyDragOver(event,'step','${s.id}','${ss.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','step','${s.id}','${ss.id}')">
                 <i class="fa-solid fa-grip-vertical sub-drag-handle"></i>
-                <button class="icon-btn sub-step-toggle" onclick="toggleDrawerSubStepsPanel('${ss.id}');this.blur()" title="${subStepsOpen?'Hide':(subStepCount>0?'Show':'Add')} sub-steps"><i class="fa-solid fa-${subToggleIcon}"></i></button>
+                <button class="icon-btn sub-step-toggle${subToggleIcon==='plus'?' is-add':''}" onclick="toggleDrawerSubStepsPanel('${ss.id}');this.blur()" title="${subStepsOpen?'Hide':(subStepCount>0?'Show':'Add')} sub-steps"><i class="fa-solid fa-${subToggleIcon}"></i></button>
                 <div class="sub-check ${ss.done?'checked':''} ${ss.id===justCompletedSubSubId?'pop':''}" role="checkbox" aria-checked="${ss.done}" aria-label="Mark subtask done" tabindex="0" onclick="toggleSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-check"></i></div>
                 ${renamingSubSubtask && renamingSubSubtask.taskId===t.id && renamingSubSubtask.subId===s.id && renamingSubSubtask.subSubId===ss.id
                   ? `<input spellcheck="true" type="text" class="sub-text-input" id="renameSubSubtaskInputDrawer" value="${esc(ss.text)}" onblur="commitRenameSubSubtask('${t.id}','${s.id}','${ss.id}', this.value)" onkeydown="if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
@@ -5053,7 +5053,7 @@ function renderTaskTrash(){
     const sel = t.id===trashSelectedId, proj = projById(t.projectId), d = trashDaysLeft(t);
     return `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="0" data-id="${t.id}" onclick="selectTrashTask('${t.id}')" onkeydown="trashRowKey(event,'${t.id}')" oncontextmenu="openTaskTrashMenu(event,'${t.id}')">
       <div class="note-row-title">${esc(t.title || 'Untitled')}</div>
-      <div class="note-row-sub"><span class="note-row-date pr-sub">${esc(proj ? proj.name : 'Inbox')} · deleted ${esc(new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}))} · ${d} day${d===1?'':'s'} left</span></div>
+      <div class="note-row-sub has-pr-sub"><span class="note-row-date pr-sub">${esc(proj ? proj.name : 'Inbox')} · deleted ${esc(new Date(t.deletedAt).toLocaleDateString(undefined,{month:'short',day:'numeric'}))} · ${d} day${d===1?'':'s'} left</span></div>
     </div>`;
   }).join('');
 }
@@ -7397,7 +7397,7 @@ function renderNotesList(vis){
   const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted notes are removed after ${NOTE_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyTrash()">Delete All</button></div>` : '';
   list.innerHTML = banner + vis.map(n=>{
     const sel = n.id===selectedNoteId, sec = anyPinned ? (n.pinned ? 'Pinned' : 'Notes') : '';
-    const head = sec && sec!==seen ? `<div class="note-section">${sec==='Pinned' ? '<i class="fa-solid fa-thumbtack"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
+    const head = sec && sec!==seen ? `<div class="note-section${sec==='Pinned' ? ' sec-pin' : ''}">${sec==='Pinned' ? '<i class="fa-solid fa-thumbtack"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
     return head + `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked || inTrash ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
       <div class="note-row-title"><span class="note-row-name">${esc(n.title || 'New note')}</span>${n.pinned || n.locked ? `<span class="note-row-marks">${n.pinned && !inTrash ? '<i class="fa-solid fa-thumbtack note-row-pin" title="Pinned"></i>' : ''}${n.locked ? '<i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</span>` : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? n.deletedAt : noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span></div>
@@ -8709,7 +8709,7 @@ function renderPromptsList(vis){
   let seen = '';
   list.innerHTML = banner + vis.map(p=>{
     const sel = p.id===selectedPromptId, sec = anyFav ? (p.favorite ? 'Favorites' : 'Prompts') : '';
-    const head = sec && sec!==seen ? `<div class="note-section">${sec==='Favorites' ? '<i class="fa-solid fa-star"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
+    const head = sec && sec!==seen ? `<div class="note-section${sec==='Favorites' ? ' sec-fav' : ''}">${sec==='Favorites' ? '<i class="fa-solid fa-star"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
     return head + `<div class="note-row ${sel ? 'selected' : ''}" role="option" aria-selected="${sel}" tabindex="${sel ? 0 : -1}" data-id="${p.id}" onclick="selectPrompt('${p.id}')" onkeydown="promptRowKey(event,'${p.id}')" oncontextmenu="openPromptMenu(event,'${p.id}')" draggable="true" ondragstart="draggedPromptId='${p.id}';event.dataTransfer.effectAllowed='move'" ondragend="draggedPromptId=null">
       <div class="note-row-title"><span class="note-row-name">${esc(promptTitle(p))}</span>${p.favorite || p.locked || p.id===promptCompareId ? `<span class="note-row-marks">${p.id===promptCompareId ? '<i class="fa-solid fa-diff note-row-cmp" title="Selected for Compare"></i>' : ''}${p.favorite ? '<i class="fa-solid fa-star note-row-star" title="Favorite"></i>' : ''}${p.locked ? '<i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</span>` : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? p.deletedAt : promptSortKey==='created' ? p.createdAt : p.updatedAt))}</span></div>
