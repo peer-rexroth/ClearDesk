@@ -11549,8 +11549,8 @@ let helpTab = 'start';   // the topic last read (this session): the dialog reope
 let helpSearching = false;
 function openHelpModal(tab){
   clearHelpSearch(); setHelpTab(tab || helpTab); document.getElementById('helpModalBg').classList.add('open');
-  // keyboard users land on the topic list (the dialog fades in, so wait a tick: a hidden element can't take focus)
-  if(typeof setTimeout==='function') setTimeout(()=>{ document.getElementById('helpTab-' + helpTab)?.focus(); }, 30);
+  // the search box takes focus (the dialog fades in, so wait a tick: a hidden element can't take focus)
+  if(typeof setTimeout==='function') setTimeout(()=>{ document.getElementById('helpSearch')?.focus(); }, 30);
 }
 function setHelpTitle(t){ const h = document.getElementById('helpTitle'); if(h) h.textContent = t; }
 function focusHelpPane(){ const p = document.querySelector('#helpModalBg .help-pane:not([hidden])'); if(p && p.focus) p.focus(); }
@@ -11613,7 +11613,7 @@ function helpTabKey(e){   // arrow keys / Home / End move between the topics, li
 function openShortcutsModal(){
   renderShortcutsDialog(); clearScSearch(); setScTab(scTab);
   document.getElementById('shortcutsModalBg').classList.add('open');
-  if(typeof setTimeout==='function') setTimeout(()=>{ focusScTab(); }, 30);
+  if(typeof setTimeout==='function') setTimeout(()=>{ document.getElementById('scSearch')?.focus(); }, 30);
 }
 function openAboutModal(){ document.getElementById('aboutModalBg').classList.add('open'); }
 function openFileSyncModal(reconnectHandle){

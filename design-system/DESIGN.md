@@ -312,7 +312,7 @@ An alert can open **over** a sheet (it stacks at a higher z-index and closes on 
 - Left: a **tinted sidebar**: a round close button where macOS puts its window controls, a capsule search field, the topics as inset rounded rows with the **solid accent on the current one**. Right: a **large title** that follows the topic ("Search results" while searching) and grouped content.
 - Content in **grouped cards**: each section's rows sit in one rounded, softly tinted list with hairlines between rows; a short icon on each row; keys shown as key caps in the system font on the right.
 - No header bar and no hairline between the halves. In a narrow window the sidebar becomes a strip across the top.
-- **Keyboard-driven:** opens with focus on the topic list; ↑/↓/Home/End switch topic, → or Tab enters the text, ← goes back; **/** jumps to search; Esc clears the search first, a second Esc closes.
+- **Keyboard-driven:** opens with focus in the search box; Tab reaches the topic list; ↑/↓/Home/End switch topic, → or Tab enters the text, ← goes back; **/** jumps to search; Esc clears the search first, a second Esc closes.
 - **About** is a button-less centred panel like macOS's: the real app icon (22% corner radius), name, tagline, credit line, privacy line, a round close control at the top-left. No version line unless the app has one.
 - Search reads the static HTML of the panes and marks the matching words; the dialog reopens on the topic last read.
 
