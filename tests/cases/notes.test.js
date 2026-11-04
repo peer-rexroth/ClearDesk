@@ -997,3 +997,11 @@ test('sanitizeNoteHtml: a font-weight:normal run ends the bold around it (Docs /
   assertEqual(sanitizeNoteHtml('<b><p><span style="font-weight:400">a</span></p><p>b</p></b>'), '<b><p></b>a<b></p><p>b</p></b>'.replace('<b><p></b>', '<b><p></b>'), 'blocks stay in place');
   assertEqual(sanitizeNoteHtml('<b>x</b><strong>y</strong>'), '<b>x</b><strong>y</strong>', 'real bold stays');
 });
+
+test('sanitizeNoteHtml: pasted styles become bold / italic / underline; Word markers and bidi weights do not break bold', function () {
+  assertEqual(sanitizeNoteHtml('<p><span style="font-weight:700">B</span><span style="font-style:italic;font-weight:400">I</span><span style="text-decoration:underline">U</span></p>'), '<p><b>B</b><i>I</i><u>U</u></p>');
+  assertEqual(sanitizeNoteHtml('<b style="mso-bidi-font-weight:normal">real</b>'), '<b>real</b>', 'Word marks real bold with mso-bidi-font-weight:normal');
+  assertEqual(sanitizeNoteHtml('<b><span style="font-weight:700">x</span></b>'), '<b>x</b>', 'no double bold');
+  assertEqual(sanitizeNoteHtml('<a href="https://x.com"><span style="text-decoration:underline;color:blue">link</span></a>'), '<a href="https://x.com" target="_blank" rel="noopener noreferrer">link</a>', 'a link is not underlined twice');
+  assertEqual(sanitizeNoteHtml('<p><![if !supportLists]><span>·&nbsp;</span><![endif]>Item</p>'), '<p>Item</p>', 'the Word bullet text is dropped');
+});
