@@ -4388,7 +4388,7 @@ const menuSvg = name=>MENU_SVG[name] ? `<svg class="mi" viewBox="0 0 24 24" aria
 const menuIconHtml = icon=>{ if(!icon) return ''; if(icon.startsWith('<svg')) return icon; return menuSvg(icon.split(' ').pop().replace(/^fa-/, '')) || `<i class="${icon}"></i>`; };
 const MENU_CHEVRON = menuSvg('chevron-right');
 // An unavailable command is left out, not dimmed (HIG: a context menu shows only what applies). tidyMenuSeps then removes the separators it leaves behind.
-const rowMenuItem = (icon, label, fn, o={})=>o.off ? '' : `<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.off?' disabled':''} onclick="${fn}">${menuIconHtml(icon)}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
+const rowMenuItem = (icon, label, fn, o={})=>o.off ? '' : `<button type="button" class="row-menu-item${o.danger?' danger':''}" role="menuitem"${o.dim?' disabled':''} onclick="${fn}">${menuIconHtml(icon)}<span>${label}</span>${o.hint?`<span class="row-menu-hint">${o.hint}</span>`:''}</button>`;
 const rowMenuSub = (icon, text, inner)=>`<div class="row-menu-sub" onmouseenter="placeRowSub(this)"><button type="button" class="row-menu-item sub-parent" role="menuitem" aria-haspopup="menu" onclick="toggleRowSub(event,this)">${menuIconHtml(icon)}<span>${text}</span><span class="row-menu-hint">${MENU_CHEVRON}</span></button><div class="row-menu-flyout" role="menu">${inner}</div></div>`;
 function rowMenuHtml(ids){
   const n = ids.length;
@@ -10085,10 +10085,10 @@ function noteTableMenuHtml(viaRowMenu){
     viaRowMenu ? tblClipItems(run) : [],
     [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')),
      item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter'))],
-    [item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: cr!==0}),                 // the header toggles stay in the menu but are dimmed away from the first row / first column
-     item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: cc!==0 || table.rows.length<2})],
+    [item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), dim: cr!==0}),                 // the header toggles stay in the menu but are dimmed away from the first row / first column
+     item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), dim: cc!==0 || table.rows.length<2})],
     tblAlignItems(table, cc, cc, run),
-    [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {off: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {off: noteTableNextWidth(table, -1)===null})],
+    [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {dim: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {dim: noteTableNextWidth(table, -1)===null})],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true})],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
@@ -10321,7 +10321,7 @@ function tblGripMenuHtml(kind, sel, table){
     tblClipItems(run),
     [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), title(`Insert ${nounN} ${col ? 'left' : 'above'}`), run(col ? 'colBefore' : 'rowBefore')),
      item(tblInsIcon(col ? 'colRight' : 'rowBelow'), title(`Insert ${nounN} ${col ? 'right' : 'below'}`), run(col ? 'colAfter' : 'rowAfter'))],
-    table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: a!==0})] : [],   // dimmed except on the first row / column
+    table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), dim: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), dim: a!==0})] : [],   // dimmed except on the first row / column
     table && col ? tblAlignItems(table, a, b, run) : [],
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true})],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
@@ -10388,9 +10388,9 @@ function tblTableMenuHtml(table){
   const item = rowMenuItem, run = op=>`tblTableRun('${op}')`;
   return tblMenuJoin([
     [item(tblHeaderIcon('row'), 'Header Row', run('header'), tblTick(tblHeadRow(table))),
-     item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: table.rows.length<2}),
+     item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), dim: table.rows.length<2}),
      ...(table.querySelector('colgroup') ? [item(TBL_ICON.even, 'Distribute Columns Evenly', run('even'))] : [])],
-    [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {off: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {off: noteTableNextWidth(table, -1)===null})],
+    [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {dim: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {dim: noteTableNextWidth(table, -1)===null})],
     [item(TBL_ICON.cut, 'Cut', run('cut')), item(TBL_ICON.copy, 'Copy', run('copy'))],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
