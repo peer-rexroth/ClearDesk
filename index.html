@@ -1409,6 +1409,14 @@ const ICONS = {
   .note-body mark[data-hl="pink"], .nc-sw.nc-hl-pink { background: var(--nh-pink); }
   .note-body mark[data-hl="purple"], .nc-sw.nc-hl-purple { background: var(--nh-purple); }
   .note-body mark[data-hl="gray"], .nc-sw.nc-hl-gray { background: var(--nh-gray); }
+  .note-body :is(td, th)[data-bg="yellow"] { background: var(--nh-yellow); }
+  .note-body :is(td, th)[data-bg="green"] { background: var(--nh-green); }
+  .note-body :is(td, th)[data-bg="blue"] { background: var(--nh-blue); }
+  .note-body :is(td, th)[data-bg="pink"] { background: var(--nh-pink); }
+  .note-body :is(td, th)[data-bg="purple"] { background: var(--nh-purple); }
+  .note-body :is(td, th)[data-bg="gray"] { background: var(--nh-gray); }
+  .tbl-bg-pick { padding: 6px 12px 8px; }
+  .tbl-bg-pick .nc-row { padding: 0; }
   .note-body mark { color: inherit; border-radius: var(--r-xs); padding: 0 1px; }
   .note-color-menu { width: max-content; min-width: 0 !important; padding: 8px 10px 10px; }
   .nc-label { margin: 4px 2px 8px; font-size: var(--fs-12); font-weight: 600; color: var(--text-2); }   /* title-style labels (HIG), not capitals */
@@ -2718,7 +2726,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Align Left / Center / Right for the column, Delete and Delete table. A Markdown table's <code>:---:</code> markers set each column's alignment when you import it. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%. <strong>Several cells</strong>: drag across cells (or click one and <kbd>Shift</kbd>-click another) to select a block, and <kbd>Shift</kbd> + arrow keys grow or shrink it. <kbd>Cmd/Ctrl+C</kbd> and <kbd>X</kbd> copy or cut it as a table (and as tab-separated text for Excel), <kbd>Delete</kbd> empties it, and a paste from Excel or from another block fills the cells from its top-left corner (one value fills the whole block). Right-click the block for Cut, Copy, Clear Contents and alignment.</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — add before/after, delete, header row, delete table. The options act on everything selected. The arrow keys move between cells in every direction. The options are Insert row above / below, Insert column left / right, Header row and Header column (on the first row or column), Align Left / Center / Right for the column, Delete and Delete table. A Markdown table's <code>:---:</code> markers set each column's alignment when you import it. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%. <strong>Several cells</strong>: drag across cells (or click one and <kbd>Shift</kbd>-click another) to select a block, and <kbd>Shift</kbd> + arrow keys grow or shrink it. <kbd>Cmd/Ctrl+C</kbd> and <kbd>X</kbd> copy or cut it as a table (and as tab-separated text for Excel), <kbd>Delete</kbd> empties it, and a paste from Excel or from another block fills the cells from its top-left corner (one value fills the whole block). <kbd>Cmd/Ctrl+D</kbd> fills the block's first row down over the rest. Right-click the block for Cut, Copy, Clear Contents, Fill Down / Right, alignment and a <strong>cell colour</strong> (the same six colours as highlights; it is kept in the note and in copied mail).</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links (also reference-style <code>[text][ref]</code> with its <code>[ref]: address</code> line), lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, a code block keeps its language, <code>==highlight==</code> and simple tags like <code>&lt;b&gt;</code> and <code>&lt;br&gt;</code> are read, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code>, <code>==highlight==</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
@@ -6300,7 +6308,8 @@ function sanitizeNoteHtml(html){
     }
     else if(name==='td' || name==='th'){                      // a column's alignment survives (centre / right; left is the default): ours, an align attribute, or a plain text-align from pasted HTML
       const am = /\bdata-al\s*=\s*["']?(center|right)|\balign\s*=\s*["']?(center|right)|\btext-align\s*:\s*(center|right)/i.exec(attrs), al = am ? (am[1] || am[2] || am[3]).toLowerCase() : '';
-      out += al ? `<${name} data-al="${al}">` : `<${name}>`;
+      const bm = /\bdata-bg\s*=\s*["']?(yellow|green|blue|pink|purple|gray)\b/i.exec(attrs), bg = bm ? bm[1].toLowerCase() : '';   // a cell colour is a palette name, never a raw colour
+      out += `<${name}${al ? ` data-al="${al}"` : ''}${bg ? ` data-bg="${bg}"` : ''}>`;
     }
     else if(name==='li') out += /\bdata-done\s*=\s*["']?1/i.test(attrs) ? '<li data-done="1">' : '<li>';
     else if(name==='ul' || name==='ol'){
@@ -6751,7 +6760,7 @@ const NOTE_FORMATS = {
   markdown: { label: 'Markdown', ext: '.md', mime: 'text/markdown' },
   html: { label: 'HTML', ext: '.html', mime: 'text/html' }
 };
-const noteCellAlignCss = c=>{ const a = c.getAttribute && c.getAttribute('data-al'); return a==='center' || a==='right' ? ';text-align:' + a : ''; };   // a mail client cannot read the editor's data-al
+const noteCellAlignCss = c=>{ const a = c.getAttribute && c.getAttribute('data-al'), g = c.getAttribute && NOTE_MAIL_HL[c.getAttribute('data-bg')]; return (a==='center' || a==='right' ? ';text-align:' + a : '') + (g ? ';background:' + g : ''); };   // a mail client cannot read the editor's data-al / data-bg   // a mail client cannot read the editor's data-al
 function noteFormatText(n, kind){                                    // no trailing line break: that is for the file
   const holder = document.createElement('div'); holder.innerHTML = sanitizeNoteHtml(n.body);
   const title = (n.title || '').trim();
@@ -10505,14 +10514,15 @@ function tblBlockEdit(fn){
 }
 // Paste cells: a block copied here, or tab-separated text (Excel, Sheets, a web table). Into a block of several cells, ONE value fills them all (as in Excel); otherwise the
 // cells land from the top-left corner of the block (or the cell the caret is in), and the table grows by the rows / columns it needs. Returns false for an ordinary paste.
+const tblCellAttr = (x, name, v)=>{ if(v) x.setAttribute(name, v); else x.removeAttribute(name); };
 function tblPasteGrid(e){
   const cd = e.clipboardData; if(!cd || noteIsLocked(noteEditorId) || notePasteRaw) return false;
   const b = tblBlockActive(), cell = b ? b.cell : noteSelectedCell(); if(!cell) return false;
   let grid = null;
   const own = cd.getData(NOTE_OWN_CLIP);
-  if(own){ const h = document.createElement('div'); h.innerHTML = sanitizeNoteHtml(own); const t = h.children.length===1 && h.children[0].tagName==='TABLE' ? h.children[0] : null; if(t) grid = [...t.rows].map(r=>[...r.cells].map(x=>x.innerHTML)); }
-  if(!grid){ const txt = cd.getData('text/plain'); if(/\t/.test(txt)) grid = txt.replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n').map(l=>l.split('\t').map(v=>esc(v))); }
-  if(!grid && b){ const one = (cd.getData('text/plain') || '').trim(); if(one && !/[\n\r\t]/.test(one)) grid = [[esc(one)]]; }   // one plain value into a block fills it
+  if(own){ const h = document.createElement('div'); h.innerHTML = sanitizeNoteHtml(own); const t = h.children.length===1 && h.children[0].tagName==='TABLE' ? h.children[0] : null; if(t) grid = [...t.rows].map(r=>[...r.cells].map(x=>({ h: x.innerHTML, al: x.getAttribute('data-al'), bg: x.getAttribute('data-bg'), own: true }))); }
+  if(!grid){ const txt = cd.getData('text/plain'); if(/\t/.test(txt)) grid = txt.replace(/\r\n?/g, '\n').replace(/\n+$/, '').split('\n').map(l=>l.split('\t').map(v=>({ h: esc(v) }))); }
+  if(!grid && b){ const one = (cd.getData('text/plain') || '').trim(); if(one && !/[\n\r\t]/.test(one)) grid = [[{ h: esc(one) }]]; }   // one plain value into a block fills it
   if(!grid || !grid.length) return false;
   const rowsN = grid.length, colsN = Math.max(...grid.map(r=>r.length)), one = rowsN===1 && colsN===1;
   if(one && !b) return false;                                       // one value into one cell is an ordinary paste
@@ -10524,7 +10534,7 @@ function tblPasteGrid(e){
   while(clone.rows.length<=q.r2){ const tr = document.createElement('tr'); for(let i = 0; i<wasCols; i++) tr.appendChild(mk('td')); (clone.tBodies[0] || clone).appendChild(tr); }
   [...clone.rows].forEach((row, ri)=>{ while(row.cells.length<=q.c2) row.appendChild(mk(ri===0 && tblHeadRow(table) ? 'th' : 'td')); });
   if(q.c2>=wasCols) clone.querySelector('colgroup')?.remove();      // new columns: the columns are even again
-  for(let r = q.r1; r<=q.r2; r++) for(let c = q.c1; c<=q.c2; c++){ const html = one ? grid[0][0] : (grid[r - r0] && grid[r - r0][c - c0]); clone.rows[r].cells[c].innerHTML = html || '<br>'; }
+  for(let r = q.r1; r<=q.r2; r++) for(let c = q.c1; c<=q.c2; c++){ const g = one ? grid[0][0] : (grid[r - r0] && grid[r - r0][c - c0]), x = clone.rows[r].cells[c]; x.innerHTML = (g && g.h) || '<br>'; if(g && g.own){ tblCellAttr(x, 'data-al', g.al); tblCellAttr(x, 'data-bg', g.bg); } }
   e.preventDefault();
   tblBlockCommit(table, clone, q);
   return true;
@@ -10535,6 +10545,7 @@ function tblBlockKey(e){
   const k = e.key, mod = e.metaKey || e.ctrlKey;
   if(k==='Shift' || k==='Meta' || k==='Control' || k==='Alt') return false;
   if(mod && /^[cxv]$/i.test(k)) return false;                       // the clipboard events do these
+  if(mod && !e.shiftKey && !e.altKey && k.toLowerCase()==='d'){ e.preventDefault(); tblBlockFill('down'); return true; }   // fill down, as in Excel (and not the browser's bookmark)
   if(k==='Escape'){ e.preventDefault(); tblBlockClear(); return true; }
   if(k==='Delete' || k==='Backspace'){ e.preventDefault(); tblBlockEdit(x=>{ x.innerHTML = '<br>'; }); return true; }
   const d = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }[k];
@@ -10547,11 +10558,24 @@ function tblBlockKey(e){
   tblBlockClear();
   return false;
 }
+// Fill Down / Fill Right: the first row (column) of the block, with its alignment and colour, copied over the rest of it.
+function tblBlockFill(dir){
+  const b = tblBlockActive(); if(!b || noteIsLocked(noteEditorId)) return;
+  const q = tblBlockRect(b), clone = b.table.cloneNode(true), cellAt = (r, c)=>clone.rows[r] && clone.rows[r].cells[c];
+  for(let r = q.r1; r<=q.r2; r++) for(let c = q.c1; c<=q.c2; c++){
+    const src = dir==='down' ? cellAt(q.r1, c) : cellAt(r, q.c1), x = cellAt(r, c); if(!src || !x || src===x) continue;
+    x.innerHTML = src.innerHTML; tblCellAttr(x, 'data-al', src.getAttribute('data-al')); tblCellAttr(x, 'data-bg', src.getAttribute('data-bg'));
+  }
+  tblBlockCommit(b.table, clone, q);
+}
+const tblBgSwatches = ()=>`<div class="tbl-bg-pick"><div class="nc-label">Cell colour</div><div class="nc-row">${['none', ...NOTE_HL_COLORS].map(n=>`<button type="button" class="nc-sw nc-hl-${n}" role="menuitem" title="${n==='none' ? 'No colour' : NOTE_COLOR_LABELS[n]}" aria-label="Cell colour: ${n==='none' ? 'none' : NOTE_COLOR_LABELS[n]}" onclick="tblBlockRun('bg:${n}')"></button>`).join('')}</div></div>`;
 function tblBlockMenuHtml(){
   const item = rowMenuItem, run = op=>`tblBlockRun('${op}')`;
   return tblMenuJoin([
     [item(TBL_ICON.cut, 'Cut', run('cut')), item(TBL_ICON.copy, 'Copy', run('copy')), item('fa-solid fa-xmark', 'Clear Contents', run('clear'))],
-    [item(tblAlignIcon('left'), 'Align Left', run('alignLeft')), item(tblAlignIcon('center'), 'Align Center', run('alignCenter')), item(tblAlignIcon('right'), 'Align Right', run('alignRight'))]
+    [item('fa-solid fa-arrow-down', 'Fill Down', run('fillDown'), { hint: platformKeyTitle('⌘D') }), item('fa-solid fa-arrow-right', 'Fill Right', run('fillRight'))],
+    [item(tblAlignIcon('left'), 'Align Left', run('alignLeft')), item(tblAlignIcon('center'), 'Align Center', run('alignCenter')), item(tblAlignIcon('right'), 'Align Right', run('alignRight'))],
+    [tblBgSwatches()]
   ]);
 }
 function tblBlockRun(op){
@@ -10563,6 +10587,8 @@ function tblBlockRun(op){
     return;
   }
   if(op==='clear'){ tblBlockEdit(x=>{ x.innerHTML = '<br>'; }); return; }
+  if(op==='fillDown' || op==='fillRight'){ tblBlockFill(op==='fillDown' ? 'down' : 'right'); return; }
+  if(op.slice(0, 3)==='bg:'){ const n = op.slice(3); tblBlockEdit(x=>tblCellAttr(x, 'data-bg', NOTE_HL_COLORS.includes(n) ? n : '')); return; }
   const al = op==='alignCenter' ? 'center' : op==='alignRight' ? 'right' : '';
   tblBlockEdit(x=>{ if(al) x.setAttribute('data-al', al); else x.removeAttribute('data-al'); });
 }
