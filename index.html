@@ -6274,18 +6274,33 @@ function sanitizeNoteHtml(html){
        .replace(/<(script|style|iframe|object|embed|template|svg|math|noscript|title|head|textarea|select|button|form|xmp|plaintext)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, '');
   const re = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:"[^"]*"|'[^']*'|[^>"'])*)>|([^<]+)|</g;
   let out = '', m;
-  const colorStack = [];
+  const colorStack = [], boldStack = [];                      // boldStack: open b / strong, {name, dropped, susp, sus}; a "font-weight:normal" run inside bold (what un-bolding leaves, and what Docs / Word wrap pasted text in) ends the bold around it
+  const unbold = attrs=>/\bfont-weight\s*:\s*(normal|lighter|[1-4]00)\b/i.test(attrs);
+  const suspendBold = ()=>{ const act = boldStack.filter(e=>!e.dropped && !e.susp); act.forEach(e=>{ e.susp = true; }); return { act, close: act.slice().reverse().map(e=>`</${e.name}>`).join(''), open: act.map(e=>`<${e.name}>`).join('') }; };
+  const resumeBold = sus=>{ sus.act.forEach(e=>{ e.susp = false; }); return sus.open; };
   while((m = re.exec(s))){
     if(m[4]!==undefined){ out += m[4]; continue; }            // text: entities stay as written, so it stays inert
     if(m[2]===undefined){ out += '&lt;'; continue; }          // a stray "<"
     const closing = m[1]==='/', name = m[2].toLowerCase(), attrs = m[3] || '';
     if(!NOTE_TAGS.has(name)) continue;                        // everything else is dropped (its text is kept)
     if(name==='span' || name==='mark'){                       // only a palette colour survives; a span / mark without one is dropped, closing tag included
-      if(closing){ for(let i = colorStack.length - 1; i>=0; i--) if(colorStack[i].name===name){ const k = colorStack.splice(i, 1)[0]; if(k.kept) out += `</${name}>`; break; } continue; }
+      if(closing){ for(let i = colorStack.length - 1; i>=0; i--) if(colorStack[i].name===name){ const k = colorStack.splice(i, 1)[0]; if(k.kept) out += `</${name}>`; if(k.sus) out += resumeBold(k.sus); break; } continue; }
+      const sus = name==='span' && unbold(attrs) ? suspendBold() : null;
+      if(sus) out += sus.close;
       const cm = new RegExp('\\bdata-' + (name==='span' ? 'tc' : 'hl') + '\\s*=\\s*["\']?([a-z]+)', 'i').exec(attrs), cn = cm ? cm[1].toLowerCase() : '';
       const ok = (name==='span' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).includes(cn);
-      colorStack.push({ name, kept: ok });
+      colorStack.push({ name, kept: ok, sus });
       if(ok) out += `<${name} data-${name==='span' ? 'tc' : 'hl'}="${cn}">`;
+      continue;
+    }
+    if(name==='b' || name==='strong'){
+      if(closing){
+        let i = boldStack.length - 1; while(i>=0 && boldStack[i].name!==name) i--;
+        if(i<0) out += `</${name}>`;
+        else { const e = boldStack.splice(i, 1)[0]; if(!e.dropped) out += `</${name}>`; else if(e.sus) out += resumeBold(e.sus); }
+      }
+      else if(unbold(attrs)){ const sus = suspendBold(); out += sus.close; boldStack.push({ name, dropped: true, sus }); }
+      else { boldStack.push({ name }); out += `<${name}>`; }
       continue;
     }
     if(closing){ if(!NOTE_VOID.has(name)) out += `</${name}>`; continue; }

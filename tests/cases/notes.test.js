@@ -990,3 +990,10 @@ test('with a selection, the note menu offers Copy Selection As (and without one 
   var m = noteMenuHtml('nf2', { noLock: true, selection: true });
   assertIncludes(m, 'Copy Selection As'); assertIncludes(m, "noteMenuRun('copyselas','markdown')"); assertIncludes(m, 'Copy As');
 });
+
+test('sanitizeNoteHtml: a font-weight:normal run ends the bold around it (Docs / Word paste wrapper, what un-bolding leaves)', function () {
+  assertEqual(sanitizeNoteHtml('<b style="font-weight:normal" id="docs-internal-guid-1"><p>one</p><p>two</p></b>'), '<p>one</p><p>two</p>', 'the Docs wrapper is not bold');
+  assertEqual(sanitizeNoteHtml('<b><span style="font-weight: normal">plain</span> bold</b>'), '<b></b>plain<b> bold</b>', 'a normal span inside bold');
+  assertEqual(sanitizeNoteHtml('<b><p><span style="font-weight:400">a</span></p><p>b</p></b>'), '<b><p></b>a<b></p><p>b</p></b>'.replace('<b><p></b>', '<b><p></b>'), 'blocks stay in place');
+  assertEqual(sanitizeNoteHtml('<b>x</b><strong>y</strong>'), '<b>x</b><strong>y</strong>', 'real bold stays');
+});
