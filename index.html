@@ -1473,6 +1473,7 @@ const ICONS = {
   .note-body :is(td, th)[data-al="right"] { text-align: right; }
   .note-body ul, .note-body ol { margin: .2em 0 .5em; padding-left: 26px; }
   .note-body li { margin: .1em 0; }
+  .note-body [data-nw] { font-weight: 400; }   /* a heading the writer un-bolded */
   .note-body li > p { margin: 0; }   /* lists pasted from Claude, Copilot or Docs put a paragraph in each item */
   .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
@@ -6278,7 +6279,7 @@ function sanitizeNoteHtml(html){
   let out = '', m;
   const colorStack = [], boldStack = [];                      // boldStack: open b / strong, {name, dropped, susp, sus}; a "font-weight:normal" run inside bold (what un-bolding leaves, and what Docs / Word wrap pasted text in) ends the bold around it
   const unbold = attrs=>/(?<![-\w])font-weight\s*:\s*(normal|lighter|[1-4]00)\b/i.test(attrs);   // not mso-bidi-font-weight:normal, which Word writes on real bold
-  let linkDepth = 0;
+  let linkDepth = 0, headDepth = 0;
   const suspendBold = ()=>{ const act = boldStack.filter(e=>!e.dropped && !e.susp); act.forEach(e=>{ e.susp = true; }); return { act, close: act.slice().reverse().map(e=>`</${e.name}>`).join(''), open: act.map(e=>`<${e.name}>`).join('') }; };
   const resumeBold = sus=>{ sus.act.forEach(e=>{ e.susp = false; }); return sus.open; };
   while((m = re.exec(s))){
@@ -6306,8 +6307,9 @@ function sanitizeNoteHtml(html){
       }
       const cm = new RegExp('\\bdata-' + (name==='span' ? 'tc' : 'hl') + '\\s*=\\s*["\']?([a-z]+)', 'i').exec(attrs), cn = cm ? cm[1].toLowerCase() : '';
       const ok = (name==='span' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).includes(cn);
-      colorStack.push({ name, kept: ok, sus, b: fmt.b, i: fmt.i, u: fmt.u });
-      if(ok) out += `<${name} data-${name==='span' ? 'tc' : 'hl'}="${cn}">`;
+      const nw = !!sus && headDepth>0;                              // a heading is bold by itself: un-bolding it is kept as data-nw (otherwise it is bold again the next time the note opens)
+      colorStack.push({ name, kept: ok || nw, sus, b: fmt.b, i: fmt.i, u: fmt.u });
+      if(ok || nw) out += `<${name}${ok ? ` data-${name==='span' ? 'tc' : 'hl'}="${cn}"` : ''}${nw ? ' data-nw="1"' : ''}>`;
       out += (fmt.b ? '<b>' : '') + (fmt.i ? '<i>' : '') + (fmt.u ? '<u>' : '');
       continue;
     }
@@ -6322,6 +6324,7 @@ function sanitizeNoteHtml(html){
       continue;
     }
     if(name==='a') linkDepth = Math.max(0, linkDepth + (closing ? -1 : 1));
+    if(/^h[1-6]$/.test(name)) headDepth = Math.max(0, headDepth + (closing ? -1 : 1));
     if(closing){ if(!NOTE_VOID.has(name)) out += `</${name}>`; continue; }
     if(name==='a'){
       const hm = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'>]+))/i.exec(attrs);

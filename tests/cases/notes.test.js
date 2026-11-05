@@ -1005,3 +1005,8 @@ test('sanitizeNoteHtml: pasted styles become bold / italic / underline; Word mar
   assertEqual(sanitizeNoteHtml('<a href="https://x.com"><span style="text-decoration:underline;color:blue">link</span></a>'), '<a href="https://x.com" target="_blank" rel="noopener noreferrer">link</a>', 'a link is not underlined twice');
   assertEqual(sanitizeNoteHtml('<p><![if !supportLists]><span>·&nbsp;</span><![endif]>Item</p>'), '<p>Item</p>', 'the Word bullet text is dropped');
 });
+
+test('sanitizeNoteHtml: an un-bolded heading stays un-bold (data-nw), a normal-weight span elsewhere is still dropped', function () {
+  assertEqual(sanitizeNoteHtml('<h2><span style="font-weight: normal;">Title</span></h2><p><span style="font-weight: normal;">x</span></p>'), '<h2><span data-nw="1">Title</span></h2><p>x</p>');
+  assertEqual(sanitizeNoteHtml('<h2><b><span style="font-weight:normal">T</span> U</b></h2>'), '<h2><b></b><span data-nw="1">T</span><b> U</b></h2>');
+});
