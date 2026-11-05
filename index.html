@@ -1473,7 +1473,7 @@ const ICONS = {
   .note-body :is(td, th)[data-al="right"] { text-align: right; }
   .note-body ul, .note-body ol { margin: .2em 0 .5em; padding-left: 26px; }
   .note-body li { margin: .1em 0; }
-  .note-body [data-nw] { font-weight: 400; }   /* a heading the writer un-bolded */
+  .note-body :is(h1,h2,h3,h4,h5,h6) :is(b,strong,span) { font-weight: inherit !important; }   /* a heading keeps its weight whatever the editor wraps in it; bold in a heading is not saved either */
   .note-body li > p { margin: 0; }   /* lists pasted from Claude, Copilot or Docs put a paragraph in each item */
   .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
@@ -6301,19 +6301,19 @@ function sanitizeNoteHtml(html){
       if(sus) out += sus.close;
       const fmt = { b: null, i: false, u: false };                  // Docs, Word and web pages write bold / italic / underline as styles on a span
       if(name==='span'){
-        if(!sus && /(?<![-\w])font-weight\s*:\s*(bold|bolder|[6-9]00)\b/i.test(attrs) && !boldStack.some(e=>!e.dropped && !e.susp)){ fmt.b = { name: 'b' }; boldStack.push(fmt.b); }
+        if(!sus && !headDepth && /(?<![-\w])font-weight\s*:\s*(bold|bolder|[6-9]00)\b/i.test(attrs) && !boldStack.some(e=>!e.dropped && !e.susp)){ fmt.b = { name: 'b' }; boldStack.push(fmt.b); }
         fmt.i = /(?<![-\w])font-style\s*:\s*italic\b/i.test(attrs);
         fmt.u = !linkDepth && /(?<![-\w])text-decoration(-line)?\s*:[^;"']*\bunderline\b/i.test(attrs);
       }
       const cm = new RegExp('\\bdata-' + (name==='span' ? 'tc' : 'hl') + '\\s*=\\s*["\']?([a-z]+)', 'i').exec(attrs), cn = cm ? cm[1].toLowerCase() : '';
       const ok = (name==='span' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).includes(cn);
-      const nw = !!sus && headDepth>0;                              // a heading is bold by itself: un-bolding it is kept as data-nw (otherwise it is bold again the next time the note opens)
-      colorStack.push({ name, kept: ok || nw, sus, b: fmt.b, i: fmt.i, u: fmt.u });
-      if(ok || nw) out += `<${name}${ok ? ` data-${name==='span' ? 'tc' : 'hl'}="${cn}"` : ''}${nw ? ' data-nw="1"' : ''}>`;
+      colorStack.push({ name, kept: ok, sus, b: fmt.b, i: fmt.i, u: fmt.u });
+      if(ok) out += `<${name} data-${name==='span' ? 'tc' : 'hl'}="${cn}">`;
       out += (fmt.b ? '<b>' : '') + (fmt.i ? '<i>' : '') + (fmt.u ? '<u>' : '');
       continue;
     }
     if(name==='b' || name==='strong'){
+      if(headDepth>0 && !closing){ boldStack.push({ name, dropped: true }); continue; }          // a heading is bold by itself: bold inside it is dropped (it can neither be added nor taken away)
       if(closing){
         let i = boldStack.length - 1; while(i>=0 && boldStack[i].name!==name) i--;
         if(i<0) out += `</${name}>`;
@@ -9653,7 +9653,36 @@ function noteClosest(node, tag){
   return null;
 }
 function noteFocusBody(){ const b = document.getElementById('noteBody'); if(b && document.activeElement!==b) b.focus(); }
-function noteCmd(cmd, val){ noteFocusBody(); document.execCommand(cmd, false, val); onNoteInput(); updateNoteToolbarState(); }
+// Headings are bold by their style, so Bold does nothing when the whole selection (or the caret) is in one.
+function noteSelInHeading(){
+  const sel = window.getSelection ? window.getSelection() : null; if(!sel || !sel.rangeCount) return false;
+  const body = document.getElementById('noteBody'); if(!body || !body.contains(sel.anchorNode) || !body.contains(sel.focusNode)) return false;
+  const h = n=>{ for(; n && n!==body; n = n.parentNode) if(n.nodeType===1 && /^H[1-6]$/.test(n.tagName)) return true; return false; };
+  return h(sel.anchorNode) && h(sel.focusNode);
+}
+// A selection that starts or ends in a heading but holds other text: bold / un-bold the other text only. The browser decides between the two from where the selection STARTS, and a heading
+// always reads as bold, so the selection is trimmed to the first and last non-heading block for the command and then put back as it was.
+function noteBold(){
+  const sel = window.getSelection(), body = document.getElementById('noteBody');
+  if(!sel || !sel.rangeCount){ document.execCommand('bold'); return; }
+  const r = sel.getRangeAt(0), isH = n=>n && n.nodeType===1 && /^H[1-6]$/.test(n.tagName);
+  const head = n=>{ for(; n && n!==body; n = n.parentNode) if(isH(n)) return n; return null; };
+  const sc = r.startContainer, so = r.startOffset, ec = r.endContainer, eo = r.endOffset, hs = r.collapsed ? null : head(sc), he = r.collapsed ? null : head(ec);
+  if(!hs && !he){ document.execCommand('bold'); return; }
+  const nr = r.cloneRange();
+  if(hs){ let n = hs.nextElementSibling; while(isH(n)) n = n.nextElementSibling; if(!n) return; nr.setStart(n, 0); }
+  if(he){ let n = he.previousElementSibling; while(isH(n)) n = n.previousElementSibling; if(!n) return; nr.setEnd(n, n.childNodes.length); }
+  if(nr.collapsed) return;
+  sel.removeAllRanges(); sel.addRange(nr);
+  document.execCommand('bold');
+  try{ const r2 = sel.getRangeAt(0); if(hs && sc.isConnected) r2.setStart(sc, so); if(he && ec.isConnected) r2.setEnd(ec, eo); sel.removeAllRanges(); sel.addRange(r2); }catch(_){}
+}
+function noteSelStartsInHeading(){
+  const sel = window.getSelection ? window.getSelection() : null; if(!sel || !sel.rangeCount) return false;
+  for(let n = sel.getRangeAt(0).startContainer, body = document.getElementById('noteBody'); n && n!==body; n = n.parentNode) if(n.nodeType===1 && /^H[1-6]$/.test(n.tagName)) return true;
+  return false;
+}
+function noteCmd(cmd, val){ if(cmd==='bold'){ noteFocusBody(); if(!noteSelInHeading()) noteBold(); onNoteInput(); updateNoteToolbarState(); return; } noteFocusBody(); document.execCommand(cmd, false, val); onNoteInput(); updateNoteToolbarState(); }
 function noteBlock(tag){
   noteFocusBody();
   const inQuote = ()=>{ const q = window.getSelection(); return q && q.rangeCount && noteClosest(q.anchorNode, 'BLOCKQUOTE'); };
@@ -10909,7 +10938,9 @@ function updateNoteToolbarState(){
   }catch(_){}
   if(!body || !sel || !sel.rangeCount || !body.contains(sel.anchorNode)) return;
   const set = (cmd, on)=>{ const b = document.querySelector(`.note-toolbar [data-cmd="${cmd}"]`); if(b) b.classList.toggle('active', !!on); };
-  ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, document.queryCommandState(c)));
+  const inHead = noteSelInHeading(), bb = document.querySelector('.note-toolbar [data-cmd="bold"]');
+  if(bb) bb.disabled = inHead;                           // a heading is bold by itself
+  ['bold','italic','underline','strikeThrough'].forEach(c=>set(c, c==='bold' && (inHead || noteSelStartsInHeading()) ? false : document.queryCommandState(c)));
   const ul = noteClosest(sel.anchorNode, 'UL'), ol = noteClosest(sel.anchorNode, 'OL');
   set('table', !!noteSelectedCell() || !!tblWholeSelected()); set('list', !!noteCurrentListStyle()); set('checklist', ul && ul.classList.contains('cl'));
   const v = String(document.queryCommandValue('formatBlock') || '').toLowerCase();
@@ -10926,6 +10957,7 @@ function updateNoteToolbarState(){
 // first gets an empty paragraph with the caret in it (before any history exists), and a note that already starts with loose text has that text wrapped in one when it opens.
 function onNoteBeforeInput(e){
   const body = document.getElementById('noteBody'); if(!body || noteIsLocked(noteEditorId)) return;
+  if(e.inputType==='formatBold'){ e.preventDefault(); if(!noteSelInHeading()) noteBold(); return; }      // ⌘B: not in a heading, and only the text around one
   if(e.inputType!=='insertText' && e.inputType!=='insertCompositionText') return;
   if(body.firstElementChild || (body.textContent||'')!=='') return;               // not empty
   const p = document.createElement('p'); p.appendChild(document.createElement('br')); body.innerHTML = ''; body.appendChild(p);
