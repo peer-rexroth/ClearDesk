@@ -7428,6 +7428,13 @@ function fmtNoteDate(ts){
   if(diff>1 && diff<7) return d.toLocaleDateString(undefined, {weekday:'long'});
   return d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'});
 }
+// The sidebar is redrawn on every selection, but its folders rarely change. Rebuilding rows that are the same would also recreate the hovered one, and its Edit / Delete buttons
+// would fade in again on every arrow key. (Not while a drag has marked rows: those marks must be cleared by the redraw.)
+function setFolderListHtml(list, html){
+  if(!list) return;
+  if(list._html===html && !list.querySelector('.dragging, .drop-into, .drag-over-top, .drag-over-bottom, .settle')) return;
+  list.innerHTML = html; list._html = html;
+}
 function renderNotesSidebar(){
   const live = notes.filter(n=>!noteTrashed(n)), own = {}; live.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
   const total = f=>own[f.id]||0;   // a folder's count is what is directly in it, the same as its list
@@ -7457,7 +7464,7 @@ function renderNotesSidebar(){
       </span>`}
     </div>` + (shut ? '' : kids.map(c=>row(c, true, [])).join(''));
   };
-  if(list) list.innerHTML = topFolders().map(f=>row(f, false, folderChildren(f.id))).join('');
+  setFolderListHtml(list, topFolders().map(f=>row(f, false, folderChildren(f.id))).join(''));
 }
 function renderNotesList(vis){
   vis = vis || visibleNotes();
@@ -8767,7 +8774,7 @@ function renderPromptsSidebar(){
       </span>`}
     </div>` + (shut ? '' : kids.map(c=>row(c, true, [])).join(''));
   };
-  list.innerHTML = topPromptFolders().map(f=>row(f, false, promptFolderKids(f.id))).join('');
+  setFolderListHtml(list, topPromptFolders().map(f=>row(f, false, promptFolderKids(f.id))).join(''));
 }
 function togglePromptFolderCollapsed(id){
   if(promptFoldersCollapsed.has(id)) promptFoldersCollapsed.delete(id); else promptFoldersCollapsed.add(id);
