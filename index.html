@@ -282,6 +282,7 @@ const ICONS = {
   .project-row:hover { background: var(--hover); }
   .project-row:is(:hover, :focus-within) .project-actions { opacity: 1; pointer-events: auto; }
   .project-row.active { background: var(--cap-on); font-weight: 600; }
+  .project-row.holds-active { background: color-mix(in srgb, var(--cap-on) 50%, transparent); font-weight: 600; }   /* a collapsed folder over the folder you are in: the same highlight, lighter */
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
@@ -7413,11 +7414,11 @@ function renderNotesSidebar(){
   const list = document.getElementById('noteFolderList');
   const activeF = folderById(noteFolderFilter);
   const row = (f, sub, kids)=>{
-    const shut = kids.length && noteFoldersCollapsed.has(f.id) && !(activeF && activeF.parentId===f.id);
+    const shut = kids.length && noteFoldersCollapsed.has(f.id), holds = shut && activeF && activeF.parentId===f.id;   // collapsed over the folder you are in: the row shows it
     const twisty = sub ? '' : kids.length
       ? `<button type="button" class="folder-twisty" aria-label="${shut?'Expand':'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();toggleFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut?'right':'down'}"></i></button>`
       : '<span class="folder-twisty-gap"></span>';
-    return `<div class="project-row ${noteFolderFilter===f.id?'active':''}${sub?' sub-folder':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')" onkeydown="folderRowKey(event,'${f.id}')" draggable="true" ondragstart="handleFolderDragStart(event,'${f.id}')" ondragend="handleFolderDragEnd()" ondragover="handleFolderDragOver(event,'${f.id}')" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event,'${f.id}')">
+    return `<div class="project-row ${noteFolderFilter===f.id?'active':''}${holds?' holds-active':''}${sub?' sub-folder':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')" onkeydown="folderRowKey(event,'${f.id}')" draggable="true" ondragstart="handleFolderDragStart(event,'${f.id}')" ondragend="handleFolderDragEnd()" ondragover="handleFolderDragOver(event,'${f.id}')" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event,'${f.id}')">
       ${twisty}<i class="fa-regular fa-folder picon"></i>
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${total(f)}</span>
@@ -8722,11 +8723,11 @@ function renderPromptsSidebar(){
   const list = document.getElementById('promptFolderList'); if(!list) return;
   const activeF = promptFolderById(promptFolderFilter);
   const row = (f, sub, kids)=>{
-    const shut = kids.length && promptFoldersCollapsed.has(f.id) && !(activeF && activeF.parentId===f.id);
+    const shut = kids.length && promptFoldersCollapsed.has(f.id), holds = shut && activeF && activeF.parentId===f.id;
     const twisty = sub ? '' : kids.length
       ? `<button type="button" class="folder-twisty" aria-label="${shut ? 'Expand' : 'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();togglePromptFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut ? 'right' : 'down'}"></i></button>`
       : '<span class="folder-twisty-gap"></span>';
-    return `<div class="project-row ${promptFolderFilter===f.id ? 'active' : ''}${sub ? ' sub-folder' : ''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${promptFolderFilter===f.id}" onclick="setPromptFolder('${f.id}')" oncontextmenu="openPromptFolderMenu(event,'${f.id}')" onkeydown="promptFolderRowKey(event,'${f.id}')"${f.locked ? '' : ` draggable="true" ondragstart="promptFolderDragStart(event,'${f.id}')" ondragend="promptFolderDragEnd()"`} ondragover="promptFolderDragOver(event,'${f.id}')" ondragleave="this.classList.remove('drop-into','drag-over-top','drag-over-bottom')" ondrop="promptFolderDrop(event,'${f.id}')">
+    return `<div class="project-row ${promptFolderFilter===f.id ? 'active' : ''}${holds ? ' holds-active' : ''}${sub ? ' sub-folder' : ''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${promptFolderFilter===f.id}" onclick="setPromptFolder('${f.id}')" oncontextmenu="openPromptFolderMenu(event,'${f.id}')" onkeydown="promptFolderRowKey(event,'${f.id}')"${f.locked ? '' : ` draggable="true" ondragstart="promptFolderDragStart(event,'${f.id}')" ondragend="promptFolderDragEnd()"`} ondragover="promptFolderDragOver(event,'${f.id}')" ondragleave="this.classList.remove('drop-into','drag-over-top','drag-over-bottom')" ondrop="promptFolderDrop(event,'${f.id}')">
       ${twisty}<i class="fa-regular fa-folder picon"></i>
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${total(f)}</span>
