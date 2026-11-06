@@ -3706,7 +3706,7 @@ function renderSidebar(){
     return `<div class="f-chip ${active?'active':''}" style="${active?`background:${tc.bg};color:${tc.text};border-color:transparent`:''}" role="button" tabindex="0" aria-pressed="${active}" onclick="setTagFilter('${tg.id}')">${esc(tg.label)}</div>`;
   }).join('');
 
-  document.getElementById('projectList').innerHTML = visibleProjects().map(p=>{
+  setFolderListHtml(document.getElementById('projectList'), visibleProjects().map(p=>{
     return `<div class="project-row ${filterProjectId===p.id?'active':''}" data-id="${p.id}" role="button" tabindex="0" aria-pressed="${filterProjectId===p.id}" onclick="setProjectFilter('${p.id}')" oncontextmenu="openProjectMenu(event,'${p.id}')" onmouseenter="tipIfTruncated(this)"
       ${p.locked ? '' : `draggable="true" ondragstart="handleProjectDragStart(event,'${p.id}')" ondragend="handleProjectDragEnd(event)" ondragover="handleProjectDragOver(event,'${p.id}')" ondragleave="handleProjectDragLeave(event)" ondrop="handleProjectDrop(event,'${p.id}')"`}>
       <i class="fa-solid fa-${p.icon||'folder'} picon"></i>
@@ -3717,7 +3717,7 @@ function renderSidebar(){
         ${p.locked ? '' : `<button class="icon-btn" onclick="event.stopPropagation();deleteProject('${p.id}')" title="Delete"><i class="fa-solid fa-trash"></i></button>`}
       </span>
     </div>`;
-  }).join('');
+  }).join(''));
 
   const total = tasks.length, done = tasks.filter(t=>t.status==='done').length;
   document.getElementById('sidebarFooter').textContent = `${total} task${total===1?'':'s'} · ${done} done`;
