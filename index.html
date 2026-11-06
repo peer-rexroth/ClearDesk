@@ -283,6 +283,20 @@ const ICONS = {
   .project-row:is(:hover, :focus-within) .project-actions { opacity: 1; pointer-events: auto; }
   .project-row.active { background: var(--cap-on); font-weight: 600; }
   .project-row.holds-active { background: color-mix(in srgb, var(--cap-on) 50%, transparent); font-weight: 600; }   /* a collapsed folder over the folder you are in: the same highlight, lighter */
+  html { --fc-red: #ff453a; --fc-orange: #ff9f0a; --fc-yellow: #d19b00; --fc-green: #2fb350; --fc-teal: #30b0a0; --fc-blue: #0a84ff; --fc-purple: #af52de; --fc-pink: #ff375f; --fc-gray: #8e8e93; }
+  html[data-theme="dark"] { --fc-yellow: #ffd60a; --fc-green: #34c759; }
+  :is(.fchip, .fc-sw).fc-red { --fcc: var(--fc-red); } :is(.fchip, .fc-sw).fc-orange { --fcc: var(--fc-orange); } :is(.fchip, .fc-sw).fc-yellow { --fcc: var(--fc-yellow); }
+  :is(.fchip, .fc-sw).fc-green { --fcc: var(--fc-green); } :is(.fchip, .fc-sw).fc-teal { --fcc: var(--fc-teal); } :is(.fchip, .fc-sw).fc-blue { --fcc: var(--fc-blue); }
+  :is(.fchip, .fc-sw).fc-purple { --fcc: var(--fc-purple); } :is(.fchip, .fc-sw).fc-pink { --fcc: var(--fc-pink); } :is(.fchip, .fc-sw).fc-gray { --fcc: var(--fc-gray); }
+  .fchip { width: 22px; height: 22px; margin: -4px -4px; border-radius: var(--r-s); display: grid; place-items: center; flex: none; background: color-mix(in srgb, var(--fcc) 20%, transparent); }   /* a coloured folder: its icon on a soft square of the colour (the layout width stays that of the plain icon) */
+  .project-row .fchip .picon { color: var(--fcc); }   /* after .project-row .picon, which would keep it grey */
+  .fc-pick { padding: 6px 12px 8px; }
+  .fc-row { display: grid; grid-template-columns: repeat(5, 22px); gap: 8px 10px; }
+  .fc-sw { width: 22px; height: 22px; padding: 0; border-radius: 50%; border: 0; background: var(--fcc); cursor: default; position: relative; }
+  .fc-sw.fc-none { background: transparent; box-shadow: inset 0 0 0 1.5px var(--border-2); }
+  .fc-sw.fc-none::before { content: ""; position: absolute; left: 4px; right: 4px; top: 50%; height: 1.5px; background: var(--danger); transform: rotate(-45deg); }
+  .fc-sw.on::after { content: ""; position: absolute; inset: -3px; border-radius: 50%; border: 2px solid var(--text-2); }
+  .fc-sw:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .project-row.dragging { opacity: 0.4; }
   .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
@@ -6224,6 +6238,12 @@ const ICO_LOCK = iconSvg('lock'), ICO_LOCK_OPEN = iconSvg('lock-open'), ICO_COPY
 // the names a note may carry as text colour / highlight (see noteApplyColor); defined with the sanitizer that needs them
 const NOTE_TEXT_COLORS = ['red', 'orange', 'green', 'blue', 'purple', 'gray'], NOTE_HL_COLORS = ['yellow', 'green', 'blue', 'pink', 'purple', 'gray'];
 
+// a folder's colour (Notes and Prompts): a name, never a raw colour; none = the plain icon
+const FOLDER_COLORS = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink', 'gray'];
+const folderColorLabel = n=>n.charAt(0).toUpperCase() + n.slice(1);
+const folderIconHtml = f=>{ const i = '<i class="fa-regular fa-folder picon"></i>'; return f && FOLDER_COLORS.includes(f.color) ? `<span class="fchip fc-${f.color}">${i}</span>` : i; };
+const folderColorPickHtml = (cur, fn, id)=>`<div class="fc-pick"><div class="nc-label">Colour</div><div class="fc-row">${['none', ...FOLDER_COLORS].map(n=>`<button type="button" class="fc-sw fc-${n}${(cur || 'none')===n ? ' on' : ''}" role="menuitem" title="${n==='none' ? 'No colour' : folderColorLabel(n)}" aria-label="Folder colour: ${n==='none' ? 'none' : folderColorLabel(n)}" aria-pressed="${(cur || 'none')===n}" onclick="${fn}('${id}','${n}')"></button>`).join('')}</div></div>`;
+
 const NOTE_UL_STYLES = ['dot','square','dash','emdash'], NOTE_OL_STYLES = ['alpha','roman'];   // list looks kept on paste/load; anything else becomes the plain default
 function decodeHtmlEntities(s){
   return String(s)
@@ -6380,6 +6400,7 @@ function normalizeNotes(){
   noteFolders.forEach((f, i)=>{
     if(!Number.isFinite(f.order)) f.order = (i + 1) * 1000;       // legacy folders: keep the order they were stored in
     if(!Number.isFinite(f.updatedAt)) f.updatedAt = 0;            // legacy folders count as the oldest version, so any real edit wins a merge
+    if(f.color!==undefined && !FOLDER_COLORS.includes(f.color)) delete f.color;
   });
   fixFolderParents();
   notes = notes.filter(n=>n && typeof n==='object');
@@ -6524,7 +6545,7 @@ function mergeNotesData(data, respectTombstones){
     if(!f || !f.id) return;
     const ex = noteFolders.find(x=>x.id===f.id);
     if(ex){                                                          // a rename, move or reorder: the newer edit wins
-      if((f.updatedAt||0) > (ex.updatedAt||0)){ const locked = ex.locked; Object.assign(ex, f); if(!f.parentId) delete ex.parentId; if(locked) ex.locked = true; }
+      if((f.updatedAt||0) > (ex.updatedAt||0)){ const locked = ex.locked; Object.assign(ex, f); if(!f.parentId) delete ex.parentId; if(!FOLDER_COLORS.includes(f.color)) delete ex.color; if(locked) ex.locked = true; }
       return;
     }
     const tomb = deletedNoteFolderIds.find(x=>x.id===f.id);
@@ -7210,7 +7231,7 @@ function folderMenuHtml(id){
   parts.push(item('fa-solid fa-arrow-down-to-bracket', 'Import Notes Here…', `folderMenuRun('import')`));
   const sibs = f.parentId ? folderChildren(f.parentId) : topFolders(), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `folderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `folderMenuRun('down')`, {off: at===sibs.length-1}));
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `folderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
+  parts.push('<div class="row-menu-sep"></div>', folderColorPickHtml(f.color, 'setNoteFolderColor', id), '<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `folderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `folderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `folderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
 }
 // Right-click menu of a project in the Tasks sidebar (the Notes folders have one too): the same builder pattern, title-style labels, danger last.
@@ -7337,6 +7358,14 @@ function openFolderMenu(e, id){
   menu.innerHTML = tidyMenuSeps(folderMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
 }
+function setNoteFolderColor(id, c){
+  closeRowMenu();
+  const f = folderById(id); if(!f) return;
+  c = FOLDER_COLORS.includes(c) ? c : '';
+  if((f.color || '')===c) return;
+  if(c) f.color = c; else delete f.color;
+  f.updatedAt = Date.now(); save(); renderNotesSidebar();
+}
 function folderMenuRun(kind){
   const id = folderMenuId; closeRowMenu();
   if(!id) return;
@@ -7419,7 +7448,7 @@ function renderNotesSidebar(){
       ? `<button type="button" class="folder-twisty" aria-label="${shut?'Expand':'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();toggleFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut?'right':'down'}"></i></button>`
       : '<span class="folder-twisty-gap"></span>';
     return `<div class="project-row ${noteFolderFilter===f.id?'active':''}${holds?' holds-active':''}${sub?' sub-folder':''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${noteFolderFilter===f.id}" onclick="setNoteFolder('${f.id}')" oncontextmenu="openFolderMenu(event,'${f.id}')" onkeydown="folderRowKey(event,'${f.id}')" draggable="true" ondragstart="handleFolderDragStart(event,'${f.id}')" ondragend="handleFolderDragEnd()" ondragover="handleFolderDragOver(event,'${f.id}')" ondragleave="handleFolderDragLeave(event)" ondrop="handleFolderDrop(event,'${f.id}')">
-      ${twisty}<i class="fa-regular fa-folder picon"></i>
+      ${twisty}${folderIconHtml(f)}
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${total(f)}</span>
       ${f.locked ? '' : `<span class="project-actions row-actions">
@@ -8634,6 +8663,7 @@ function normalizePrompts(){
     if(!isSafeId(f.id)) f.id = genId();
     f.name = String(f.name || 'Folder').slice(0,40);
     if(!Number.isFinite(f.updatedAt)) f.updatedAt = 0;
+    if(f.color!==undefined && !FOLDER_COLORS.includes(f.color)) delete f.color;
     if(!Number.isFinite(f.order)) delete f.order;
   });
   if(!promptFolders.some(f=>f.id===PROMPTS_DEFAULT_FOLDER)) promptFolders.unshift({ id: PROMPTS_DEFAULT_FOLDER, name: 'Prompts', locked: true, updatedAt: 0 });
@@ -8677,7 +8707,7 @@ function mergePromptsData(data, respectTombstones){
   (data.promptFolders || []).forEach(f=>{
     if(!f || !f.id) return;
     const ex = promptFolderById(f.id);
-    if(ex){ if((f.updatedAt || 0) > (ex.updatedAt || 0)){ Object.assign(ex, f); if(!f.parentId) delete ex.parentId; } return; }
+    if(ex){ if((f.updatedAt || 0) > (ex.updatedAt || 0)){ Object.assign(ex, f); if(!f.parentId) delete ex.parentId; if(!FOLDER_COLORS.includes(f.color)) delete ex.color; } return; }
     const tomb = deletedPromptFolderIds.find(x=>x.id===f.id);
     if(f.id!==PROMPTS_DEFAULT_FOLDER && respectTombstones && tomb && tomb.deletedAt >= (f.updatedAt || 0)) return;   // (the default folder is never deleted)
     if(tomb) untombstone(deletedPromptFolderIds, f.id);
@@ -8728,7 +8758,7 @@ function renderPromptsSidebar(){
       ? `<button type="button" class="folder-twisty" aria-label="${shut ? 'Expand' : 'Collapse'} ${esc(f.name)}" aria-expanded="${!shut}" onclick="event.stopPropagation();togglePromptFolderCollapsed('${f.id}')"><i class="fa-solid fa-chevron-${shut ? 'right' : 'down'}"></i></button>`
       : '<span class="folder-twisty-gap"></span>';
     return `<div class="project-row ${promptFolderFilter===f.id ? 'active' : ''}${holds ? ' holds-active' : ''}${sub ? ' sub-folder' : ''}" data-id="${f.id}" role="button" tabindex="0" aria-pressed="${promptFolderFilter===f.id}" onclick="setPromptFolder('${f.id}')" oncontextmenu="openPromptFolderMenu(event,'${f.id}')" onkeydown="promptFolderRowKey(event,'${f.id}')"${f.locked ? '' : ` draggable="true" ondragstart="promptFolderDragStart(event,'${f.id}')" ondragend="promptFolderDragEnd()"`} ondragover="promptFolderDragOver(event,'${f.id}')" ondragleave="this.classList.remove('drop-into','drag-over-top','drag-over-bottom')" ondrop="promptFolderDrop(event,'${f.id}')">
-      ${twisty}<i class="fa-regular fa-folder picon"></i>
+      ${twisty}${folderIconHtml(f)}
       <span class="pname">${esc(f.name)}</span>
       <span class="count">${total(f)}</span>
       ${f.locked ? '' : `<span class="project-actions row-actions">
@@ -9611,7 +9641,7 @@ function promptFolderMenuHtml(id){
   if(!f.parentId) parts.push(item('fa-regular fa-folder-plus', 'New Subfolder', `promptFolderMenuRun('newsub')`));
   const sibs = f.locked ? [] : promptFolderSibs(f), at = sibs.findIndex(x=>x.id===f.id);
   if(sibs.length>1) parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-arrow-up', 'Move Up', `promptFolderMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `promptFolderMenuRun('down')`, {off: at===sibs.length-1}));
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `promptFolderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true, off:!!f.locked}));
+  parts.push('<div class="row-menu-sep"></div>', folderColorPickHtml(f.color, 'setPromptFolderColor', id), '<div class="row-menu-sep"></div>', item('fa-solid fa-pen', 'Edit…', `promptFolderMenuRun('rename')`, {off:!!f.locked}), item('fa-solid fa-arrow-up-from-bracket', 'Export Folder', `promptFolderMenuRun('export')`), item('fa-solid fa-trash', 'Delete', `promptFolderMenuRun('delete')`, {danger:true, off:!!f.locked}));
   return parts.join('');
 }
 function openPromptFolderMenu(e, id){
@@ -9622,6 +9652,14 @@ function openPromptFolderMenu(e, id){
   promptFolderMenuId = id; promptMenuId = null; noteMenuId = null; folderMenuId = null;
   menu.innerHTML = tidyMenuSeps(promptFolderMenuHtml(id));
   placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function setPromptFolderColor(id, c){
+  closeRowMenu();
+  const f = promptFolderById(id); if(!f) return;
+  c = FOLDER_COLORS.includes(c) ? c : '';
+  if((f.color || '')===c) return;
+  if(c) f.color = c; else delete f.color;
+  f.updatedAt = Date.now(); save(); renderPromptsSidebar();
 }
 function promptFolderMenuRun(kind){
   const id = promptFolderMenuId; closeRowMenu(); if(!id) return;

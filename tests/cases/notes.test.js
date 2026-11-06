@@ -1011,3 +1011,15 @@ test('sanitizeNoteHtml: bold inside a heading is dropped (a heading is bold by i
   assertEqual(sanitizeNoteHtml('<h2><span style="font-weight: normal;">Title</span></h2><h3><span style="font-weight:700">T</span></h3>'), '<h2>Title</h2><h3>T</h3>');
   assertEqual(sanitizeNoteHtml('<h2><span data-nw="1">Title</span></h2>'), '<h2>Title</h2>', 'the earlier un-bold mark is gone');
 });
+
+test('folder colours: only palette names are kept, a newer copy can clear one, and the row shows the soft square', function () {
+  noteFolders = [{ id: 'nf-notes', name: 'Notes', locked: true }, { id: 'fcx', name: 'A', color: 'blue' }, { id: 'fcy', name: 'B', color: 'javascript:1' }];
+  notes = []; normalizeNotes();
+  assertEqual(noteFolders.find(function(f){ return f.id==='fcx'; }).color, 'blue');
+  assertEqual(noteFolders.find(function(f){ return f.id==='fcy'; }).color, undefined, 'a colour that is not in the palette is dropped');
+  mergeNotesData({ noteFolders: [{ id: 'fcx', name: 'A', updatedAt: 5 }] }, true);
+  assertEqual(noteFolders.find(function(f){ return f.id==='fcx'; }).color, undefined, 'a newer copy without a colour clears it');
+  assertIncludes(folderIconHtml({ color: 'green' }), 'fchip fc-green');
+  assertNotIncludes(folderIconHtml({}), 'fchip');
+  assertIncludes(folderColorPickHtml('blue', 'setNoteFolderColor', 'fcx'), "setNoteFolderColor('fcx','blue')");
+});
