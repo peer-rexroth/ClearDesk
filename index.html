@@ -11879,6 +11879,14 @@ function handlePromptsKeys(e){
   else if((e.key==='Delete' || e.key==='Backspace') && selectedPromptId){ e.preventDefault(); deletePrompt(selectedPromptId); }
 }
 
+// A drag that starts inside a dialog (selecting text in a field) and ends on the backdrop must not close it:
+// the browser then fires "click" on the backdrop, so ignore clicks whose press began elsewhere.
+let pressedOnBackdrop = true;
+if(typeof document!=='undefined' && document.addEventListener){
+  document.addEventListener('mousedown', e => { pressedOnBackdrop = !!(e.target.classList && e.target.classList.contains('modal-bg')); }, true);
+  document.addEventListener('click', e => { if(e.target.classList && e.target.classList.contains('modal-bg') && !pressedOnBackdrop){ e.stopPropagation(); e.preventDefault(); } }, true);
+}
+
 // ── Help dialog (tabbed, with search — modelled on Milestone's) ────────────────
 const HELP_TABS = ['start', 'edit', 'nest', 'views', 'org', 'notes', 'prompts', 'look', 'data'];
 const HELP_TAB_LABELS = { start: 'Getting started', edit: 'Editing in place', nest: 'Subtasks & repeating', views: 'Views & filters', org: 'Projects & tags', notes: 'Notes', prompts: 'Prompts', look: 'Appearance', data: 'Data & sync' };
