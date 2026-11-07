@@ -10298,15 +10298,15 @@ function noteTableMenuHtml(viaRowMenu){
   const { table, c: cc } = noteCellPos(cell), item = rowMenuItem, run = op=>viaRowMenu ? `tblCellMenuRun('${op}')` : `noteTableEdit('${op}')`;   // the right-click menu lives in #rowMenu, which must close first
   const [headers, widths, del] = tblTableItems(table, run);
   const rowSub = rowMenuSub('fa-solid fa-table-row', 'Row', tblMenuJoin([
-    [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item('fa-solid fa-duplicate', 'Duplicate Row', run('dupRow'))],
+    [item('fa-solid fa-duplicate', 'Duplicate Row', run('dupRow'))],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true})]]));
   const colSub = rowMenuSub('fa-solid fa-table-column', 'Column', tblMenuJoin([
-    [item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), item('fa-solid fa-duplicate', 'Duplicate Column', run('dupCol'))],
+    [item('fa-solid fa-duplicate', 'Duplicate Column', run('dupCol'))],
     [...tblSortItems(run), ...tblAlignItems(table, cc, cc, run), item(tblInsIcon('narrow'), 'Fit Column to Content', run('fitCols'))],
     [item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true})]]));
   const tabSub = rowMenuSub('fa-solid fa-table-cells', 'Table', tblMenuJoin([headers, widths, del]));
-  // Insert Row Below / Insert Column Right are the most common table edits: one click here, the full set (above, left, duplicate, delete …) in the submenus
-  return tblMenuJoin([viaRowMenu ? tblClipItems(run) : [], [item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), rowSub, colSub, tabSub], [tblBgSwatches('tblCellColor')]]);
+  // The four Insert commands are the most common table edits: one click here, and not repeated in the submenus (which hold Duplicate, Sort, Align, Fit and Delete)
+  return tblMenuJoin([viaRowMenu ? tblClipItems(run) : [], [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), rowSub, colSub, tabSub], [tblBgSwatches('tblCellColor')]]);
 }
 const tblSortItems = run=>[rowMenuItem('fa-solid fa-arrow-down-wide-short', 'Sort A to Z', run('sortAsc')), rowMenuItem('fa-solid fa-arrow-up-wide-short', 'Sort Z to A', run('sortDesc'))];
 // What a table's own menu and the cell menu's Table submenu offer: the header toggles, the table's width, Delete Table (three groups of items).
