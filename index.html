@@ -10306,7 +10306,7 @@ function noteTableMenuHtml(viaRowMenu){
     [item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true})]]));
   const tabSub = rowMenuSub('fa-solid fa-table-cells', 'Table', tblMenuJoin([headers, widths, del]));
   // Insert Row Below / Insert Column Right are the most common table edits: one click here, the full set (above, left, duplicate, delete …) in the submenus
-  return tblMenuJoin([viaRowMenu ? tblClipItems(run) : [], [tblBgSwatches('tblCellColor'), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), rowSub, colSub, tabSub]]);
+  return tblMenuJoin([viaRowMenu ? tblClipItems(run) : [], [item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), rowSub, colSub, tabSub], [tblBgSwatches('tblCellColor')]]);
 }
 const tblSortItems = run=>[rowMenuItem('fa-solid fa-arrow-down-wide-short', 'Sort A to Z', run('sortAsc')), rowMenuItem('fa-solid fa-arrow-up-wide-short', 'Sort Z to A', run('sortDesc'))];
 // What a table's own menu and the cell menu's Table submenu offer: the header toggles, the table's width, Delete Table (three groups of items).
@@ -10550,14 +10550,14 @@ function tblGripMenuHtml(kind, sel, table){
   const noun = col ? 'column' : 'row', nounN = n>1 ? `${n} ${noun}s` : noun, title = t=>t.replace(/\b[a-z]/g, c=>c.toUpperCase());   // menu items are in Title Case ("Insert 3 Columns Left")
   return tblMenuJoin([
     tblClipItems(run),
-    [table ? tblBgSwatches('tblGripColor', col ? 'Column Colour' : 'Row Colour') : '',
-     item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), title(`Insert ${nounN} ${col ? 'left' : 'above'}`), run(col ? 'colBefore' : 'rowBefore')),
+    [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), title(`Insert ${nounN} ${col ? 'left' : 'above'}`), run(col ? 'colBefore' : 'rowBefore')),
      item(tblInsIcon(col ? 'colRight' : 'rowBelow'), title(`Insert ${nounN} ${col ? 'right' : 'below'}`), run(col ? 'colAfter' : 'rowAfter')),
      item('fa-solid fa-duplicate', n>1 ? title(`Duplicate ${nounN}`) : `Duplicate ${title(noun)}`, run(col ? 'dupCol' : 'dupRow')),
      ...(table && col ? tblSortItems(run) : []),
      ...(table && col ? [rowMenuSub(tblAlignIcon('left'), 'Align Column', tblAlignItems(table, a, b, run, null).join('')),
        item(TBL_ICON.even, n>1 ? `Make ${n} Columns Equal Width` : 'Make Columns Equal Width', run('equalCols'), {off: n<2}), item(tblInsIcon('narrow'), n>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))] : []),
-     ...(table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: a!==0})] : [])],   // a table setting: last, and only on the first row / column
+     ...(table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: a!==0})] : []),   // a table setting, and only on the first row / column
+     ...(table ? [tblBgSwatches('tblGripColor', col ? 'Column Colour' : 'Row Colour')] : [])],   // colour is formatting: the last line of the body, above Delete
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true})]     // Delete Table is not here (it is a far bigger step than deleting a row, and would sit right under it): it is in the table's own menu
   ]);
 }
@@ -10622,9 +10622,10 @@ function tblTableMenuHtml(table){
   const item = rowMenuItem, run = op=>`tblTableRun('${op}')`, cols = Math.max(...[...table.rows].map(x=>x.cells.length)), [headers, widths, del] = tblTableItems(table, run);
   return tblMenuJoin([
     [item(TBL_ICON.cut, 'Cut', run('cut'), {hint: platformKeyTitle('⌘X')}), item(TBL_ICON.copy, 'Copy', run('copy'), {hint: platformKeyTitle('⌘C')}), item(TBL_ICON.paste, 'Paste', run('paste'), {hint: platformKeyTitle('⌘V')})],
-    [tblBgSwatches('tblTableColor', 'Table Colour'), ...headers,
+    [...headers,
      rowMenuSub(tblAlignIcon('left'), 'Align Columns', tblAlignItems(table, 0, cols - 1, run, null).join('')),
-     rowMenuSub(tblInsIcon('widen'), 'Width', tblMenuJoin([[...widths, item(tblInsIcon('narrow'), 'Fit Columns to Content', run('fitCols'))]]))],
+     rowMenuSub(tblInsIcon('widen'), 'Width', tblMenuJoin([[...widths, item(tblInsIcon('narrow'), 'Fit Columns to Content', run('fitCols'))]])),
+     tblBgSwatches('tblTableColor', 'Table Colour')],
     del
   ]);
 }
@@ -10847,7 +10848,8 @@ function tblBlockMenuHtml(){
     [item(TBL_ICON.cut, 'Cut', run('cut'), {hint: platformKeyTitle('⌘X')}), item(TBL_ICON.copy, 'Copy', run('copy'), {hint: platformKeyTitle('⌘C')}), item(TBL_ICON.paste, 'Paste', run('paste'), {hint: platformKeyTitle('⌘V')}), item('fa-solid fa-xmark', 'Clear Contents', run('clear'))],
     [item('fa-solid fa-arrow-down', 'Fill Down', run('fillDown'), { hint: platformKeyTitle('⌘D') }), item('fa-solid fa-arrow-right', 'Fill Right', run('fillRight')),
      rowMenuSub(tblAlignIcon('left'), 'Align Cells', [item(tblAlignIcon('left'), 'Left', run('alignLeft')), item(tblAlignIcon('center'), 'Center', run('alignCenter')), item(tblAlignIcon('right'), 'Right', run('alignRight'))].join('')),
-     tblBgSwatches(), rowSub, colSub]
+     rowSub, colSub],
+    [tblBgSwatches()]
   ]);
 }
 const tblBlockColor = n=>tblBlockRun('bg:' + n);
