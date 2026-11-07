@@ -8,6 +8,8 @@
 }
 
 html {
+  /* Folder colours (Notes and Prompts): a folder shows its icon on a soft square of one of these; the same dots pick the colour. Names, never raw colours, are stored. */
+  --fc-red: #ff453a; --fc-orange: #ff9f0a; --fc-yellow: #d19b00; --fc-green: #2fb350; --fc-teal: #30b0a0; --fc-blue: #0a84ff; --fc-purple: #af52de; --fc-pink: #ff375f; --fc-gray: #8e8e93;
   --submenu-w: 164px;
   --bar-ctl-h: 36px;                /* the height of every control in a column's 52px bar (capsule groups, selects, round buttons) */
   /* Per-pane hooks, set on the pane that needs them and not defaults: --list-w (a list column's width, falls back to --notes-list-w: 300px),
@@ -64,6 +66,7 @@ html[data-scheme="glass"] {
   --wall: radial-gradient(55% 45% at 12% 10%, #dfe3ea 0, transparent 70%), radial-gradient(50% 45% at 88% 15%, #f3f4f7 0, transparent 70%), radial-gradient(60% 55% at 75% 95%, #cfd5df 0, transparent 70%), linear-gradient(160deg, #eef0f4, #e3e6ec);
 }
 
+html[data-theme="dark"] { --fc-yellow: #ffd60a; --fc-green: #34c759; }
 html[data-scheme="glass"][data-theme="dark"] {
   --bg: rgba(34,36,52,.50);
   --bg-2: rgba(22,24,36,.40);

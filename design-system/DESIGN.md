@@ -8,7 +8,7 @@ An Apple-style look for a web app (a PWA used mostly in desktop Chrome on macOS)
 |---|---|
 | `DESIGN.md` | this guide |
 | `tokens.css` | every colour, size, radius, shadow and motion token, light and dark, extracted from the app |
-| `icons.json` | the whole icon set (121 icons): name → inner SVG markup on a 24 grid |
+| `icons.json` | the whole icon set (124 icons): name → inner SVG markup on a 24 grid |
 | `icon-sheet.html` | a preview of every icon at 32px and the four drawn sizes (open it in a browser) |
 | `assets/` | the app-icon masters (`icon.svg`, `icon-maskable.svg`, `favicon.svg`) and `manifest.json`, as examples for section 14 |
 
@@ -62,6 +62,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 - **Dark mode is a second full set of values**, not an inversion. Define the same variables in both blocks (a variable only the light block sets leaks into dark).
 - **Theme** follows the system live; the user may override with Light / Dark. It is a per-device preference, never synced.
 - **Neutral blue-grey** palette (a hint of blue in every grey: `#f2f3f7`, `#171925`), not pure grey.
+- **Folder colours** (`--fc-red … --fc-gray`, nine; yellow and green are brighter in dark): optional, none by default. A coloured folder draws its 14px icon in the colour on a soft square of it (20% of the colour, `--r-s`, 22px, laid out as the plain icon so rows do not shift), as the System Settings icons do but softer than their solid squares. They are chosen with the same 24px dots as note colours (`.nc-sw`), five to a row.
 
 ### 2.2 Typography
 
@@ -171,6 +172,9 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Pin / Favourite | `thumbtack` / `star` | |
 | Show/hide panel | a framed box with a side column | |
 | Check / complete | `check`, `circle-check` | round checklist items match the icon |
+| Table row / column (a group of commands about one) | `table-row` / `table-column` | the table box with two horizontal / two vertical lines; **not** `table-columns`, which is the Board view |
+| Sort ascending / descending | `arrow-down-wide-short` / `arrow-up-wide-short` | one icon per direction |
+| Clear contents | `xmark` | the cell is emptied, not removed |
 
 The icon set: `icons.json`, preview in `icon-sheet.html`. To add an icon: draw it on the 24 grid, add it to the registry under a name that states its meaning, never reuse another action's name.
 
@@ -234,6 +238,7 @@ One shape per job, so the same kind of thing always looks the same:
 - **Surface:** glass (2.4), `--r-xl`, 230px wide for the main menu, small option menus at a fixed `--submenu-w` 164px so Priority/Status/Due/Move look the same everywhere.
 - **Row:** 8px radius, a 22px tick column for the current value (✓ at the left for single-choice lists, at the right for toggle states), then a dot or 16px icon, then the label. **Hover fills the row with the accent and turns text white**, as in a macOS pop-up; a destructive item turns white on it too.
 - **A flyout is as wide as its longest label** (`width: max-content`, at least `--submenu-w`, at most 280px) so labels like "Plain Text (.txt)" never wrap onto a second line; it is measured while hidden and flips to the left when it would leave the window.
+- **Table menus** (cell, block, column, row, whole table) follow these rules: Cut / Copy / Paste (/ Clear Contents) first with their shortcut hints, then the colour dots and the commands that change the structure, Delete (and Delete Table) the last group, red; at most three groups; commands that do not apply are left out. The cell menu keeps the commands of each scope in one submenu (Row, Column, Table: `table-row`, `table-column`, `table-cells`), so the parent says what a command acts on; labels name their scope where it is not obvious ("Align Column Left", "Align Cells", "Column Colour"). The toolbar's table button opens the same popover when the caret is in a table.
 - **Context-menu rules:** Title-style labels ("Open Details", "Add Subtask", "Move to"); few items; **one level of submenu** (hover or click to open, flips left and nudges up when near the edge); **hide unavailable items** (do not dim); separators group (≤ 3 groups; the task row menu's four are a documented exception, U-07) and are cleaned up when a group empties; Delete is always its own last group, red; the ⌫ glyph hint, not "Del". A command that opens a dialog or asks for more input ends in an ellipsis ("Edit…", "Print / Save as PDF…"); a row that only acts does not. Move to lists its targets with an icon each (project icons in Tasks, the folder glyph in Notes and Prompts): icons on all rows or none.
 - **Coverage:** every row in the sidebar has a right-click menu: a project or folder (New Here, Edit…, Delete), a smart view or All / Pinned / Favorites row (New Task / Note / Prompt Here; Overdue also *Move All to Today*), and a Recently Deleted row (*Delete All…*, nothing while it is empty).
 - Every context-menu command also exists in a visible control (toolbar, panel, ⋯ button).
