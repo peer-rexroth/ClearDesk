@@ -8,7 +8,7 @@ An Apple-style look for a web app (a PWA used mostly in desktop Chrome on macOS)
 |---|---|
 | `DESIGN.md` | this guide |
 | `tokens.css` | every colour, size, radius, shadow and motion token, light and dark, extracted from the app |
-| `icons.json` | the whole icon set (124 icons): name → inner SVG markup on a 24 grid |
+| `icons.json` | the whole icon set (126 icons): name → inner SVG markup on a 24 grid |
 | `icon-sheet.html` | a preview of every icon at 32px and the four drawn sizes (open it in a browser) |
 | `assets/` | the app-icon masters (`icon.svg`, `icon-maskable.svg`, `favicon.svg`) and `manifest.json`, as examples for section 14 |
 
@@ -165,7 +165,9 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | New (compose) | a square with a pen | |
 | Prompts | `braces` | curly braces |
 | Compare | `diff` | a rounded square, a + above a − |
-| Swap / move sideways | `arrows-left-right` | only for "Distribute columns evenly" (it reads as swap) |
+| Swap / move sideways | `arrows-left-right` | a swap glyph; not used for "Distribute columns evenly" any more (that is `columns-equal`) |
+| Equal column widths / Distribute columns evenly | `columns-equal` | the table box with two dividers at thirds: the result, not an arrow |
+| Fit a column to its content | `fit-to-content` | two arrows pointing in at a small block; **not** the Decrease Width icon (`tblInsIcon('narrow')`) |
 | New folder / subfolder | `folder-plus` | `folder-open` = link a file/folder, `folder` = plain |
 | Undo / Redo | `undo` / `redo` | hooked arrows; the circular arrow `rotate-left` is for *Restore* and *Reset* |
 | Lock / unlock | `lock` / `lock-open` | amber while locked |

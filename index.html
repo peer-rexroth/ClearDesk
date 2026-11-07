@@ -59,6 +59,7 @@ const ICONS = {
   "compass": "<circle cx=\"12\" cy=\"12\" r=\"8.5\"/><path d=\"m15.5 8.5-2 5-5 2 2-5z\"/>",
   "computer-mouse": "<rect x=\"7\" y=\"3.5\" width=\"10\" height=\"17\" rx=\"5\"/><path d=\"M12 3.5v6\"/>",
   "copy": "<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5\"/>",
+  "columns-equal": "<rect x=\"4\" y=\"5\" width=\"16\" height=\"14\" rx=\"2.5\"/><path d=\"M9.3 5v14M14.7 5v14\"/>",
   "diff": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"3\"/><path d=\"M7.2 9.5h4.6M9.5 7.2v4.6\"/><path d=\"M12.2 14.5h4.6\"/>",
   "display": "<rect x=\"3.5\" y=\"4.5\" width=\"17\" height=\"11.5\" rx=\"2.5\"/><path d=\"M9 20h6M12 16v4\"/>",
   "dollar-sign": "<path d=\"M12 3.5v17M16 8a3.5 3 0 0 0-4-2.2c-2.4 0-4 1-4 2.8 0 4 8 2 8 6 0 1.8-1.8 2.9-4 2.9A4 3 0 0 1 8 16\"/>",
@@ -70,6 +71,7 @@ const ICONS = {
   "file-circle-plus": "<path d=\"M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h4M13.5 3.5 19 9v2.5M13.5 3.5V9H19\"/><path d=\"M17 14.5v6M14 17.5h6\"/>",
   "file-lines": "<path d=\"M7 3.5h6.5L19 9v10a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z\"/><path d=\"M13.5 3.5V9H19M8.5 13h7M8.5 16.5h5\"/>",
   "filter": "<path d=\"M4 6h16l-6 7v5.5l-4 2V13z\"/>",
+  "fit-to-content": "<path d=\"M4 12h4M6.3 9.8 8.5 12l-2.2 2.2M20 12h-4M17.7 9.8 15.5 12l2.2 2.2\"/><path d=\"M12 8.5v7\"/>",
   "flag": "<path d=\"M6 20.5V4.5\"/><path d=\"M6 5.5h10.5l-2 3.5 2 3.5H6\"/>",
   "folder": "<path d=\"M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z\"/>",
   "folder-open": "<g transform=\"translate(-0.366 0.394) scale(0.966)\" stroke-width=\"2.069\"><path d=\"M4 18V6.5A2 2 0 0 1 6 4.5h3.6l2 2.2H17A2 2 0 0 1 19 8.7V10\"/><path d=\"M4 18l2.2-6.3A2 2 0 0 1 8.1 10.3h12.1a1.4 1.4 0 0 1 1.3 1.9L19.3 17.6A2 2 0 0 1 17.4 19H6a2 2 0 0 1-2-1z\"/></g>",
@@ -10309,7 +10311,7 @@ const tblHeaderIcon = kind=>`<svg class="tbl-ins" viewBox="0 0 20 20" fill="none
     ? `<rect x="2.5" y="3" width="15" height="14" rx="2.6" stroke="currentColor" stroke-width="1.5" opacity=".6"/><path d="M3.2 6.2a2.4 2.4 0 0 1 2.4-2.4h8.8a2.4 2.4 0 0 1 2.4 2.4V8H3.2Z" fill="currentColor"/>`
     : `<rect x="3" y="2.5" width="14" height="15" rx="2.6" stroke="currentColor" stroke-width="1.5" opacity=".6"/><path d="M6.2 16.8A2.4 2.4 0 0 1 3.8 14.4V5.6a2.4 2.4 0 0 1 2.4-2.4H8v13.6Z" fill="currentColor"/>`)
   + `</svg>`;
-const TBL_ICON = { paste:'fa-solid fa-paste', del:'fa-solid fa-minus', delTable:'fa-regular fa-trash-can', cut:'fa-solid fa-scissors', copy:'fa-regular fa-copy', even:'fa-solid fa-arrows-left-right' };
+const TBL_ICON = { paste:'fa-solid fa-paste', del:'fa-solid fa-minus', delTable:'fa-regular fa-trash-can', cut:'fa-solid fa-scissors', copy:'fa-regular fa-copy', even:'fa-solid fa-columns-equal' };
 // The menus of a table all read the same way (DESIGN 5.5): at most three groups, Cut / Copy / Paste / Clear first, then colour and what changes the structure, Delete always its own
 // last group; a command that does not apply is left out, not dimmed. The cell menu keeps the commands of each scope in a submenu (Row, Column, Table), so what a command acts on is
 // in its parent's name (and the menu is a handful of lines, not twenty-one).
@@ -10325,7 +10327,7 @@ function noteTableMenuHtml(viaRowMenu){
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true})]]));
   const colSub = rowMenuSub('fa-solid fa-table-column', 'Column', tblMenuJoin([
     [item('fa-solid fa-duplicate', 'Duplicate Column', run('dupCol')), item(tblHeaderIcon('col'), 'Header Column', run('headerCols'), tblTick(tblColsAreHeader(table, cc, cc)))],
-    [...tblSortItems(run), ...tblAlignItems(table, cc, cc, run), item(tblInsIcon('narrow'), 'Fit Column to Content', run('fitCols'))],
+    [...tblSortItems(run), ...tblAlignItems(table, cc, cc, run), item('fa-solid fa-fit-to-content', 'Fit Column to Content', run('fitCols'))],
     [item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true})]]));
   const tabSub = rowMenuSub('fa-solid fa-table-cells', 'Table', tblMenuJoin([widths, del]));
   // The four Insert commands are the most common table edits: one click here, and not repeated in the submenus (which hold Duplicate, Sort, Align, Fit and Delete)
@@ -10578,7 +10580,7 @@ function tblGripMenuHtml(kind, sel, table){
      item('fa-solid fa-duplicate', n>1 ? title(`Duplicate ${nounN}`) : `Duplicate ${title(noun)}`, run(col ? 'dupCol' : 'dupRow')),
      ...(table && col ? tblSortItems(run) : []),
      ...(table && col ? [rowMenuSub(tblAlignIcon('left'), 'Align Column', tblAlignItems(table, a, b, run, null).join('')),
-       item(TBL_ICON.even, n>1 ? `Make ${n} Columns Equal Width` : 'Make Columns Equal Width', run('equalCols'), {off: n<2}), item(tblInsIcon('narrow'), n>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))] : []),
+       item(TBL_ICON.even, n>1 ? `Make ${n} Columns Equal Width` : 'Make Columns Equal Width', run('equalCols'), {off: n<2}), item('fa-solid fa-fit-to-content', n>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))] : []),
      ...(table ? [col ? item(tblHeaderIcon('col'), n>1 ? 'Header Columns' : 'Header Column', run('headerCols'), tblTick(tblColsAreHeader(table, a, b))) : item(tblHeaderIcon('row'), n>1 ? 'Header Rows' : 'Header Row', run('headerRows'), tblTick(tblRowsAreHeader(table, a, b)))] : []),   // any row / column can be styled as header or put back
      ...(table ? [tblBgSwatches('tblGripColor', col ? 'Column Colour' : 'Row Colour')] : [])],   // colour is formatting: the last line of the body, above Delete
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true})]     // Delete Table is not here (it is a far bigger step than deleting a row, and would sit right under it): it is in the table's own menu
@@ -10647,7 +10649,7 @@ function tblTableMenuHtml(table){
     [item(TBL_ICON.cut, 'Cut', run('cut'), {hint: platformKeyTitle('⌘X')}), item(TBL_ICON.copy, 'Copy', run('copy'), {hint: platformKeyTitle('⌘C')}), item(TBL_ICON.paste, 'Paste', run('paste'), {hint: platformKeyTitle('⌘V')})],
     [...headers,
      rowMenuSub(tblAlignIcon('left'), 'Align Columns', tblAlignItems(table, 0, cols - 1, run, null).join('')),
-     rowMenuSub(tblInsIcon('widen'), 'Width', tblMenuJoin([[...widths, item(tblInsIcon('narrow'), 'Fit Columns to Content', run('fitCols'))]])),
+     rowMenuSub(tblInsIcon('widen'), 'Width', tblMenuJoin([[...widths, item('fa-solid fa-fit-to-content', 'Fit Columns to Content', run('fitCols'))]])),
      tblBgSwatches('tblTableColor', 'Table Colour')],
     del
   ]);
@@ -10865,7 +10867,7 @@ function tblBlockMenuHtml(){
     [item(TBL_ICON.del, tc(`Delete ${pl(nr, 'row')}`), run('delRow'), {danger:true})]]));
   const colSub = rowMenuSub('fa-solid fa-table-column', 'Columns', tblMenuJoin([
     [item(tblInsIcon('colLeft'), tc(`Insert ${pl(nc, 'column')} left`), run('colBefore')), item(tblInsIcon('colRight'), tc(`Insert ${pl(nc, 'column')} right`), run('colAfter')), item('fa-solid fa-duplicate', tc(`Duplicate ${pl(nc, 'column')}`), run('dupCol')), item(tblHeaderIcon('col'), nc>1 ? 'Header Columns' : 'Header Column', run('headerCols'), tblTick(blk ? tblColsAreHeader(tblBlockAtMenu.table, blk.c1, blk.c2) : false))],
-    [...tblSortItems(run), item(TBL_ICON.even, 'Make Columns Equal Width', run('equalCols'), {off: nc<2}), item(tblInsIcon('narrow'), nc>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))],
+    [...tblSortItems(run), item(TBL_ICON.even, 'Make Columns Equal Width', run('equalCols'), {off: nc<2}), item('fa-solid fa-fit-to-content', nc>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))],
     [item(TBL_ICON.del, tc(`Delete ${pl(nc, 'column')}`), run('delCol'), {danger:true})]]));
   return tblMenuJoin([
     [item(TBL_ICON.cut, 'Cut', run('cut'), {hint: platformKeyTitle('⌘X')}), item(TBL_ICON.copy, 'Copy', run('copy'), {hint: platformKeyTitle('⌘C')}), item(TBL_ICON.paste, 'Paste', run('paste'), {hint: platformKeyTitle('⌘V')}), item('fa-solid fa-xmark', 'Clear Contents', run('clear'))],
