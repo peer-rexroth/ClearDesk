@@ -10141,11 +10141,13 @@ function noteTableEdit(op, ref){
   }
   if(op==='rowBefore' || op==='rowAfter'){
     const anchor = clone.rows[op==='rowBefore' ? rowLo : rowHi], headCol = tblHeadCol(clone);   // a header column keeps its header cell in the new rows
+    const aboveHeader = op==='rowBefore' && rowLo===0 && tblHeadRow(clone);                      // above the header row: the new first row becomes the header, the old one an ordinary row
     for(let k=0; k<nRows; k++){
       const tr = document.createElement('tr');
-      for(let i=0; i<colsN; i++){ const nc = mk(i===0 && headCol ? 'th' : 'td'), al = anchor.cells[i] && anchor.cells[i].getAttribute('data-al'); if(al) nc.setAttribute('data-al', al); tr.appendChild(nc); }   // a new row keeps each column's alignment
+      for(let i=0; i<colsN; i++){ const nc = mk((aboveHeader && k===0) || (i===0 && headCol) ? 'th' : 'td'), al = anchor.cells[i] && anchor.cells[i].getAttribute('data-al'); if(al) nc.setAttribute('data-al', al); tr.appendChild(nc); }   // a new row keeps each column's alignment
       if(op==='rowBefore') anchor.before(tr); else anchor.after(tr);
     }
+    if(aboveHeader) [...anchor.cells].forEach((x, i)=>{ if(x.tagName==='TH' && !(i===0 && headCol)) swap(x, 'td'); });   // the former header row loses its header look (a header column keeps its corner cell)
     focusR = op==='rowBefore' ? rowLo : rowHi + 1;
   }
   else if(op==='colBefore' || op==='colAfter'){
@@ -10171,6 +10173,15 @@ function noteTableEdit(op, ref){
   else if(op==='widen' || op==='narrow'){
     const nw = noteTableNextWidth(clone, op==='widen' ? 1 : -1); if(nw===null) return;
     if(nw>=100) clone.removeAttribute('style'); else clone.style.width = nw + '%';
+  }
+  else if(op==='headerRows' || op==='headerCols'){            // style the selected rows (columns) as header, or back to ordinary cells: on any row, not only the first
+    const hc = tblHeadCol(clone), hr = tblHeadRow(clone), targets = [];
+    [...clone.rows].forEach((row, ri)=>{ [...row.cells].forEach((x, k)=>{
+      if(op==='headerRows' ? (ri>=rowLo && ri<=rowHi && !(k===0 && hc)) : (k>=colLo && k<=colHi && !(ri===0 && hr))) targets.push(x);
+    }); });
+    if(!targets.length) return;
+    const to = targets.every(x=>x.tagName==='TH') ? 'td' : 'th';
+    targets.forEach(x=>swap(x, to));
   }
   else if(op==='headerCol'){
     const on = !tblHeadCol(clone), headRow = tblHeadRow(clone);
@@ -10253,6 +10264,18 @@ const TBL_INS_PATHS = {
 const tblInsIcon = k=>`<svg class="tbl-ins" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="${TBL_INS_PATHS[k][0]}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" opacity=".5"/><path d="${TBL_INS_PATHS[k][1]}" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 // Header row = every cell of the first row is a <th>; header column = the first cell of every row below the first is a <th> (needs 2+ rows).
 const tblHeadRow = table=>!!(table.rows[0] && [...table.rows[0].cells].every(x=>x.tagName==='TH'));
+// Rows lo..hi (columns lo..hi) are styled as header when all their cells are <th>; under a header column its corner cells (a header row's first cell), and under a header row its
+// first-row cells, are always headers and do not count.
+const tblRowsAreHeader = (table, lo, hi)=>{
+  const hc = tblHeadCol(table); let ok = true, seen = false;
+  for(let r = lo; r<=hi; r++) [...(table.rows[r] ? table.rows[r].cells : [])].forEach((x, i)=>{ if(i===0 && hc) return; seen = true; if(x.tagName!=='TH') ok = false; });
+  return seen && ok;
+};
+const tblColsAreHeader = (table, lo, hi)=>{
+  const hr = tblHeadRow(table); let ok = true, seen = false;
+  [...table.rows].forEach((row, ri)=>{ for(let k = lo; k<=hi; k++){ const x = row.cells[k]; if(!x || (ri===0 && hr)) continue; seen = true; if(x.tagName!=='TH') ok = false; } });
+  return seen && ok;
+};
 const tblHeadCol = table=>table.rows.length>1 && [...table.rows].slice(1).every(row=>row.cells[0] && row.cells[0].tagName==='TH');
 // The four table menus (toolbar menu, row grip, column grip, whole-table grip) share one grammar and one item builder, so they look and read alike:
 //   Insert (row above/below, column left/right)  |  Header toggle(s)  |  [Cut / Copy]  |  Delete (the selection first, then Delete table)
@@ -10295,16 +10318,16 @@ function noteTableMenuHtml(viaRowMenu){
   if(whole) return tblTableMenuHtml(whole);                      // the whole table is selected (corner grip): the same options as its right-click menu
   const cell = noteSelectedCell();
   if(!cell) return noteTablePickerHtml(noteTablePicker);
-  const { table, c: cc } = noteCellPos(cell), item = rowMenuItem, run = op=>viaRowMenu ? `tblCellMenuRun('${op}')` : `noteTableEdit('${op}')`;   // the right-click menu lives in #rowMenu, which must close first
-  const [headers, widths, del] = tblTableItems(table, run);
+  const { table, r: cr, c: cc } = noteCellPos(cell), item = rowMenuItem, run = op=>viaRowMenu ? `tblCellMenuRun('${op}')` : `noteTableEdit('${op}')`;   // the right-click menu lives in #rowMenu, which must close first
+  const [, widths, del] = tblTableItems(table, run);
   const rowSub = rowMenuSub('fa-solid fa-table-row', 'Row', tblMenuJoin([
-    [item('fa-solid fa-duplicate', 'Duplicate Row', run('dupRow'))],
+    [item('fa-solid fa-duplicate', 'Duplicate Row', run('dupRow')), item(tblHeaderIcon('row'), 'Header Row', run('headerRows'), tblTick(tblRowsAreHeader(table, cr, cr)))],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true})]]));
   const colSub = rowMenuSub('fa-solid fa-table-column', 'Column', tblMenuJoin([
-    [item('fa-solid fa-duplicate', 'Duplicate Column', run('dupCol'))],
+    [item('fa-solid fa-duplicate', 'Duplicate Column', run('dupCol')), item(tblHeaderIcon('col'), 'Header Column', run('headerCols'), tblTick(tblColsAreHeader(table, cc, cc)))],
     [...tblSortItems(run), ...tblAlignItems(table, cc, cc, run), item(tblInsIcon('narrow'), 'Fit Column to Content', run('fitCols'))],
     [item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true})]]));
-  const tabSub = rowMenuSub('fa-solid fa-table-cells', 'Table', tblMenuJoin([headers, widths, del]));
+  const tabSub = rowMenuSub('fa-solid fa-table-cells', 'Table', tblMenuJoin([widths, del]));
   // The four Insert commands are the most common table edits: one click here, and not repeated in the submenus (which hold Duplicate, Sort, Align, Fit and Delete)
   return tblMenuJoin([viaRowMenu ? tblClipItems(run) : [], [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), rowSub, colSub, tabSub], [tblBgSwatches('tblCellColor')]]);
 }
@@ -10556,7 +10579,7 @@ function tblGripMenuHtml(kind, sel, table){
      ...(table && col ? tblSortItems(run) : []),
      ...(table && col ? [rowMenuSub(tblAlignIcon('left'), 'Align Column', tblAlignItems(table, a, b, run, null).join('')),
        item(TBL_ICON.even, n>1 ? `Make ${n} Columns Equal Width` : 'Make Columns Equal Width', run('equalCols'), {off: n<2}), item(tblInsIcon('narrow'), n>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))] : []),
-     ...(table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), off: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), off: a!==0})] : []),   // a table setting, and only on the first row / column
+     ...(table ? [col ? item(tblHeaderIcon('col'), n>1 ? 'Header Columns' : 'Header Column', run('headerCols'), tblTick(tblColsAreHeader(table, a, b))) : item(tblHeaderIcon('row'), n>1 ? 'Header Rows' : 'Header Row', run('headerRows'), tblTick(tblRowsAreHeader(table, a, b)))] : []),   // any row / column can be styled as header or put back
      ...(table ? [tblBgSwatches('tblGripColor', col ? 'Column Colour' : 'Row Colour')] : [])],   // colour is formatting: the last line of the body, above Delete
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true})]     // Delete Table is not here (it is a far bigger step than deleting a row, and would sit right under it): it is in the table's own menu
   ]);
@@ -10838,10 +10861,10 @@ function tblBlockMenuHtml(){
   const item = rowMenuItem, run = op=>`tblBlockRun('${op}')`, blk = tblBlockAtMenu ? tblBlockRect(tblBlockAtMenu) : null;
   const nr = blk ? blk.r2 - blk.r1 + 1 : 1, nc = blk ? blk.c2 - blk.c1 + 1 : 1, pl = (n, w)=>n>1 ? `${n} ${w}s` : w, tc = t=>t.replace(/\b[a-z]/g, c=>c.toUpperCase());
   const rowSub = rowMenuSub('fa-solid fa-table-row', 'Rows', tblMenuJoin([
-    [item(tblInsIcon('rowAbove'), tc(`Insert ${pl(nr, 'row')} above`), run('rowBefore')), item(tblInsIcon('rowBelow'), tc(`Insert ${pl(nr, 'row')} below`), run('rowAfter')), item('fa-solid fa-duplicate', tc(`Duplicate ${pl(nr, 'row')}`), run('dupRow'))],
+    [item(tblInsIcon('rowAbove'), tc(`Insert ${pl(nr, 'row')} above`), run('rowBefore')), item(tblInsIcon('rowBelow'), tc(`Insert ${pl(nr, 'row')} below`), run('rowAfter')), item('fa-solid fa-duplicate', tc(`Duplicate ${pl(nr, 'row')}`), run('dupRow')), item(tblHeaderIcon('row'), nr>1 ? 'Header Rows' : 'Header Row', run('headerRows'), tblTick(blk ? tblRowsAreHeader(tblBlockAtMenu.table, blk.r1, blk.r2) : false))],
     [item(TBL_ICON.del, tc(`Delete ${pl(nr, 'row')}`), run('delRow'), {danger:true})]]));
   const colSub = rowMenuSub('fa-solid fa-table-column', 'Columns', tblMenuJoin([
-    [item(tblInsIcon('colLeft'), tc(`Insert ${pl(nc, 'column')} left`), run('colBefore')), item(tblInsIcon('colRight'), tc(`Insert ${pl(nc, 'column')} right`), run('colAfter')), item('fa-solid fa-duplicate', tc(`Duplicate ${pl(nc, 'column')}`), run('dupCol'))],
+    [item(tblInsIcon('colLeft'), tc(`Insert ${pl(nc, 'column')} left`), run('colBefore')), item(tblInsIcon('colRight'), tc(`Insert ${pl(nc, 'column')} right`), run('colAfter')), item('fa-solid fa-duplicate', tc(`Duplicate ${pl(nc, 'column')}`), run('dupCol')), item(tblHeaderIcon('col'), nc>1 ? 'Header Columns' : 'Header Column', run('headerCols'), tblTick(blk ? tblColsAreHeader(tblBlockAtMenu.table, blk.c1, blk.c2) : false))],
     [...tblSortItems(run), item(TBL_ICON.even, 'Make Columns Equal Width', run('equalCols'), {off: nc<2}), item(tblInsIcon('narrow'), nc>1 ? 'Fit Columns to Content' : 'Fit Column to Content', run('fitCols'))],
     [item(TBL_ICON.del, tc(`Delete ${pl(nc, 'column')}`), run('delCol'), {danger:true})]]));
   return tblMenuJoin([
@@ -10880,8 +10903,8 @@ function tblBlockRun(op){
   if(op==='copy' || op==='cut'){ tblClipRun(op, b); return; }
   if(op==='paste'){ tblMenuPaste(null); return; }
   if(op==='clear'){ tblBlockEdit(x=>{ x.innerHTML = '<br>'; }); return; }
-  if(/^(rowBefore|rowAfter|dupRow|delRow)$/.test(op)){ const q = tblBlockRect(b); noteTableEdit(op, { table: b.table, r: q.r1, c: q.c1, a: q.r1, b: q.r2 }); return; }                       // the block's rows
-  if(/^(colBefore|colAfter|dupCol|delCol|sortAsc|sortDesc|equalCols|fitCols)$/.test(op)){ const q = tblBlockRect(b); noteTableEdit(op, { table: b.table, r: q.r1, c: q.c1, a: q.c1, b: q.c2 }); return; }   // its columns
+  if(/^(rowBefore|rowAfter|dupRow|delRow|headerRows)$/.test(op)){ const q = tblBlockRect(b); noteTableEdit(op, { table: b.table, r: q.r1, c: q.c1, a: q.r1, b: q.r2 }); return; }                       // the block's rows
+  if(/^(colBefore|colAfter|dupCol|delCol|headerCols|sortAsc|sortDesc|equalCols|fitCols)$/.test(op)){ const q = tblBlockRect(b); noteTableEdit(op, { table: b.table, r: q.r1, c: q.c1, a: q.c1, b: q.c2 }); return; }   // its columns
   if(op==='fillDown' || op==='fillRight'){ tblBlockFill(op==='fillDown' ? 'down' : 'right'); return; }
   if(op.slice(0, 3)==='bg:'){ const n = op.slice(3); tblBlockEdit(x=>tblCellAttr(x, 'data-bg', NOTE_HL_COLORS.includes(n) ? n : '')); return; }
   const al = op==='alignCenter' ? 'center' : op==='alignRight' ? 'right' : '';
