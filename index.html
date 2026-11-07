@@ -6850,6 +6850,7 @@ function noteSelectionHtml(){
   const range = sel.getRangeAt(0); let content = range.cloneContents(), anc = range.commonAncestorContainer;
   if(anc.nodeType===3) anc = anc.parentNode;
   for(; anc && anc!==body; anc = anc.parentNode){                         // rows, cells or list items on their own lose their table / list: put those back around them
+    if(/^(TD|TH)$/.test(anc.tagName)) break;                              // text inside one cell is just text: wrapping it in a row and a table made a copy of a few letters paste as a broken table
     if(!/^(TR|TBODY|THEAD|TABLE|UL|OL)$/.test(anc.tagName)) continue;
     const wrap = anc.cloneNode(false); wrap.appendChild(content); content = wrap;
   }
@@ -10775,7 +10776,10 @@ function tblPasteGrid(e){
   if(!grid && b){ const one = (cd.getData('text/plain') || '').trim(); if(one && !/[\n\r\t]/.test(one)) grid = [[{ h: esc(one) }]]; }   // one plain value into a block fills it
   if(!grid || !grid.length) return false;
   const rowsN = grid.length, colsN = Math.max(...grid.map(r=>r.length)), one = rowsN===1 && colsN===1;
-  if(one && !b) return false;                                       // one value into one cell is an ordinary paste
+  if(one && !b){                                                    // one cell copied (a menu Copy / Cut of a cell) into a cell: its contents go in at the caret, not a table inside the cell
+    e.preventDefault(); document.execCommand('insertHTML', false, (grid[0][0] && grid[0][0].h) || ''); onNoteInput();
+    return true;
+  }
   const table = cell.parentNode.closest('table'), pos = noteCellPos(cell), qb = b ? tblBlockRect(b) : null;
   const r0 = qb ? qb.r1 : pos.r, c0 = qb ? qb.c1 : pos.c;
   const q = one ? qb : { r1: r0, c1: c0, r2: r0 + rowsN - 1, c2: c0 + colsN - 1 };
