@@ -25,3 +25,20 @@ test('tblSortOrder: numbers as numbers, text without case, empty cells last, tie
   assertEqual(JSON.stringify(tblSortOrder(['x', 'x', 'a'], 'asc')), '[2,0,1]', 'equal cells keep their order');
   assertEqual(JSON.stringify(tblSortOrder(['3', 'b', '1'], 'asc')), '[2,0,1]', 'a mix sorts as text');
 });
+
+test('tblEqualWidths: the chosen columns share what they have between them, the others stay', function () {
+  var r = tblEqualWidths([30, 10, 10, 20, 10, 20], 1, 4);
+  assertEqual(r.map(function(x){ return Math.round(x * 100) / 100; }).join(' '), '30 12.5 12.5 12.5 12.5 20');
+  assertEqual(r.reduce(function(a, b){ return a + b; }, 0), 100);
+});
+
+test('tblFitWidths: fitted columns take what their text needs, the others give or take in proportion, never below the minimum', function () {
+  var w = [25, 25, 25, 25], out = tblFitWidths(w, 1, 1, [40]);
+  assertEqual(Math.round(out[1]), 40); assertEqual(Math.round(out[0]), 20); assertEqual(Math.round(out[0]), Math.round(out[2]));
+  assertEqual(Math.round(out.reduce(function(a, b){ return a + b; }, 0)), 100);
+  var tight = tblFitWidths([25, 25, 25, 25], 0, 0, [500]);
+  assertEqual(tight[1] >= TBL_MIN_COL - 0.001, true, 'the others keep the minimum');
+  assertEqual(Math.round(tight.reduce(function(a, b){ return a + b; }, 0)), 100);
+  var all = tblFitWidths([50, 50], 0, 1, [10, 30]);
+  assertEqual(Math.round(all[0]) + ',' + Math.round(all[1]), '25,75', 'all columns: in proportion to what they need');
+});
