@@ -10,3 +10,27 @@ test('tblBlockMany: one cell is not a block', function () {
   assertEqual(tblBlockMany({ a: { r: 2, c: 2 }, b: { r: 2, c: 3 } }), true);
   assertEqual(tblBlockMany({ a: { r: 2, c: 2 }, b: { r: 3, c: 2 } }), true);
 });
+
+test('tblMovedOrder: a run of items moves one place, and nothing moves past an end', function () {
+  assertEqual(JSON.stringify(tblMovedOrder(4, 1, 1, -1)), '[1,0,2,3]');
+  assertEqual(JSON.stringify(tblMovedOrder(4, 1, 1, 1)), '[0,2,1,3]');
+  assertEqual(JSON.stringify(tblMovedOrder(4, 1, 2, 1)), '[0,3,1,2]', 'two rows move together');
+  assertEqual(tblMovedOrder(4, 0, 0, -1), null, 'the first cannot move up');
+  assertEqual(tblMovedOrder(4, 3, 3, 1), null, 'the last cannot move down');
+  assertEqual(tblMovedOrder(4, 2, 5, 1), null, 'out of range');
+});
+
+test('tblSortNumber reads numbers as people write them', function () {
+  assertEqual(tblSortNumber('12'), 12); assertEqual(tblSortNumber('-3.5'), -3.5); assertEqual(tblSortNumber('1,234.50'), 1234.5); assertEqual(tblSortNumber('1.234,50'), 1234.5);
+  assertEqual(tblSortNumber('1,5'), 1.5); assertEqual(tblSortNumber('1,234'), 1234); assertEqual(tblSortNumber('€ 10'), 10); assertEqual(tblSortNumber('12 %'), 12); assertEqual(tblSortNumber('(5)'), -5);
+  assertEqual(tblSortNumber('abc'), null); assertEqual(tblSortNumber('12a'), null); assertEqual(tblSortNumber(''), null); assertEqual(tblSortNumber('1.2.3'), null);
+});
+
+test('tblSortOrder: numbers as numbers, text without case, empty cells last, ties keep their order', function () {
+  assertEqual(JSON.stringify(tblSortOrder(['10', '2', '', '30'], 'asc')), '[1,0,3,2]', 'ascending numbers, the empty one last');
+  assertEqual(JSON.stringify(tblSortOrder(['10', '2', '', '30'], 'desc')), '[3,0,1,2]', 'descending, the empty one still last');
+  assertEqual(JSON.stringify(tblSortOrder(['b', 'A', 'c'], 'asc')), '[1,0,2]', 'case ignored');
+  assertEqual(JSON.stringify(tblSortOrder(['item 10', 'item 9', 'item 1'], 'asc')), '[2,1,0]', 'numbers inside text are in order');
+  assertEqual(JSON.stringify(tblSortOrder(['x', 'x', 'a'], 'asc')), '[2,0,1]', 'equal cells keep their order');
+  assertEqual(JSON.stringify(tblSortOrder(['3', 'b', '1'], 'asc')), '[2,0,1]', 'a mix sorts as text');
+});

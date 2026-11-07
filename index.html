@@ -877,6 +877,14 @@ const ICONS = {
   .project-row .picon, .lead-ico, .split-btn-menu-icon { height: 14px; -webkit-mask-size: calc(1em * var(--ico-k)); mask-size: calc(1em * var(--ico-k)); }
   .row-menu-item:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
   .row-menu-item:disabled { opacity: .45; cursor: default; }
+  .tbl-move { display: flex; align-items: center; justify-content: space-between; padding: 2px 10px 2px 10px; }
+  .tbl-move .nc-label { margin: 0; }
+  .tbl-move-btns { display: flex; gap: 2px; }
+  .tbl-mv { width: 28px; height: 26px; padding: 0; border: 0; border-radius: var(--r-s); background: transparent; color: var(--text); display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+  .tbl-mv i { width: 16px; height: 16px; text-align: center; color: var(--text-2); -webkit-mask-size: calc(1em * var(--ico-k)); mask-size: calc(1em * var(--ico-k)); }
+  .tbl-mv:hover:not(:disabled) { background: var(--sel-bg, var(--bg-3)); } .tbl-mv:hover:not(:disabled) i { color: var(--on-accent); }
+  .tbl-mv.tbl-mv-t { width: auto; padding: 0 8px; font: inherit; font-size: var(--fs-13); }
+  .tbl-mv:disabled { opacity: .35; }
   .row-menu-item.danger, .row-menu-item.danger i { color: var(--red-text); }
   .row-menu-item.danger:hover:not(:disabled), .row-menu-item.danger:hover:not(:disabled) i { color: var(--on-accent); }
   .row-menu-hint { margin-left: auto; font-size: var(--fs-12); color: var(--text-3); }
@@ -2743,7 +2751,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong>: while you search, the matches are highlighted in the open note and the first one is scrolled into view.</span></div>
           <div class="help-row"><i class="fa-solid fa-list-ul"></i><span><strong>List styles</strong>: the list button opens a menu to pick the bullet (• ▪ – —) or the numbering (1. a. i.) for the list you are in. The current style is ticked; pick it again to turn the list off.</span></div>
           <div class="help-row"><i class="fa-solid fa-ellipsis"></i><span><strong>Sorting</strong>: the <strong>⋯</strong> button above the note list sorts by date edited, date created or title, newest or oldest first (A to Z for titles). The choice is remembered on this device, and the date on each row follows it.</span></div>
-          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — cut, copy, paste, insert before/after, align, delete, delete table. The options act on everything selected. <strong>Right-click any cell</strong> for the same table options (hold <kbd>Shift</kbd> while right-clicking, or select some text first, to get the browser's own menu with spelling and Look Up). The arrow keys move between cells in every direction. The options are Insert Row Above / Below, Insert Column Left / Right, Header row and Header column (on the first row or column), Align Left / Center / Right for the column, Delete and Delete table. A Markdown table's <code>:---:</code> markers set each column's alignment when you import it. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%. <strong>Several cells</strong>: drag across cells (or click one and <kbd>Shift</kbd>-click another) to select a block, and <kbd>Shift</kbd> + arrow keys grow or shrink it. <kbd>Cmd/Ctrl+C</kbd> and <kbd>X</kbd> copy or cut it as a table (and as tab-separated text for Excel), <kbd>Delete</kbd> empties it, and a paste from Excel or from another block fills the cells from its top-left corner (one value fills the whole block). <kbd>Cmd/Ctrl+D</kbd> fills the block's first row down over the rest. Right-click the block for Cut, Copy, Clear Contents, Fill Down / Right, alignment and a <strong>cell colour</strong> (the same six colours as highlights; it is kept in the note and in copied mail).</span></div>
+          <div class="help-row"><i class="fa-solid fa-table"></i><span><strong>Tables</strong>: the table button opens a size grid: move over it (or use the arrow keys) to light up the rows and columns you want, then click (or press Enter) to insert it with a header row. The grid grows up to 10×10. While your cursor is in a table, a small <strong>···</strong> tab appears above its column and a <strong>⋮</strong> tab beside its row (as in Apple Notes): click one to select that column or row, drag the round handles on its outline to take in neighbouring columns or rows, then <strong>right-click</strong> inside the selection (or on its tab) for its options — cut, copy, paste, insert before/after, align, delete, delete table. The options act on everything selected. <strong>Right-click any cell</strong> for the same table options (hold <kbd>Shift</kbd> while right-clicking, or select some text first, to get the browser's own menu with spelling and Look Up). The arrow keys move between cells in every direction. The options are Insert Row Above / Below, Insert Column Left / Right, Header row and Header column (on the first row or column), Align Left / Center / Right for the column, Delete and Delete table. A Markdown table's <code>:---:</code> markers set each column's alignment when you import it. Point at a table for a <strong>+</strong> on its right and bottom edge to add a column or row. Inside a table the toolbar table button offers the same actions. <kbd>Tab</kbd> moves to the next cell (and adds a row after the last one). Tables pasted from the web or a spreadsheet are kept, without their colours or merged cells. All of it works with Undo. <em>Increase Width</em> and <em>Decrease Width</em> (in the table menu, and the whole-table menu) change how wide the table is, in steps: a new two-column table is about 44% of the note, then 66%, 88% and the full width, and back down to 35%. <strong>Several cells</strong>: drag across cells (or click one and <kbd>Shift</kbd>-click another) to select a block, and <kbd>Shift</kbd> + arrow keys grow or shrink it. <kbd>Cmd/Ctrl+C</kbd> and <kbd>X</kbd> copy or cut it as a table (and as tab-separated text for Excel), <kbd>Delete</kbd> empties it, and a paste from Excel or from another block fills the cells from its top-left corner (one value fills the whole block). <kbd>Cmd/Ctrl+D</kbd> fills the block's first row down over the rest. Right-click the block for Cut, Copy, Clear Contents, Fill Down / Right, alignment and a <strong>cell colour</strong> (the same six colours as highlights; it is kept in the note and in copied mail). The menu of a single cell, column or row has the colour too, and <strong>Duplicate</strong>, <strong>Move</strong> (the arrows, or <kbd>Ctrl</kbd>+<kbd>Option</kbd> / <kbd>Ctrl</kbd>+<kbd>Alt</kbd> with an arrow key) and, for a column, <strong>Sort A to Z / Z to A</strong> (numbers sort as numbers, empty cells stay last, a header row stays on top). Dragging a block past the top or bottom of the note scrolls it.</span></div>
           <div class="help-row"><i class="fa-solid fa-lock"></i><span><strong>Lock</strong>: the lock button at the right of a note's toolbar (next to ⋯) locks and unlocks it, and the note list's right-click menu has <em>Lock</em> too: a locked note is read-only (the lock button turns amber and closes while it is locked). You cannot type, format, tick checklists, move or delete it until you unlock it. Cloning a locked note works and keeps the lock.</span></div>
           <div class="help-row"><i class="fa-solid fa-arrow-down-to-bracket"></i><span><strong>Import notes</strong>: <em>Data</em> → <em>Import…</em> (or drop files on the notes list, or right-click a folder → <em>Import Notes Here…</em>) reads <code>.md</code>, <code>.txt</code> and <code>.html</code> files, several at once, and ClearDesk notes files (<em>Export Notes</em> in the Data menu, <em>Export → Note File</em> on a note, <em>Export Folder</em> on a folder), which keep the folders, pinned, locked and dates; a note that is already here is skipped, so importing twice changes nothing. Each file becomes a note in the folder you are looking at; a first <code># Heading</code> (or the HTML title) is the note's title, otherwise the file name. Markdown headings, <strong>bold</strong>, <em>italic</em>, <code>code</code>, links (also reference-style <code>[text][ref]</code> with its <code>[ref]: address</code> line), lists, <code>- [ ]</code> checklists, quotes, code blocks and tables come across; images become a link to the picture, headings keep all six levels, a code block keeps its language, <code>==highlight==</code> and simple tags like <code>&lt;b&gt;</code> and <code>&lt;br&gt;</code> are read, and a table's <code>:---:</code> markers set each column's alignment. One <em>Undo</em> takes the whole import back.</span></div>
           <div class="help-row"><i class="fa-solid fa-hashtag"></i><span><strong>Markdown as you type</strong>: <code>**bold**</code> or <code>__bold__</code>, <code>_italic_</code> or <code>*italic*</code>, <code>`code`</code>, <code>~~strike~~</code>, <code>==highlight==</code> and <code>[text](address)</code> turn into formatting the moment you type the closing character; <kbd>Cmd/Ctrl</kbd>+<kbd>Z</kbd> brings the characters back. Nothing changes inside a code block or a link.</span></div>
@@ -4445,9 +4453,11 @@ function placeRowMenu(menu, x, y, measureEl){
   if(measureEl && measureEl.offsetWidth){ k = measureEl.getBoundingClientRect().width / measureEl.offsetWidth || 1; }
   const vw = window.innerWidth / k, vh = window.innerHeight / k;
   let left = x / k, top = y / k;
+  menu.style.maxHeight = ''; menu.style.overflowY = '';
   const w = menu.offsetWidth, h = menu.offsetHeight;
+  if(h > vh - 16){ menu.style.maxHeight = (vh - 16) + 'px'; menu.style.overflowY = 'auto'; }      // taller than the window (a long table menu on a small screen): it scrolls
   if(left + w > vw - 16) left = Math.max(8, vw - w - 16);                       // 16px clear of the window edge (a classic scroll bar is up to 15px wide)
-  if(top + h > vh - 8) top = Math.max(8, vh - h - 8);
+  if(top + Math.min(h, vh - 16) > vh - 8) top = Math.max(8, vh - Math.min(h, vh - 16) - 8);
   menu.style.left = left + 'px'; menu.style.top = top + 'px';
   // Safety net: the maths above can be off (UI-size zoom, a scroll bar, a window narrower than the layout), so look at where the menu really
   // landed and pull it back inside the visible window, clear of the right edge / scroll bar.
@@ -10046,6 +10056,58 @@ function noteCaretIn(cell){
   sel.removeAllRanges(); sel.addRange(r);
 }
 function noteCellPos(cell){ const tr = cell.parentNode, table = tr.closest('table'); return { table, r: [...table.rows].indexOf(tr), c: cell.cellIndex }; }
+// ---- moving, duplicating and sorting rows / columns ----
+// tblMovedOrder(n, lo, hi, dir): the new order of n items (as old indexes) when items lo..hi move one place (dir -1 up / left, +1 down / right); null when they cannot.
+function tblMovedOrder(n, lo, hi, dir){
+  if(!(lo>=0 && hi<n && lo<=hi)) return null;
+  if((dir<0 && lo===0) || (dir>0 && hi===n - 1)) return null;
+  const idx = [...Array(n).keys()], block = idx.splice(lo, hi - lo + 1);
+  idx.splice(lo + dir, 0, ...block);
+  return idx;
+}
+// A cell's text as a number ("1,234.50", "1.234,50", "12 %", "€ 10", "(5)"), or null when it is not one.
+function tblSortNumber(text){
+  let t = String(text==null ? '' : text).replace(/[\s\u00a0']/g, '').replace(/[€$£¥%]/g, '');
+  if(!t) return null;
+  let neg = false; const pm = /^\((.*)\)$/.exec(t); if(pm){ neg = true; t = pm[1]; }
+  const hasC = t.includes(','), hasD = t.includes('.');
+  if(hasC && hasD){ const dec = t.lastIndexOf(',') > t.lastIndexOf('.') ? ',' : '.'; t = dec===',' ? t.replace(/\./g, '').replace(',', '.') : t.replace(/,/g, ''); }
+  else if(hasC) t = /^[-+]?\d{1,3}(,\d{3})+$/.test(t) ? t.replace(/,/g, '') : t.replace(',', '.');
+  else if(hasD && /^[-+]?\d{1,3}(\.\d{3}){2,}$/.test(t)) t = t.replace(/\./g, '');
+  if(!/^[-+]?(\d+\.?\d*|\.\d+)$/.test(t)) return null;
+  const v = Number(t);
+  return Number.isFinite(v) ? (neg ? -v : v) : null;
+}
+// The order (old indexes) the rows take when sorted by their cell texts: numbers as numbers when every filled cell is one, otherwise text (numbers inside it in order,
+// case and accents ignored); empty cells always last; equal cells keep their order.
+function tblSortOrder(texts, dir){
+  const items = texts.map((t, i)=>({ t: String(t==null ? '' : t).trim(), i })), empty = items.filter(x=>!x.t), full = items.filter(x=>x.t);
+  const nums = full.map(x=>tblSortNumber(x.t)), numeric = full.length>0 && nums.every(v=>v!==null);
+  full.forEach((x, k)=>{ x.n = nums[k]; });
+  const sgn = dir==='desc' ? -1 : 1, coll = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  full.sort((a, b)=>(numeric ? a.n - b.n : coll.compare(a.t, b.t)) * sgn || a.i - b.i);
+  return [...full, ...empty].map(x=>x.i);
+}
+// Whether rows / columns lo..hi of a table can move one place: a header row (column) stays first, nothing moves in front of it.
+function tblCanMove(table, kind, lo, hi, dir){
+  const off = kind==='row' ? (tblHeadRow(table) ? 1 : 0) : (tblHeadCol(table) ? 1 : 0), n = kind==='row' ? table.rows.length : Math.max(...[...table.rows].map(x=>x.cells.length));
+  return lo>=off && !!tblMovedOrder(n - off, lo - off, hi - off, dir);
+}
+// Rows from `off` on take the order `order` (old indexes). The row elements stay where they are in the table (a <thead> keeps its row); their contents are what moves.
+function tblReorderRows(clone, off, order){
+  const slots = [...clone.rows].slice(off), copies = slots.map(tr=>tr.cloneNode(true));
+  slots.forEach((slot, p)=>slot.replaceChildren(...copies[order[p]].childNodes));
+}
+// Columns from `off` on take the order `order` in every row (a column's cells keep their own th / td), and the column widths follow.
+function tblReorderCols(clone, off, order, colsN){
+  [...clone.rows].forEach(row=>{
+    if(row.cells.length!==colsN) return;
+    const cells = [...row.cells].slice(off), copies = cells.map(x=>x.cloneNode(true));
+    cells.forEach((x, p)=>x.replaceWith(copies[order[p]]));
+  });
+  const w = tblColWidths(clone);
+  if(w && w.length===colsN){ const head = w.slice(0, off), rest = w.slice(off); tblSetColgroup(clone, [...head, ...order.map(i=>rest[i])]); }
+}
 function noteTableEdit(op, ref){
   closeNoteTableMenu();
   noteFocusBody();
@@ -10105,7 +10167,34 @@ function noteTableEdit(op, ref){
     const on = !tblHeadCol(clone), headRow = tblHeadRow(clone);
     [...clone.rows].forEach((row, i)=>{ const x = row.cells[0]; if(!x) return; const want = (on || (i===0 && headRow)) ? 'TH' : 'TD'; if(x.tagName!==want) swap(x, want.toLowerCase()); });
   }
+  else if(op==='moveRowUp' || op==='moveRowDown'){
+    const off = tblHeadRow(clone) ? 1 : 0, dir = op==='moveRowUp' ? -1 : 1, order = rowLo>=off ? tblMovedOrder(rowsN - off, rowLo - off, rowHi - off, dir) : null; if(!order) return;
+    tblReorderRows(clone, off, order); focusR = rowLo + dir;
+  }
+  else if(op==='moveColLeft' || op==='moveColRight'){
+    const off = tblHeadCol(clone) ? 1 : 0, dir = op==='moveColLeft' ? -1 : 1, order = colLo>=off ? tblMovedOrder(colsN - off, colLo - off, colHi - off, dir) : null; if(!order) return;
+    tblReorderCols(clone, off, order, colsN); focusC = colLo + dir;
+  }
+  else if(op==='dupRow'){
+    const src = [...clone.rows].slice(rowLo, rowHi + 1), hr = tblHeadRow(clone), hc = tblHeadCol(clone); let after = clone.rows[rowHi];
+    src.forEach((tr, k)=>{ const cp = tr.cloneNode(true); if(hr && rowLo + k===0) [...cp.cells].forEach((x, i)=>{ if(x.tagName==='TH' && !(i===0 && hc)) swap(x, 'td'); }); after.after(cp); after = cp; });   // a copy of the header row is an ordinary row
+    focusR = rowHi + 1;
+  }
+  else if(op==='dupCol'){
+    const hr = tblHeadRow(clone), hc = tblHeadCol(clone);
+    [...clone.rows].forEach((row, ri)=>{
+      const src = [...row.cells].slice(colLo, colHi + 1); let after = row.cells[Math.min(colHi, row.cells.length - 1)]; if(!after) return;
+      src.forEach((x, k)=>{ const cp = x.cloneNode(true); if(colLo + k===0 && hc && !(ri===0 && hr) && cp.tagName==='TH'){ const n = document.createElement('td'); n.innerHTML = cp.innerHTML; ['data-al', 'data-bg'].forEach(a=>{ if(cp.hasAttribute(a)) n.setAttribute(a, cp.getAttribute(a)); }); after.after(n); after = n; } else { after.after(cp); after = cp; } });
+    });
+    focusC = colHi + 1;
+  }
+  else if(op==='sortAsc' || op==='sortDesc'){
+    const off = tblHeadRow(clone) ? 1 : 0, data = [...clone.rows].slice(off), order = tblSortOrder(data.map(tr=>tr.cells[colLo] ? (tr.cells[colLo].textContent || '') : ''), op==='sortAsc' ? 'asc' : 'desc');
+    if(order.every((v, i)=>v===i)) return;                     // already in that order
+    tblReorderRows(clone, off, order);
+  }
   if(op==='colBefore' || op==='colAfter' || op==='delCol') tblColgroupAfterColOp(clone, op, colLo, colHi, colsN);
+  if(op==='dupCol') tblColgroupAfterColOp(clone, 'colAfter', colLo, colHi, colsN);
   range.selectNode(table); sel.removeAllRanges(); sel.addRange(range);
   document.execCommand('insertHTML', false, clone.outerHTML);
   const t = body.querySelectorAll('table')[idx];
@@ -10176,6 +10265,23 @@ const tblAlignItems = (table, lo, hi, run)=>{
     , item(tblAlignIcon('right'), 'Align Right', run('alignRight'), tblTick(cur==='right'))];
 };
 const tblMenuSep = '<div class="row-menu-sep"></div>';
+const tblKeyHint = arrow=>/Mac|iPhone|iPad/.test((typeof navigator!=='undefined' && (navigator.platform || navigator.userAgent)) || '') ? '⌃⌥' + arrow : 'Ctrl+Alt+' + arrow;
+// Duplicate and Move, shared by the cell menu and the column / row tab menus. `which`: 'row', 'col' or 'both'; rlo..rhi / clo..chi: the rows / columns they act on.
+// Move is one row of four small arrows (a menu line each would make the cell menu taller than a small window); a move that cannot happen is dimmed.
+const tblArrangeItems = (table, run, which, rlo, rhi, clo, chi)=>{
+  const item = rowMenuItem, dups = [];
+  if(which==='both') dups.push(tblToolRow('Duplicate', tblTextBtn('Row', 'Duplicate Row', run('dupRow')) + tblTextBtn('Column', 'Duplicate Column', run('dupCol'))));
+  else if(which==='row') dups.push(item('fa-solid fa-duplicate', rhi>rlo ? `Duplicate ${rhi - rlo + 1} Rows` : 'Duplicate Row', run('dupRow')));
+  else dups.push(item('fa-solid fa-duplicate', chi>clo ? `Duplicate ${chi - clo + 1} Columns` : 'Duplicate Column', run('dupCol')));
+  const mv = (icon, label, op, kind, lo, hi, dir, arrow)=>`<button type="button" class="tbl-mv" role="menuitem" title="${label} (${tblKeyHint(arrow)})" aria-label="${label}"${tblCanMove(table, kind, lo, hi, dir) ? '' : ' disabled'} onclick="${run(op)}"><i class="fa-solid fa-${icon}"></i></button>`;
+  const btns = (which!=='col' ? mv('arrow-up', rhi>rlo ? 'Move Rows Up' : 'Move Row Up', 'moveRowUp', 'row', rlo, rhi, -1, '↑') + mv('arrow-down', rhi>rlo ? 'Move Rows Down' : 'Move Row Down', 'moveRowDown', 'row', rlo, rhi, 1, '↓') : '')
+    + (which!=='row' ? mv('arrow-left', chi>clo ? 'Move Columns Left' : 'Move Column Left', 'moveColLeft', 'col', clo, chi, -1, '←') + mv('arrow-right', chi>clo ? 'Move Columns Right' : 'Move Column Right', 'moveColRight', 'col', clo, chi, 1, '→') : '');
+  return [dups, [tblToolRow('Move' + (which==='both' ? '' : which==='row' ? (rhi>rlo ? ' Rows' : ' Row') : (chi>clo ? ' Columns' : ' Column')), btns)]];
+};
+// A menu line with a label and a few small buttons (Duplicate, Move, Sort): one line instead of one per command.
+const tblToolRow = (label, btns)=>`<div class="tbl-move"><span class="nc-label">${label}</span><div class="tbl-move-btns">${btns}</div></div>`;
+const tblTextBtn = (text, title, fn)=>`<button type="button" class="tbl-mv tbl-mv-t" role="menuitem" title="${title}" aria-label="${title}" onclick="${fn}">${text}</button>`;
+const tblSortItems = run=>[tblToolRow('Sort', tblTextBtn('A to Z', 'Sort A to Z', run('sortAsc')) + tblTextBtn('Z to A', 'Sort Z to A', run('sortDesc')))];
 const tblMenuJoin = groups=>groups.map(g=>g.filter(Boolean)).filter(g=>g.length).map(g=>g.join('')).join(tblMenuSep);
 function tidyMenuSeps(html){ const SEP = '<div class="row-menu-sep"></div>'; return String(html).split(SEP).filter(x=>x.trim()!=='').join(SEP); }
 const tblTick = on=>({hint: on ? '<i class="fa-solid fa-check"></i>' : ''});
@@ -10197,9 +10303,12 @@ function noteTableMenuHtml(viaRowMenu){
     viaRowMenu ? tblClipItems(run) : [],
     [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')),
      item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter'))],
+    ...tblArrangeItems(table, run, 'both', cr, cr, cc, cc),
+    tblSortItems(run),
     [item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), dim: cr!==0}),                 // the header toggles stay in the menu but are dimmed away from the first row / first column
      item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), dim: cc!==0 || table.rows.length<2})],
     tblAlignItems(table, cc, cc, run),
+    [tblBgSwatches('tblCellColor')],
     [item(tblInsIcon('widen'), 'Increase Width', run('widen'), {dim: noteTableNextWidth(table, 1)===null}), item(tblInsIcon('narrow'), 'Decrease Width', run('narrow'), {dim: noteTableNextWidth(table, -1)===null})],
     [item(TBL_ICON.del, 'Delete Row', run('delRow'), {danger:true}), item(TBL_ICON.del, 'Delete Column', run('delCol'), {danger:true})],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
@@ -10433,8 +10542,11 @@ function tblGripMenuHtml(kind, sel, table){
     tblClipItems(run),
     [item(tblInsIcon(col ? 'colLeft' : 'rowAbove'), title(`Insert ${nounN} ${col ? 'left' : 'above'}`), run(col ? 'colBefore' : 'rowBefore')),
      item(tblInsIcon(col ? 'colRight' : 'rowBelow'), title(`Insert ${nounN} ${col ? 'right' : 'below'}`), run(col ? 'colAfter' : 'rowAfter'))],
+    ...(table ? tblArrangeItems(table, run, col ? 'col' : 'row', a, b, a, b) : []),
+    table && col ? tblSortItems(run) : [],
     table ? [col ? item(tblHeaderIcon('col'), 'Header Column', run('headerCol'), {...tblTick(tblHeadCol(table)), dim: a!==0 || table.rows.length<2}) : item(tblHeaderIcon('row'), 'Header Row', run('header'), {...tblTick(tblHeadRow(table)), dim: a!==0})] : [],   // dimmed except on the first row / column
     table && col ? tblAlignItems(table, a, b, run) : [],
+    table ? [tblBgSwatches('tblGripColor')] : [],
     [item(TBL_ICON.del, `Delete ${nounN.replace(/\b[a-z]/g, c=>c.toUpperCase())}`, run(col ? 'delCol' : 'delRow'), {danger:true})],
     [item(TBL_ICON.delTable, 'Delete Table', run('delTable'), {danger:true})]
   ]);
@@ -10581,13 +10693,30 @@ function tblBlockDown(e){
 function tblBlockMove(e){
   const d = tblBlockDrag; if(!d) return;
   if(!(e.buttons & 1)){ tblBlockUp(); return; }                      // the button was let go outside the window
-  const r = tblIndexAt(d.table, 'row', e.clientX, e.clientY), c = tblIndexAt(d.table, 'col', e.clientX, e.clientY);
-  if(!d.on){ if(r===d.a.r && c===d.a.c) return; d.on = true; document.getElementById('noteBody')?.classList.add('tbl-blocking'); }   // still inside the first cell: an ordinary text selection
+  d.x = e.clientX; d.y = e.clientY;
+  tblBlockTo(d);
+}
+function tblBlockTo(d){
+  const r = tblIndexAt(d.table, 'row', d.x, d.y), c = tblIndexAt(d.table, 'col', d.x, d.y);
+  if(!d.on){ if(r===d.a.r && c===d.a.c) return; d.on = true; document.getElementById('noteBody')?.classList.add('tbl-blocking'); d.timer = setInterval(tblBlockAutoScroll, 30); }   // still inside the first cell: an ordinary text selection
   tblBlockSet(d.table, d.a, { r, c }, d.cell);
+}
+// Dragging a block past the top or bottom of the note scrolls it (the pointer rests there, so there are no mouse events to follow), and the block keeps growing.
+function tblScrollParent(el){
+  for(let n = el && el.parentElement; n; n = n.parentElement){ const o = getComputedStyle(n).overflowY; if((o==='auto' || o==='scroll') && n.scrollHeight>n.clientHeight) return n; }
+  return document.scrollingElement;
+}
+function tblBlockAutoScroll(){
+  const d = tblBlockDrag; if(!d || !d.on || d.y===undefined || !d.table.isConnected) return;
+  const sc = tblScrollParent(d.table), box = sc===document.scrollingElement ? { top: 0, bottom: window.innerHeight } : sc.getBoundingClientRect(), edge = 36;
+  const dy = d.y < box.top + edge ? -Math.min(20, (box.top + edge - d.y) / 2 + 3) : d.y > box.bottom - edge ? Math.min(20, (d.y - (box.bottom - edge)) / 2 + 3) : 0;
+  if(!dy) return;
+  const before = sc.scrollTop; sc.scrollTop += dy;
+  if(sc.scrollTop!==before) tblBlockTo(d);
 }
 function tblBlockUp(){
   document.removeEventListener('mousemove', tblBlockMove); document.removeEventListener('mouseup', tblBlockUp);
-  const d = tblBlockDrag; tblBlockDrag = null;
+  const d = tblBlockDrag; tblBlockDrag = null; if(d && d.timer) clearInterval(d.timer);
   if(!d || !d.on) return;
   setTimeout(()=>{ document.getElementById('noteBody')?.classList.remove('tbl-blocking'); if(tblBlock) noteCaretIn(tblBlock.cell); }, 0);   // after the browser has finished its own mouse-up selection
 }
@@ -10661,6 +10790,16 @@ function tblPasteGrid(e){
   return true;
 }
 // Keys while a block is selected: Delete empties it, Shift+arrows grow or shrink it, Esc drops it; any other key just lets go of it (the caret is in its first cell).
+// Ctrl+Option / Ctrl+Alt + arrow: move the row or column the caret is in (or the rows / columns of the block) one place.
+function tblMoveKey(e){
+  if(!(e.ctrlKey && e.altKey) || e.metaKey || e.shiftKey) return false;
+  const op = { ArrowUp: 'moveRowUp', ArrowDown: 'moveRowDown', ArrowLeft: 'moveColLeft', ArrowRight: 'moveColRight' }[e.key]; if(!op) return false;
+  const cell = noteSelectedCell(); if(!cell || noteIsLocked(noteEditorId)) return false;
+  e.preventDefault();
+  const pos = noteCellPos(cell), b = tblBlockActive(), q = b && b.table===pos.table ? tblBlockRect(b) : null, row = op==='moveRowUp' || op==='moveRowDown';
+  noteTableEdit(op, { table: pos.table, r: pos.r, c: pos.c, a: q ? (row ? q.r1 : q.c1) : (row ? pos.r : pos.c), b: q ? (row ? q.r2 : q.c2) : (row ? pos.r : pos.c) });
+  return true;
+}
 function tblBlockKey(e){
   const b = tblBlockActive(); if(!b) return false;
   const k = e.key, mod = e.metaKey || e.ctrlKey;
@@ -10689,7 +10828,7 @@ function tblBlockFill(dir){
   }
   tblBlockCommit(b.table, clone, q);
 }
-const tblBgSwatches = ()=>`<div class="tbl-bg-pick"><div class="nc-label">Cell colour</div><div class="nc-row">${['none', ...NOTE_HL_COLORS].map(n=>`<button type="button" class="nc-sw nc-hl-${n}" role="menuitem" title="${n==='none' ? 'No colour' : NOTE_COLOR_LABELS[n]}" aria-label="Cell colour: ${n==='none' ? 'none' : NOTE_COLOR_LABELS[n]}" onclick="tblBlockRun('bg:${n}')"></button>`).join('')}</div></div>`;
+const tblBgSwatches = (fn = 'tblBlockColor')=>`<div class="tbl-bg-pick"><div class="nc-label">Cell colour</div><div class="nc-row">${['none', ...NOTE_HL_COLORS].map(n=>`<button type="button" class="nc-sw nc-hl-${n}" role="menuitem" title="${n==='none' ? 'No colour' : NOTE_COLOR_LABELS[n]}" aria-label="Cell colour: ${n==='none' ? 'none' : NOTE_COLOR_LABELS[n]}" onclick="${fn}('${n}')"></button>`).join('')}</div></div>`;
 function tblBlockMenuHtml(){
   const item = rowMenuItem, run = op=>`tblBlockRun('${op}')`;
   return tblMenuJoin([
@@ -10698,6 +10837,19 @@ function tblBlockMenuHtml(){
     [item(tblAlignIcon('left'), 'Align Left', run('alignLeft')), item(tblAlignIcon('center'), 'Align Center', run('alignCenter')), item(tblAlignIcon('right'), 'Align Right', run('alignRight'))],
     [tblBgSwatches()]
   ]);
+}
+const tblBlockColor = n=>tblBlockRun('bg:' + n);
+// Colour for the cell the caret is in (the cell menu), and for the cells of the selected column(s) / row(s) (their tab menu).
+function tblCellColor(n){
+  closeRowMenu(); closeNoteTableMenu();
+  const cell = noteSelectedCell(); if(!cell || noteIsLocked(noteEditorId)) return;
+  const pos = noteCellPos(cell), at = { r: pos.r, c: pos.c };
+  tblBlockEdit(x=>tblCellAttr(x, 'data-bg', NOTE_HL_COLORS.includes(n) ? n : ''), { table: pos.table, a: at, b: at, cell });
+}
+function tblGripColor(n){
+  const ref = tblMenuRef; closeRowMenu(); tblSel = null;
+  if(!ref || !ref.table || !ref.table.isConnected || !ref.kind) return;
+  tblBlockEdit(x=>tblCellAttr(x, 'data-bg', NOTE_HL_COLORS.includes(n) ? n : ''), tblRefBlock(ref));
 }
 function tblBlockRun(op){
   const b = tblBlockAtMenu; closeRowMenu(); tblBlockAtMenu = null;
@@ -11203,6 +11355,7 @@ function noteBackspaceAfterTable(e){
 }
 function onNoteKeydown(e){
   if((e.metaKey || e.ctrlKey) && e.shiftKey && !e.altKey && (e.key || '').toLowerCase()==='v'){ notePasteRaw = true; setTimeout(()=>{ notePasteRaw = false; }, 500); }   // ⇧⌘V: the next paste is the text as it is
+  if(tblMoveKey(e)) return;                                                    // move a row / column
   if(tblBlockKey(e)) return;                                                   // a block of table cells is selected
   if(noteSlashKey(e)) return;                                                  // the / menu owns ↑ ↓ ↵ Tab Esc while it is open
   if(noteAutoBlockAtEnter(e)) return;                                          // --- / *** / ___ / ``` + Enter
