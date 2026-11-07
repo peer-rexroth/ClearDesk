@@ -11,15 +11,6 @@ test('tblBlockMany: one cell is not a block', function () {
   assertEqual(tblBlockMany({ a: { r: 2, c: 2 }, b: { r: 3, c: 2 } }), true);
 });
 
-test('tblMovedOrder: a run of items moves one place, and nothing moves past an end', function () {
-  assertEqual(JSON.stringify(tblMovedOrder(4, 1, 1, -1)), '[1,0,2,3]');
-  assertEqual(JSON.stringify(tblMovedOrder(4, 1, 1, 1)), '[0,2,1,3]');
-  assertEqual(JSON.stringify(tblMovedOrder(4, 1, 2, 1)), '[0,3,1,2]', 'two rows move together');
-  assertEqual(tblMovedOrder(4, 0, 0, -1), null, 'the first cannot move up');
-  assertEqual(tblMovedOrder(4, 3, 3, 1), null, 'the last cannot move down');
-  assertEqual(tblMovedOrder(4, 2, 5, 1), null, 'out of range');
-});
-
 test('tblSortNumber reads numbers as people write them', function () {
   assertEqual(tblSortNumber('12'), 12); assertEqual(tblSortNumber('-3.5'), -3.5); assertEqual(tblSortNumber('1,234.50'), 1234.5); assertEqual(tblSortNumber('1.234,50'), 1234.5);
   assertEqual(tblSortNumber('1,5'), 1.5); assertEqual(tblSortNumber('1,234'), 1234); assertEqual(tblSortNumber('€ 10'), 10); assertEqual(tblSortNumber('12 %'), 12); assertEqual(tblSortNumber('(5)'), -5);
