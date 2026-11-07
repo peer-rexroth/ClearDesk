@@ -172,7 +172,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Pin / Favourite | `thumbtack` / `star` | |
 | Show/hide panel | a framed box with a side column | |
 | Check / complete | `check`, `circle-check` | round checklist items match the icon |
-| Table row / column (a group of commands about one) | `table-row` / `table-column` | the table box with two horizontal / two vertical lines; **not** `table-columns`, which is the Board view |
+| Table row / column (a group of commands about one) | `table-row` / `table-column` | the table box with a bold band across (two touching 2-unit strokes, which draw as a solid band without a filled shape) horizontally / vertically; **not** `table-columns`, which is the Board view |
 | Sort ascending / descending | `arrow-down-wide-short` / `arrow-up-wide-short` | one icon per direction |
 | Clear contents | `xmark` | the cell is emptied, not removed |
 
