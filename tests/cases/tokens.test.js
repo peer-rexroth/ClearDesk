@@ -40,3 +40,8 @@ test('no colour literal outside a token definition, except the print sheet', fun
   });
   assertEqual(bad.length, 0, 'colour literals: ' + bad.slice(0, 3).join(' | '));
 });
+test('a disabled .btn is styled as disabled (cross-app audit X2-01), and the danger alert icon uses the text red (X2-04)', function(){
+  var css = tokScanCss();
+  assertTrue(/\.btn:disabled\s*\{[^}]*opacity/.test(css), 'no generic .btn:disabled rule with an opacity');
+  assertTrue(/\.alert-ico\.danger\s*\{[^}]*color:\s*var\(--red-text\)/.test(css), 'the danger alert icon is not var(--red-text)');
+});

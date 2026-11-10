@@ -27,7 +27,7 @@ const ICONS = {
   "arrow-right": "<path d=\"M5 12h14M13.5 6.5 19 12l-5.5 5.5\"/>",
   "arrow-up": "<path d=\"M12 19V5M6.5 10.5 12 5l5.5 5.5\"/>",
   "arrow-up-from-bracket": "<path d=\"M12 15V4.5M8 8.2l4-4 4 4\"/><path d=\"M6 11.5v6.2a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8v-6.2\"/>",
-  "arrow-up-wide-short": "<path d=\"M7 19V5M3.5 8.5 7 5l3.5 3.5M13 7h3M13 11.5h5M13 16h7\"/>",
+  "arrow-up-short-wide": "<path d=\"M7 19V5M3.5 8.5 7 5l3.5 3.5M13 7h3M13 11.5h5M13 16h7\"/>",
   "arrow-up-right-from-square": "<path d=\"M14 4.5h5.5V10M19.5 4.5l-8 8\"/><path d=\"M18 14v3.5a2 2 0 0 1-2 2H6.5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2H10\"/>",
   "arrows-left-right": "<path d=\"M4 12h16M7.5 8.5 4 12l3.5 3.5M16.5 8.5 20 12l-3.5 3.5\"/>",
   "arrows-up-down": "<path d=\"M12 4v16M8.5 7.5 12 4l3.5 3.5M8.5 16.5 12 20l3.5-3.5\"/>",
@@ -139,9 +139,9 @@ const ICONS = {
   "braces": "<path d=\"M8.5 4C6.5 4 6 5 6 6.5V9c0 1.2-.8 2-2 3 1.2 1 2 1.8 2 3v2.5C6 19 6.5 20 8.5 20\"/><path d=\"M15.5 4C17.5 4 18 5 18 6.5V9c0 1.2.8 2 2 3-1.2 1-2 1.8-2 3v2.5c0 1.5-.5 2.5-2.5 2.5\"/>",
   "duplicate": "<rect x=\"8.5\" y=\"8.5\" width=\"11\" height=\"11\" rx=\"2.5\"/><path d=\"M15.5 8.5V7A2.5 2.5 0 0 0 13 4.5H7A2.5 2.5 0 0 0 4.5 7v6A2.5 2.5 0 0 0 7 15.5h1.5\"/><path d=\"M14 11.5v5M11.5 14h5\"/>",
   "arrow-down-to-bracket": "<path d=\"M12 4.5V15M8 11.3l4 4 4-4\"/><path d=\"M6 11.5v6.2a1.8 1.8 0 0 0 1.8 1.8h8.4a1.8 1.8 0 0 0 1.8-1.8v-6.2\"/>",
-  "compose": "<path d=\"M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4\"/><path d=\"M18.4 3.9a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z\"/>",
-  "eraser": "<path d=\"m7 21-4.3-4.3a2.4 2.4 0 0 1 0-3.4l9.6-9.6a2.4 2.4 0 0 1 3.4 0l5.6 5.6a2.4 2.4 0 0 1 0 3.4L13 21\"/><path d=\"M22 21H7\"/><path d=\"m5 11 9 9\"/>",
-  "table-cells": "<rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2.5\"/><path d=\"M3 9h18M3 15h18M9 3v18\"/>",
+  "compose": "<path d=\"M12 4.5H8A3.5 3.5 0 0 0 4.5 8v8A3.5 3.5 0 0 0 8 19.5h8a3.5 3.5 0 0 0 3.5-3.5v-4\"/><path d=\"M17.7 4.1a1.7 1.7 0 0 1 2.4 2.4l-8 8-3.2.8.8-3.2z\"/>",
+  "eraser": "<path d=\"M7.75 19.65 4.1 16a2.04 2.04 0 0 1 0-2.9l8.15-8.15a2.04 2.04 0 0 1 2.9 0l4.76 4.76a2.04 2.04 0 0 1 0 2.9L12.85 19.65\"/><path d=\"M20.5 19.65H7.75\"/><path d=\"m6.05 11.15 7.65 7.65\"/>",
+  "table-cells": "<rect x=\"4\" y=\"4\" width=\"16\" height=\"16\" rx=\"2.5\"/><path d=\"M4 9.3h16M4 14.7h16M9.3 4v16\"/>",
   "chevrons-up-down": "<path d=\"m8.5 9.5 3.5-3.5 3.5 3.5M8.5 14.5l3.5 3.5 3.5-3.5\"/>",
   "check-thin": "<path d=\"m5.5 12.5 4.2 4.2 8.8-9.5\"/>"
 };
@@ -226,6 +226,8 @@ const ICONS = {
   .btn-primary:hover { opacity: 0.85; background: var(--text); }
   .btn-danger { background: var(--red-text); color: var(--on-accent); border-color: var(--red-text); }
   .btn-danger:hover { opacity: 0.85; background: var(--red-text); }
+  .btn:disabled { opacity: .45; cursor: default; }   /* a disabled button reads as disabled (it did not: e.g. the PDF viewer's Save before any change) */
+  .btn-primary:disabled:hover, .btn-danger:disabled:hover { opacity: .45; }   /* the .85 hover dimming must not lift it */
   .btn-icon { padding: 6px 8px; }
   .btn-sm { font-size: var(--fs-12); padding: 4px 10px; }
   /* ONE icon button: a disc (22px; 26px for the panel's close), filled on hover, no ring. Only icon-only buttons use it; a segment inside a capsule is a pill, and the +/- bar and the code-copy chip are deliberate exceptions. */
@@ -528,7 +530,7 @@ const ICONS = {
   .modal.alert { width: 340px; text-align: center; align-items: center; gap: 12px; padding: 24px 24px 20px; }
   .modal.alert.alert-wide { width: 400px; }
   .alert-ico { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--accent-tint); color: var(--accent); font-size: var(--ico-18); }
-  .alert-ico.danger { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+  .alert-ico.danger { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--red-text); }   /* the glyph is a graphic on a tint: --red-text keeps 4.7:1 light and 5.4:1 dark (the fill red gave 2.8:1 in dark) */
   .modal.alert .modal-actions { align-self: stretch; justify-content: center; margin-top: 8px; }
   .modal.alert .modal-actions .btn { flex: 1; justify-content: center; }
   #confirmModalBg { z-index: 210; }   /* a confirmation can stack on top of another dialog (Compare), which stays open underneath */
@@ -993,6 +995,7 @@ const ICONS = {
   html[data-scheme="glass"] .btn:active, html[data-scheme="glass"] .view-switch-btn:active, html[data-scheme="glass"] .f-chip:active, html[data-scheme="glass"] .nc-sw:active { transform: scale(.94); }
   html[data-scheme="glass"] .btn-primary { background: var(--glass-accent); color: var(--on-accent); border-color: transparent; box-shadow: none; }   /* a flat accent fill, no coloured glow */
   html[data-scheme="glass"] .btn-primary:hover { background: var(--glass-accent); filter: brightness(1.06); opacity: 1; }
+  html[data-scheme="glass"] .btn-primary:disabled:hover { opacity: .45; filter: none; }   /* a disabled primary does not light up on hover */
   html[data-scheme="glass"] .btn-danger { background: var(--danger); color: var(--on-accent); border-color: transparent; box-shadow: none; }
   html[data-scheme="glass"] .btn-danger:hover { background: var(--danger); filter: brightness(1.08); }
   /* capsules: controls that live in the toolbars, as in Mail; everything in the
@@ -1268,7 +1271,7 @@ const ICONS = {
   /* on the solid selection colour */
 
   .task-row:is(:hover, :focus-within, .kbd-selected, .keep-actions) .row-actions { opacity: 1; pointer-events: auto; }
-  .task-row.keep-actions .row-actions { transition: none; }   /* a rebuilt row under a still pointer: buttons stay, no fade-in */
+  .task-row.keep-actions .row-actions, .board-card.keep-actions .row-actions { transition: none; }   /* a rebuilt row under a still pointer: buttons stay, no fade-in */
   /* Inline rename fields are quiet, like the ghost add rows: a soft tint and the caret/selected text are the indicator. The
      boxed field with the global 3px focus halo (white on the blue row) read as a heavy bar across the whole row. */
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input) { border: 0 !important; border-radius: var(--r-s); padding: 1px 6px; background: var(--bg-3); box-shadow: none !important; outline: none !important; }
@@ -1289,7 +1292,7 @@ const ICONS = {
   /* Board cards get the same hover language as list rows: a grey fill on hover (the Glass card border rule used to cancel
      the base border change, leaving cards with no hover feedback at all), the same action capsule, and an empty-Due chip. */
   html[data-scheme="glass"] .board-card:hover:not(.kbd-selected):not(.bulk-selected):not(.dragging) { background: var(--bg); border-color: transparent; box-shadow: 0 2px 10px var(--shadow-ink); }   /* hover lifts the tile instead of outlining it (a filled hover would swallow the status pill) */
-  .board-card:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
+  .board-card:is(:hover, :focus-within, .kbd-selected, .keep-actions) .row-actions { opacity: 1; pointer-events: auto; }
   /* the capsule is centred on the task-main cell, which is 1px off the solid band's centre: plain row 1px high, row with subtasks (band 5px up / 3px down) 1px low */
   .task-row > .task-main > .row-actions { top: calc(50% + 1px); }
   .task-row.has-subs > .task-main > .row-actions { top: calc(50% - 1px); }
@@ -3815,11 +3818,11 @@ function getVisibleListTasks(){
 // reaches it on the next mouse move: that was the flicker while arrowing through or editing tasks).
 let lastPointer = null;
 document.addEventListener('mousemove', e=>{ lastPointer = { x: e.clientX, y: e.clientY }; }, { passive: true });
-function setTaskListHtml(el, html){
-  if(el._html===html && !el.querySelector('.dragging, [class*="drag-over"], .cell-pop')) return;
-  el.innerHTML = html; el._html = html;
+function setTaskListHtml(el, html, rowSel = '.task-row'){
+  if(el._html===html && el._first && el.firstElementChild===el._first && !el.querySelector('.dragging, [class*="drag-over"], .cell-pop')) return;   // still the DOM built from this markup (something else may have replaced it: the empty state, a test)
+  el.innerHTML = html; el._html = html; el._first = el.firstElementChild;
   const row = lastPointer && document.elementFromPoint(lastPointer.x, lastPointer.y);
-  const hot = row && row.closest ? row.closest('#taskList .task-row') : null;
+  const hot = row && row.closest ? row.closest(rowSel) : null;
   if(!hot) return;
   hot.classList.add('keep-actions');
   document.addEventListener('mousemove', ()=>hot.classList.remove('keep-actions'), { once: true, passive: true });
@@ -4023,7 +4026,7 @@ function renderBoard(){
   const board = document.getElementById('board');
   if(!board) return;
   const columns = getBoardColumns();
-  board.innerHTML = columns.map(col=>{
+  const html = columns.map(col=>{
     if(col.status){
       const colTasks = col.tasks;
       const expanded = expandedCompletedProjects.has(col.key);
@@ -4052,6 +4055,7 @@ function renderBoard(){
       </div>
     </div>`;
   }).join('');
+  setTaskListHtml(board, html, '.board-card');   // the same rule as the list: no rebuild when nothing changed, and the card under the pointer keeps its button
   updateCollapseAllIcon();
 }
 function handleCardDragStart(e, id){
@@ -10372,7 +10376,7 @@ function noteTableMenuHtml(viaRowMenu){
   // The four Insert commands are the most common table edits: one click here, and not repeated in the submenus (which hold Duplicate, Sort, Align, Fit and Delete)
   return tblMenuJoin([viaRowMenu ? tblClipItems(run) : [], [item(tblInsIcon('rowAbove'), 'Insert Row Above', run('rowBefore')), item(tblInsIcon('rowBelow'), 'Insert Row Below', run('rowAfter')), item(tblInsIcon('colLeft'), 'Insert Column Left', run('colBefore')), item(tblInsIcon('colRight'), 'Insert Column Right', run('colAfter')), rowSub, colSub, tabSub], [tblBgSwatches('tblCellColor')]]);
 }
-const tblSortItems = run=>[rowMenuItem('fa-solid fa-arrow-down-wide-short', 'Sort A to Z', run('sortAsc')), rowMenuItem('fa-solid fa-arrow-up-wide-short', 'Sort Z to A', run('sortDesc'))];
+const tblSortItems = run=>[rowMenuItem('fa-solid fa-arrow-down-wide-short', 'Sort A to Z', run('sortAsc')), rowMenuItem('fa-solid fa-arrow-up-short-wide', 'Sort Z to A', run('sortDesc'))];
 // What a table's own menu and the cell menu's Table submenu offer: the header toggles, the table's width, Delete Table (three groups of items).
 const tblTableItems = (table, run)=>{
   const item = rowMenuItem;

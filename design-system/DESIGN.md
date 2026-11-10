@@ -134,7 +134,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 ### 4.1 The family
 
 - **Outline only.** 24×24 grid, **2-unit stroke**, round caps and joins, `currentColor`, `fill: none`. No filled glyphs (so a "star" is an outline; a favourite is shown by colour). Two allowed details: a dot (an ellipsis, a keyboard key, the exclamation point) is a zero-length stroke at 2–2.2 so it reads as a dot, and a drawing that had to be scaled to fit the visible window carries its own `<g transform>` with the stroke compensated back to 2 (the registry's 18 oversized drawings). Keep geometry inside 4–20 (the mask shows 2.5–21.5 including the stroke).
-- Keep drawings inside the 4–20 box so optical size is the same across icons (a rounded square is `4.5…19.5`).
+- Keep drawings inside the **3.5–20.5** box (the outline's centre line: with the 2-unit stroke the paint reaches 2.5–21.5) so optical size is the same across icons (a rounded square is `4.5…19.5`). Most of the set sits at 3.5–20.5 (circles, folders, envelopes); nothing goes past it. A scan with `getBBox()` over the registry is how to check a new icon.
 - **Four drawn sizes:** 12 (chevrons, tiny marks), 14 (badges, chips, row marks), 16 (lists, sidebar, menus, icon buttons, search fields), 18 (toolbars). Nothing else.
 - **Effective line weight scales with size** (as SF Symbols do): 1.17px at 14, 1.33px at 16, 1.5px at 18. Do not set a different stroke per context.
 - **No drawing lives outside the registry:** markup says `<svg data-ico="name">` (filled by `hydrateIcons`) and script uses `iconSvg(name)`; the only exceptions are the 10-grid chevrons of the pull-downs. **A hand-drawn icon must render at the same line weight as a registry icon of that size** (rendered line = stroke × drawn size ÷ viewBox). Chevrons drawn as background images need their own stroke: 1.3 on a 12px-wide box, 1.2 on an 8px one. Measure the stroke of the path, not the svg element.
@@ -175,7 +175,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Show/hide panel | a framed box with a side column | |
 | Check / complete | `check`, `circle-check` | round checklist items match the icon |
 | Table row / column (a group of commands about one) | `table-row` / `table-column` | the table box with a bold band across (two touching 2-unit strokes, which draw as a solid band without a filled shape) horizontally / vertically; **not** `table-columns`, which is the Board view |
-| Sort ascending / descending | `arrow-down-wide-short` / `arrow-up-wide-short` | one icon per direction |
+| Sort ascending / descending | `arrow-down-wide-short` / `arrow-up-short-wide` | one icon per direction |
 | Clear contents | `xmark` | the cell is emptied, not removed |
 
 The icon set: `icons.json`, preview in `icon-sheet.html`. To add an icon: draw it on the 24 grid, add it to the registry under a name that states its meaning, never reuse another action's name.
