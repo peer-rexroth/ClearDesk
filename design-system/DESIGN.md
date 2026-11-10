@@ -167,7 +167,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Compare | `diff` | a rounded square, a + above a − |
 | Swap / move sideways | `arrows-left-right` | a swap glyph; not used for "Distribute columns evenly" any more (that is `columns-equal`) |
 | Equal column widths / Distribute columns evenly | `columns-equal` | the table box with two dividers at thirds: the result, not an arrow |
-| Fit a column to its content | `fit-to-content` | two arrows pointing in at a small block; **not** the Decrease Width icon (`tblInsIcon('narrow')`) |
+| Fit a column to its content | `fit-to-content` | square brackets closing in on a short dash ("exactly as wide as this"), no arrows; **not** an arrow icon, which read as a smaller Decrease Width (`tblInsIcon('narrow')`) at 16px |
 | New folder / subfolder | `folder-plus` | `folder-open` = link a file/folder, `folder` = plain |
 | Undo / Redo | `undo` / `redo` | hooked arrows; the circular arrow `rotate-left` is for *Restore* and *Reset* |
 | Lock / unlock | `lock` / `lock-open` | amber while locked |

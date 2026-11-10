@@ -71,7 +71,7 @@ const ICONS = {
   "file-circle-plus": "<path d=\"M13.5 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h4M13.5 3.5 19 9v2.5M13.5 3.5V9H19\"/><path d=\"M17 14.5v6M14 17.5h6\"/>",
   "file-lines": "<path d=\"M7 3.5h6.5L19 9v10a1.5 1.5 0 0 1-1.5 1.5H7A1.5 1.5 0 0 1 5.5 19V5A1.5 1.5 0 0 1 7 3.5z\"/><path d=\"M13.5 3.5V9H19M8.5 13h7M8.5 16.5h5\"/>",
   "filter": "<path d=\"M4 6h16l-6 7v5.5l-4 2V13z\"/>",
-  "fit-to-content": "<path d=\"M4 12h4M6.3 9.8 8.5 12l-2.2 2.2M20 12h-4M17.7 9.8 15.5 12l2.2 2.2\"/><path d=\"M12 8.5v7\"/>",
+  "fit-to-content": "<path d=\"M8 5H5v14h3M16 5h3v14h-3\"/><path d=\"M10 12h4\"/>",
   "flag": "<path d=\"M6 20.5V4.5\"/><path d=\"M6 5.5h10.5l-2 3.5 2 3.5H6\"/>",
   "folder": "<path d=\"M3.5 8A2.5 2.5 0 0 1 6 5.5h3.6l2 2.5H18A2.5 2.5 0 0 1 20.5 10.5V17A2.5 2.5 0 0 1 18 19.5H6A2.5 2.5 0 0 1 3.5 17z\"/>",
   "folder-open": "<g transform=\"translate(-0.366 0.394) scale(0.966)\" stroke-width=\"2.069\"><path d=\"M4 18V6.5A2 2 0 0 1 6 4.5h3.6l2 2.2H17A2 2 0 0 1 19 8.7V10\"/><path d=\"M4 18l2.2-6.3A2 2 0 0 1 8.1 10.3h12.1a1.4 1.4 0 0 1 1.3 1.9L19.3 17.6A2 2 0 0 1 17.4 19H6a2 2 0 0 1-2-1z\"/></g>",
@@ -1267,7 +1267,8 @@ const ICONS = {
   :is(.task-row, .board-card) .task-subtask-add-row:focus-within { background: transparent; }   /* no tint while typing: the caret and the placeholder say it, and on the grey selected card the tint was a hard-edged pale bar */
   /* on the solid selection colour */
 
-  .task-row:is(:hover, :focus-within, .kbd-selected) .row-actions { opacity: 1; pointer-events: auto; }
+  .task-row:is(:hover, :focus-within, .kbd-selected, .keep-actions) .row-actions { opacity: 1; pointer-events: auto; }
+  .task-row.keep-actions .row-actions { transition: none; }   /* a rebuilt row under a still pointer: buttons stay, no fade-in */
   /* Inline rename fields are quiet, like the ghost add rows: a soft tint and the caret/selected text are the indicator. The
      boxed field with the global 3px focus halo (white on the blue row) read as a heavy bar across the whole row. */
   html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input) { border: 0 !important; border-radius: var(--r-s); padding: 1px 6px; background: var(--bg-3); box-shadow: none !important; outline: none !important; }
@@ -3809,6 +3810,20 @@ function getVisibleListTasks(){
   return capCompleted(getFilteredSortedTasks(), showAllCompletedList);
 }
 
+// The list is rebuilt only when its markup changed (a redraw with nothing new used to replace every row, and the hovered row's buttons faded in again from nothing),
+// and when it did change, the row under the pointer keeps its buttons showing until the pointer moves (a new element starts at opacity 0 and the hover state only
+// reaches it on the next mouse move: that was the flicker while arrowing through or editing tasks).
+let lastPointer = null;
+document.addEventListener('mousemove', e=>{ lastPointer = { x: e.clientX, y: e.clientY }; }, { passive: true });
+function setTaskListHtml(el, html){
+  if(el._html===html && !el.querySelector('.dragging, [class*="drag-over"], .cell-pop')) return;
+  el.innerHTML = html; el._html = html;
+  const row = lastPointer && document.elementFromPoint(lastPointer.x, lastPointer.y);
+  const hot = row && row.closest ? row.closest('#taskList .task-row') : null;
+  if(!hot) return;
+  hot.classList.add('keep-actions');
+  document.addEventListener('mousemove', ()=>hot.classList.remove('keep-actions'), { once: true, passive: true });
+}
 function renderList(){
   const { tasks: list, hiddenCount, doneTotal } = getVisibleListTasks();
   const el = document.getElementById('taskList'), wrap = document.getElementById('taskListWrap');
@@ -3821,7 +3836,7 @@ function renderList(){
     else fadeSwapHTML(el, html);
     return;
   }
-  el.innerHTML = list.map(t=>{
+  const html = list.map(t=>{
     const proj = projById(t.projectId);
     const subTotal = (t.subtasks||[]).length;
     let dueCell = '<span class="task-cell-empty">—</span>';
@@ -3903,6 +3918,7 @@ function renderList(){
   }).join('') + (doneTotal>MAX_COMPLETED_SHOWN
     ? `<div class="show-more-row" onclick="toggleShowAllCompletedList()">${showAllCompletedList?'Show fewer completed':`Show ${hiddenCount} more completed`}</div>`
     : '');
+  setTaskListHtml(el, html);
   updateCollapseAllIcon();
 }
 
