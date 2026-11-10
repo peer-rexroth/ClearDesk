@@ -1023,3 +1023,12 @@ test('folder colours: only palette names are kept, a newer copy can clear one, a
   assertNotIncludes(folderIconHtml({}), 'fchip');
   assertIncludes(folderColorPickHtml('blue', 'setNoteFolderColor', 'fcx'), "setNoteFolderColor('fcx','blue')");
 });
+
+test('a recoloured part inside a coloured run keeps both colours through the sanitizer', function () {
+  const h = '<p><span data-tc="red">he<span data-tc="green">llo</span> world</span></p>';
+  assertEqual(sanitizeNoteHtml(h), h);
+});
+
+test('an inline colour style (what the browser writes) is not kept, so the editor must turn it into data-tc before saving', function () {
+  assertEqual(sanitizeNoteHtml('<p><span style="color: rgb(217, 45, 32);">x</span></p>'), '<p>x</p>');
+});

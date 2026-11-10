@@ -9785,12 +9785,35 @@ function noteRememberTextColor(name){
   noteSyncColorBar();
 }
 noteSyncColorBar();
+// The palette as it is drawn right now (light and dark differ): name -> the colour the browser reports for it.
+function noteColorValues(kind){
+  const out = {};
+  (kind==='tc' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).forEach(n=>{ const p = document.createElement('span'); p.className = `nc-${kind}-${n}`; document.body.appendChild(p); const cs = getComputedStyle(p); out[n] = kind==='tc' ? cs.color : cs.backgroundColor; p.remove(); });
+  return out;
+}
+// The browser writes a colour as <span style="color: rgb(...)"> (foreColor, and insertHTML too, which drops the data-tc attribute), and the sanitizer would strip that on save: the
+// colour would be gone the moment you leave the note. Put the name back by matching the inline colour to the palette, and drop the other junk Chrome adds (a font-size on a coloured heading word).
+function noteRestoreColorSpans(){
+  const body = document.getElementById('noteBody'); if(!body) return;
+  const spans = [...body.querySelectorAll('span[style]')]; if(!spans.length) return;
+  const vals = noteColorValues('tc'), byColor = {}; Object.keys(vals).forEach(n=>{ byColor[vals[n]] = n; });
+  spans.forEach(el=>{
+    const n = byColor[el.style.color]; if(!n) return;
+    el.removeAttribute('style'); el.setAttribute('data-tc', n);
+  });
+}
 function noteApplyColor(kind, name){
   const body = document.getElementById('noteBody'), sel = window.getSelection();
   closeNoteColorMenu();
   if(!body || !sel || !sel.rangeCount || noteIsLocked(noteEditorId)) return;
   if(sel.isCollapsed || !body.contains(sel.anchorNode)){ showToast('Select some text first'); return; }
   if(kind==='tc') noteRememberTextColor(name);
+  if(kind==='tc' && name!=='none'){                                                         // native colour command: works in cells, lists, bold and headings, one Undo step
+    document.execCommand('styleWithCSS', false, true);
+    document.execCommand('foreColor', false, noteColorValues('tc')[name]);
+    document.execCommand('styleWithCSS', false, false);
+    noteRestoreColorSpans(); onNoteInput(); updateNoteToolbarState(); return;
+  }
   const range = sel.getRangeAt(0), sel_ = kind==='tc' ? 'span[data-tc]' : 'mark[data-hl]', tag = kind==='tc' ? 'span' : 'mark', attr = kind==='tc' ? 'data-tc' : 'data-hl';
   const wrapTexts = (root, nm)=>{                                                          // wrap every text run of root in the colour (nm 'none' = no wrapper)
     root.querySelectorAll(sel_).forEach(el=>{ while(el.firstChild) el.parentNode.insertBefore(el.firstChild, el); el.remove(); });   // a new colour replaces the old one
