@@ -256,9 +256,6 @@ const ICONS = {
   .split-btn-menu-label { font-size: var(--fs-12); font-weight: 500; }
   .split-btn-menu-desc { font-size: var(--fs-11); color: var(--text-3); margin-top: 1px; }
   .split-btn-menu-hint { margin-left: auto; padding-left: 16px; font-size: var(--fs-12); color: var(--text-3); }
-  /* the Help menu groups its items (help · about) with one divider, like a macOS Help menu, instead of a rule between every row */
-  #helpMenu .split-btn-menu-item + .split-btn-menu-item { border-top: 0; }
-  #helpMenu .split-btn-menu-item.grp-start { border-top: 0.5px solid var(--border); margin-top: 4px; }
 
   /* layout */
   .layout { display: flex; flex: 1; overflow: hidden; height: calc(100vh - 52px); }
@@ -808,12 +805,16 @@ const ICONS = {
   .sync-banner .icon-btn { color: var(--text-3); }
   .update-banner > i:first-child { color: var(--accent); }
   .split-btn-menu-item.notes-only { border-top: 0.5px solid var(--border-2); }   /* Export Notes / Prompts follow the general items after a hairline */
-  /* Data menu (export / import): one line per item, groups split by a single hairline, an inset rounded accent highlight under the pointer — as a macOS menu */
-  #libMenu { padding: 4px; min-width: 0; width: max-content; }
-  #libMenu .split-btn-menu-item { align-items: center; padding: 5px 10px; border-radius: var(--r-s); border-top: 0; }
-  #libMenu .split-btn-menu-item:hover { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
-  #libMenu .split-btn-menu-item:hover :is(.split-btn-menu-icon, .split-btn-menu-desc) { color: inherit; }
-  #libMenu .split-btn-menu-icon { margin-top: 0; }
+  /* The Data and Help menus (opened from a button) look like the right-click menus (X2-02): one line per item, groups split by a single hairline (.split-btn-menu-sep, never a rule between every row),
+     inset rounded rows (8px) and the accent highlight under the pointer, 14px text, at least 230px wide, as a macOS menu */
+  :is(#libMenu, #helpMenu) { padding: 6px; min-width: 230px; width: max-content; }
+  :is(#libMenu, #helpMenu) .split-btn-menu-item { align-items: center; padding: 8px 10px; border-radius: var(--r-s); border-top: 0; }
+  :is(#libMenu, #helpMenu) .split-btn-menu-item + .split-btn-menu-item { border-top: 0; }
+  :is(#libMenu, #helpMenu) .split-btn-menu-item:hover { background: var(--sel-bg, var(--bg-3)); color: var(--on-accent); }
+  :is(#libMenu, #helpMenu) .split-btn-menu-item:hover :is(.split-btn-menu-icon, .split-btn-menu-desc, .split-btn-menu-hint) { color: inherit; }
+  :is(#libMenu, #helpMenu) .split-btn-menu-icon { margin-top: 0; }
+  :is(#libMenu, #helpMenu) .split-btn-menu-label { font-size: var(--fs-14); }
+  :is(#libMenu, #helpMenu) .split-btn-menu-desc { font-size: var(--fs-12); }
   .split-btn-menu-sep { height: 0.5px; background: var(--border-2); margin: 4px 8px; }
 
   .filter-menu { width: max-content; max-width: calc(100vw - 24px); }   /* fits its chips (a min-width left a wide empty strip); max-content because the menu's containing block is the small Filter button */
@@ -2274,7 +2275,8 @@ const ICONS = {
       <div class="split-btn-menu" id="helpMenu" style="left:auto;right:0">
         <div class="split-btn-menu-item" onclick="openHelpModal();closeHelpMenu()"><i class="fa-regular fa-circle-question split-btn-menu-icon"></i><div><div class="split-btn-menu-label">ClearDesk Help</div></div></div>
         <div class="split-btn-menu-item" onclick="openShortcutsModal();closeHelpMenu()"><i class="fa-solid fa-keyboard split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Keyboard Shortcuts</div></div><span class="split-btn-menu-hint">?</span></div>
-        <div class="split-btn-menu-item grp-start" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About ClearDesk</div></div></div>
+        <div class="split-btn-menu-sep" role="separator"></div>
+        <div class="split-btn-menu-item" onclick="openAboutModal();closeHelpMenu()"><i class="fa-solid fa-circle-info split-btn-menu-icon"></i><div><div class="split-btn-menu-label">About ClearDesk</div></div></div>
         <div class="split-btn-menu-item" onclick="closeHelpMenu();checkForUpdatesNow()"><i class="fa-solid fa-rotate-right split-btn-menu-icon"></i><div><div class="split-btn-menu-label">Check for Updates</div></div></div>
       </div>
     </div>
