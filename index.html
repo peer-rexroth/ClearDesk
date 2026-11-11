@@ -7762,11 +7762,19 @@ function saveFolderModal(){
     save(); render(); showToast('Change undone');
   });
 }
+// The sentence under "Delete this folder?" (Notes and Prompts): what goes with it, where the items land, and that Undo is there for a moment.
+function folderDeleteBody(subfolders, items, noun, dest){
+  const parts = [];
+  if(subfolders>0) parts.push(`Its ${subfolders} subfolder${subfolders===1 ? '' : 's'} will be deleted too.`);
+  parts.push(items>0 ? `${items} ${noun}${items===1 ? '' : 's'} will move to ${dest}.` : 'It has no ' + noun + 's.');
+  parts.push('You can undo this for a few seconds.');
+  return parts.join(' ');
+}
 function deleteNoteFolder(id){
   const f = folderById(id); if(!f || f.locked) return;
   const kids = folderChildren(id), gone = new Set([id, ...kids.map(k=>k.id)]);
   const count = notes.filter(n=>gone.has(n.folderId)).length;
-  {                                                             // no alert: the toast offers Undo
+  const run = ()=>{                                             // after the confirmation; the toast still offers Undo
       if(!folderById(id)) return;
       flushNoteEdit();
       const removed = [];
@@ -7783,7 +7791,8 @@ function deleteNoteFolder(id){
         moved.forEach(([nid, fid])=>{ const n = notes.find(x=>x.id===nid); if(n){ n.folderId = fid; n.updatedAt = Date.now(); } });
         noteEditorId = null; save(); render(); showToast('Folder restored');
       });
-  }
+  };
+  openConfirmModal({ title: 'Delete this folder?', body: folderDeleteBody(kids.length, count, 'note', (folderById(NOTES_DEFAULT_FOLDER) || {}).name || 'Notes'), confirmLabel: 'Delete Folder', action: run });
 }
 
 // ───────────────────────── Prompts: the third mode (reusable prompt templates with variables) ─────────────────────────
@@ -9531,7 +9540,7 @@ function savePromptFolderModal(){
 function deletePromptFolder(id){
   const f = promptFolderById(id); if(!f || f.locked) return;
   const kids = promptFolderKids(id), gone = new Set([id, ...kids.map(k=>k.id)]), count = prompts.filter(p=>gone.has(p.folderId)).length;
-  {                                                             // no alert: the toast offers Undo
+  const run = ()=>{                                             // after the confirmation; the toast still offers Undo
     if(!promptFolderById(id)) return;
     flushPromptEdit();
     const removed = []; promptFolders.forEach((x, i)=>{ if(gone.has(x.id)) removed.push({ f: x, i }); });
@@ -9544,7 +9553,8 @@ function deletePromptFolder(id){
       moved.forEach(([pid, fid])=>{ const p = prompts.find(x=>x.id===pid); if(p){ p.folderId = fid; p.updatedAt = Date.now(); } });
       promptEditorId = null; save(); render(); showToast('Folder restored');
     });
-  }
+  };
+  openConfirmModal({ title: 'Delete this folder?', body: folderDeleteBody(kids.length, count, 'prompt', (promptFolderById(PROMPTS_DEFAULT_FOLDER) || {}).name || 'Prompts'), confirmLabel: 'Delete Folder', action: run });
 }
 
 // ---- export / import ----

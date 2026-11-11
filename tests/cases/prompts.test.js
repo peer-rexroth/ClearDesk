@@ -143,7 +143,10 @@ test('folders: creating through the dialog, deleting moves prompts out, and the 
   const ideas = promptFolders.find(f => f.name === 'Ideas'); assertTrue(!!ideas); assertEqual(promptFolderFilter, ideas.id);
   const fid = ideas.id;
   prompts = [pmk({ id: 'a', folderId: fid })];
-  deletePromptFolder(fid);                                         
+  deletePromptFolder(fid);
+  assertTrue(!!promptFolderById(fid), 'nothing is deleted until the confirmation is accepted');
+  assertEqual(document.getElementById('confirmModalBody').textContent, '1 prompt will move to Prompts. You can undo this for a few seconds.');
+  confirmModalAction();
   assertFalse(!!promptFolderById(fid)); assertEqual(prompts[0].folderId, PROMPTS_DEFAULT_FOLDER, 'its prompts move to the default folder');
   assertTrue(deletedPromptFolderIds.some(t => t.id === fid)); assertEqual(promptFolderFilter, 'all');
 });

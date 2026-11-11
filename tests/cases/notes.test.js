@@ -154,6 +154,10 @@ test('deleting a folder moves its notes to Notes, and undo puts everything back'
   notes = [ntNote({ id: 'a', folderId: 'f2' }), ntNote({ id: 'b', folderId: NOTES_DEFAULT_FOLDER })];
   noteFolderFilter = 'f2';
   deleteNoteFolder('f2');
+  assertEqual(noteFolders.length, 2, 'nothing is deleted until the confirmation is accepted');
+  assertEqual(document.getElementById('confirmModalTitle').textContent, 'Delete this folder?');
+  assertEqual(document.getElementById('confirmModalBody').textContent, '1 note will move to Notes. You can undo this for a few seconds.');
+  confirmModalAction();
   assertEqual(noteFolders.length, 1); assertEqual(notes[0].folderId, NOTES_DEFAULT_FOLDER); assertEqual(noteFolderFilter, 'all');
   toastUndoAction();
   assertEqual(noteFolders.length, 2); assertEqual(notes.find(function (n) { return n.id === 'a'; }).folderId, 'f2');
@@ -466,6 +470,8 @@ test('deleting a folder deletes its subfolders, moves all their notes to Notes, 
   ntTree();
   notes = [ntNote({ id: 'a', folderId: 'f-work' }), ntNote({ id: 'b', folderId: 'f-q1' }), ntNote({ id: 'c', folderId: 'f-home' })];
   deleteNoteFolder('f-work');
+  assertEqual(document.getElementById('confirmModalBody').textContent, 'Its 2 subfolders will be deleted too. 2 notes will move to Notes. You can undo this for a few seconds.');
+  confirmModalAction();
   assertDeepEqual(noteFolders.map(f => f.id), [NOTES_DEFAULT_FOLDER, 'f-home']);
   assertEqual(notes.find(n => n.id === 'a').folderId, NOTES_DEFAULT_FOLDER);
   assertEqual(notes.find(n => n.id === 'b').folderId, NOTES_DEFAULT_FOLDER);
@@ -1031,4 +1037,17 @@ test('a recoloured part inside a coloured run keeps both colours through the san
 
 test('an inline colour style (what the browser writes) is not kept, so the editor must turn it into data-tc before saving', function () {
   assertEqual(sanitizeNoteHtml('<p><span style="color: rgb(217, 45, 32);">x</span></p>'), '<p>x</p>');
+});
+
+test('cancelling the folder confirmation deletes nothing', function () {
+  noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true }, { id: 'f2', name: 'Work' }];
+  notes = [ntNote({ id: 'a', folderId: 'f2' })];
+  deleteNoteFolder('f2'); closeConfirmModal(true);
+  assertEqual(noteFolders.length, 2); assertEqual(notes[0].folderId, 'f2');
+});
+test('an empty folder says so in the confirmation', function () {
+  noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true }, { id: 'f2', name: 'Empty' }]; notes = [];
+  deleteNoteFolder('f2');
+  assertEqual(document.getElementById('confirmModalBody').textContent, 'It has no notes. You can undo this for a few seconds.');
+  closeConfirmModal(true);
 });
