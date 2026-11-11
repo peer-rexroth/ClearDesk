@@ -2768,7 +2768,7 @@ const ICONS = {
           <div class="help-row"><i class="fa-regular fa-folder-plus"></i><span><strong>Subfolders</strong>: right-click a folder and choose <em>New subfolder</em>, or pick a location when you create or edit a folder. Folders nest one level. A folder shows only the notes directly in it, and so does its count; each subfolder has its own list. Deleting a folder deletes its subfolders too and moves all their notes to <em>Notes</em> (with Undo).</span></div>
           <div class="help-row"><i class="fa-solid fa-arrows-up-down"></i><span><strong>Reordering folders</strong>: drag a folder up or down within its level, or right-click it and choose <em>Move up</em> / <em>Move down</em>. The order, renames and moves sync between devices like note edits.</span></div>
           <div class="help-row"><i class="fa-solid fa-magnifying-glass"></i><span><strong>Search</strong> (<kbd>/</kbd>) in the sidebar looks through the titles and text of <em>every</em> note, whatever folder you are in, and opens the first result.</span></div>
-          <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Delete</kbd> while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
+          <div class="help-row"><i class="fa-regular fa-trash-can"></i><span><strong>Delete</strong> a note with the trash button, or <kbd>Cmd</kbd>+<kbd>Delete</kbd> (<kbd>Delete</kbd> on Windows) while the note list has focus. <kbd>↑</kbd> <kbd>↓</kbd> move through the list and <kbd>Enter</kbd> jumps into the note.</span></div>
           <div class="help-row"><i class="fa-solid fa-hard-drive"></i><span>Notes are part of your data: they are saved in this browser, included in <strong>Export</strong> and <strong>Import</strong>, and kept in the linked file. When two copies of a note differ, the newer edit wins.</span></div>
           </div>
         </div>
@@ -3072,6 +3072,12 @@ function platformKeyTitle(t){
   });
 }
 const titleMacKeys = /Mac|iPhone|iPad|iPod/i.test(navigator.userAgent);
+// Deleting the selected item from the keyboard (the Tasks, Notes and Prompts lists): ⌘⌫ on a Mac, as in Finder, and Delete elsewhere (a Mac's fn+⌫ is a Delete key too).
+// A bare Backspace does nothing: it is the key people press without thinking.
+const isDeleteShortcut = e=>!e.altKey && !e.shiftKey && (titleMacKeys
+  ? ((e.key==='Backspace' && e.metaKey && !e.ctrlKey) || (e.key==='Delete' && !e.metaKey && !e.ctrlKey))
+  : (e.key==='Delete' && !e.metaKey && !e.ctrlKey));
+const deleteKeyHint = ()=>titleMacKeys ? '⌘⌫' : 'Delete';
 function labelIconButtons(root){
   if(!root || !root.querySelectorAll) return;
   if(!titleMacKeys){ const ts = root.querySelectorAll('[title]'); for(let i=0;i<ts.length;i++){ const v = ts[i].getAttribute('title'); if(v && /[⌃⌥⇧⌘]/.test(v)){ const w = platformKeyTitle(v); if(w!==v) ts[i].setAttribute('title', w); } } }
@@ -4455,7 +4461,7 @@ function rowMenuHtml(ids){
   parts.push(sub('fa-regular fa-folder', 'Move to', opts('project', visibleProjects().map(p=>({id:p.id,label:abbreviateName(p.name,22),icon:p.icon})), same('projectId'), x=>({icon:x.icon}))));
   parts.push(sep);
   if(n===1) parts.push(item('fa-solid fa-plus','Add Subtask','rowMenuRun(\'subtask\')'), item('fa-regular fa-duplicate','Duplicate','rowMenuRun(\'duplicate\')'), sep);
-  parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} Tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:'⌫'}));
+  parts.push(item('fa-solid fa-trash', n>1?`Delete ${n} Tasks`:'Delete', 'rowMenuRun(\'delete\')', {danger:true, hint:deleteKeyHint()}));
   return parts.join('');
 }
 // x/y are viewport px from the event. The menu is position:fixed on <body>, and
@@ -5112,7 +5118,7 @@ function renderTaskTrash(){
 }
 function trashRowKey(e, id){
   if(e.key==='Enter' || e.key===' '){ e.preventDefault(); selectTrashTask(id); }
-  else if(e.key==='Delete' || e.key==='Backspace'){ e.preventDefault(); permanentDeleteTask(id); }
+  else if(isDeleteShortcut(e)){ e.preventDefault(); permanentDeleteTask(id); }
 }
 function openTaskTrashMenu(e, id){
   e.preventDefault(); e.stopPropagation();
@@ -6144,12 +6150,12 @@ function shortcutGroups(){
       ['Switch to Tasks', [opt,mod,'1']], ['Switch to Notes', [opt,mod,'2']], ['Switch to Prompts', [opt,mod,'3']],
       ['Navigate tasks', ['↑','↓']], ['Jump from the quick-add field into the list', ['↓']], ['Back to the quick-add field from the first task', ['↑']], ['Open selected task', ['↵']] ] },
     { id:'actions', label:'Task actions', icon:'fa-solid fa-list-check', rows:[
-      ['Collapse or expand the selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Rename the selected task', ['F2']], ['Delete selected task', ['Delete']],
+      ['Collapse or expand the selected task (list view)', ['Space']], ['Add subtask to selected task', ['Tab']], ['Rename the selected task', ['F2']], ['Delete selected task', mac ? ['⌘','⌫'] : ['Delete']],
       ['Select all visible tasks', [mod,'A']], ['Undo last delete or edit', [mod,'Z']] ] },
     { id:'general', label:'General', icon:'fa-solid fa-sliders', rows:[
       ['Show shortcuts', ['?']], ['Close drawer or dialog, clear selection', ['Esc']] ] },
     { id:'notes', label:'Notes', icon:'fa-regular fa-note-sticky', rows:[
-      ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Insert a block (table, checklist, divider, date…)', ['/']], ['Jump into the note', ['↵']], ['Delete the selected note', ['Delete']],
+      ['New note', ['N']], ['Move through the notes list', ['↑','↓']], ['Insert a block (table, checklist, divider, date…)', ['/']], ['Jump into the note', ['↵']], ['Delete the selected note', mac ? ['⌘','⌫'] : ['Delete']],
       ['Undo typing and formatting', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Undo a delete, move or duplicate (when not typing)', [mod,'Z']],
       ['Bold', [mod,'B']], ['Italic', [mod,'I']], ['Underline', [mod,'U']], ['Add or edit a link', [mod,'K']], ['Paste text as it is, without reading Markdown', [shift,mod,'V']],
       ['Copy the whole note (for Mail)', mac ? ['⌃','⌘','C'] : ['Ctrl','Alt','C']], ['Print or save as PDF', [mod,'P']],
@@ -6158,7 +6164,7 @@ function shortcutGroups(){
       ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']],
       ['Find in the note', [mod,'F']], ['Find and replace', mac ? ['⌥','⌘','F'] : ['Ctrl','Alt','F']], ['Next match', [mod,'G']], ['Previous match', [shift,mod,'G']], ['Close the find bar', ['Esc']] ] },
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-braces', rows:[
-      ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', ['Delete']],
+      ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', mac ? ['⌘','⌫'] : ['Delete']],
       ['Copy the finished prompt', [mod,'↵']], ['Copy and open in the first AI app', [shift,mod,'↵']], ['Show or hide the Variables panel', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
       ['Undo typing in the template', [mod,'Z']], ['Redo', [shift,mod,'Z']], ['Focus search', ['/']],
       ['Find in the template', [mod,'F']], ['Find and replace', mac ? ['⌥','⌘','F'] : ['Ctrl','Alt','F']], ['Next match', [mod,'G']], ['Previous match', [shift,mod,'G']], ['Close the find bar', ['Esc']] ] },
@@ -7222,7 +7228,7 @@ function noteMenuHtml(id, opts){
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
-    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock First' : '⌫', off:!!n.locked})
+    item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock First' : deleteKeyHint(), off:!!n.locked})
   ].join('');
 }
 function openNoteMenu(e, id){
@@ -7288,7 +7294,7 @@ function subMenuHtml(ref, surface){
     if(L<=2 && f.idx>0) move.push(item('fa-solid fa-indent', L===1 ? 'Make Step of Subtask Above' : 'Make Sub-step of Step Above', `subMenuRun('demote')`));
     if(move.length) parts.push('<div class="row-menu-sep"></div>', ...move);
   }
-  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-trash', 'Delete', `subMenuRun('delete')`, {danger:true, hint:'⌫'}));
+  parts.push('<div class="row-menu-sep"></div>', item('fa-solid fa-trash', 'Delete', `subMenuRun('delete')`, {danger:true, hint:deleteKeyHint()}));
   return tidyMenuSeps(parts.join(''));
 }
 function subMenuRun(kind){
@@ -9660,7 +9666,7 @@ function promptMenuHtml(id){
     item('fa-solid fa-arrow-up-from-bracket', 'Export Prompt', `promptMenuRun('export')`),
     rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts),
     sep,
-    item('fa-solid fa-trash', 'Delete', `promptMenuRun('delete')`, {danger:true, off:p.locked, hint: p.locked ? 'Unlock First' : '⌫'})
+    item('fa-solid fa-trash', 'Delete', `promptMenuRun('delete')`, {danger:true, off:p.locked, hint: p.locked ? 'Unlock First' : deleteKeyHint()})
   ].join('');
 }
 function openPromptMenu(e, id){
@@ -11703,7 +11709,7 @@ function handleNotesKeys(e){
     const next = vis[Math.max(0, Math.min(vis.length-1, i + (e.key==='ArrowDown' ? 1 : -1)))];
     if(next && next.id!==selectedNoteId){ selectNote(next.id); document.querySelector(`.note-row[data-id="${next.id}"]`)?.focus(); }
   } else if(e.key==='Enter' && selectedNoteId){ e.preventDefault(); document.getElementById('noteBody')?.focus(); }
-  else if((e.key==='Delete' || e.key==='Backspace') && selectedNoteId){ e.preventDefault(); deleteNote(selectedNoteId); }
+  else if(isDeleteShortcut(e) && selectedNoteId){ e.preventDefault(); deleteNote(selectedNoteId); }
 }
 
 // ---- global variables: a fourth kind of placeholder, {{@name}}, whose options are kept in ONE place and shared by every prompt that uses it ----
@@ -12179,7 +12185,7 @@ function handlePromptsKeys(e){
     const next = vis[Math.max(0, Math.min(vis.length - 1, i + (e.key==='ArrowDown' ? 1 : -1)))];
     if(next && next.id!==selectedPromptId){ selectPrompt(next.id); document.querySelector(`#pList .note-row[data-id="${next.id}"]`)?.focus(); }
   } else if(e.key==='Enter' && selectedPromptId){ e.preventDefault(); document.getElementById('pTemplate')?.focus(); }
-  else if((e.key==='Delete' || e.key==='Backspace') && selectedPromptId){ e.preventDefault(); deletePrompt(selectedPromptId); }
+  else if(isDeleteShortcut(e) && selectedPromptId){ e.preventDefault(); deletePrompt(selectedPromptId); }
 }
 
 // A drag that starts inside a dialog (selecting text in a field) and ends on the backdrop must not close it:
@@ -12555,7 +12561,7 @@ function addInlineSubSubSubtask(taskId, subId, stepId){
   document.getElementById(inputId)?.focus();
 }
 function handleListKeyNav(e){
-  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && e.key!=='Delete' && e.key!=='F2' && e.key!=='ContextMenu' && !(e.shiftKey && e.key==='F10')) return;
+  if(e.key!=='ArrowDown' && e.key!=='ArrowUp' && e.key!=='Enter' && e.key!==' ' && e.key!=='Tab' && !isDeleteShortcut(e) && e.key!=='F2' && e.key!=='ContextMenu' && !(e.shiftKey && e.key==='F10')) return;
   if(isTypingTarget(document.activeElement)) return;
   if(document.querySelector('.modal-bg.open')) return;
   if(activeTaskId && e.key!=='ArrowDown' && e.key!=='ArrowUp') return;
@@ -12569,7 +12575,7 @@ function handleListKeyNav(e){
     if(kbdSelectedTaskId && list.some(t=>t.id===kbdSelectedTaskId)){ e.preventDefault(); openRowMenuForKeyboard(kbdSelectedTaskId); }
     return;
   }
-  if(e.key==='Delete'){
+  if(isDeleteShortcut(e)){
     if(kbdSelectedTaskId && list.some(t=>t.id===kbdSelectedTaskId)){
       e.preventDefault();
       deleteTask(kbdSelectedTaskId);
