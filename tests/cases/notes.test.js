@@ -132,12 +132,12 @@ test('a note in Recently Deleted is read-only, and one deleted over 30 days ago 
   assertTrue(noteTrashed(notes[0]));
 });
 
-test('pinned notes sort first, and pin / unpin is a stamped edit that syncs', function () {
+test('pinned notes sort first, and pin / unpin keeps the Edited date but is stamped so it syncs', function () {
   notes = [ntNote({ id: 'a', updatedAt: 3 }), ntNote({ id: 'b', updatedAt: 2 }), ntNote({ id: 'c', updatedAt: 1, pinned: true })];
   noteFolderFilter = 'all';
   assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'c,a,b');
   toggleNotePin('b');
-  assertTrue(notes[1].pinned === true); assertTrue(notes[1].updatedAt > 2);
+  assertTrue(notes[1].pinned === true); assertEqual(notes[1].updatedAt, 2, 'pinning is not an edit'); assertTrue(notes[1].stateAt > 2);
   assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'b,c,a');
   toggleNotePin('b');
   assertTrue(notes[1].pinned === false);
@@ -227,11 +227,11 @@ test('export includes notes and folders', function () {
   assertEqual(out.notes.length, 1); assertTrue(Array.isArray(out.noteFolders));
 });
 
-test('moveNote changes the folder and bumps updatedAt; an unknown folder is refused', function () {
+test('moveNote changes the folder and stamps stateAt (not updatedAt); an unknown folder is refused', function () {
   noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true }, { id: 'f2', name: 'Work' }];
   notes = [ntNote({ id: 'a', updatedAt: 1 })];
   moveNote('a', 'nope'); assertEqual(notes[0].folderId, NOTES_DEFAULT_FOLDER);
-  moveNote('a', 'f2'); assertEqual(notes[0].folderId, 'f2'); assertTrue(notes[0].updatedAt > 1);
+  moveNote('a', 'f2'); assertEqual(notes[0].folderId, 'f2'); assertEqual(notes[0].updatedAt, 1); assertTrue(notes[0].stateAt > 1);
 });
 
 test('setAppMode switches areas, remembers the choice per device, and render follows the mode', function () {
@@ -314,12 +314,12 @@ test('a locked note cannot be deleted, moved or auto-removed', function () {
   assertEqual(notes.length, 1, 'an empty locked note is not auto-removed');
 });
 
-test('toggleNoteLock flips the lock and stamps the note so a sync prefers it', function () {
+test('toggleNoteLock flips the lock, keeps the Edited date and stamps the note so a sync prefers it', function () {
   const n = ntNote({ id: 'nl2', updatedAt: 1000 });
   notes = [n];
   toggleNoteLock('nl2');
   assertTrue(n.locked === true);
-  assertTrue(n.updatedAt > 1000, 'updatedAt moves so the lock change wins a merge');
+  assertEqual(n.updatedAt, 1000, 'locking is not an edit'); assertTrue(n.stateAt > 1000, 'stateAt moves so the lock change wins a merge');
   toggleNoteLock('nl2');
   assertTrue(n.locked === false);
   deleteNote('nl2');
@@ -1050,4 +1050,19 @@ test('an empty folder says so in the confirmation', function () {
   deleteNoteFolder('f2');
   assertEqual(document.getElementById('confirmModalBody').textContent, 'It has no notes. You can undo this for a few seconds.');
   closeConfirmModal(true);
+});
+
+test('moving a note keeps the Edited date; pin / lock / move still win a merge via stateAt', function () {
+  noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true, order: 1000, updatedAt: 0 }, { id: 'f-a', name: 'A', order: 2000, updatedAt: 0 }];
+  const n = ntNote({ id: 'sv1', updatedAt: 1000 }); notes = [n];
+  moveNote('sv1', 'f-a');
+  assertEqual(n.folderId, 'f-a'); assertEqual(n.updatedAt, 1000, 'a move is not an edit'); assertTrue(n.stateAt > 1000);
+  // another device pinned it later without touching the text: we take the pin
+  mergeNotesData({ notes: [Object.assign({}, n, { pinned: true, stateAt: n.stateAt + 5000 })] }, true);
+  assertTrue(notes[0].pinned === true);
+  // our text edit is newer than their pin: keep our text, still take their pin / lock
+  notes = [ntNote({ id: 'sv2', body: '<p>mine</p>', updatedAt: 5000, baseAt: 1000 })];
+  mergeNotesData({ notes: [ntNote({ id: 'sv2', body: '<p>old</p>', updatedAt: 1000, stateAt: 6000, pinned: true, locked: true })] }, true);
+  assertEqual(notes[0].body, '<p>mine</p>'); assertTrue(notes[0].pinned === true && notes[0].locked === true);
+  assertEqual(notes.length, 1, 'no conflicted copy for a pin against a text edit');
 });

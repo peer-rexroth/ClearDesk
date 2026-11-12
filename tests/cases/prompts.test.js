@@ -101,8 +101,10 @@ test('favorite, lock, clone and move', function () {
   promptFolders = [{ id: 'f1', name: 'Top', updatedAt: 1 }];
   const p = pmk({ id: 'x', name: 'Base', template: 'A {{v}}', vars: { v: { type: 'option', options: ['1'], selected: '1' } }, locked: true });
   prompts = [p]; promptEditorId = 'x';
+  const edited = p.updatedAt;
   togglePromptFavorite('x'); assertTrue(p.favorite);
   togglePromptLock('x'); assertFalse(p.locked);
+  assertEqual(p.updatedAt, edited, 'favorite and lock are not edits'); assertTrue(p.stateAt >= edited);
   clonePrompt('x');
   assertEqual(prompts.length, 2);
   const c = prompts.find(q => q.id !== 'x');
@@ -697,4 +699,17 @@ test('a prompt with only text variables shows the Presets row with just Clear (n
   assertFalse(promptPresetMatches(p, null), 'Clear is not "on" while the field has text');
   applyPromptPreset(-1);
   assertEqual(p.vars.note.value, '', 'Clear empties the text field'); assertTrue(promptPresetMatches(p, null), 'and the chip then shows as on');
+});
+
+test('prompt favorite / lock / move keep the Edited date but still win a merge', function () {
+  pfresh();
+  promptFolders = [{ id: 'f1', name: 'Top', updatedAt: 1 }];
+  const p = pmk({ id: 'sv', updatedAt: 1000 }); prompts = [p];
+  movePrompt('sv', 'f1');
+  assertEqual(p.updatedAt, 1000, 'a move is not an edit'); assertTrue(p.stateAt > 1000);
+  mergePromptsData({ prompts: [Object.assign({}, p, { favorite: true, stateAt: p.stateAt + 5000 })] }, true);
+  assertTrue(prompts[0].favorite === true);
+  prompts = [pmk({ id: 'sw', template: 'mine', updatedAt: 5000 })];
+  mergePromptsData({ prompts: [pmk({ id: 'sw', template: 'old', updatedAt: 1000, stateAt: 6000, favorite: true })] }, true);
+  assertEqual(prompts[0].template, 'mine'); assertTrue(prompts[0].favorite === true);
 });

@@ -6599,7 +6599,11 @@ function mergeNotesData(data, respectTombstones){
         added++;
         if(incomingWins){ adoptNote(existing, it); existing.baseAt = existing.updatedAt; updated++; }
         else existing.baseAt = inUpd;                                 // our version stays; the other side's edit is now accounted for
-      } else if(inUpd > exUpd){ adoptNote(existing, it); existing.baseAt = existing.updatedAt; updated++; }
+      } else if(itemVer(it) > itemVer(existing)){
+        if(exUpd > inUpd) adoptState(existing, it, ['pinned', 'locked', 'folderId']);        // our text is newer: take only their pin / lock / folder
+        else { adoptNote(existing, it); existing.baseAt = existing.updatedAt; }
+        updated++;
+      }
       return;
     }
     const tomb = deletedNoteIds.find(x=>x.id===it.id);
@@ -6638,7 +6642,7 @@ function noteIsLocked(id){ const n = notes.find(x=>x.id===id); return !!(n && (n
 function toggleNoteLock(id){
   const n = notes.find(x=>x.id===id); if(!n) return;
   if(id===noteEditorId) flushNoteEdit();
-  n.locked = !n.locked; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
+  n.locked = !n.locked; touchState(n);
   save(); render();
 }
 function uniqueNoteTitle(base){
@@ -7690,19 +7694,19 @@ function emptyTrash(){
 function toggleNotePin(id){
   const n = notes.find(x=>x.id===id); if(!n || noteTrashed(n)) return;
   if(id===noteEditorId) flushNoteEdit();
-  n.pinned = !n.pinned; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;                 // an edit like any other, so it syncs
+  n.pinned = !n.pinned; touchState(n);                 // not an edit (the Edited date stays), but it still syncs
   save(); render(); showToast(n.pinned ? 'Note pinned' : 'Note unpinned');
 }
 function moveNote(id, folderId){
   const n = notes.find(x=>x.id===id); if(!n || n.locked || noteTrashed(n) || !folderById(folderId) || n.folderId===folderId) return;
   flushNoteEdit();
   const prev = n.folderId, dest = folderById(folderId);
-  n.folderId = folderId; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
+  n.folderId = folderId; touchState(n);
   if(!noteInFilter(n)) selectedNoteId = null;
   save(); render();
   showToast(`Moved to ${dest.name}`, false, ()=>{
     const m = notes.find(x=>x.id===id); if(!m) return;
-    m.folderId = folderById(prev) ? prev : NOTES_DEFAULT_FOLDER; m.updatedAt = Date.now(); noteEditorStamp = m.updatedAt;
+    m.folderId = folderById(prev) ? prev : NOTES_DEFAULT_FOLDER; touchState(m);
     selectedNoteId = id; noteEditorId = null;
     save(); render(); showToast('Move undone');
   });
@@ -8767,7 +8771,11 @@ function mergePromptsData(data, respectTombstones){
     if(!it || !it.id) return;
     const ex = prompts.find(p=>p.id===it.id);
     if(ex){
-      if((it.updatedAt || 0) > (ex.updatedAt || 0)){ Object.assign(ex, it); if(!Number.isFinite(it.deletedAt)) delete ex.deletedAt; updated++; }
+      if(itemVer(it) > itemVer(ex)){
+        if((ex.updatedAt || 0) > (it.updatedAt || 0)) adoptState(ex, it, ['favorite', 'locked', 'folderId']);   // our text is newer: take only their favourite / lock / folder
+        else { Object.assign(ex, it); if(!Number.isFinite(it.deletedAt)) delete ex.deletedAt; }
+        updated++;
+      }
       return;
     }
     const tomb = deletedPromptIds.find(x=>x.id===it.id);
@@ -8948,6 +8956,11 @@ function schedulePromptSave(){ if(typeof clearTimeout==='function') clearTimeout
 function flushPromptEdit(){ if(promptSaveTimer){ if(typeof clearTimeout==='function') clearTimeout(promptSaveTimer); promptSaveTimer = null; commitPromptEdit(); } }
 function commitPromptEdit(){ promptSaveTimer = null; save(); renderPromptsList(); }
 function touchPrompt(p){ p.updatedAt = Date.now(); }
+// updatedAt = the last real edit (what "Edited" shows and the Edited sort uses). stateAt = the last pin / lock / favourite / folder move: it does
+// not count as an edit, but merges compare the newer of the two (itemVer), so those changes still sync between devices.
+function touchState(x){ x.stateAt = Date.now(); }
+const itemVer = x=>Math.max(x.updatedAt || 0, x.stateAt || 0);
+function adoptState(ex, it, keys){ keys.forEach(k=>{ if(it[k]!==undefined) ex[k] = it[k]; else if(typeof ex[k]==='boolean') ex[k] = false; }); ex.stateAt = it.stateAt; if(it.stateAt===undefined) delete ex.stateAt; }
 
 // ---- the variables panel (an inspector on the right) ----
 const promptSigOf = p=>Object.entries(p.vars || {}).map(([k, v])=>k + ':' + v.type).join('|') + '#' + promptIncludes(p).map(i=>i.name + ':' + i.status + ':' + (i.target ? i.target.id : '') + ':' + i.rest).join('|') + '#' + promptUsedBy(p).map(q=>q.id).join(',');
@@ -9344,11 +9357,11 @@ function createPrompt(){
 }
 function togglePromptFavorite(id){
   const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p || promptTrashed(p)) return;
-  p.favorite = !p.favorite; touchPrompt(p); save(); render();
+  p.favorite = !p.favorite; touchState(p); save(); render();
 }
 function togglePromptLock(id){
   const p = prompts.find(x=>x.id===(id || promptEditorId)); if(!p || promptTrashed(p)) return;
-  flushPromptEdit(); p.locked = !p.locked; touchPrompt(p); promptEditorId = null; save(); render();
+  flushPromptEdit(); p.locked = !p.locked; touchState(p); promptEditorId = null; save(); render();
 }
 function clonePrompt(id){
   const p = prompts.find(x=>x.id===id); if(!p) return;
@@ -9361,8 +9374,8 @@ function movePrompt(id, folderId){
   const p = prompts.find(x=>x.id===id); if(!p || p.locked || promptTrashed(p)) return;
   folderId = promptFolderById(folderId) ? folderId : '';
   if(p.folderId===folderId) return;
-  const was = p.folderId; p.folderId = folderId; touchPrompt(p); promptEditorId = null; save(); render();
-  showToast(folderId ? `Moved to ${promptFolderById(folderId).name}` : 'Moved out of its folder', false, ()=>{ p.folderId = promptFolderById(was) ? was : ''; touchPrompt(p); save(); render(); });
+  const was = p.folderId; p.folderId = folderId; touchState(p); promptEditorId = null; save(); render();
+  showToast(folderId ? `Moved to ${promptFolderById(folderId).name}` : 'Moved out of its folder', false, ()=>{ p.folderId = promptFolderById(was) ? was : ''; touchState(p); save(); render(); });
 }
 // Delete moves a prompt to Recently Deleted (30 days, restorable, and the delete syncs as an edit); deleting it THERE is permanent.
 function deletePrompt(id){
@@ -9584,7 +9597,7 @@ function buildPromptsExport(scope, id){                           // scope: 'all
   return JSON.parse(JSON.stringify({
     format: PROMPTS_FILE_FORMAT, version: 1, exported: new Date().toISOString(),
     folders: promptFolders.filter(f=>need.has(f.id)).map(f=>f.parentId ? { id: f.id, name: f.name, parentId: f.parentId } : { id: f.id, name: f.name }),
-    prompts: list.map(p=>({ id: p.id, name: p.name, folderId: p.folderId, favorite: !!p.favorite, locked: !!p.locked, template: p.template, vars: p.vars, presets: p.presets, createdAt: p.createdAt, updatedAt: p.updatedAt })),
+    prompts: list.map(p=>({ id: p.id, name: p.name, folderId: p.folderId, favorite: !!p.favorite, locked: !!p.locked, template: p.template, vars: p.vars, presets: p.presets, createdAt: p.createdAt, updatedAt: p.updatedAt, stateAt: p.stateAt })),
     globals: promptGlobals.filter(g=>used.has(globalKey(g.name).toLowerCase())).map(g=>({ name: g.name, options: g.options }))
   }));
 }
@@ -12729,7 +12742,7 @@ function buildNotesExport(scope, id){                              // scope: 'no
   return JSON.parse(JSON.stringify({
     format: NOTES_FILE_FORMAT, version: 1, exported: new Date().toISOString(),
     folders: noteFolders.filter(f=>need.has(f.id)).map(f=>f.parentId ? { id: f.id, name: f.name, parentId: f.parentId } : { id: f.id, name: f.name }),
-    notes: list.map(n=>({ id: n.id, title: n.title, body: n.body, folderId: n.folderId, pinned: !!n.pinned, locked: !!n.locked, createdAt: n.createdAt, updatedAt: n.updatedAt }))
+    notes: list.map(n=>({ id: n.id, title: n.title, body: n.body, folderId: n.folderId, pinned: !!n.pinned, locked: !!n.locked, createdAt: n.createdAt, updatedAt: n.updatedAt, stateAt: n.stateAt }))
   }));
 }
 function exportNotes(scope, id){
