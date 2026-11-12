@@ -730,3 +730,13 @@ test('prompt favorite / lock / move keep the Edited date but still win a merge',
   mergePromptsData({ prompts: [pmk({ id: 'sw', template: 'old', updatedAt: 1000, stateAt: 6000, favorite: true })] }, true);
   assertEqual(prompts[0].template, 'mine'); assertTrue(prompts[0].favorite === true);
 });
+
+test('deleting a prompt subfolder gives its prompts back to the parent folder', function () {
+  pfresh();
+  promptFolders = [{ id: PROMPTS_DEFAULT_FOLDER, name: 'Prompts', locked: true, updatedAt: 0 }, { id: 'pw', name: 'Work', updatedAt: 1 }, { id: 'ps', name: 'Sub', parentId: 'pw', updatedAt: 1 }];
+  prompts = [pmk({ id: 'x', folderId: 'ps' })];
+  deletePromptFolder('ps'); confirmModalAction();
+  assertEqual(prompts[0].folderId, 'pw', 'back to the parent');
+  deletePromptFolder('pw'); confirmModalAction();
+  assertEqual(prompts[0].folderId, PROMPTS_DEFAULT_FOLDER, 'a top-level folder: the default folder');
+});

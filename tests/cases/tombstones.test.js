@@ -31,7 +31,7 @@ test('bulkDelete tombstones every removed id, and undo clears them all', functio
 });
 
 test('deleteProject records a tombstone, and undo clears it again', function () {
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   assertTrue(deletedProjectIds.some(x => x.id === 'proj-work'));
   triggerToastUndo();
   assertFalse(deletedProjectIds.some(x => x.id === 'proj-work'));

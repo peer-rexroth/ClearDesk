@@ -1066,3 +1066,12 @@ test('moving a note keeps the Edited date; pin / lock / move still win a merge v
   assertEqual(notes[0].body, '<p>mine</p>'); assertTrue(notes[0].pinned === true && notes[0].locked === true);
   assertEqual(notes.length, 1, 'no conflicted copy for a pin against a text edit');
 });
+
+test('deleting a subfolder gives its notes back to the parent folder; a top-level folder sends them to the default folder', function () {
+  noteFolders = [{ id: NOTES_DEFAULT_FOLDER, name: 'Notes', locked: true, order: 1000, updatedAt: 0 }, { id: 'f-w', name: 'Work', order: 2000, updatedAt: 0 }, { id: 'f-s', name: 'Sub', parentId: 'f-w', order: 1000, updatedAt: 0 }];
+  notes = [ntNote({ id: 'a', folderId: 'f-s' }), ntNote({ id: 'b', folderId: 'f-w' })];
+  deleteNoteFolder('f-s'); confirmModalAction();
+  assertEqual(notes[0].folderId, 'f-w', 'the subfolder\'s note goes to Work, not to Notes'); assertEqual(notes[1].folderId, 'f-w');
+  deleteNoteFolder('f-w'); confirmModalAction();
+  assertEqual(notes[0].folderId, NOTES_DEFAULT_FOLDER); assertEqual(notes[1].folderId, NOTES_DEFAULT_FOLDER);
+});

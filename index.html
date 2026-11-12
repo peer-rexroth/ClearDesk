@@ -5556,7 +5556,8 @@ function deleteProject(id){
   const projTasks = tasks.filter(t=>t.projectId===id);
   const activeCount = projTasks.filter(t=>t.status!=='done').length;
   const doneCount = projTasks.length - activeCount;
-  {                                                             // no alert: the toast says where the tasks went and offers Undo
+  const body = [activeCount>0 ? `${activeCount} open task${activeCount===1?'':'s'} will move to Inbox.` : 'It has no open tasks.', doneCount>0 ? `${doneCount} completed task${doneCount===1?'':'s'} will move to Deleted.` : '', 'You can undo this for a few seconds.'].filter(Boolean).join(' ');
+  openConfirmModal({ title: 'Delete this project?', body, confirmLabel: 'Delete Project', action: ()=>{   // after the confirmation; the toast still says where the tasks went and offers Undo
       const idx = projects.findIndex(x=>x.id===id);
       if(idx===-1) return;
       const [removed] = projects.splice(idx,1);
@@ -5578,7 +5579,7 @@ function deleteProject(id){
         save(); render();
         showToast('Project restored');
       });
-  }
+  }});
 }
 
 // ── Project reordering ───────────────────────────────────────────────────────
@@ -7574,6 +7575,7 @@ function renderNoteEditor(){
       if(had) fresh.focus();
     }
     title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
+    if(!body.firstElementChild && !body.textContent) body.innerHTML = '<p><br></p>';             // an empty note starts with its paragraph (see noteEnsureParagraph)
     noteWrapLeadingInline(body);                                            // a first line stored as loose text becomes a paragraph, so its spacing matches the others
     noteAutoLinkDom(body);                                                  // links, e-mail addresses and phone numbers in existing text
     if(!noteIsLocked(n.id)) noteEnsureTrailingLine(body);
@@ -7777,6 +7779,8 @@ function saveFolderModal(){
   });
 }
 // The sentence under "Delete this folder?" (Notes and Prompts): what goes with it, where the items land, and that Undo is there for a moment.
+// Where the items of a deleted folder go: a subfolder gives them back to its parent, a top-level folder (and its subfolders) to the default folder.
+const folderRescueId = (f, byId, dflt)=>f.parentId && byId(f.parentId) ? f.parentId : dflt;
 function folderDeleteBody(subfolders, items, noun, dest){
   const parts = [];
   if(subfolders>0) parts.push(`Its ${subfolders} subfolder${subfolders===1 ? '' : 's'} will be deleted too.`);
@@ -7787,7 +7791,7 @@ function folderDeleteBody(subfolders, items, noun, dest){
 function deleteNoteFolder(id){
   const f = folderById(id); if(!f || f.locked) return;
   const kids = folderChildren(id), gone = new Set([id, ...kids.map(k=>k.id)]);
-  const count = notes.filter(n=>gone.has(n.folderId)).length;
+  const count = notes.filter(n=>gone.has(n.folderId)).length, destId = folderRescueId(f, folderById, NOTES_DEFAULT_FOLDER);
   const run = ()=>{                                             // after the confirmation; the toast still offers Undo
       if(!folderById(id)) return;
       flushNoteEdit();
@@ -7796,7 +7800,7 @@ function deleteNoteFolder(id){
       noteFolders = noteFolders.filter(x=>!gone.has(x.id));
       gone.forEach(g=>tombstone(deletedNoteFolderIds, g));
       const moved = [];
-      notes.forEach(n=>{ if(gone.has(n.folderId)){ moved.push([n.id, n.folderId]); n.folderId = NOTES_DEFAULT_FOLDER; n.updatedAt = Date.now(); } });
+      notes.forEach(n=>{ if(gone.has(n.folderId)){ moved.push([n.id, n.folderId]); n.folderId = destId; n.updatedAt = Date.now(); } });
       if(gone.has(noteFolderFilter)) noteFolderFilter = 'all';
       noteEditorId = null;
       save(); render();
@@ -7806,7 +7810,7 @@ function deleteNoteFolder(id){
         noteEditorId = null; save(); render(); showToast('Folder restored');
       });
   };
-  openConfirmModal({ title: 'Delete this folder?', body: folderDeleteBody(kids.length, count, 'note', (folderById(NOTES_DEFAULT_FOLDER) || {}).name || 'Notes'), confirmLabel: 'Delete Folder', action: run });
+  openConfirmModal({ title: 'Delete this folder?', body: folderDeleteBody(kids.length, count, 'note', (folderById(destId) || {}).name || 'Notes'), confirmLabel: 'Delete Folder', action: run });
 }
 
 // ───────────────────────── Prompts: the third mode (reusable prompt templates with variables) ─────────────────────────
@@ -9572,13 +9576,13 @@ function savePromptFolderModal(){
 }
 function deletePromptFolder(id){
   const f = promptFolderById(id); if(!f || f.locked) return;
-  const kids = promptFolderKids(id), gone = new Set([id, ...kids.map(k=>k.id)]), count = prompts.filter(p=>gone.has(p.folderId)).length;
+  const kids = promptFolderKids(id), gone = new Set([id, ...kids.map(k=>k.id)]), count = prompts.filter(p=>gone.has(p.folderId)).length, destId = folderRescueId(f, promptFolderById, PROMPTS_DEFAULT_FOLDER);
   const run = ()=>{                                             // after the confirmation; the toast still offers Undo
     if(!promptFolderById(id)) return;
     flushPromptEdit();
     const removed = []; promptFolders.forEach((x, i)=>{ if(gone.has(x.id)) removed.push({ f: x, i }); });
     promptFolders = promptFolders.filter(x=>!gone.has(x.id)); gone.forEach(g=>tombstone(deletedPromptFolderIds, g));
-    const moved = []; prompts.forEach(p=>{ if(gone.has(p.folderId)){ moved.push([p.id, p.folderId]); p.folderId = PROMPTS_DEFAULT_FOLDER; p.updatedAt = Date.now(); } });
+    const moved = []; prompts.forEach(p=>{ if(gone.has(p.folderId)){ moved.push([p.id, p.folderId]); p.folderId = destId; p.updatedAt = Date.now(); } });
     if(gone.has(promptFolderFilter)) promptFolderFilter = 'all';
     promptEditorId = null; save(); render();
     showToast('Folder deleted', false, ()=>{
@@ -9587,7 +9591,7 @@ function deletePromptFolder(id){
       promptEditorId = null; save(); render(); showToast('Folder restored');
     });
   };
-  openConfirmModal({ title: 'Delete this folder?', body: folderDeleteBody(kids.length, count, 'prompt', (promptFolderById(PROMPTS_DEFAULT_FOLDER) || {}).name || 'Prompts'), confirmLabel: 'Delete Folder', action: run });
+  openConfirmModal({ title: 'Delete this folder?', body: folderDeleteBody(kids.length, count, 'prompt', (promptFolderById(destId) || {}).name || 'Prompts'), confirmLabel: 'Delete Folder', action: run });
 }
 
 // ---- export / import ----
@@ -9781,7 +9785,10 @@ function noteSelInHeading(){
 }
 // A selection that starts or ends in a heading but holds other text: bold / un-bold the other text only. The browser decides between the two from where the selection STARTS, and a heading
 // always reads as bold, so the selection is trimmed to the first and last non-heading block for the command and then put back as it was.
-function noteBold(){
+// WebKit (Safari) also fires beforeinput for execCommand('bold'): onNoteBeforeInput would call noteBold again, without end ("Maximum call stack size exceeded"). While noteBold runs, that event passes through.
+let noteBoldBusy = false;
+function noteBold(){ if(noteBoldBusy) return; noteBoldBusy = true; try{ noteBoldRun(); } finally{ noteBoldBusy = false; } }
+function noteBoldRun(){
   const sel = window.getSelection(), body = document.getElementById('noteBody');
   if(!sel || !sel.rangeCount){ document.execCommand('bold'); return; }
   const r = sel.getRangeAt(0), isH = n=>n && n.nodeType===1 && /^H[1-6]$/.test(n.tagName);
@@ -9853,19 +9860,32 @@ noteSyncColorBar();
 // The palette as it is drawn right now (light and dark differ): name -> the colour the browser reports for it.
 function noteColorValues(kind){
   const out = {};
-  (kind==='tc' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).forEach(n=>{ const p = document.createElement('span'); p.className = `nc-${kind}-${n}`; document.body.appendChild(p); const cs = getComputedStyle(p); out[n] = kind==='tc' ? cs.color : cs.backgroundColor; p.remove(); });
+  (kind==='tc' ? NOTE_TEXT_COLORS : NOTE_HL_COLORS).forEach(n=>{ const p = document.createElement('span'); p.className = (kind==='hl' ? 'nc-sw ' : '') + `nc-${kind}-${n}`; document.body.appendChild(p); const cs = getComputedStyle(p); out[n] = kind==='tc' ? cs.color : cs.backgroundColor; p.remove(); });
   return out;
 }
 // The browser writes a colour as <span style="color: rgb(...)"> (foreColor, and insertHTML too, which drops the data-tc attribute), and the sanitizer would strip that on save: the
 // colour would be gone the moment you leave the note. Put the name back by matching the inline colour to the palette, and drop the other junk Chrome adds (a font-size on a coloured heading word).
+// WebKit (Safari) ignores defaultParagraphSeparator for the first line of an EMPTY editor: the text goes in loose and the next Enter nests a <p> inside a <p>.
+// So an empty note is loaded with its paragraph (renderNoteEditor) and gets one again when everything was deleted; Chrome makes one anyway.
+function noteEnsureParagraph(body){
+  body = body || document.getElementById('noteBody');
+  if(!body || body.textContent || body.querySelector('*:not(br)') || noteIsLocked(noteEditorId)) return;
+  const sel = window.getSelection(); if(!sel || !sel.rangeCount || !body.contains(sel.anchorNode)) return;
+  if(!(document.execCommand && document.execCommand('formatBlock', false, 'p'))){ body.innerHTML = '<p><br></p>'; const r = document.createRange(); r.setStart(body.firstChild, 0); r.collapse(true); sel.removeAllRanges(); sel.addRange(r); }
+}
 function noteRestoreColorSpans(){
   const body = document.getElementById('noteBody'); if(!body) return;
-  const spans = [...body.querySelectorAll('span[style]')]; if(!spans.length) return;
+  const spans = [...body.querySelectorAll('span[style]')]; if(!spans.length) return [];
   const vals = noteColorValues('tc'), byColor = {}; Object.keys(vals).forEach(n=>{ byColor[vals[n]] = n; });
+  const hv = noteColorValues('hl'), byBg = {}; Object.keys(hv).forEach(n=>{ byBg[hv[n]] = n; });
+  const marks = [];                                                   // Chrome also turns <mark data-hl> into <span style="background-color: …; color: inherit">: back into the mark
   spans.forEach(el=>{
+    const h = byBg[el.style.backgroundColor];
+    if(h){ const m = document.createElement('mark'); m.setAttribute('data-hl', h); while(el.firstChild) m.appendChild(el.firstChild); el.replaceWith(m); marks.push(m); return; }
     const n = byColor[el.style.color]; if(!n) return;
     el.removeAttribute('style'); el.setAttribute('data-tc', n);
   });
+  return marks;
 }
 function noteApplyColor(kind, name){
   const body = document.getElementById('noteBody'), sel = window.getSelection();
@@ -9873,11 +9893,13 @@ function noteApplyColor(kind, name){
   if(!body || !sel || !sel.rangeCount || noteIsLocked(noteEditorId)) return;
   if(sel.isCollapsed || !body.contains(sel.anchorNode)){ showToast('Select some text first'); return; }
   if(kind==='tc') noteRememberTextColor(name);
-  if(kind==='tc' && name!=='none'){                                                         // native colour command: works in cells, lists, bold and headings, one Undo step
+  if(name!=='none'){                                                                        // native colour command: works in cells, lists, bold and headings, one Undo step
     document.execCommand('styleWithCSS', false, true);
-    document.execCommand('foreColor', false, noteColorValues('tc')[name]);
+    document.execCommand(kind==='tc' ? 'foreColor' : 'hiliteColor', false, noteColorValues(kind)[name]);
     document.execCommand('styleWithCSS', false, false);
-    noteRestoreColorSpans(); onNoteInput(); updateNoteToolbarState(); return;
+    const marks = noteRestoreColorSpans();
+    if(marks.length){ const a = marks[0].firstChild, z = marks[marks.length - 1].lastChild; if(a && z) sel.setBaseAndExtent(a, 0, z, z.nodeType===3 ? z.nodeValue.length : z.childNodes.length); }   // the text stays selected
+    onNoteInput(); updateNoteToolbarState(); return;
   }
   const range = sel.getRangeAt(0), sel_ = kind==='tc' ? 'span[data-tc]' : 'mark[data-hl]', tag = kind==='tc' ? 'span' : 'mark', attr = kind==='tc' ? 'data-tc' : 'data-hl';
   const wrapTexts = (root, nm)=>{                                                          // wrap every text run of root in the colour (nm 'none' = no wrapper)
@@ -9904,6 +9926,7 @@ function noteApplyColor(kind, name){
     const whole = document.createRange(); whole.selectNodeContents(block); sel.removeAllRanges(); sel.addRange(whole);
     document.execCommand('insertHTML', false, clone.innerHTML);
   } else document.execCommand('insertHTML', false, holder.innerHTML);
+  noteRestoreColorSpans();
   onNoteInput(); updateNoteToolbarState();
 }
 // The list button opens one menu with every bullet and numbering style; the current style is ticked and picking it again turns the list off.
@@ -11294,7 +11317,7 @@ function updateNoteToolbarState(){
 // first gets an empty paragraph with the caret in it (before any history exists), and a note that already starts with loose text has that text wrapped in one when it opens.
 function onNoteBeforeInput(e){
   const body = document.getElementById('noteBody'); if(!body || noteIsLocked(noteEditorId)) return;
-  if(e.inputType==='formatBold'){ e.preventDefault(); if(!noteSelInHeading()) noteBold(); return; }      // ⌘B: not in a heading, and only the text around one
+  if(e.inputType==='formatBold'){ if(noteBoldBusy) return; e.preventDefault(); if(!noteSelInHeading()) noteBold(); return; }      // ⌘B: not in a heading, and only the text around one
   if(e.inputType!=='insertText' && e.inputType!=='insertCompositionText') return;
   if(body.firstElementChild || (body.textContent||'')!=='') return;               // not empty
   const p = document.createElement('p'); p.appendChild(document.createElement('br')); body.innerHTML = ''; body.appendChild(p);
@@ -11314,6 +11337,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   noteEditCount++;
+  noteEnsureParagraph(body);
   noteAutoInline(e);
   if(noteFindBar.state.open) noteFindBar.run(false);     // the note changed under the find bar: its matches follow
   noteSlashUpdate(e);

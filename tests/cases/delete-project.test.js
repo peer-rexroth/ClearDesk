@@ -13,13 +13,13 @@ function fixtureForDelete(){
 
 test('deleteProject routes active tasks to Inbox', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   assertEqual(tasks.find(x => x.id === 'active1').projectId, 'proj-inbox');
 });
 
 test('deleteProject routes completed tasks to proj-deleted', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   const t = tasks.find(x => x.id === 'done1');
   assertEqual(t.projectId, 'proj-deleted');
   assertEqual(t.status, 'done');
@@ -32,14 +32,14 @@ test('proj-deleted is excluded from the sidebar project list', function () {
 
 test('proj-deleted gets no board column', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   const cols = getBoardColumns();
   assertFalse(cols.some(c => c.project.id === 'proj-deleted'));
 });
 
 test('routed completed tasks stay visible with no project filter (All Tasks)', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   filterProjectId = null;
   assertTrue(taskMatchesFilters(tasks.find(x => x.id === 'done1')));
 });
@@ -47,14 +47,14 @@ test('routed completed tasks stay visible with no project filter (All Tasks)', f
 test('deleteProject bumps updatedAt on tasks it reassigns, so a later merge does not resurrect the deleted project onto them', function () {
   fixtureForDelete();
   tasks.forEach(t => { t.updatedAt = 1; });
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   assertTrue(tasks.find(x => x.id === 'active1').updatedAt > 1, 'reassigned task should get a fresh updatedAt, matching every other projectId-changing function');
   assertTrue(tasks.find(x => x.id === 'done1').updatedAt > 1);
 });
 
 test('undoing a project delete restores the original project on both tasks', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   triggerToastUndo();
   assertEqual(tasks.find(x => x.id === 'done1').projectId, 'proj-work');
   assertEqual(tasks.find(x => x.id === 'active1').projectId, 'proj-work');
@@ -63,7 +63,7 @@ test('undoing a project delete restores the original project on both tasks', fun
 
 test('un-completing a task in proj-deleted (via toggleTaskDone) sends it to Inbox', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   toggleTaskDone('done1');
   const t = tasks.find(x => x.id === 'done1');
   assertEqual(t.status, 'todo');
@@ -72,7 +72,7 @@ test('un-completing a task in proj-deleted (via toggleTaskDone) sends it to Inbo
 
 test('un-completing a task in proj-deleted (via updateTaskField status) sends it to Inbox', function () {
   fixtureForDelete();
-  deleteProject('proj-work');
+  deleteProject('proj-work'); confirmModalAction();
   updateTaskField('done1', 'status', 'todo');
   const t = tasks.find(x => x.id === 'done1');
   assertEqual(t.projectId, 'proj-inbox');
@@ -96,4 +96,14 @@ test('drawer project select options omit proj-deleted', function () {
   openTask('active1');
   const html = document.getElementById('drawer').innerHTML;
   assertFalse(html.includes("value=\"proj-deleted\""), 'proj-deleted should not be an assignable option in the drawer');
+});
+
+test('deleting a project asks first, says where the tasks go, and cancelling deletes nothing', function () {
+  fixtureForDelete();
+  deleteProject('proj-work');
+  assertTrue(!!projects.find(function (x) { return x.id === 'proj-work'; }), 'nothing is deleted before the confirmation');
+  const body = document.getElementById('confirmBody') ? document.getElementById('confirmBody').textContent : '';
+  closeConfirmModal(true);
+  assertTrue(!!projects.find(function (x) { return x.id === 'proj-work'; }), 'cancel keeps the project');
+  assertEqual(tasks[0].projectId, 'proj-work');
 });
