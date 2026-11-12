@@ -572,16 +572,21 @@ test('"Used in" lists the prompts that include this one, and follows a rename wi
   assertDeepEqual(promptUsedBy(role).map(function (q) { return q.id; }), ['a']);
 });
 
-test('a row of Included Prompts can be switched to another prompt: only that include changes in the template, its values stay', function () {
+test('a row of Included Prompts chooses what fills the slot without touching the template (also when locked), like a variable', function () {
   pfresh();
-  const r1 = pmk({ id: 'r1', name: 'Role' }), r2 = pmk({ id: 'r2', name: 'Critic' }), host = pmk({ id: 'h', name: 'Host', template: 'A {{>Role who=b}} B {{>Role}} C \\{{>Role who=b}}' });
+  const r1 = pmk({ id: 'r1', name: 'Role', template: 'a role' }), r2 = pmk({ id: 'r2', name: 'Critic', template: 'a critic' }), host = pmk({ id: 'h', name: 'Host', template: 'Hi {{>Role}} / {{>Gone}}', locked: true });
   prompts.push(r1, r2, host); promptEditorId = 'h';
-  const ta = document.getElementById('pTemplate'); ta.value = host.template;
-  const inc = promptIncludes(host); assertEqual(inc.length, 2, 'two different includes (one has values)');
-  assertIncludes(promptIncludesHtml(host), 'openPromptIncludeMenu(event, 0)', 'each row has a change button');
-  promptReplaceInclude({ name: inc[0].name, rest: inc[0].rest }, 'r2');
-  assertEqual(host.template, 'A {{>Critic who=b}} B {{>Role}} C \\{{>Role who=b}}', 'the same include with the same values changes; the other include and the escaped one stay');
-  host.locked = true; assertIncludes(promptIncludesHtml(host), 'disabled', 'a locked prompt cannot be changed');
+  assertEqual(buildPromptFinal(host), 'Hi a role / {{>Gone}}');
+  assertIncludes(promptIncludesHtml(host), 'openPromptIncludeMenu(event, 0)', 'each row has a change button, and it is not disabled on a locked prompt'); assertNotIncludes(promptIncludesHtml(host), 'disabled');
+  promptReplaceInclude({ name: 'Role', rest: '' }, 'r2');
+  assertEqual(host.template, 'Hi {{>Role}} / {{>Gone}}', 'the template is not rewritten');
+  assertEqual(buildPromptFinal(host), 'Hi a critic / {{>Gone}}', 'the copied text uses the chosen prompt');
+  assertIncludes(promptIncludesHtml(host), 'Fills {{&gt;Role}}');
+  promptReplaceInclude({ name: 'Gone', rest: '' }, 'r1');                       // a slot no prompt is called: the choice makes it resolve
+  assertEqual(buildPromptFinal(host), 'Hi a critic / a role');
+  promptReplaceInclude({ name: 'Role', rest: '' }, 'r1');                       // choosing the prompt the name points to clears the choice
+  assertTrue(!host.incPick || !host.incPick.role, 'back to the default');
+  r2.deletedAt = 1; host.incPick = { gone: 'r2' }; assertEqual(buildPromptFinal(host), 'Hi a role / {{>Gone}}', 'a deleted choice is ignored');
 });
 
 test('prompt folders reorder like Notes folders: Move Up / Down, drag before / after, one level, the default folder stays first', function () {

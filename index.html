@@ -7907,8 +7907,10 @@ const PROMPT_ESC_RE = /\\(\{\{[^}]+\}\}|\[\[[^\]]+\]\]|\(\([^)]+\)\))/g;      //
 // {{>Name}} includes another prompt: when this prompt is copied, that prompt's finished text (with its own choices) is put in its place. Matched by name, ignoring case.
 const PROMPT_INC_RE = /\{\{>\s*([^}]+?)\s*\}\}/g, PROMPT_INCLUDE_DEPTH = 6;
 const promptIncKey = n=>String(n).trim().replace(/\s+/g, ' ').toLowerCase();
-function promptIncludeTarget(name){
-  const k = promptIncKey(name);
+// A prompt can also CHOOSE what fills a slot without touching its text: p.incPick = { 'slot name (lower case)': promptId }, set from the Included Prompts list like a variable's option.
+function promptIncludeTarget(name, host){
+  const k = promptIncKey(name), pick = host && host.incPick && host.incPick[k], chosen = pick && prompts.find(q=>q.id===pick && q.id!==host.id && !promptTrashed(q));
+  if(chosen) return chosen;
   return prompts.filter(q=>!promptTrashed(q) && promptIncKey(promptTitle(q))===k).sort((a, b)=>(a.createdAt || 0) - (b.createdAt || 0))[0] || null;
 }
 // What is inside {{> … }}: the prompt's name, then optional values for its variables: {{>Role who=critic tone="very formal" @Language=German}}.
@@ -7927,14 +7929,14 @@ const promptIncludeNames = p=>promptIncludeSpecs(p).map(sp=>sp.name);
 function promptIncludeLoops(q, p, seen){                           // would including q bring p back in (directly or through other prompts)?
   if(q.id===p.id) return true;
   seen = seen || new Set(); if(seen.has(q.id)) return false; seen.add(q.id);
-  return promptIncludeNames(q).some(n=>{ const r = promptIncludeTarget(n); return !!r && promptIncludeLoops(r, p, seen); });
+  return promptIncludeNames(q).some(n=>{ const r = promptIncludeTarget(n, q); return !!r && promptIncludeLoops(r, p, seen); });
 }
 function promptIncludes(p){                                        // the distinct prompts this one includes, with whether each one resolves
   const seen = new Set(), out = [];
   promptIncludeSpecs(p).forEach(sp=>{
     const k = promptIncKey(sp.name) + '|' + sp.rest; if(seen.has(k)) return; seen.add(k);
-    const q = promptIncludeTarget(sp.name), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
-    out.push({ name: sp.name, args: sp.args, rest: sp.rest.trim(), target: q, status: !q ? 'missing' : promptIncludeLoops(q, p) ? 'loop' : 'ok',
+    const q = promptIncludeTarget(sp.name, p), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
+    out.push({ name: sp.name, picked: !!(q && p.incPick && p.incPick[promptIncKey(sp.name)]===q.id), args: sp.args, rest: sp.rest.trim(), target: q, status: !q ? 'missing' : promptIncludeLoops(q, p) ? 'loop' : 'ok',
       unknown: q ? Object.keys(sp.args).filter(a=>!have.includes(a.toLowerCase())) : [] });             // values given for a variable the included prompt does not have
   });
   return out;
@@ -7980,7 +7982,7 @@ function buildPromptFinal(p, stack, overrides){
   stack = stack || [p.id];
   let t = String(p.template || '').replace(PROMPT_ESC_RE, (_, ph)=>{ escaped.push(ph); return TOKEN + (escaped.length - 1) + TOKEN; });
   t = t.replace(PROMPT_INC_RE, (m, inner)=>{                        // an included prompt goes in as finished text; one that is missing, would loop or is nested too deep stays as its placeholder
-    const sp = promptIncParse(inner), q = promptIncludeTarget(sp.name);
+    const sp = promptIncParse(inner), q = promptIncludeTarget(sp.name, p);
     if(!q || stack.includes(q.id) || stack.length>=PROMPT_INCLUDE_DEPTH) return m;
     escaped.push(buildPromptFinal(q, stack.concat(q.id), sp.args).replace(/\s+$/, ''));      // (its own choices, except the values this include sets)
     return TOKEN + (escaped.length - 1) + TOKEN;
@@ -8018,7 +8020,7 @@ function promptHighlightLines(template, selfId){
     let k;
     if(s0.startsWith('{{@')) k = 'ph-glob';
     else if(s0.startsWith('{{>')){
-      const sp = promptIncParse(/^\{\{>\s*([^}]+?)\s*\}\}$/.exec(s0)[1]), q = promptIncludeTarget(sp.name), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
+      const sp = promptIncParse(/^\{\{>\s*([^}]+?)\s*\}\}$/.exec(s0)[1]), q = promptIncludeTarget(sp.name, self), have = q ? Object.keys(q.vars || {}).map(x=>x.toLowerCase()) : [];
       const bad = !q || (self && promptIncludeLoops(q, self)) || Object.keys(sp.args).some(x=>!have.includes(x.toLowerCase()));   // (a value for a variable the prompt does not have is flagged too)
       k = 'ph-inc' + (bad ? ' ph-miss' : '');
     }
@@ -8738,6 +8740,7 @@ function normalizePrompts(){
     p.template = String(p.template || '').slice(0,100000);
     if(!promptFolders.some(f=>f.id===p.folderId)) p.folderId = PROMPTS_DEFAULT_FOLDER;      // every prompt has a folder
     p.favorite = p.favorite===true; p.locked = p.locked===true;
+    if(p.incPick && typeof p.incPick==='object' && !Array.isArray(p.incPick)){ const k = {}; Object.keys(p.incPick).forEach(n=>{ if(typeof p.incPick[n]==='string' && isSafeId(p.incPick[n])) k[n] = p.incPick[n]; }); p.incPick = k; if(!Object.keys(k).length) delete p.incPick; } else delete p.incPick;
     p.vars = detectPromptVars(p.template, cleanPromptVars(p.vars));
     p.presets = (Array.isArray(p.presets) ? p.presets : []).filter(x=>x && typeof x.name==='string' && x.values && typeof x.values==='object').slice(0,40).map(x=>({ name:x.name.slice(0,60), values:x.values }));
     if(!p.createdAt) p.createdAt = Date.now();
@@ -8944,14 +8947,19 @@ function promptRenameCommit(){
   prompts.forEach(q=>{
     if(q.id===p.id || q.locked || promptTrashed(q) || !q.template.includes('{{>')) return;
     const t = q.template.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, inner)=>{ const sp = promptIncParse(inner); return esc_ || promptIncKey(sp.name)!==promptIncKey(from.title) ? m : `{{>${to}${sp.rest}}}`; });
-    if(t!==q.template){ before.push({ q, template: q.template, vars: q.vars }); q.template = t; q.vars = detectPromptVars(t, q.vars); touchPrompt(q); }
+    if(t!==q.template){
+      before.push({ q, template: q.template, vars: q.vars, pick: q.incPick });
+      q.template = t; q.vars = detectPromptVars(t, q.vars); touchPrompt(q);
+      const ok = promptIncKey(from.title), nk = promptIncKey(to);       // a choice made for that slot follows the new name
+      if(q.incPick && q.incPick[ok]){ q.incPick = { ...q.incPick, [nk]: q.incPick[ok] }; delete q.incPick[ok]; }
+    }
   });
   const n = before.length;
   { const cur = prompts.find(x=>x.id===promptEditorId); if(cur) renderPromptInspector(cur); }
   if(n){
     save(); renderPromptsList();
     showToast(`Updated the reference in ${n} prompt${n===1 ? '' : 's'}`, false, ()=>{          // Undo puts the old text back (the new name stays)
-      before.forEach(b=>{ if(prompts.includes(b.q)){ b.q.template = b.template; b.q.vars = b.vars; touchPrompt(b.q); } });
+      before.forEach(b=>{ if(prompts.includes(b.q)){ b.q.template = b.template; b.q.vars = b.vars; if(b.pick) b.q.incPick = b.pick; else delete b.q.incPick; touchPrompt(b.q); } });
       save(); render();
     });
   }
@@ -8971,14 +8979,14 @@ const promptSigOf = p=>Object.entries(p.vars || {}).map(([k, v])=>k + ':' + v.ty
 // The prompts this one includes: a click opens that prompt (to edit the shared text in one place); a missing or looping one is flagged.
 function promptIncludesHtml(p){
   const inc = promptIncludes(p), used = promptUsedBy(p); if(!inc.length && !used.length) return '';
-  const lockedP = p.locked || promptTrashed(p);
-  const change = i=>`<button type="button" class="pr-inc-change" title="${lockedP ? 'Unlock the prompt to change it' : 'Change Prompt…'}" aria-label="Change the included prompt" aria-haspopup="menu"${lockedP ? ' disabled' : ''} onclick="openPromptIncludeMenu(event, ${i})">${iconSvg('chevrons-up-down')}</button>`;
+  const change = i=>`<button type="button" class="pr-inc-change" title="Choose Prompt…" aria-label="Choose which prompt fills this" aria-haspopup="menu" onclick="openPromptIncludeMenu(event, ${i})">${iconSvg('chevrons-up-down')}</button>`;   // a choice, like a variable's option: allowed on a locked prompt too
   const open = q=>`<button type="button" class="pr-inc-name" title="Open ${esc(promptTitle(q))}" onclick="selectPrompt('${q.id}')">${esc(promptTitle(q))}</button>`;
   let html = '';
   if(inc.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Included Prompts</div>` + inc.map((i, ix)=>{
     if(i.status!=='ok') return `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span>${change(ix)}</div>`;
     const names = Object.keys(i.target.vars || {}).map(k=>k.replace(/^@/, '@'));
-    const sub = i.unknown.length ? `<span class="pr-inc-sub bad">No variable ${i.unknown.map(esc).join(', ')}</span>` : i.rest ? `<span class="pr-inc-sub">${esc(i.rest)}</span>` : names.length ? `<span class="pr-inc-sub" title="Set one with {{>${esc(promptTitle(i.target))} ${esc(names[0])}=value}}">Can set: ${esc(names.slice(0, 4).join(', '))}${names.length>4 ? '…' : ''}</span>` : '';
+    const fills = i.picked ? `<span class="pr-inc-sub" title="The template says {{>${esc(i.name)}}}; your choice here replaces it when copying">Fills {{&gt;${esc(i.name)}}}</span>` : '';
+    const sub = fills + (i.unknown.length ? `<span class="pr-inc-sub bad">No variable ${i.unknown.map(esc).join(', ')}</span>` : i.rest ? `<span class="pr-inc-sub">${esc(i.rest)}</span>` : names.length ? `<span class="pr-inc-sub" title="Set one with {{>${esc(promptTitle(i.target))} ${esc(names[0])}=value}}">Can set: ${esc(names.slice(0, 4).join(', '))}${names.length>4 ? '…' : ''}</span>` : '');
     return `<div class="pr-inc"><i class="fa-regular fa-braces"></i><div class="pr-inc-main">${open(i.target)}${sub}</div>${change(ix)}</div>`;
   }).join('') + `</div>`;
   if(used.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Used In</div>` + used.map(q=>`<div class="pr-inc"><i class="fa-regular fa-braces"></i>${open(q)}</div>`).join('') + `</div>`;
@@ -11907,16 +11915,21 @@ function promptIncPickRender(){
 }
 function promptIncPickHover(i){ if(!promptIncPick) return; promptIncPick.idx = i; document.querySelectorAll('#incPickList .inc-row').forEach((b, k)=>{ b.classList.toggle('sel', k===i); b.setAttribute('aria-selected', String(k===i)); }); }
 function promptIncPickChoose(i){ const it = promptIncPick && promptIncPick.items[i]; if(!it) return; if(promptIncPick.replace) promptReplaceInclude(promptIncPick.replace, it.id); else promptInsertInclude(it.id); }
-// Swap one include for another prompt in the template: every {{>Old …}} with the same name and the same values becomes {{>New …}} (the values stay as written).
+// Choose what fills an include slot, without touching the template (like picking a variable's option): the text keeps {{>Role}}, p.incPick remembers the choice.
+// Choosing the prompt the name already points to clears the choice.
 function promptReplaceInclude(from, id){
   closeRowMenu();
-  const q = prompts.find(x=>x.id===id), p = prompts.find(x=>x.id===promptEditorId), ta = document.getElementById('pTemplate'); if(!q || !p || !ta || p.locked || promptTrashed(p)) return;
-  const text = ta.value.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, inner)=>{ const sp = promptIncParse(inner); return esc_ || promptIncKey(sp.name)!==promptIncKey(from.name) || sp.rest.trim()!==from.rest ? m : `{{>${promptTitle(q)}${sp.rest}}}`; });
-  if(text===ta.value) return;
-  const top = ta.scrollTop; ta.focus(); ta.select();
-  if(!(document.execCommand && document.execCommand('insertText', false, text))) ta.value = text;        // insertText keeps the template's own Undo
-  ta.scrollTop = top; onPromptTemplateInput();
-  showToast(`Now includes ${promptTitle(q)}`);
+  const q = prompts.find(x=>x.id===id), p = prompts.find(x=>x.id===promptEditorId); if(!q || !p || promptTrashed(p)) return;
+  const key = promptIncKey(from.name), dflt = promptIncludeTarget(from.name), was = p.incPick && p.incPick[key];
+  p.incPick = { ...(p.incPick || {}) };
+  if(dflt && dflt.id===q.id) delete p.incPick[key]; else p.incPick[key] = q.id;
+  if(!Object.keys(p.incPick).length) delete p.incPick;
+  touchPrompt(p); save(); paintTemplateHl(p.template, p.id); renderPromptInspector(p); updatePromptMeta(p);
+  showToast(`${promptTitle(q)} fills ${from.name}`, false, ()=>{
+    const c = prompts.find(x=>x.id===p.id); if(!c) return;
+    c.incPick = { ...(c.incPick || {}) }; if(was) c.incPick[key] = was; else delete c.incPick[key]; if(!Object.keys(c.incPick).length) delete c.incPick;
+    touchPrompt(c); save(); if(promptEditorId===c.id){ paintTemplateHl(c.template, c.id); renderPromptInspector(c); }
+  });
 }
 function promptIncPickFilter(v){ if(!promptIncPick) return; promptIncPick.q = v; promptIncPick.items = promptIncPickItems(v); promptIncPick.idx = 0; promptIncPickRender(); }
 function promptIncPickKey(e){
@@ -11931,7 +11944,7 @@ function openPromptIncludeMenu(e, replaceIdx){
   const btn = (e && e.currentTarget) || document.querySelector('.pr-insert-menu .tool-btn') || document.querySelector('.pr-insert-group .tool-btn'), r = btn.getBoundingClientRect();
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
-  if(p.locked || promptTrashed(p)){ menu.innerHTML = '<div class="row-menu-hint row-menu-empty">Unlock the prompt to include another one</div>'; menu.classList.add('open'); placeRowMenu(menu, r.left, r.bottom + 6, btn); return; }
+  if(promptTrashed(p) || (p.locked && replaceIdx===undefined)){ menu.innerHTML = '<div class="row-menu-hint row-menu-empty">Unlock the prompt to include another one</div>'; menu.classList.add('open'); placeRowMenu(menu, r.left, r.bottom + 6, btn); return; }
   const cur = replaceIdx!==undefined ? promptIncludes(p)[replaceIdx] : null;          // opened from a row of Included Prompts: choosing swaps that include instead of inserting a new one
   promptIncPick = { q: '', items: promptIncPickItems(''), idx: 0, replace: cur ? { name: cur.name, rest: cur.rest } : null };
   menu.innerHTML = `<div class="inc-pick"><div class="inc-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="text" id="incPickInput" role="combobox" aria-expanded="true" aria-controls="incPickList" placeholder="Search prompts" aria-label="Search prompts to include" autocomplete="off" spellcheck="false" oninput="promptIncPickFilter(this.value)" onkeydown="promptIncPickKey(event)"></div><div class="inc-list" id="incPickList" role="listbox" aria-label="Prompts"></div></div>`;
