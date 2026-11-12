@@ -7160,6 +7160,12 @@ function noteImportParse(name, text){
   return { title: base.slice(0, 200), body: sanitizeNoteHtml(paras.map(p=>'<p>' + p.split('\n').map(esc).join('<br>') + '</p>').join('')) };
 }
 // -- typing: "**bold**", "_italic_", "`code`", "~~strike~~" and "[text](address)" become formatting the moment the closing character is typed --
+let noteSafariGap = null;                                                 // the space given to Safari after an auto-formatted run (see noteAutoInline)
+function noteSafariGapFix(e){                                             // the next thing typed is a space: that space IS the gap, not a second one
+  const g = noteSafariGap; noteSafariGap = null;
+  if(!g || !g.isConnected || !e || e.inputType!=='insertText' || e.data!==' ' || !/^\u00a0[ \u00a0]$/.test(g.nodeValue)) return;
+  g.nodeValue = '\u00a0'; const sel = window.getSelection(), r = document.createRange(); r.setStart(g, 1); r.collapse(true); sel.removeAllRanges(); sel.addRange(r);
+}
 function noteAutoInline(e){
   if(!e || e.inputType!=='insertText' || !e.data || !/^[*_`~)=]$/.test(e.data)) return;
   const body = document.getElementById('noteBody'), sel = window.getSelection();
@@ -7177,6 +7183,9 @@ function noteAutoInline(e){
   const q = window.getSelection(), a = q.anchorNode, el = a && (a.nodeType===3 ? a.parentNode : a), fmt = el && el.closest ? el.closest('b, i, s, code, a, mark') : null;
   if(fmt && body.contains(fmt) && q.isCollapsed){                         // what is typed next is not part of it: the caret steps out, and the typing style is switched off
     const c = document.createRange(); c.setStartAfter(fmt); c.collapse(true); q.removeAllRanges(); q.addRange(c);
+    if(!(fmt.nextSibling && fmt.nextSibling.nodeType===3) && /AppleWebKit/.test(navigator.userAgent) && !/Chrome|Chromium|Edg/.test(navigator.userAgent)){   // Safari types a caret that sits right after the LAST element back INSIDE it, so the next word stayed bold (the selection API still says "after"): give it a space to stand in
+      const sp = document.createTextNode('\u00a0'); fmt.after(sp); noteSafariGap = sp; c.setStart(sp, 1); c.collapse(true); q.removeAllRanges(); q.addRange(c);
+    }
     const cmd = { b: 'bold', i: 'italic', s: 'strikeThrough' }[fmt.tagName.toLowerCase()];
     if(cmd && document.queryCommandState(cmd)) document.execCommand(cmd);
   }
@@ -11338,6 +11347,7 @@ function onNoteInput(e){
   }
   noteEditCount++;
   noteEnsureParagraph(body);
+  noteSafariGapFix(e);
   noteAutoInline(e);
   if(noteFindBar.state.open) noteFindBar.run(false);     // the note changed under the find bar: its matches follow
   noteSlashUpdate(e);
