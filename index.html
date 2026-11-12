@@ -247,7 +247,7 @@ const ICONS = {
   .split-btn-main:hover { background: var(--hover); }
   .split-btn-chevron { display: flex; align-items: center; padding: 6px 8px; background: var(--bg-2); color: var(--text-3); font-size: var(--ico-12); font-family: var(--font); border: none; border-left: 0.5px solid var(--border); border-radius: 0 var(--r-m) var(--r-m) 0; cursor: default; }
   .split-btn-chevron:hover { background: var(--hover); color: var(--text); }
-  .split-btn-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--r-m); box-shadow: var(--elev-2); min-width: 210px; z-index: 300; overflow: hidden; }
+  .split-btn-menu { display: none; position: absolute; top: calc(100% + 5px); right: 0; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--r-m); box-shadow: var(--elev-2); min-width: 210px; z-index: 400; overflow: hidden; }   /* the right-click menus' layer (400), above the toast (300) */
   .split-btn-menu.open { display: block; }
   .split-btn-menu-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 12px; cursor: default; color: var(--text); }
   .split-btn-menu-item:hover { background: var(--hover); }
@@ -527,7 +527,7 @@ const ICONS = {
   .modal.alert { width: 340px; text-align: center; align-items: center; gap: 12px; padding: 24px 24px 20px; }
   .modal.alert.alert-wide { width: 400px; }
   .alert-ico { width: 40px; height: 40px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--accent-tint); color: var(--accent); font-size: var(--ico-18); }
-  .alert-ico.danger { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--red-text); }   /* the glyph is a graphic on a tint: --red-text keeps 4.7:1 light and 5.4:1 dark (the fill red gave 2.8:1 in dark) */
+  .alert-ico.danger { background: var(--red-bg); color: var(--red-text); }   /* the glyph is a graphic on a tint: --red-text keeps 4.7:1 light and 5.4:1 dark (the fill red gave 2.8:1 in dark) */
   .modal.alert .modal-actions { align-self: stretch; justify-content: center; margin-top: 8px; }
   .modal.alert .modal-actions .btn { flex: 1; justify-content: center; }
   #confirmModalBg { z-index: 210; }   /* a confirmation can stack on top of another dialog (Compare), which stays open underneath */
@@ -1014,7 +1014,7 @@ const ICONS = {
 
   /* menus, modals, toast, banner */
   html[data-scheme="glass"] :is(.split-btn-menu, .cell-pop, .row-menu, .row-menu-flyout, .note-link-pop, .modal, .toast) { background: var(--glass-strong); color: var(--text); border: 1px solid var(--glass-edge); border-radius: var(--r-xl); box-shadow: inset 0 1px 0 var(--glass-rim), var(--glass-shadow); }
-  html[data-scheme="glass"] :is(.row-menu, .note-link-pop, .modal, .toast) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  html[data-scheme="glass"] :is(.row-menu, .split-btn-menu, .note-link-pop, .modal, .toast) { -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
   html[data-scheme="glass"] .toast.error { background: var(--red-bg); color: var(--red-text); }
   html[data-scheme="glass"] .row-menu-item, html[data-scheme="glass"] .row-menu-chip, html[data-scheme="glass"] .cell-pop-opt { border-radius: var(--r-s); }
   html[data-scheme="glass"] .sync-banner { margin: 0; border-radius: 0; border: 0; border-bottom: 1px solid var(--border); background: var(--bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: none; }
@@ -6114,7 +6114,7 @@ function modalClosed(bg){
 function openConfirmModal({title, body, action, confirmLabel = 'Delete', danger = true, icon, cancelLabel = 'Cancel', onCancel}){
   document.getElementById('confirmModalTitle').textContent = title;
   const ico = document.getElementById('confirmModalIcon');
-  if(ico){ ico.className = 'alert-ico' + (danger ? ' danger' : ''); ico.innerHTML = `<i class="fa-solid ${icon || (danger ? 'fa-trash' : 'fa-circle-info')}"></i>`; }
+  if(ico){ ico.className = 'alert-ico' + (danger ? ' danger' : ''); ico.innerHTML = `<i class="fa-solid fa-${String(icon || (danger ? 'trash' : 'circle-info')).replace(/^fa-/, '')}"></i>`; }   // a registry name or an 'fa-' name, as in Milestone
   const cancelBtn = document.querySelector('#confirmModalBg .modal-actions .btn'); if(cancelBtn) cancelBtn.textContent = cancelLabel;   // the first button is Cancel
   document.getElementById('confirmModalBody').textContent = body;
   const btn = document.getElementById('confirmModalBtn');

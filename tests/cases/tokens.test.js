@@ -45,3 +45,10 @@ test('a disabled .btn is styled as disabled (cross-app audit X2-01), and the dan
   assertTrue(/\.btn:disabled\s*\{[^}]*opacity/.test(css), 'no generic .btn:disabled rule with an opacity');
   assertTrue(/\.alert-ico\.danger\s*\{[^}]*color:\s*var\(--red-text\)/.test(css), 'the danger alert icon is not var(--red-text)');
 });
+test('the danger alert disc uses the shared --red-bg, and the Help / Data menus sit on the context menus\' layer with their blur (cross-app audit X3-01, X3-02)', function(){
+  var css = tokScanCss();
+  assertTrue(/\.alert-ico\.danger\s*\{[^}]*background:\s*var\(--red-bg\)/.test(css), 'the danger disc fill is not var(--red-bg)');
+  assertTrue(/\.split-btn-menu\s*\{[^}]*z-index:\s*400/.test(css), 'button menus are not at z-index 400 (the right-click menus\' layer)');
+  assertTrue(/data-scheme="glass"\]\s*:is\([^)]*\.split-btn-menu[^)]*\)\s*\{\s*-webkit-backdrop-filter/.test(css), 'button menus do not get the glass blur');
+});
+
