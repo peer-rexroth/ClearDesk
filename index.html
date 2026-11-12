@@ -1905,6 +1905,10 @@ const ICONS = {
   .pr-inc-name:hover { text-decoration: underline; }
   .pr-inc.bad .pr-inc-name { color: var(--text-2); cursor: default; text-decoration: none; }
   .pr-inc-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+  .pr-inc-change { flex: none; width: 24px; height: 24px; border: 0; border-radius: var(--r-xs); background: none; color: var(--text-3); display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: default; }
+  .pr-inc-change:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+  .pr-inc-change:disabled { opacity: .45; }
+  .pr-inc-change svg { width: 16px; height: 16px; }
   .pr-inc-sub { font-size: var(--fs-12); color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .pr-inc-sub.bad { color: var(--red-text); }
   .pr-inc-note { flex: none; font-size: var(--fs-12); color: var(--red-text); }
@@ -8967,13 +8971,15 @@ const promptSigOf = p=>Object.entries(p.vars || {}).map(([k, v])=>k + ':' + v.ty
 // The prompts this one includes: a click opens that prompt (to edit the shared text in one place); a missing or looping one is flagged.
 function promptIncludesHtml(p){
   const inc = promptIncludes(p), used = promptUsedBy(p); if(!inc.length && !used.length) return '';
+  const lockedP = p.locked || promptTrashed(p);
+  const change = i=>`<button type="button" class="pr-inc-change" title="${lockedP ? 'Unlock the prompt to change it' : 'Change Prompt…'}" aria-label="Change the included prompt" aria-haspopup="menu"${lockedP ? ' disabled' : ''} onclick="openPromptIncludeMenu(event, ${i})">${iconSvg('chevrons-up-down')}</button>`;
   const open = q=>`<button type="button" class="pr-inc-name" title="Open ${esc(promptTitle(q))}" onclick="selectPrompt('${q.id}')">${esc(promptTitle(q))}</button>`;
   let html = '';
-  if(inc.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Included Prompts</div>` + inc.map(i=>{
-    if(i.status!=='ok') return `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span></div>`;
+  if(inc.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Included Prompts</div>` + inc.map((i, ix)=>{
+    if(i.status!=='ok') return `<div class="pr-inc bad"><i class="fa-solid fa-triangle-exclamation"></i><span class="pr-inc-name">${esc(i.name)}</span><span class="pr-inc-note">${i.status==='loop' ? 'Includes itself' : 'Not found'}</span>${change(ix)}</div>`;
     const names = Object.keys(i.target.vars || {}).map(k=>k.replace(/^@/, '@'));
     const sub = i.unknown.length ? `<span class="pr-inc-sub bad">No variable ${i.unknown.map(esc).join(', ')}</span>` : i.rest ? `<span class="pr-inc-sub">${esc(i.rest)}</span>` : names.length ? `<span class="pr-inc-sub" title="Set one with {{>${esc(promptTitle(i.target))} ${esc(names[0])}=value}}">Can set: ${esc(names.slice(0, 4).join(', '))}${names.length>4 ? '…' : ''}</span>` : '';
-    return `<div class="pr-inc"><i class="fa-regular fa-braces"></i><div class="pr-inc-main">${open(i.target)}${sub}</div></div>`;
+    return `<div class="pr-inc"><i class="fa-regular fa-braces"></i><div class="pr-inc-main">${open(i.target)}${sub}</div>${change(ix)}</div>`;
   }).join('') + `</div>`;
   if(used.length) html += `<div class="pr-inc-list"><div class="pr-insp-label">Used In</div>` + used.map(q=>`<div class="pr-inc"><i class="fa-regular fa-braces"></i>${open(q)}</div>`).join('') + `</div>`;
   return html;
@@ -11900,7 +11906,18 @@ function promptIncPickRender(){
   const input = document.getElementById('incPickInput'); if(input) input.setAttribute('aria-activedescendant', s.items.length ? 'incPickOpt' + s.idx : '');
 }
 function promptIncPickHover(i){ if(!promptIncPick) return; promptIncPick.idx = i; document.querySelectorAll('#incPickList .inc-row').forEach((b, k)=>{ b.classList.toggle('sel', k===i); b.setAttribute('aria-selected', String(k===i)); }); }
-function promptIncPickChoose(i){ const it = promptIncPick && promptIncPick.items[i]; if(it) promptInsertInclude(it.id); }
+function promptIncPickChoose(i){ const it = promptIncPick && promptIncPick.items[i]; if(!it) return; if(promptIncPick.replace) promptReplaceInclude(promptIncPick.replace, it.id); else promptInsertInclude(it.id); }
+// Swap one include for another prompt in the template: every {{>Old …}} with the same name and the same values becomes {{>New …}} (the values stay as written).
+function promptReplaceInclude(from, id){
+  closeRowMenu();
+  const q = prompts.find(x=>x.id===id), p = prompts.find(x=>x.id===promptEditorId), ta = document.getElementById('pTemplate'); if(!q || !p || !ta || p.locked || promptTrashed(p)) return;
+  const text = ta.value.replace(/(\\)?\{\{>\s*([^}]+?)\s*\}\}/g, (m, esc_, inner)=>{ const sp = promptIncParse(inner); return esc_ || promptIncKey(sp.name)!==promptIncKey(from.name) || sp.rest.trim()!==from.rest ? m : `{{>${promptTitle(q)}${sp.rest}}}`; });
+  if(text===ta.value) return;
+  const top = ta.scrollTop; ta.focus(); ta.select();
+  if(!(document.execCommand && document.execCommand('insertText', false, text))) ta.value = text;        // insertText keeps the template's own Undo
+  ta.scrollTop = top; onPromptTemplateInput();
+  showToast(`Now includes ${promptTitle(q)}`);
+}
 function promptIncPickFilter(v){ if(!promptIncPick) return; promptIncPick.q = v; promptIncPick.items = promptIncPickItems(v); promptIncPick.idx = 0; promptIncPickRender(); }
 function promptIncPickKey(e){
   const s = promptIncPick; if(!s) return;
@@ -11908,14 +11925,15 @@ function promptIncPickKey(e){
   else if(e.key==='Enter'){ e.preventDefault(); promptIncPickChoose(s.idx); }
   else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeRowMenu(); document.getElementById('pTemplate')?.focus(); }
 }
-function openPromptIncludeMenu(e){
+function openPromptIncludeMenu(e, replaceIdx){
   if(e){ e.preventDefault(); e.stopPropagation(); }
   const p = prompts.find(x=>x.id===promptEditorId), menu = document.getElementById('rowMenu'); if(!p || !menu) return;
   const btn = (e && e.currentTarget) || document.querySelector('.pr-insert-menu .tool-btn') || document.querySelector('.pr-insert-group .tool-btn'), r = btn.getBoundingClientRect();
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
   promptMenuId = null; promptFolderMenuId = null; noteMenuId = null; folderMenuId = null;
   if(p.locked || promptTrashed(p)){ menu.innerHTML = '<div class="row-menu-hint row-menu-empty">Unlock the prompt to include another one</div>'; menu.classList.add('open'); placeRowMenu(menu, r.left, r.bottom + 6, btn); return; }
-  promptIncPick = { q: '', items: promptIncPickItems(''), idx: 0 };
+  const cur = replaceIdx!==undefined ? promptIncludes(p)[replaceIdx] : null;          // opened from a row of Included Prompts: choosing swaps that include instead of inserting a new one
+  promptIncPick = { q: '', items: promptIncPickItems(''), idx: 0, replace: cur ? { name: cur.name, rest: cur.rest } : null };
   menu.innerHTML = `<div class="inc-pick"><div class="inc-search"><i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><input type="text" id="incPickInput" role="combobox" aria-expanded="true" aria-controls="incPickList" placeholder="Search prompts" aria-label="Search prompts to include" autocomplete="off" spellcheck="false" oninput="promptIncPickFilter(this.value)" onkeydown="promptIncPickKey(event)"></div><div class="inc-list" id="incPickList" role="listbox" aria-label="Prompts"></div></div>`;
   promptIncPickRender();
   menu.classList.add('open');

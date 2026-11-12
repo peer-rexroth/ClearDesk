@@ -572,6 +572,18 @@ test('"Used in" lists the prompts that include this one, and follows a rename wi
   assertDeepEqual(promptUsedBy(role).map(function (q) { return q.id; }), ['a']);
 });
 
+test('a row of Included Prompts can be switched to another prompt: only that include changes in the template, its values stay', function () {
+  pfresh();
+  const r1 = pmk({ id: 'r1', name: 'Role' }), r2 = pmk({ id: 'r2', name: 'Critic' }), host = pmk({ id: 'h', name: 'Host', template: 'A {{>Role who=b}} B {{>Role}} C \\{{>Role who=b}}' });
+  prompts.push(r1, r2, host); promptEditorId = 'h';
+  const ta = document.getElementById('pTemplate'); ta.value = host.template;
+  const inc = promptIncludes(host); assertEqual(inc.length, 2, 'two different includes (one has values)');
+  assertIncludes(promptIncludesHtml(host), 'openPromptIncludeMenu(event, 0)', 'each row has a change button');
+  promptReplaceInclude({ name: inc[0].name, rest: inc[0].rest }, 'r2');
+  assertEqual(host.template, 'A {{>Critic who=b}} B {{>Role}} C \\{{>Role who=b}}', 'the same include with the same values changes; the other include and the escaped one stay');
+  host.locked = true; assertIncludes(promptIncludesHtml(host), 'disabled', 'a locked prompt cannot be changed');
+});
+
 test('prompt folders reorder like Notes folders: Move Up / Down, drag before / after, one level, the default folder stays first', function () {
   pfresh(); promptFolders = [{ id: PROMPTS_DEFAULT_FOLDER, name: 'Prompts', locked: true, updatedAt: 0 }, { id: 'fa', name: 'Alpha', updatedAt: 1 }, { id: 'fb', name: 'Beta', updatedAt: 1 }, { id: 'fc', name: 'Gamma', updatedAt: 1 }, { id: 'fs1', name: 'S1', parentId: 'fa', updatedAt: 1 }, { id: 'fs2', name: 'S2', parentId: 'fa', updatedAt: 1 }];
   normalizePrompts();
