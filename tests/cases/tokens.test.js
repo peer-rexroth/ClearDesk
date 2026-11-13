@@ -14,7 +14,7 @@ test('no var() fallback hides a missing token behind a colour literal', function
   assertEqual(hits.length, 0, hits.join(' | '));
 });
 test('every var(--token) the stylesheet reads is defined somewhere', function(){
-  var css = tokScanCss(), defined = { '--note-max-w': 1, '--prompts-list-w': 1, '--prompts-insp-w': 1 }, missing = {};   // those three are optional on purpose: script sets them, the rule carries a length fallback
+  var css = tokScanCss(), defined = { '--note-max-w': 1, '--prompts-list-w': 1, '--prompts-insp-w': 1, '--note-outline-w': 1 }, missing = {};   // those four are optional on purpose: script sets them, the rule carries a length fallback
   (css.match(/--[a-z0-9-]+(?=\s*:)/gi) || []).forEach(function(n){ defined[n] = 1; });
   (globalThis.__APP_HTML.match(/style\.setProperty\('(--[a-z0-9-]+)'/g) || []).forEach(function(x){ defined[/'(--[^']+)'/.exec(x)[1]] = 1; });
   (css.match(/var\((--[a-z0-9-]+)(?=[,)])/gi) || []).forEach(function(v){ var n = v.slice(4); if(!defined[n]) missing[n] = 1; });

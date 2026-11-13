@@ -1951,9 +1951,10 @@ const ICONS = {
   /* The note Outline (a list of the headings) is a panel on the right like Prompts' Variables: it slides in and out (⌥⌘I) and floats over the note in a narrow pane. */
   .note-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
   .note-split > .note-scroll { flex: 1; min-width: 0; }
-  .note-outline { position: relative; flex: none; width: 240px; overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width var(--dur-base) ease, border-color var(--dur-base) ease; }
-  .note-outline-inner { width: 240px; max-width: 100%; height: 100%; overflow-y: auto; padding: 16px 12px 40px 14px; box-sizing: border-box; transition: opacity var(--dur-fast) ease; }
+  .note-outline { position: relative; flex: none; width: var(--note-outline-w, 240px); max-width: max(200px, calc(100% - 380px)); overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width var(--dur-base) ease, border-color var(--dur-base) ease; }
+  .note-outline-inner { width: var(--note-outline-w, 240px); max-width: 100%; height: 100%; overflow-y: auto; padding: 16px 12px 40px 14px; box-sizing: border-box; transition: opacity var(--dur-fast) ease; }
   .note-split.outline-closed .note-outline { width: 0; border-left-color: transparent; }
+  .note-split.outline-closed .pr-insp-grip { display: none; }
   .note-split.outline-closed .note-outline-inner { opacity: 0; pointer-events: none; }
   .no-row { display: flex; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-13); line-height: 1.35; padding: 5px 8px; border-radius: var(--r-s); cursor: default; }
   .no-row:hover { background: var(--hover); color: var(--text); }
@@ -1963,8 +1964,9 @@ const ICONS = {
   .no-empty { font-size: var(--fs-13); color: var(--text-3); line-height: 1.5; }
   @container notepane (max-width: 739px) {
     .note-split { position: relative; }
-    .note-outline { position: absolute; top: 0; right: 0; bottom: 0; z-index: 6; box-shadow: var(--elev-2); }
+    .note-outline { position: absolute; top: 0; right: 0; bottom: 0; z-index: 6; width: min(var(--note-outline-w, 240px), 100%); max-width: 100%; box-shadow: var(--elev-2); }
     .note-split.outline-closed .note-outline { width: 0; box-shadow: none; }
+    .note-outline-inner { width: 100%; }
   }
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
   .pr-split > .note-scroll { flex: 1; min-width: 0; }
@@ -2462,7 +2464,7 @@ const ICONS = {
                         <div class="note-code-copy-layer" id="noteCodeCopyLayer"></div>
           </div>
         </div>
-        <aside class="note-outline" id="noteOutline" aria-label="Outline"><div class="note-outline-inner"><div class="pr-insp-head"><span>Outline</span><span class="pr-insp-sub" id="noteOutlineCount"></span></div><div id="noteOutlineList"></div></div></aside>
+        <aside class="note-outline" id="noteOutline" aria-label="Outline"><div class="pr-insp-grip" id="noteOutlineResizer" role="separator" aria-orientation="vertical" aria-label="Resize the Outline" aria-valuemin="200" aria-valuemax="440" tabindex="0" title="Drag to resize (double-click to reset)"></div><div class="note-outline-inner"><div class="pr-insp-head"><span>Outline</span><span class="pr-insp-sub" id="noteOutlineCount"></span></div><div id="noteOutlineList" role="listbox" aria-label="Headings" onkeydown="noteOutlineKey(event)"></div></div></aside>
         </div>
       </div>
     </div>
@@ -3249,6 +3251,12 @@ wireColumnResizer(PROMPTS_LIST_COL, promptsListW, {
 }, 'ArrowRight');
 wireColumnResizer(PROMPTS_INSP_COL, promptsInspW, {
   start(){ const split = document.getElementById('prSplit'), rect = split.getBoundingClientRect(), k = split.offsetWidth ? rect.width / split.offsetWidth : 1; return { right: rect.right, k, max: Math.max(PROMPTS_INSP_COL.min, Math.min(PROMPTS_INSP_COL.max, rect.width / k - 380)) }; },   // the template keeps at least 380px
+  width(ev, c){ return (c.right - ev.clientX) / c.k; }
+}, 'ArrowLeft');
+const NOTE_OUTLINE_COL = { key: 'cleardesk_note_outline_w', cssVar: '--note-outline-w', def: 240, min: 200, max: 440, bar: 'noteOutlineResizer' };
+const noteOutlineW = makeColumnWidth(NOTE_OUTLINE_COL);
+wireColumnResizer(NOTE_OUTLINE_COL, noteOutlineW, {
+  start(){ const split = document.getElementById('noteSplit'), rect = split.getBoundingClientRect(), k = split.offsetWidth ? rect.width / split.offsetWidth : 1; return { right: rect.right, k, max: Math.max(NOTE_OUTLINE_COL.min, Math.min(NOTE_OUTLINE_COL.max, rect.width / k - 380)) }; },   // the note keeps at least 380px
   width(ev, c){ return (c.right - ev.clientX) / c.k; }
 }, 'ArrowLeft');
 const UI_SCALE_KEY = 'cleardesk_uiscale';
@@ -9414,8 +9422,8 @@ function renderNoteOutline(){
   const sig = title + '#' + items.map(x=>x.i + ':' + x.lv + ':' + x.t).join('|');
   if(sig!==noteOutlineSig){
     noteOutlineSig = sig; noteOutlineCur = -2;
-    host.innerHTML = (title ? `<button type="button" class="no-row l1 no-title" data-i="t" title="${esc(title)}" onclick="noteOutlineGo('t')"><span class="t">${esc(title)}</span></button>` : '')
-      + (items.length ? items.map(x=>`<button type="button" class="no-row l${x.lv}" data-i="${x.i}" title="${esc(x.t)}" onclick="noteOutlineGo(${x.i})"><span class="t">${esc(x.t)}</span></button>`).join('')
+    host.innerHTML = (title ? `<div class="no-row l1 no-title" role="option" tabindex="-1" aria-selected="false" data-i="t" title="${esc(title)}" onclick="noteOutlineGo('t')"><span class="t">${esc(title)}</span></div>` : '')
+      + (items.length ? items.map(x=>`<div class="no-row l${x.lv}" role="option" tabindex="-1" aria-selected="false" data-i="${x.i}" title="${esc(x.t)}" onclick="noteOutlineGo(${x.i})"><span class="t">${esc(x.t)}</span></div>`).join('')
       : '<div class="no-empty">No headings yet. Make a line a heading from the Text Style menu, or type # and a space.</div>');
     const c = document.getElementById('noteOutlineCount'); if(c) c.textContent = items.length ? `${items.length} heading${items.length===1 ? '' : 's'}` : '';
   }
@@ -9434,7 +9442,10 @@ function noteOutlineMark(){
   const hasTitle = !!document.querySelector('#noteOutlineList .no-title');
   if(cur===-1) cur = hasTitle ? 't' : hs.findIndex(h=>h.textContent.trim());           // above the first heading: the title (when there is one)
   if(cur===noteOutlineCur) return; noteOutlineCur = cur;
-  document.querySelectorAll('#noteOutlineList .no-row').forEach(r=>{ const on = r.dataset.i===String(cur); r.classList.toggle('act', on); if(on) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current'); if(on) r.scrollIntoView({ block: 'nearest' }); });
+  const panel = document.getElementById('noteOutline'), keyboard = !!panel && panel.contains(document.activeElement);      // while you move through the list with the arrow keys it must not jump
+  const rows = [...document.querySelectorAll('#noteOutlineList .no-row')];
+  rows.forEach(r=>{ const on = r.dataset.i===String(cur); r.classList.toggle('act', on); r.setAttribute('aria-selected', String(on)); if(!keyboard) r.tabIndex = on ? 0 : -1; if(on && !keyboard) r.scrollIntoView({ block: 'nearest' }); });
+  if(!rows.some(r=>r.tabIndex===0) && rows[0] && !keyboard) rows[0].tabIndex = 0;
 }
 function noteOutlineGo(i){
   const sc = document.querySelector('#noteSplit > .note-scroll'); if(!sc) return;
@@ -9442,6 +9453,25 @@ function noteOutlineGo(i){
   const h = noteHeadings()[i]; if(!h) return;
   noteOutlineWant = i; setTimeout(()=>{ if(noteOutlineWant===i) noteOutlineWant = null; }, 1600);
   sc.scrollTo({ top: h.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 16, behavior: 'smooth' });
+}
+// Keys in the list, as in the Notes list: ↑ ↓ (Home, End) move through the headings, Return takes you to the heading in the note with the caret there, Esc goes back to the note.
+function noteOutlineJump(i){
+  noteOutlineGo(i);
+  if(i==='t'){ document.getElementById('noteTitle')?.focus({ preventScroll: true }); return; }
+  const h = noteHeadings()[i], body = document.getElementById('noteBody'); if(!h || !body) return;
+  body.focus({ preventScroll: true });
+  const r = document.createRange(); r.selectNodeContents(h); r.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+}
+function noteOutlineKey(e){
+  if(e.metaKey || e.ctrlKey || e.altKey) return;
+  const rows = [...document.querySelectorAll('#noteOutlineList .no-row')], cur = rows.indexOf(e.target.closest ? e.target.closest('.no-row') : null);
+  const to = k=>{ const r = rows[Math.max(0, Math.min(rows.length - 1, k))]; if(r){ rows.forEach(x=>{ x.tabIndex = x===r ? 0 : -1; }); r.focus(); r.scrollIntoView({ block: 'nearest' }); } };
+  if(e.key==='ArrowDown'){ e.preventDefault(); to(cur + 1); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); to(cur < 0 ? 0 : cur - 1); }
+  else if(e.key==='Home'){ e.preventDefault(); to(0); }
+  else if(e.key==='End'){ e.preventDefault(); to(rows.length - 1); }
+  else if((e.key==='Enter' || e.key===' ') && cur>=0){ e.preventDefault(); const i = rows[cur].dataset.i; noteOutlineJump(i==='t' ? 't' : +i); }
+  else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); const a = document.getElementById('noteOutline'); if(a && getComputedStyle(a).position==='absolute') toggleNoteOutline(false, false); (document.getElementById('noteBody') || document.body).focus({ preventScroll: true }); }
 }
 function toggleNoteOutline(force, remember){
   const split = document.getElementById('noteSplit'); if(!split) return;
