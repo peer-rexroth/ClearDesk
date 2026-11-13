@@ -1501,8 +1501,11 @@ const ICONS = {
   .note-day-btn:hover:not(:disabled) { background: var(--hover); color: var(--text); }
   .note-day-btn:disabled { opacity: .35; }
   .note-day-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .note-toolbar .note-tpl-btn { margin-left: -6px; width: 20px; min-width: 0; padding: 0; }
-  .note-toolbar .note-tpl-btn .tb-ico2 { width: 12px; height: 12px; }
+  /* compose + its arrow are one capsule (a split button, like Mail's New Message): the two halves touch, a hairline between them */
+  html:is([data-scheme], :root) .note-toolbar .note-new-btn:has(+ .note-tpl-btn) { border-radius: calc(var(--bar-ctl-h, 36px) / 2) 0 0 calc(var(--bar-ctl-h, 36px) / 2); width: calc(var(--bar-ctl-h, 36px) - 2px); padding-left: 2px; }
+  html:is([data-scheme], :root) .note-toolbar .note-more-btn.note-tpl-btn { margin-left: -6px; width: 26px; min-width: 0; padding: 0 2px 0 0; border-radius: 0 calc(var(--bar-ctl-h, 36px) / 2) calc(var(--bar-ctl-h, 36px) / 2) 0; box-shadow: inset 1px 0 0 var(--border-2); }
+  html:is([data-scheme], :root) .note-toolbar .note-tpl-btn .tb-ico2 { width: 12px; height: 12px; }
+  @container notepane (max-width: 720px) { html:is([data-scheme], :root) .note-toolbar .note-more-btn.note-tpl-btn { margin-left: -4px; } }
   .note-meta-locked { color: var(--amber-text); white-space: nowrap; }   /* the one fact that changes what you can do, so it is the one that stands out */
   .note-meta-locked i { font-size: var(--ico-12); margin-right: 2px; }
   .note-body { min-height: 50vh; outline: none; font-size: var(--fs-15); line-height: 1.65; color: var(--text); overflow-wrap: anywhere; }
@@ -2071,7 +2074,7 @@ const ICONS = {
   .pr-chip-wrap.has-x:hover, .pr-pill-wrap.has-x:hover { background: var(--cap-hover); color: var(--text); }
   .pr-chip-wrap.has-x.on { background: var(--accent-tint); color: var(--blue-text); }
   .pr-pill-wrap.has-x.on { background: var(--accent); color: var(--on-accent); }
-  .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: 999px 0 0 999px; }
+  .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: calc(var(--bar-ctl-h, 36px) / 2) 0 0 calc(var(--bar-ctl-h, 36px) / 2); }
   .pr-chip-wrap.has-x .pr-chip { padding-left: 12px; }
   .pr-pill-x::before, .pr-chip-x::before, .tbl-plus::before, .tbl-grip.tbl::before, .tbl-grip.col::before, .tbl-grip.row::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
   .tbl-plus::before { inset: -4px; }                          /* inset is from the padding box, inside a 1px border: 12px + 2 x 4 = 20 */
@@ -7343,6 +7346,7 @@ function noteMenuHtml(id, opts){
     ...(opts && opts.selection ? [rowMenuSub('fa-regular fa-copy', 'Copy Selection As', ['rich:Rich Text', 'plain:Plain Text', 'markdown:Markdown', 'html:HTML'].map(x=>menuOpt(`noteMenuRun('copyselas','${x.split(':')[0]}')`, {none: true}, x.split(':')[1])).join(''))] : []),
     rowMenuSub('fa-regular fa-copy', 'Copy As', menuOpt(`noteMenuRun('copyas','rich')`, {none: true}, 'Rich Text') + menuOpt(`noteMenuRun('copyas','plain')`, {none: true}, 'Plain Text') + menuOpt(`noteMenuRun('copyas','markdown')`, {none: true}, 'Markdown') + menuOpt(`noteMenuRun('copyas','html')`, {none: true}, 'HTML')),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('exportas','json')`, {svg: menuSvg('file-lines')}, 'Note File (.json)')),
+    sep,
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
     ...(n.template ? [item('fa-regular fa-file-lines', 'New Note from Template', `noteMenuRun('usetpl')`)] : [item('fa-regular fa-file-lines', 'Save as Template', `noteMenuRun('savetpl')`)]),
     ...(n.day ? [sep, item('fa-solid fa-list-check', noteCarryOn() ? 'Stop Carrying Over Open Items' : 'Carry Over Open Items', `noteMenuRun('carry')`)] : []),
@@ -7796,13 +7800,17 @@ const NOTE_STARTERS = [
   { id:'nt-journal', title:'Journal', body:'<h2>{{weekday}}, {{date}}</h2><h2>What happened</h2><p>{{cursor}}</p><h2>What I learned</h2><p><br></p>' },
   { id:'nt-weekly', title:'Weekly Review', body:'<p>Week of {{date}}</p><h2>Wins</h2><ul><li>{{cursor}}</li></ul><h2>What slipped</h2><ul><li><br></li></ul><h2>Next week</h2><ul class="cl"><li><br></li></ul>' },
   { id:'nt-project', title:'Project Plan', body:'<h2>Goal</h2><p>{{cursor}}</p><h2>Scope</h2><ul><li><br></li></ul><h2>Milestones</h2><ul class="cl"><li><br></li></ul><h2>Risks</h2><ul><li><br></li></ul>' },
+  { id:'nt-strawman', title:'Slide Strawman', body:'<p>Audience: · Decision or ask: · Due {{date}}</p><h2>Governing thought</h2><p>{{cursor}}</p><h2>Storyline</h2><p>One full-sentence title per slide. Read the titles in a row: they should tell the whole story.</p><h3>Slide 1: Executive summary (the answer in three lines)</h3><ul><li>Visual: </li><li>Data needed: </li><li>Source / owner: </li></ul><h3>Slide 2: Situation: what is true today</h3><ul><li>Visual: </li><li>Data needed: </li><li>Source / owner: </li></ul><h3>Slide 3: Complication: why it needs action</h3><ul><li>Visual: </li><li>Data needed: </li><li>Source / owner: </li></ul><h3>Slide 4: Recommendation: what we propose</h3><ul><li>Visual: </li><li>Data needed: </li><li>Source / owner: </li></ul><h3>Slide 5: Next steps and decisions needed</h3><ul><li>Visual: </li><li>Data needed: </li><li>Source / owner: </li></ul><h2>Appendix</h2><ul><li><br></li></ul>' },
   { id:NOTE_DAILY_TPL, title:'Daily', body:NOTE_DAILY_BODY }
 ];
 // First start only (per device): the starter templates. Fixed ids, so devices that sync do not end up with copies, and a starter you deleted (tombstone) stays deleted.
 function seedNoteTemplates(){
-  try{ if(localStorage.getItem(NOTE_TPL_SEED_KEY)) return; localStorage.setItem(NOTE_TPL_SEED_KEY, '1'); }catch(_){ return; }
+  let done = [];
+  try{ const v = localStorage.getItem(NOTE_TPL_SEED_KEY); done = v==='1' ? ['nt-meeting', 'nt-checklist', 'nt-journal', 'nt-weekly', 'nt-project', NOTE_DAILY_TPL] : JSON.parse(v || '[]'); if(!Array.isArray(done)) done = []; }catch(_){ return; }   // '1' = the first six, seeded by the first version
+  const todo = NOTE_STARTERS.filter(t=>!done.includes(t.id)); if(!todo.length) return;
+  try{ localStorage.setItem(NOTE_TPL_SEED_KEY, JSON.stringify(NOTE_STARTERS.map(t=>t.id))); }catch(_){ return; }
   const now = Date.now(); let added = false;
-  NOTE_STARTERS.forEach((t, i)=>{
+  todo.forEach((t, i)=>{
     if(notes.some(n=>n.id===t.id) || deletedNoteIds.some(x=>x.id===t.id)) return;
     notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added = true;
   });
