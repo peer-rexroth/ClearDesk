@@ -1956,11 +1956,19 @@ const ICONS = {
   .note-split.outline-closed .note-outline { width: 0; border-left-color: transparent; }
   .note-split.outline-closed .pr-insp-grip { display: none; }
   .note-split.outline-closed .note-outline-inner { opacity: 0; pointer-events: none; }
-  .no-row { display: flex; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-13); line-height: 1.35; padding: 5px 8px; border-radius: var(--r-s); cursor: default; }
+  .no-row { display: flex; align-items: center; gap: 2px; width: 100%; text-align: left; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-13); line-height: 1.35; padding: 5px 8px 5px 4px; border-radius: var(--r-s); cursor: default; }
   .no-row:hover { background: var(--hover); color: var(--text); }
-  .no-row.l1 { font-weight: 600; color: var(--text); } .no-row.no-title { font-weight: 700; } .no-row.l2 { padding-left: 22px; } .no-row.l3 { padding-left: 36px; font-size: var(--fs-12); }
-  .no-row.act { background: var(--blue-bg); color: var(--blue-text); font-weight: 600; }
-  .no-row .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .no-row.l1 { font-weight: 600; color: var(--text); } .no-row.l2 { padding-left: 18px; } .no-row.l3 { padding-left: 32px; font-size: var(--fs-12); }
+  /* The heading you are in is marked like a selected row in a macOS list: the solid accent while the Outline is the active area (pointer or focus in it), neutral grey otherwise (as html.sel-inactive does for the lists). */
+  .no-row.act { background: var(--sel-inactive); color: var(--text); font-weight: 600; }
+  .note-outline.is-active .no-row.act { background: var(--sel-bg); color: var(--on-accent); }
+  .no-twist { flex: none; width: 16px; height: 16px; display: inline-grid; place-items: center; border-radius: var(--r-xs); color: var(--text-3); }
+  .no-twist.has:hover { background: color-mix(in srgb, var(--text) 10%, transparent); color: var(--text); }
+  .no-twist svg { width: 12px; height: 12px; transition: transform var(--dur-fast) ease; } .no-twist.shut svg { transform: rotate(-90deg); }
+  .no-row .n { flex: none; margin-left: 6px; font-size: var(--fs-11); font-weight: 400; color: var(--text-3); }
+  .note-outline.is-active .no-row.act :is(.no-twist, .n) { color: var(--sel-text-2); }
+  .note-outline.is-active .no-row.act .no-twist.has:hover { background: var(--sel-fill-hover); color: var(--on-accent); }
+  .no-row .t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .no-empty { font-size: var(--fs-13); color: var(--text-3); line-height: 1.5; }
   @container notepane (max-width: 739px) {
     .note-split { position: relative; }
@@ -2455,7 +2463,7 @@ const ICONS = {
         <div class="note-split outline-closed" id="noteSplit">
         <div class="note-scroll">
           <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyHover(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyHover(null)">
-            <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave(); noteOutlineSoon()" onkeydown="onNoteTitleKey(event)">
+            <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing, or type / for blocks"
@@ -9415,20 +9423,42 @@ const NOTE_OUTLINE_KEY = 'cleardesk_note_outline';
 let noteOutlineSig = '', noteOutlineCur = -2, noteOutlineTimer = null, noteOutlineRaf = 0, noteOutlineWant = null;
 const noteOutlineOpen = ()=>{ const s = document.getElementById('noteSplit'); return !!s && !s.classList.contains('outline-closed'); };
 function noteHeadings(){ const b = document.getElementById('noteBody'); return b ? [...b.querySelectorAll('h1, h2, h3, h4, h5, h6')] : []; }
+// Folding lives in the list only (never in the note): which headings are folded is kept per note on this device, by "level:text" (a repeat gets #2, #3).
+const NOTE_OUTLINE_FOLD_KEY = 'cleardesk_note_outline_fold';
+function noteOutlineFoldStore(){ try{ return JSON.parse(localStorage.getItem(NOTE_OUTLINE_FOLD_KEY) || '{}') || {}; }catch(_){ return {}; } }
+const noteOutlineFolded = ()=>new Set(noteOutlineFoldStore()[noteEditorId] || []);
+function noteOutlineSetFolded(set){
+  const st = noteOutlineFoldStore(); delete st[noteEditorId]; if(set.size) st[noteEditorId] = [...set];
+  for(const k of Object.keys(st)){ if(Object.keys(st).length<=300) break; delete st[k]; }
+  try{ localStorage.setItem(NOTE_OUTLINE_FOLD_KEY, JSON.stringify(st)); }catch(_){}
+}
 function renderNoteOutline(){
   const host = document.getElementById('noteOutlineList'); if(!host || !noteOutlineOpen()) return;
-  const items = noteHeadings().map((h, i)=>({ i, lv: Math.min(+h.tagName[1], 3), t: h.textContent.trim() })).filter(x=>x.t);
-  const ti = document.getElementById('noteTitle'), title = ti ? ti.value.trim() : '';       // the note's own title leads the list (it is a field, not a heading, but it is the top of the note)
-  const sig = title + '#' + items.map(x=>x.i + ':' + x.lv + ':' + x.t).join('|');
+  const seen = {};
+  const items = noteHeadings().map((h, i)=>{ const rl = +h.tagName[1], t = h.textContent.trim(); let key = rl + ':' + t; seen[key] = (seen[key] || 0) + 1; if(seen[key]>1) key += '#' + seen[key]; return { i, rl, lv: Math.min(rl, 3), t, key }; }).filter(x=>x.t);
+  items.forEach((x, k)=>{ let n = 0; for(let j = k + 1; j<items.length && items[j].rl>x.rl; j++) n++; x.kids = n; });   // the headings under this one, until the next of the same or a higher level
+  const folded = noteOutlineFolded(), vis = []; let hideBelow = null;
+  items.forEach(x=>{ if(hideBelow!==null && x.rl>hideBelow) return; hideBelow = null; vis.push(x); if(x.kids && folded.has(x.key)) hideBelow = x.rl; });
+  const sig = items.map(x=>x.i + ':' + x.rl + ':' + x.t).join('|') + '#' + vis.map(x=>x.i).join(',') + '#' + noteEditorId;
   if(sig!==noteOutlineSig){
     noteOutlineSig = sig; noteOutlineCur = -2;
-    host.innerHTML = (title ? `<div class="no-row l1 no-title" role="option" tabindex="-1" aria-selected="false" data-i="t" title="${esc(title)}" onclick="noteOutlineGo('t')"><span class="t">${esc(title)}</span></div>` : '')
-      + (items.length ? items.map(x=>`<div class="no-row l${x.lv}" role="option" tabindex="-1" aria-selected="false" data-i="${x.i}" title="${esc(x.t)}" onclick="noteOutlineGo(${x.i})"><span class="t">${esc(x.t)}</span></div>`).join('')
+    const twist = x=>x.kids ? `<span class="no-twist has${folded.has(x.key) ? ' shut' : ''}" onclick="noteOutlineFold(event)">${iconSvg('chevron-down')}</span>` : '<span class="no-twist"></span>';
+    host.innerHTML = (items.length ? vis.map(x=>`<div class="no-row l${x.lv}" role="option" tabindex="-1" aria-selected="false" data-i="${x.i}" data-rl="${x.rl}" data-key="${esc(x.key)}"${x.kids ? ` aria-expanded="${!folded.has(x.key)}"` : ''} title="${esc(x.t)}" onclick="noteOutlineGo(${x.i})">${twist(x)}<span class="t">${esc(x.t)}</span>${x.kids && folded.has(x.key) ? `<span class="n" title="${x.kids} hidden">${x.kids}</span>` : ''}</div>`).join('')
       : '<div class="no-empty">No headings yet. Make a line a heading from the Text Style menu, or type # and a space.</div>');
     const c = document.getElementById('noteOutlineCount'); if(c) c.textContent = items.length ? `${items.length} heading${items.length===1 ? '' : 's'}` : '';
   }
   noteOutlineMark();
 }
+// Fold or unfold the heading of a row (the arrow, or ← → on the keyboard); the focused row stays focused after the list is redrawn.
+function noteOutlineToggleFold(key, open){
+  const folded = noteOutlineFolded(), has = folded.has(key); if(open===true && !has || open===false && has) return;
+  if(has) folded.delete(key); else folded.add(key);
+  noteOutlineSetFolded(folded);
+  const panel = document.getElementById('noteOutline'), keep = !!panel && panel.contains(document.activeElement);
+  noteOutlineSig = ''; renderNoteOutline();
+  if(keep){ const r = [...document.querySelectorAll('#noteOutlineList .no-row')].find(x=>x.dataset.key===key); if(r){ r.tabIndex = 0; r.focus(); } }
+}
+function noteOutlineFold(e){ e.stopPropagation(); const row = e.currentTarget.closest('.no-row'); if(row && row.dataset.key) noteOutlineToggleFold(row.dataset.key); }
 function noteOutlineSoon(){ if(!noteOutlineOpen()) return; clearTimeout(noteOutlineTimer); noteOutlineTimer = setTimeout(renderNoteOutline, 150); }
 // The heading the top of the note is in now (the last one at or above the top edge, else the first), marked in the list.
 function noteOutlineMark(){
@@ -9436,11 +9466,13 @@ function noteOutlineMark(){
   const top = sc.getBoundingClientRect().top + 48; let cur = -1;
   hs.forEach((h, i)=>{ if(h.textContent.trim() && h.getBoundingClientRect().top <= top) cur = i; });
   if(sc.scrollTop>0 && sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2){ let last = -1; hs.forEach((h, k)=>{ if(h.textContent.trim()) last = k; }); if(last>=0) cur = last; }   // scrolled to the very end: the last heading never reaches the top, so it counts as the current one
-  if(noteOutlineWant!==null && noteOutlineWant!=='t' && hs[noteOutlineWant]){                // the entry you just clicked stays current while it is on screen, even when the end of the note stops it short of the top
+  if(noteOutlineWant!==null && hs[noteOutlineWant]){                // the entry you just clicked stays current while it is on screen, even when the end of the note stops it short of the top
     const r = hs[noteOutlineWant].getBoundingClientRect(), b = sc.getBoundingClientRect(); if(r.top >= b.top - 2 && r.top < b.bottom - 20) cur = noteOutlineWant;
   }
-  const hasTitle = !!document.querySelector('#noteOutlineList .no-title');
-  if(cur===-1) cur = hasTitle ? 't' : hs.findIndex(h=>h.textContent.trim());           // above the first heading: the title (when there is one)
+  if(cur>=0){                                                  // the heading is folded away: the nearest row above it (the folded one that holds it) is current
+    let best = -1; document.querySelectorAll('#noteOutlineList .no-row[data-rl]').forEach(r=>{ const v = +r.dataset.i; if(v<=cur && v>best) best = v; });
+    cur = best>=0 ? best : -1;
+  }
   if(cur===noteOutlineCur) return; noteOutlineCur = cur;
   const panel = document.getElementById('noteOutline'), keyboard = !!panel && panel.contains(document.activeElement);      // while you move through the list with the arrow keys it must not jump
   const rows = [...document.querySelectorAll('#noteOutlineList .no-row')];
@@ -9449,7 +9481,6 @@ function noteOutlineMark(){
 }
 function noteOutlineGo(i){
   const sc = document.querySelector('#noteSplit > .note-scroll'); if(!sc) return;
-  if(i==='t'){ sc.scrollTo({ top: 0, behavior: 'smooth' }); return; }
   const h = noteHeadings()[i]; if(!h) return;
   noteOutlineWant = i; setTimeout(()=>{ if(noteOutlineWant===i) noteOutlineWant = null; }, 1600);
   sc.scrollTo({ top: h.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 16, behavior: 'smooth' });
@@ -9457,7 +9488,6 @@ function noteOutlineGo(i){
 // Keys in the list, as in the Notes list: ↑ ↓ (Home, End) move through the headings, Return takes you to the heading in the note with the caret there, Esc goes back to the note.
 function noteOutlineJump(i){
   noteOutlineGo(i);
-  if(i==='t'){ document.getElementById('noteTitle')?.focus({ preventScroll: true }); return; }
   const h = noteHeadings()[i], body = document.getElementById('noteBody'); if(!h || !body) return;
   body.focus({ preventScroll: true });
   const r = document.createRange(); r.selectNodeContents(h); r.collapse(false); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
@@ -9470,7 +9500,16 @@ function noteOutlineKey(e){
   else if(e.key==='ArrowUp'){ e.preventDefault(); to(cur < 0 ? 0 : cur - 1); }
   else if(e.key==='Home'){ e.preventDefault(); to(0); }
   else if(e.key==='End'){ e.preventDefault(); to(rows.length - 1); }
-  else if((e.key==='Enter' || e.key===' ') && cur>=0){ e.preventDefault(); const i = rows[cur].dataset.i; noteOutlineJump(i==='t' ? 't' : +i); }
+  else if(e.key==='ArrowRight' && cur>=0){                                              // unfold, or step into the first heading below
+    e.preventDefault(); const r = rows[cur];
+    if(r.getAttribute('aria-expanded')==='false') noteOutlineToggleFold(r.dataset.key, true); else if(r.getAttribute('aria-expanded')==='true') to(cur + 1);
+  }
+  else if(e.key==='ArrowLeft' && cur>=0){                                                // fold, or step out to the heading above this level
+    e.preventDefault(); const r = rows[cur];
+    if(r.getAttribute('aria-expanded')==='true') noteOutlineToggleFold(r.dataset.key, false);
+    else { const rl = +r.dataset.rl || 0; for(let k = cur - 1; k>=0; k--){ if((+rows[k].dataset.rl || 0) < rl){ to(k); break; } } }
+  }
+  else if((e.key==='Enter' || e.key===' ') && cur>=0){ e.preventDefault(); noteOutlineJump(+rows[cur].dataset.i); }
   else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); const a = document.getElementById('noteOutline'); if(a && getComputedStyle(a).position==='absolute') toggleNoteOutline(false, false); (document.getElementById('noteBody') || document.body).focus({ preventScroll: true }); }
 }
 function toggleNoteOutline(force, remember){
@@ -9482,6 +9521,14 @@ function toggleNoteOutline(force, remember){
   if(b){ b.setAttribute('aria-pressed', String(!closed)); b.title = (closed ? 'Show' : 'Hide') + ' Outline (⌥⌘I)'; b.setAttribute('aria-label', (closed ? 'Show' : 'Hide') + ' Outline'); }
   if(!closed){ noteOutlineSig = ''; renderNoteOutline(); }
 }
+// The marker is the solid accent only while the Outline is the active area (the pointer over it, or focus inside it); otherwise it is grey, as a selection is in the lists.
+(function(){
+  const a = document.getElementById('noteOutline'); if(!a) return;
+  const sync = ()=>a.classList.toggle('is-active', a.matches(':hover') || (a.contains(document.activeElement) && document.documentElement.classList.contains('kbd-input')));   // (a click that leaves focus in the list does not keep it blue while the pointer is in the note)
+  a.addEventListener('pointerenter', sync); a.addEventListener('pointerleave', ()=>setTimeout(sync, 0));
+  a.addEventListener('focusin', sync); a.addEventListener('focusout', ()=>setTimeout(sync, 0));
+  document.addEventListener('keydown', ()=>{ if(a.contains(document.activeElement)) setTimeout(sync, 0); }, true); document.addEventListener('pointerdown', ()=>setTimeout(sync, 0), true);
+})();
 function applyNoteOutlineState(){ let v = null; try{ v = localStorage.getItem(NOTE_OUTLINE_KEY); }catch(_){} toggleNoteOutline(v==='1', false); }
 document.addEventListener('scroll', e=>{ if(e.target && e.target.classList && e.target.classList.contains('note-scroll') && !noteOutlineRaf && noteOutlineOpen()) noteOutlineRaf = requestAnimationFrame(()=>{ noteOutlineRaf = 0; noteOutlineMark(); }); }, true);
 // While the panel floats over the note (a narrow window) a click in the note puts it away (not remembered as a choice), like the Variables panel.
