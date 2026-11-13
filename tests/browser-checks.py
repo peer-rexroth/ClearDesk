@@ -39,6 +39,21 @@ with sync_playwright() as p:
     ev = pg.evaluate
     off = ev("""() => [...document.querySelectorAll('i[class*="fa-"]')].filter(i => i.getBoundingClientRect().width).map(i => Math.round(parseFloat(getComputedStyle(i).fontSize) * 1.26 * 10) / 10).filter(d => ![12, 14, 16, 18].some(x => Math.abs(x - d) < .6))""")
     check("every visible icon is drawn at 12, 14, 16 or 18px", not off, off[:6])
+    # DESIGN.md 4.1: every registry icon is outline only, draws inside the 3.5-20.5 box, and uses the documented strokes (2; zero-length dots; the heavier check;
+    # a scaled <g transform> drawing with the stroke compensated). The one filled shape is the half disc of circle-half-stroke (In Progress).
+    geo = ev("""() => { const bad = []; const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('viewBox', '0 0 24 24'); svg.style.cssText = 'position:fixed;left:0;top:0;width:24px;height:24px'; document.body.appendChild(svg);
+      const OK = new Set(['path', 'circle', 'rect', 'ellipse', 'line', 'polyline', 'polygon', 'g']), FILL_OK = { 'circle-half-stroke': 1 }, WIDTH_OK = { 'check': 2.6 };
+      for (const [k, v] of Object.entries(ICONS)) { svg.innerHTML = '<g>' + v + '</g>'; const root = svg.firstChild;
+        for (const e of root.querySelectorAll('*')) { if (!OK.has(e.tagName.toLowerCase())) bad.push(k + ': tag ' + e.tagName);
+          const f = e.getAttribute('fill'); if (f && f !== 'none' && !FILL_OK[k]) bad.push(k + ': fill ' + f);
+          if (e.getAttribute('stroke')) bad.push(k + ': stroke attribute');
+          const w = e.getAttribute('stroke-width'); if (w) { const d = (e.getAttribute('d') || '').replace(/\s/g, ''); const dot = /\.01/.test(d), inG = e.tagName.toLowerCase() === 'g'; if (parseFloat(w) !== 2 && !dot && !inG && parseFloat(w) !== WIDTH_OK[k]) bad.push(k + ': stroke-width ' + w); } }
+        const bb = root.getBBox(); if (bb.x < 3.45 || bb.y < 3.45 || bb.x + bb.width > 20.55 || bb.y + bb.height > 20.55) bad.push(k + ': outside the 3.5-20.5 box ' + [bb.x, bb.y, bb.x + bb.width, bb.y + bb.height].map(n => +n.toFixed(2)).join(',')); }
+      return bad; }""")
+    check("every registry icon is outline only, inside the 3.5-20.5 box, with the documented strokes", not geo, geo[:6])
+    src = open(os.path.join(CD, "index.html"), encoding="utf-8").read()
+    grids = sorted({m for m in re.findall(r'<svg[^>]*viewBox=["\']0 0 (\d+ \d+)["\']', src)} - {"24 24", "10 14", "10 6", "10 10"})
+    check("no hand-drawn svg on another grid than 24 (the 10-grid pull-down chevrons are the one documented exception)", not grids, grids)
     small = ev("""() => [...document.querySelectorAll('.sidebar button, .sidebar .nav-item, .main-toolbar button, .main-toolbar select')].filter(e => e.offsetParent).map(e => [e.id || e.className.toString().slice(0, 28), Math.round(e.getBoundingClientRect().width), Math.round(e.getBoundingClientRect().height)]).filter(a => a[1] < 20 || a[2] < 20)""")
     check("sidebar and toolbar controls are at least 20x20", not small, small[:6])
     for theme in ("light", "dark"):
