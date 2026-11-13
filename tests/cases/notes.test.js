@@ -1103,9 +1103,11 @@ test('the Manual order syncs through stateAt and survives a merge with a newer t
   noteSortKey = 'edited';
 });
 
-test('the rich copy and the HTML export write the title as a real <h1> (Word / Outlook / browsers see a heading)', function () {
+test('the rich copy and the HTML export write the title and the body headings as real <h1>…<h6> (Word / Outlook / browsers see headings)', function () {
   var src = noteCopyContent.toString();
   assertIncludes(src, '<h1 style="font-size:22px;font-weight:700'); assertNotIncludes(src, '<div style="font-size:22px;font-weight:700');
   assertIncludes(noteFormatText.toString(), 'noteCopyContent(n).html', 'the HTML export is built from the same markup');
+  var mail = noteToMailHtml.toString();
+  for (var k = 1; k <= 6; k++) assertIncludes(mail, "case 'H" + k + "': return `<h" + k + ' style=', 'a body heading level ' + k + ' is a real <h' + k + '> in the rich copy and the HTML export');
 });
 

@@ -6776,12 +6776,12 @@ function noteToMailHtml(root){
       case 'HR': return '<hr style="border:0;border-top:1px solid #c8c8cc;margin:12px 0">';
       case 'A': { const h = n.getAttribute('href') || ''; return h ? `<a href="${esc(h)}">${kids(n)}</a>` : kids(n); }
       case 'P': case 'DIV': return `<div style="margin:0 0 6px">${kids(n) || '<br>'}</div>`;
-      case 'H1': return `<div style="font-size:20px;font-weight:700;margin:12px 0 6px">${kids(n)}</div>`;
-      case 'H2': return `<div style="font-size:17px;font-weight:700;margin:10px 0 4px">${kids(n)}</div>`;
-      case 'H3': return `<div style="font-size:15px;font-weight:700;margin:8px 0 4px">${kids(n)}</div>`;
-      case 'H4': return `<div style="font-size:15px;font-weight:600;margin:8px 0 4px">${kids(n)}</div>`;
-      case 'H5': return `<div style="font-size:14px;font-weight:600;color:#555;margin:8px 0 4px">${kids(n)}</div>`;
-      case 'H6': return `<div style="font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.04em;margin:8px 0 4px">${kids(n)}</div>`;
+      case 'H1': return `<h1 style="font-size:20px;font-weight:700;margin:12px 0 6px;line-height:1.3">${kids(n)}</h1>`;
+      case 'H2': return `<h2 style="font-size:17px;font-weight:700;margin:10px 0 4px;line-height:1.3">${kids(n)}</h2>`;
+      case 'H3': return `<h3 style="font-size:15px;font-weight:700;margin:8px 0 4px;line-height:1.3">${kids(n)}</h3>`;
+      case 'H4': return `<h4 style="font-size:15px;font-weight:600;margin:8px 0 4px;line-height:1.3">${kids(n)}</h4>`;
+      case 'H5': return `<h5 style="font-size:14px;font-weight:600;color:#555;margin:8px 0 4px;line-height:1.3">${kids(n)}</h5>`;
+      case 'H6': return `<h6 style="font-size:12px;font-weight:600;color:#555;text-transform:uppercase;letter-spacing:.04em;margin:8px 0 4px;line-height:1.3">${kids(n)}</h6>`;
       case 'BLOCKQUOTE': return `<blockquote style="margin:6px 0;padding-left:12px;border-left:3px solid #c8c8cc;color:#555">${kids(n)}</blockquote>`;
       case 'PRE': return `<pre style="font-family:Menlo,monospace;font-size:13px;background:#f4f4f6;padding:8px 10px;border-radius:6px;white-space:pre-wrap">${esc(n.textContent)}</pre>`;
       case 'CODE': return `<code style="font-family:Menlo,monospace;font-size:.9em;background:#f4f4f6;padding:1px 4px;border-radius:3px">${kids(n)}</code>`;
