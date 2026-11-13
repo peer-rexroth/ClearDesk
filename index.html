@@ -105,6 +105,7 @@ const ICONS = {
   "note-sticky": "<path d=\"M6.5 4h11A2.5 2.5 0 0 1 20 6.5V14l-6 6H6.5A2.5 2.5 0 0 1 4 17.5v-11A2.5 2.5 0 0 1 6.5 4z\"/><path d=\"M20 14h-4.5a1.5 1.5 0 0 0-1.5 1.5V20\"/>",
   "object-group": "<rect x=\"4\" y=\"4\" width=\"10\" height=\"10\" rx=\"2\"/><rect x=\"10\" y=\"10\" width=\"10\" height=\"10\" rx=\"2\"/>",
   "outdent": "<path d=\"M4 5.5h16M12 10h8M12 14.5h8M4 19h16M7.5 9.5 4 12l3.5 2.5z\"/>",
+  "outline": "<path d=\"M4.5 6h15M8.5 12h11M12.5 18h7\"/>",
   "palette": "<path d=\"M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.8-.8 1.8-1.7 0-1.4-1-1.6-1-2.8 0-1 .8-1.7 1.8-1.7H17a3.5 3.5 0 0 0 3.5-3.5C20.5 6.7 16.7 3.5 12 3.5z\"/><path d=\"M7.5 11.5h.01M9.5 7.8h.01M14 7.5h.01\" stroke-width=\"2\"/>",
   "paste": "<g transform=\"translate(0.343 0.586) scale(0.971)\" stroke-width=\"2.059\"><rect x=\"5.5\" y=\"5\" width=\"13\" height=\"15.5\" rx=\"2.5\"/><path d=\"M9 5v-.8A1.2 1.2 0 0 1 10.2 3h3.6A1.2 1.2 0 0 1 15 4.2V5\"/><path d=\"M9 12h6M9 15.5h4\"/></g>",
   "pen": "<path d=\"m15.8 4.7 3.5 3.5L8.2 19.3l-4.4.9.9-4.4z\"/><path d=\"m13.7 6.8 3.5 3.5\"/>",
@@ -298,7 +299,8 @@ const ICONS = {
   .fc-row { display: grid; grid-template-columns: repeat(5, 24px); gap: 8px 10px; }   /* the note colour dots (.nc-sw: 24px, hairline edge, ring when chosen), five to a row */
   .nc-sw.fc-sw:not(.fc-none) { background: var(--fcc); }
   .project-row.dragging { opacity: 0.4; }
-  .project-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
+  .project-row.drag-over-top, .note-row.drag-over-top { box-shadow: inset 0 2px 0 0 var(--blue-text); }
+  .note-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
   .project-row.drag-over-bottom { box-shadow: inset 0 -2px 0 0 var(--blue-text); }
   .pr-empty-actions { display: flex; gap: 8px; margin-top: 12px; justify-content: center; }
   .project-row.drop-into { background: var(--accent-tint); box-shadow: inset 0 0 0 1.5px var(--accent); }
@@ -1946,6 +1948,24 @@ const ICONS = {
   html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, .sort-wrap, #collapseAllBtnBoard) { display: none !important; }
   #trashTools { display: none; }
   html.task-trash #trashTools { display: inline-flex; }
+  /* The note Outline (a list of the headings) is a panel on the right like Prompts' Variables: it slides in and out (⌥⌘I) and floats over the note in a narrow pane. */
+  .note-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
+  .note-split > .note-scroll { flex: 1; min-width: 0; }
+  .note-outline { position: relative; flex: none; width: 240px; overflow: hidden; border-left: 1px solid var(--border); background: var(--bg-2); transition: width var(--dur-base) ease, border-color var(--dur-base) ease; }
+  .note-outline-inner { width: 240px; max-width: 100%; height: 100%; overflow-y: auto; padding: 16px 12px 40px 14px; box-sizing: border-box; transition: opacity var(--dur-fast) ease; }
+  .note-split.outline-closed .note-outline { width: 0; border-left-color: transparent; }
+  .note-split.outline-closed .note-outline-inner { opacity: 0; pointer-events: none; }
+  .no-row { display: flex; align-items: center; width: 100%; text-align: left; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: var(--fs-13); line-height: 1.35; padding: 5px 8px; border-radius: var(--r-s); cursor: default; }
+  .no-row:hover { background: var(--hover); color: var(--text); }
+  .no-row.l1 { font-weight: 600; color: var(--text); } .no-row.no-title { font-weight: 700; } .no-row.l2 { padding-left: 22px; } .no-row.l3 { padding-left: 36px; font-size: var(--fs-12); }
+  .no-row.act { background: var(--blue-bg); color: var(--blue-text); font-weight: 600; }
+  .no-row .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .no-empty { font-size: var(--fs-13); color: var(--text-3); line-height: 1.5; }
+  @container notepane (max-width: 739px) {
+    .note-split { position: relative; }
+    .note-outline { position: absolute; top: 0; right: 0; bottom: 0; z-index: 6; box-shadow: var(--elev-2); }
+    .note-split.outline-closed .note-outline { width: 0; box-shadow: none; }
+  }
   .pr-split { display: flex; flex: 1; min-width: 0; min-height: 0; }
   .pr-split > .note-scroll { flex: 1; min-width: 0; }
   #promptsMain { --list-w: var(--prompts-list-w, 300px); }   /* Prompts keeps its own list width (Notes keeps its own) */
@@ -2407,6 +2427,7 @@ const ICONS = {
           </div>
                     <span class="note-toolbar-grow"></span>
           <button type="button" class="btn note-more-btn note-lock-btn" id="noteLockBtn" onclick="toggleNoteLock(noteEditorId)" title="Lock note" aria-label="Lock note" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="lock-open"></svg></button>
+          <button type="button" class="btn note-more-btn" id="noteOutlineBtn" onclick="toggleNoteOutline()" title="Show Outline (⌥⌘I)" aria-label="Show Outline" aria-pressed="false"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="outline"></svg></button>
           <button type="button" class="btn note-more-btn" id="noteMoreBtn" onclick="openNoteMoreMenu(event)" title="More: copy, duplicate, move, delete" aria-label="More actions" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="ellipsis"></svg></button>
         </div>
         <div class="find-bar" id="ntFind" role="search" aria-label="Find in the note" hidden>
@@ -2429,9 +2450,10 @@ const ICONS = {
             <button type="button" class="btn btn-sm find-repall" id="ntFindRepAll" onclick="noteFindBar.replaceAll()" title="Replace every match (⌥↵)">Replace All</button>
           </div>
         </div>
+        <div class="note-split outline-closed" id="noteSplit">
         <div class="note-scroll">
           <div class="note-doc" onmousemove="tblHandlesMove(event); noteCodeCopyHover(event)" onmouseleave="tblHandlesLeave(); noteCodeCopyHover(null)">
-            <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave()" onkeydown="onNoteTitleKey(event)">
+            <input type="text" class="note-title" id="noteTitle" placeholder="Title" maxlength="200" aria-label="Note title" autocomplete="off" oninput="scheduleNoteSave(); noteOutlineSoon()" onkeydown="onNoteTitleKey(event)">
             <div class="note-meta" id="noteMeta"></div>
             <div class="note-trash-bar" id="noteTrashBar" hidden><i class="fa-regular fa-trash-can"></i><span id="noteTrashText"></span><button type="button" class="btn btn-sm" onclick="restoreNote(noteEditorId)">Restore</button><button type="button" class="btn btn-sm nlp-remove" onclick="deleteNote(noteEditorId)">Delete Now</button></div>
             <div class="note-body is-empty" id="noteBody" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Note" spellcheck="true" data-placeholder="Start writing, or type / for blocks"
@@ -2439,6 +2461,8 @@ const ICONS = {
                         <div class="tbl-handles" id="tblHandles" aria-hidden="true"></div>
                         <div class="note-code-copy-layer" id="noteCodeCopyLayer"></div>
           </div>
+        </div>
+        <aside class="note-outline" id="noteOutline" aria-label="Outline"><div class="note-outline-inner"><div class="pr-insp-head"><span>Outline</span><span class="pr-insp-sub" id="noteOutlineCount"></span></div><div id="noteOutlineList"></div></div></aside>
         </div>
       </div>
     </div>
@@ -6167,6 +6191,7 @@ function shortcutGroups(){
       ['Leave a table: go to the line below it', [mod,'↵']], ...(mac ? [] : [['Table options (rows, columns, header) at the caret', ['Shift','F10']]]),
       ['Next cell, adding a row after the last one', ['Tab']], ['Indent a list item', ['Tab']], ['Outdent a list item', [shift,'Tab']],
       ['Move the focused folder up (sidebar)', [opt,'↑']], ['Move the focused folder down (sidebar)', [opt,'↓']],
+      ['Move the selected note up or down (Manual sort order)', [opt,'↑','↓']], ['Show or hide the Outline', mac ? ['⌥','⌘','I'] : ['Ctrl','Alt','I']],
       ['Find in the note', [mod,'F']], ['Find and replace', mac ? ['⌥','⌘','F'] : ['Ctrl','Alt','F']], ['Next match', [mod,'G']], ['Previous match', [shift,mod,'G']], ['Close the find bar', ['Esc']] ] },
     { id:'prompts', label:'Prompts', icon:'fa-regular fa-braces', rows:[
       ['New prompt', ['N']], ['Move through the prompts list', ['↑','↓']], ['Jump into the template', ['↵']], ['Delete the selected prompt', mac ? ['⌘','⌫'] : ['Delete']],
@@ -6256,7 +6281,7 @@ try{
   const savedFolder = localStorage.getItem(NOTES_FOLDER_KEY); if(savedFolder) noteFolderFilter = savedFolder;
   noteOpenPending = localStorage.getItem('cleardesk_notes_open') || null;
   const savedSort = JSON.parse(localStorage.getItem(NOTES_SORT_KEY) || 'null');
-  if(savedSort && ['edited','created','title'].includes(savedSort.key) && ['asc','desc'].includes(savedSort.dir)){ noteSortKey = savedSort.key; noteSortDir = savedSort.dir; }
+  if(savedSort && ['edited','created','title','manual'].includes(savedSort.key) && ['asc','desc'].includes(savedSort.dir)){ noteSortKey = savedSort.key; noteSortDir = savedSort.dir; }
   const savedCollapsed = JSON.parse(localStorage.getItem(NOTES_COLLAPSED_KEY) || '[]'); if(Array.isArray(savedCollapsed)) savedCollapsed.forEach(x=>{ if(typeof x==='string') noteFoldersCollapsed.add(x); });
 }catch(_){}
 let noteSortKey = 'edited', noteSortDir = 'desc';   // how the notes list is ordered (per device): edited | created | title, desc | asc
@@ -6449,6 +6474,7 @@ function normalizeNotes(){
     if(!n.updatedAt) n.updatedAt = n.createdAt;
     n.locked = n.locked===true;
     n.pinned = n.pinned===true;
+    if(!Number.isFinite(n.order)) delete n.order;                    // the place in the Manual order (see reorderNote)
     if(!Number.isFinite(n.deletedAt)) delete n.deletedAt;            // in Recently Deleted since this time (see deleteNote)
     if(!Number.isFinite(n.baseAt)) n.baseAt = n.updatedAt;           // legacy / imported notes count as already in sync
   });
@@ -6526,7 +6552,27 @@ function handleNoteDragStart(e, id){
 }
 function handleNoteDragEnd(){
   draggedNoteId = null;
-  document.querySelectorAll('#notesList .dragging, #noteFolderList .drop-into').forEach(el=>el.classList.remove('dragging', 'drop-into'));
+  document.querySelectorAll('#notesList .dragging, #notesList .drag-over-top, #notesList .drag-over-bottom, #noteFolderList .drop-into').forEach(el=>el.classList.remove('dragging', 'drop-into', 'drag-over-top', 'drag-over-bottom'));
+}
+// With the Manual order, a note dragged over another row of the list lands before or after it (the folder rows still take it as a move to that folder).
+function noteRowDropOk(targetId){
+  const d = notes.find(x=>x.id===draggedNoteId), t = notes.find(x=>x.id===targetId);
+  return !!(noteSortKey==='manual' && d && t && d.id!==t.id && !noteTrashed(d) && !noteTrashed(t) && !!d.pinned===!!t.pinned);
+}
+function handleNoteRowDragOver(e, targetId){
+  if(!draggedNoteId || !noteRowDropOk(targetId)) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+  const row = e.currentTarget, rect = row.getBoundingClientRect();
+  row.classList.remove('drag-over-top', 'drag-over-bottom');
+  row.classList.add((e.clientY - rect.top) / rect.height < 0.5 ? 'drag-over-top' : 'drag-over-bottom');
+}
+function handleNoteRowDragLeave(e){ e.currentTarget.classList.remove('drag-over-top', 'drag-over-bottom'); }
+function handleNoteRowDrop(e, targetId){
+  if(!draggedNoteId || !noteRowDropOk(targetId)) return;
+  e.preventDefault(); e.stopPropagation();
+  const rect = e.currentTarget.getBoundingClientRect(), before = (e.clientY - rect.top) / rect.height < 0.5, id = draggedNoteId;
+  handleNoteDragEnd();
+  reorderNote(id, targetId, before);
 }
 function noteDropOk(folderId){ const n = notes.find(x=>x.id===draggedNoteId); return !!(n && !n.locked && folderById(folderId) && n.folderId!==folderId); }
 function handleFolderDragOver(e, targetId){
@@ -6605,7 +6651,7 @@ function mergeNotesData(data, respectTombstones){
         if(incomingWins){ adoptNote(existing, it); existing.baseAt = existing.updatedAt; updated++; }
         else existing.baseAt = inUpd;                                 // our version stays; the other side's edit is now accounted for
       } else if(itemVer(it) > itemVer(existing)){
-        if(exUpd > inUpd) adoptState(existing, it, ['pinned', 'locked', 'folderId']);        // our text is newer: take only their pin / lock / folder
+        if(exUpd > inUpd) adoptState(existing, it, ['pinned', 'locked', 'folderId', 'order']);        // our text is newer: take only their pin / lock / folder
         else { adoptNote(existing, it); existing.baseAt = existing.updatedAt; }
         updated++;
       }
@@ -6625,6 +6671,7 @@ function applyAppMode(){
   const si = document.getElementById('searchInput');
   if(si){ si.placeholder = appMode==='notes' ? 'Search notes…' : appMode==='prompts' ? 'Search prompts…' : 'Search tasks…'; si.value = appMode==='notes' ? noteSearchQuery : appMode==='prompts' ? promptSearchQuery : searchQuery; }
   if(appMode==='prompts') applyPromptInspectorState();
+  if(appMode==='notes') applyNoteOutlineState();
   document.querySelectorAll('#modeSwitch .view-switch-btn').forEach(b=>{ const on = b.dataset.mode===appMode; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on ? 'true' : 'false'); });
 }
 function setAppMode(mode){
@@ -6770,7 +6817,7 @@ function noteCopyContent(n){
   const title = (n.title || '').trim();
   const plain = [title, noteToPlainText(holder)].filter(Boolean).join('\n\n');
   const html = `<div style="font-family:-apple-system,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5;color:#1d1d1f">`
-    + (title ? `<div style="font-size:22px;font-weight:700;margin:0 0 10px">${esc(title)}</div>` : '') + noteToMailHtml(holder) + `</div>`;
+    + (title ? `<h1 style="font-size:22px;font-weight:700;line-height:1.3;margin:0 0 10px">${esc(title)}</h1>` : '') + noteToMailHtml(holder) + `</div>`;
   return { html, plain };
 }
 function noteWriteClipboard(html, plain){
@@ -7244,6 +7291,7 @@ function noteMenuHtml(id, opts){
     rowMenuSub('fa-regular fa-copy', 'Copy As', menuOpt(`noteMenuRun('copyas','rich')`, {none: true}, 'Rich Text') + menuOpt(`noteMenuRun('copyas','plain')`, {none: true}, 'Plain Text') + menuOpt(`noteMenuRun('copyas','markdown')`, {none: true}, 'Markdown') + menuOpt(`noteMenuRun('copyas','html')`, {none: true}, 'HTML')),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('exportas','json')`, {svg: menuSvg('file-lines')}, 'Note File (.json)')),
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
+    ...(noteSortKey==='manual' ? (()=>{ const g = noteReorderGroup(n), at = g.findIndex(x=>x.id===n.id); return [sep, item('fa-solid fa-arrow-up', 'Move Up', `noteMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `noteMenuRun('down')`, {off: at===-1 || at>=g.length - 1})]; })() : []),
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
     item('fa-solid fa-trash', 'Delete', `noteMenuRun('delete')`, {danger:true, hint: n.locked ? 'Unlock First' : deleteKeyHint(), off:!!n.locked})
@@ -7264,6 +7312,8 @@ function noteMenuRun(kind, value){
   if(kind==='lock') toggleNoteLock(id);
   else if(kind==='copy') copyNote(id);
   else if(kind==='pin') toggleNotePin(id);
+  else if(kind==='up') moveNoteBy(id, -1);
+  else if(kind==='down') moveNoteBy(id, 1);
   else if(kind==='copyas') copyNoteAs(id, value);
   else if(kind==='copyselas') copySelectionAs(value);
   else if(kind==='exportas'){ if(value==='json') exportNotes('note', id); else noteExportAs(id, value); }
@@ -7435,24 +7485,51 @@ function folderMenuRun(kind){
 // The order of the notes list: by date edited (default), date created or title, either way round. Ties fall back to newest-edited first.
 function noteSorter(){
   const dir = noteSortDir==='asc' ? 1 : -1;
+  if(noteSortKey==='manual') return (a, b)=>noteOrd(a) - noteOrd(b) || (b.updatedAt - a.updatedAt);      // your own order; notes never placed by hand (a new one) come first, newest first
   return (a, b)=>{
     const cmp = noteSortKey==='title' ? (a.title || 'New note').localeCompare(b.title || 'New note', undefined, {sensitivity:'base'})
       : noteSortKey==='created' ? a.createdAt - b.createdAt : a.updatedAt - b.updatedAt;
     return cmp * dir || (b.updatedAt - a.updatedAt);
   };
 }
-const noteSortDefaultDir = key=>key==='title' ? 'asc' : 'desc';
+const noteSortDefaultDir = key=>key==='title' || key==='manual' ? 'asc' : 'desc';
+// Manual order: n.order (ascending). Dragging a row (or Option+Up / Down, or Move Up / Down in its menu) gives the moved note a number between its new neighbours; a move is a state change
+// (stateAt), not an edit, so the Edited date stays and the order still syncs. Pinned notes stay a group above the others, so a note only moves inside its own group.
+const noteOrd = n=>Number.isFinite(n.order) ? n.order : -1e15;
+const noteReorderGroup = n=>visibleNotes().filter(x=>!!x.pinned===!!n.pinned);
+function reorderNote(id, targetId, before){
+  if(noteSortKey!=='manual') return false;
+  const n = notes.find(x=>x.id===id), t = notes.find(x=>x.id===targetId);
+  if(!n || !t || n.id===t.id || noteTrashed(n) || noteTrashed(t) || !!n.pinned!==!!t.pinned) return false;
+  const rest = noteReorderGroup(n).filter(x=>x.id!==n.id);
+  let at = rest.findIndex(x=>x.id===t.id); if(at===-1) return false; if(!before) at++;
+  const prev = rest[at - 1], next = rest[at], fin = x=>!x || Number.isFinite(x.order);
+  if(rest.every(x=>Number.isFinite(x.order)) && (!prev || !next || Math.abs(next.order - prev.order) > 1e-6)){
+    n.order = prev && next ? (prev.order + next.order) / 2 : next ? next.order - 1000 : prev ? prev.order + 1000 : 1000; touchState(n);
+  } else {                                                                          // some notes have no place yet, or no room is left: number the whole list
+    rest.splice(at, 0, n); rest.forEach((x, i)=>{ const o = (i + 1) * 1000; if(x.order!==o){ x.order = o; touchState(x); } });
+  }
+  save(); render();
+  return true;
+}
+function moveNoteBy(id, delta){
+  const n = notes.find(x=>x.id===id); if(!n || noteSortKey!=='manual' || noteTrashed(n)) return;
+  const grp = noteReorderGroup(n), i = grp.findIndex(x=>x.id===id), j = i + delta;
+  if(i===-1 || j<0 || j>=grp.length) return;
+  reorderNote(id, grp[j].id, delta<0);
+}
 function setNoteSort(key, dir){
-  noteSortKey = key; noteSortDir = dir || noteSortDefaultDir(key);
+  noteSortKey = key; noteSortDir = key==='manual' ? 'asc' : (dir || noteSortDefaultDir(key));
   try{ localStorage.setItem(NOTES_SORT_KEY, JSON.stringify({key: noteSortKey, dir: noteSortDir})); }catch(_){}
   closeRowMenu(); renderNotesList();
 }
 function noteSortMenuHtml(){
   const o = (fn, icon, label, cur)=>menuOpt(fn, {none: true}, label, cur), sep = '<div class="row-menu-sep"></div>';
   const isTitle = noteSortKey==='title';
-  return o(`setNoteSort('edited')`, 'pen', 'Date Edited', noteSortKey==='edited') + o(`setNoteSort('created')`, 'calendar-plus', 'Date Created', noteSortKey==='created') + o(`setNoteSort('title')`, 'font', 'Title', isTitle) + sep
+  return o(`setNoteSort('edited')`, 'pen', 'Date Edited', noteSortKey==='edited') + o(`setNoteSort('created')`, 'calendar-plus', 'Date Created', noteSortKey==='created') + o(`setNoteSort('title')`, 'font', 'Title', isTitle) + o(`setNoteSort('manual')`, 'hand', 'Manual', noteSortKey==='manual')
+    + (noteSortKey==='manual' ? '' : sep
     + o(`setNoteSort('${noteSortKey}','${isTitle ? 'asc' : 'desc'}')`, 'arrow-down', isTitle ? 'A to Z' : 'Newest First', noteSortDir===(isTitle ? 'asc' : 'desc'))
-    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest First', noteSortDir===(isTitle ? 'desc' : 'asc'));
+    + o(`setNoteSort('${noteSortKey}','${isTitle ? 'desc' : 'asc'}')`, 'arrow-up', isTitle ? 'Z to A' : 'Oldest First', noteSortDir===(isTitle ? 'desc' : 'asc')));
 }
 function openNoteSortMenu(e){
   e.preventDefault(); e.stopPropagation();
@@ -7537,7 +7614,7 @@ function renderNotesList(vis){
   list.innerHTML = banner + vis.map(n=>{
     const sel = n.id===selectedNoteId, sec = anyPinned ? (n.pinned ? 'Pinned' : 'Notes') : '';
     const head = sec && sec!==seen ? `<div class="note-section${sec==='Pinned' ? ' sec-pin' : ''}">${sec==='Pinned' ? '<i class="fa-solid fa-thumbtack"></i>' : ''}${sec}</div>` : ''; seen = sec || seen;
-    return head + `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')"${n.locked || inTrash ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
+    return head + `<div class="note-row ${sel?'selected':''}" role="option" aria-selected="${sel}" tabindex="${sel?0:-1}" data-id="${n.id}" onclick="selectNote('${n.id}')" oncontextmenu="openNoteMenu(event,'${n.id}')" ondragover="handleNoteRowDragOver(event,'${n.id}')" ondragleave="handleNoteRowDragLeave(event)" ondrop="handleNoteRowDrop(event,'${n.id}')"${n.locked || inTrash ? '' : ` draggable="true" ondragstart="handleNoteDragStart(event,'${n.id}')" ondragend="handleNoteDragEnd()"`}>
       <div class="note-row-title"><span class="note-row-name">${esc(n.title || 'New note')}</span>${n.pinned || n.locked ? `<span class="note-row-marks">${n.pinned && !inTrash ? '<i class="fa-solid fa-thumbtack note-row-pin" title="Pinned"></i>' : ''}${n.locked ? '<i class="fa-solid fa-lock note-row-lock" title="Locked"></i>' : ''}</span>` : ''}</div>
       <div class="note-row-sub"><span class="note-row-date">${esc(fmtNoteDate(inTrash ? n.deletedAt : noteSortKey==='created' ? n.createdAt : n.updatedAt))}</span></div>
     </div>`;   // a row is just the title and its timestamp: no text snippet, no folder line
@@ -7589,6 +7666,7 @@ function renderNoteEditor(){
     noteAutoLinkDom(body);                                                  // links, e-mail addresses and phone numbers in existing text
     if(!noteIsLocked(n.id)) noteEnsureTrailingLine(body);
     body.classList.toggle('is-empty', noteIsEmpty({title:'', body:n.body}));
+    noteOutlineSig = ''; renderNoteOutline();
   }
   const trashed = noteTrashed(n), locked = !!n.locked || trashed;                  // a deleted note is read-only like a locked one
   ed?.classList.toggle('locked', locked); ed?.classList.toggle('trashed', trashed);
@@ -9324,6 +9402,65 @@ function deletePromptPreset(i){
   touchPrompt(p); save(); renderPromptInspector(p);
   showToast(`Preset "${gone.name}" deleted`, false, ()=>{ p.presets.splice(Math.min(i, p.presets.length), 0, gone); touchPrompt(p); save(); renderPromptInspector(p); showToast('Preset restored'); });
 }
+// ---- the note Outline ----
+const NOTE_OUTLINE_KEY = 'cleardesk_note_outline';
+let noteOutlineSig = '', noteOutlineCur = -2, noteOutlineTimer = null, noteOutlineRaf = 0, noteOutlineWant = null;
+const noteOutlineOpen = ()=>{ const s = document.getElementById('noteSplit'); return !!s && !s.classList.contains('outline-closed'); };
+function noteHeadings(){ const b = document.getElementById('noteBody'); return b ? [...b.querySelectorAll('h1, h2, h3, h4, h5, h6')] : []; }
+function renderNoteOutline(){
+  const host = document.getElementById('noteOutlineList'); if(!host || !noteOutlineOpen()) return;
+  const items = noteHeadings().map((h, i)=>({ i, lv: Math.min(+h.tagName[1], 3), t: h.textContent.trim() })).filter(x=>x.t);
+  const ti = document.getElementById('noteTitle'), title = ti ? ti.value.trim() : '';       // the note's own title leads the list (it is a field, not a heading, but it is the top of the note)
+  const sig = title + '#' + items.map(x=>x.i + ':' + x.lv + ':' + x.t).join('|');
+  if(sig!==noteOutlineSig){
+    noteOutlineSig = sig; noteOutlineCur = -2;
+    host.innerHTML = (title ? `<button type="button" class="no-row l1 no-title" data-i="t" title="${esc(title)}" onclick="noteOutlineGo('t')"><span class="t">${esc(title)}</span></button>` : '')
+      + (items.length ? items.map(x=>`<button type="button" class="no-row l${x.lv}" data-i="${x.i}" title="${esc(x.t)}" onclick="noteOutlineGo(${x.i})"><span class="t">${esc(x.t)}</span></button>`).join('')
+      : '<div class="no-empty">No headings yet. Make a line a heading from the Text Style menu, or type # and a space.</div>');
+    const c = document.getElementById('noteOutlineCount'); if(c) c.textContent = items.length ? `${items.length} heading${items.length===1 ? '' : 's'}` : '';
+  }
+  noteOutlineMark();
+}
+function noteOutlineSoon(){ if(!noteOutlineOpen()) return; clearTimeout(noteOutlineTimer); noteOutlineTimer = setTimeout(renderNoteOutline, 150); }
+// The heading the top of the note is in now (the last one at or above the top edge, else the first), marked in the list.
+function noteOutlineMark(){
+  const sc = document.querySelector('#noteSplit > .note-scroll'), hs = noteHeadings(); if(!sc || !noteOutlineOpen()) return;
+  const top = sc.getBoundingClientRect().top + 48; let cur = -1;
+  hs.forEach((h, i)=>{ if(h.textContent.trim() && h.getBoundingClientRect().top <= top) cur = i; });
+  if(sc.scrollTop>0 && sc.scrollTop + sc.clientHeight >= sc.scrollHeight - 2){ let last = -1; hs.forEach((h, k)=>{ if(h.textContent.trim()) last = k; }); if(last>=0) cur = last; }   // scrolled to the very end: the last heading never reaches the top, so it counts as the current one
+  if(noteOutlineWant!==null && noteOutlineWant!=='t' && hs[noteOutlineWant]){                // the entry you just clicked stays current while it is on screen, even when the end of the note stops it short of the top
+    const r = hs[noteOutlineWant].getBoundingClientRect(), b = sc.getBoundingClientRect(); if(r.top >= b.top - 2 && r.top < b.bottom - 20) cur = noteOutlineWant;
+  }
+  const hasTitle = !!document.querySelector('#noteOutlineList .no-title');
+  if(cur===-1) cur = hasTitle ? 't' : hs.findIndex(h=>h.textContent.trim());           // above the first heading: the title (when there is one)
+  if(cur===noteOutlineCur) return; noteOutlineCur = cur;
+  document.querySelectorAll('#noteOutlineList .no-row').forEach(r=>{ const on = r.dataset.i===String(cur); r.classList.toggle('act', on); if(on) r.setAttribute('aria-current', 'true'); else r.removeAttribute('aria-current'); if(on) r.scrollIntoView({ block: 'nearest' }); });
+}
+function noteOutlineGo(i){
+  const sc = document.querySelector('#noteSplit > .note-scroll'); if(!sc) return;
+  if(i==='t'){ sc.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+  const h = noteHeadings()[i]; if(!h) return;
+  noteOutlineWant = i; setTimeout(()=>{ if(noteOutlineWant===i) noteOutlineWant = null; }, 1600);
+  sc.scrollTo({ top: h.getBoundingClientRect().top - sc.getBoundingClientRect().top + sc.scrollTop - 16, behavior: 'smooth' });
+}
+function toggleNoteOutline(force, remember){
+  const split = document.getElementById('noteSplit'); if(!split) return;
+  const closed = typeof force==='boolean' ? !force : !split.classList.contains('outline-closed');
+  split.classList.toggle('outline-closed', closed);
+  if(remember!==false){ try{ localStorage.setItem(NOTE_OUTLINE_KEY, closed ? '0' : '1'); }catch(_){} }
+  const b = document.getElementById('noteOutlineBtn');
+  if(b){ b.setAttribute('aria-pressed', String(!closed)); b.title = (closed ? 'Show' : 'Hide') + ' Outline (⌥⌘I)'; b.setAttribute('aria-label', (closed ? 'Show' : 'Hide') + ' Outline'); }
+  if(!closed){ noteOutlineSig = ''; renderNoteOutline(); }
+}
+function applyNoteOutlineState(){ let v = null; try{ v = localStorage.getItem(NOTE_OUTLINE_KEY); }catch(_){} toggleNoteOutline(v==='1', false); }
+document.addEventListener('scroll', e=>{ if(e.target && e.target.classList && e.target.classList.contains('note-scroll') && !noteOutlineRaf && noteOutlineOpen()) noteOutlineRaf = requestAnimationFrame(()=>{ noteOutlineRaf = 0; noteOutlineMark(); }); }, true);
+// While the panel floats over the note (a narrow window) a click in the note puts it away (not remembered as a choice), like the Variables panel.
+document.addEventListener('mousedown', e=>{
+  if(appMode!=='notes' || !noteOutlineOpen()) return;
+  const a = document.getElementById('noteOutline'); if(!a || getComputedStyle(a).position!=='absolute') return;
+  if(e.target.closest && e.target.closest('#noteOutline, #noteOutlineBtn, .row-menu, .modal-bg')) return;
+  if(e.target.closest && e.target.closest('#noteSplit > .note-scroll')) toggleNoteOutline(false, false);
+});
 function togglePromptInspector(force, remember){
   const split = document.getElementById('prSplit'); if(!split) return;
   const closed = typeof force==='boolean' ? !force : !split.classList.contains('insp-closed');
@@ -11192,10 +11329,11 @@ const NOTE_SLASH_ITEMS = [   // in the order shown: headings, lists, blocks, the
   { group:'block', id:'code', label:'Code Block', icon:'fa-solid fa-code', keys:'pre snippet', hint:'```', run:()=>noteBlock('pre') },
   { group:'block', id:'table', label:'Table', icon:'fa-solid fa-table', keys:'grid rows columns', run:()=>noteTableInsert(3, 3) },
   { group:'block', id:'hr', label:'Divider', icon:'fa-solid fa-minus', keys:'hr line rule separator', hint:'---', run:()=>document.execCommand('insertHorizontalRule', false) },
-  { group:'inline', id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) }
+  { group:'inline', id:'date', label:'Date', icon:'fa-solid fa-calendar', keys:'today now', run:()=>document.execCommand('insertText', false, new Date().toLocaleDateString(undefined, {dateStyle:'medium'})) },
+  { group:'inline', id:'time', label:'Time', icon:'fa-solid fa-clock', keys:'now clock', run:()=>document.execCommand('insertText', false, new Date().toLocaleTimeString(undefined, {timeStyle:'short'})) }
 ];
 // What may be inserted where: nothing in a code block; only a date in a table cell; no headings, quotes, code, dividers or tables inside a list item.
-const noteSlashAllowed = node=>noteClosest(node, 'TD') || noteClosest(node, 'TH') ? ['date'] : noteClosest(node, 'LI') ? ['date', 'checklist', 'ul', 'ol'] : NOTE_SLASH_ITEMS.map(i=>i.id);
+const noteSlashAllowed = node=>noteClosest(node, 'TD') || noteClosest(node, 'TH') ? ['date', 'time'] : noteClosest(node, 'LI') ? ['date', 'time', 'checklist', 'ul', 'ol'] : NOTE_SLASH_ITEMS.map(i=>i.id);
 // `before` is the text in front of the caret; `lineBefore` the text of the line in front of that text node. A "/" opens the menu only when it starts the line or follows a space,
 // so "and/or", "1/2" and "http://…" never do.
 function noteSlashMatch(before, lineBefore){
@@ -11354,6 +11492,7 @@ function onNoteInput(e){
   noteCodeCopyQueue();
   noteEnsureTrailingLine(body);
   body.classList.toggle('is-empty', noteIsEmpty({title:'', body: body.innerHTML}));
+  noteOutlineSoon();
   tblHandlesRefresh();
   updateNoteToolbarState();                            // keeps the Undo / Redo buttons in step, including after ⌘Z and ⇧⌘Z
   scheduleNoteSave();
@@ -11762,7 +11901,11 @@ function handleNotesKeys(e){
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='p' && selectedNoteId){ e.preventDefault(); noteExportPrint(selectedNoteId); return; }   // Print / Save as PDF: this note only
   if(((e.metaKey && e.ctrlKey) || (e.ctrlKey && e.altKey && !e.metaKey)) && !e.shiftKey && e.key.toLowerCase()==='c' && selectedNoteId){ e.preventDefault(); copyNote(selectedNoteId); return; }   // the whole note, for pasting into Mail
+  if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); toggleNoteOutline(); return; }   // show or hide the Outline, like the Variables panel in Prompts
   if(!onList || typing) return;
+  if(e.altKey && !e.metaKey && !e.ctrlKey && !e.shiftKey && (e.key==='ArrowUp' || e.key==='ArrowDown') && noteSortKey==='manual' && selectedNoteId){     // Manual order: move the selected note
+    e.preventDefault(); moveNoteBy(selectedNoteId, e.key==='ArrowUp' ? -1 : 1); document.querySelector(`.note-row[data-id="${selectedNoteId}"]`)?.focus(); return;
+  }
   const vis = visibleNotes(), i = vis.findIndex(n=>n.id===selectedNoteId);
   if(e.key==='ArrowDown' || e.key==='ArrowUp'){
     e.preventDefault();

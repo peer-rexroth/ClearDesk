@@ -8,7 +8,7 @@ An Apple-style look for a web app (a PWA used mostly in desktop Chrome on macOS)
 |---|---|
 | `DESIGN.md` | this guide |
 | `tokens.css` | every colour, size, radius, shadow and motion token, light and dark, extracted from the app |
-| `icons.json` | the whole icon set (126 icons): name → inner SVG markup on a 24 grid |
+| `icons.json` | the whole icon set (127 icons): name → inner SVG markup on a 24 grid |
 | `icon-sheet.html` | a preview of every icon at 32px and the four drawn sizes (open it in a browser) |
 | `assets/` | the app-icon masters (`icon.svg`, `icon-maskable.svg`, `favicon.svg`) and `manifest.json`, as examples for section 14 |
 
@@ -177,6 +177,7 @@ Roles, not colours. Always use the token, never a literal. The only literals all
 | Table row / column (a group of commands about one) | `table-row` / `table-column` | the table box with a bold band across (two touching 2-unit strokes, which draw as a solid band without a filled shape) horizontally / vertically; **not** `table-columns`, which is the Board view |
 | Sort ascending / descending | `arrow-down-wide-short` / `arrow-up-short-wide` | one icon per direction |
 | Clear contents | `xmark` | the cell is emptied, not removed |
+| Outline (a note's headings) | `outline` | three lines stepping in: the heading levels |
 
 The icon set: `icons.json`, preview in `icon-sheet.html`. To add an icon: draw it on the 24 grid, add it to the registry under a name that states its meaning, never reuse another action's name.
 

@@ -957,13 +957,14 @@ test('a slash opens the menu only at the start of a line or after a space, and i
 test('the / menu filters by the start of a word in the name or its keywords, and offers less inside lists and tables', function () {
   var all = NOTE_SLASH_ITEMS.map(function (i) { return i.id; });
   assertDeepEqual(noteSlashFilter('', all).length, NOTE_SLASH_ITEMS.length);
-  assertDeepEqual(noteSlashFilter('', all).map(function (i) { return i.id; }), ['h1', 'h2', 'h3', 'checklist', 'ul', 'ol', 'quote', 'code', 'table', 'hr', 'date'], 'headings, lists, blocks, then the date');
+  assertDeepEqual(noteSlashFilter('', all).map(function (i) { return i.id; }), ['h1', 'h2', 'h3', 'checklist', 'ul', 'ol', 'quote', 'code', 'table', 'hr', 'date', 'time'], 'headings, lists, blocks, then the date and the time');
   assertDeepEqual(NOTE_SLASH_ITEMS.map(function (i) { return i.group; }).filter(function (g, k, a) { return a.indexOf(g) === k; }), ['text', 'list', 'block', 'inline'], 'one separator between each group');
   assertDeepEqual(noteSlashFilter('tab', all).map(function (i) { return i.id; }), ['table']);
   assertDeepEqual(noteSlashFilter('code', all).map(function (i) { return i.id; }), ['code']);
   assertDeepEqual(noteSlashFilter('hr', all).map(function (i) { return i.id; }), ['hr']);
   assertDeepEqual(noteSlashFilter('zzz', all), []);
-  assertDeepEqual(noteSlashFilter('', ['date']).map(function (i) { return i.id; }), ['date'], 'a table cell only offers the date');
+  assertDeepEqual(noteSlashFilter('', ['date', 'time']).map(function (i) { return i.id; }), ['date', 'time'], 'a table cell only offers the date and the time');
+  assertDeepEqual(noteSlashFilter('clo', all).map(function (i) { return i.id; }), ['time'], '/time is found by its keyword "clock"');
 });
 
 test('the app reopens on the note you had open, once; a note that is gone or in another folder falls back to the top one', function () {
@@ -1075,3 +1076,36 @@ test('deleting a subfolder gives its notes back to the parent folder; a top-leve
   deleteNoteFolder('f-w'); confirmModalAction();
   assertEqual(notes[0].folderId, NOTES_DEFAULT_FOLDER); assertEqual(notes[1].folderId, NOTES_DEFAULT_FOLDER);
 });
+
+test('Manual sort order: unplaced notes first, a move gets a number between its neighbours, the Edited date stays, pinned notes stay a group', function () {
+  noteSortKey = 'manual'; noteFolderFilter = 'all'; noteSearchQuery = '';
+  notes = [ntNote({ id: 'a', updatedAt: 30 }), ntNote({ id: 'b', updatedAt: 20 }), ntNote({ id: 'c', updatedAt: 10 }), ntNote({ id: 'p', updatedAt: 5, pinned: true })];
+  assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'p,a,b,c', 'nothing placed yet: newest edited first, the pinned group on top');
+  assertTrue(reorderNote('c', 'a', true), 'drop c before a');
+  assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'p,c,a,b');
+  var c = notes.find(function (n) { return n.id === 'c'; });
+  assertEqual(c.updatedAt, 10, 'a move is not an edit'); assertTrue(c.stateAt > 0);
+  moveNoteBy('b', -1);
+  assertEqual(visibleNotes().map(function (n) { return n.id; }).join(','), 'p,c,b,a', 'Move Up');
+  assertFalse(reorderNote('a', 'p', true), 'a note cannot move into the pinned group');
+  moveNoteBy('c', -1); assertEqual(visibleNotes()[1].id, 'c', 'the first of its group cannot move up');
+  var nw = ntNote({ id: 'new', updatedAt: 99 }); notes.push(nw);
+  assertEqual(visibleNotes()[1].id, 'new', 'a note that was never placed (a new one) comes first');
+  noteSortKey = 'edited';
+  assertFalse(reorderNote('a', 'c', true), 'only in the Manual order');
+});
+
+test('the Manual order syncs through stateAt and survives a merge with a newer text edit', function () {
+  noteSortKey = 'manual';
+  notes = [ntNote({ id: 'm1', body: '<p>mine</p>', updatedAt: 5000, baseAt: 1000, order: 1000 })];
+  mergeNotesData({ notes: [ntNote({ id: 'm1', body: '<p>old</p>', updatedAt: 1000, stateAt: 6000, order: 3000 })] }, true);
+  assertEqual(notes[0].body, '<p>mine</p>'); assertEqual(notes[0].order, 3000, 'their place in the list is taken, our text is kept');
+  noteSortKey = 'edited';
+});
+
+test('the rich copy and the HTML export write the title as a real <h1> (Word / Outlook / browsers see a heading)', function () {
+  var src = noteCopyContent.toString();
+  assertIncludes(src, '<h1 style="font-size:22px;font-weight:700'); assertNotIncludes(src, '<div style="font-size:22px;font-weight:700');
+  assertIncludes(noteFormatText.toString(), 'noteCopyContent(n).html', 'the HTML export is built from the same markup');
+});
+
