@@ -53,6 +53,7 @@ const ICONS = {
   "check": "<path d=\"m5 12.5 4.5 4.5L19 7.5\" stroke-width=\"2.6\"/>",
   "check-double": "<path d=\"m3.5 12.5 4 4L15 8M11 14l2 2.5L20.5 8\"/>",
   "chevron-down": "<path d=\"m6 9.5 6 6 6-6\"/>",
+  "chevron-left": "<path d=\"m14.5 6-6 6 6 6\"/>",
   "chevron-right": "<path d=\"m9.5 6 6 6-6 6\"/>",
   "chevron-up": "<path d=\"m6 14.5 6-6 6 6\"/>",
   "circle": "<circle cx=\"12\" cy=\"12\" r=\"8\"/>",
@@ -1495,6 +1496,13 @@ const ICONS = {
   .note-trash-bar .nlp-remove { color: var(--red-text); }
   .note-editor.trashed #noteLockBtn { display: none; }
   .note-meta { margin-bottom: 14px; font-size: var(--fs-12); color: var(--text-3); }
+  .note-meta .note-day-nav { margin-left: 10px; display: inline-flex; gap: 2px; vertical-align: middle; }
+  .note-day-btn { width: 22px; height: 22px; padding: 0; border: 0; border-radius: var(--r-s); background: transparent; color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+  .note-day-btn:hover:not(:disabled) { background: var(--hover); color: var(--text); }
+  .note-day-btn:disabled { opacity: .35; }
+  .note-day-btn svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .note-toolbar .note-tpl-btn { margin-left: -6px; width: 20px; min-width: 0; padding: 0; }
+  .note-toolbar .note-tpl-btn .tb-ico2 { width: 12px; height: 12px; }
   .note-meta-locked { color: var(--amber-text); white-space: nowrap; }   /* the one fact that changes what you can do, so it is the one that stands out */
   .note-meta-locked i { font-size: var(--ico-12); margin-right: 2px; }
   .note-body { min-height: 50vh; outline: none; font-size: var(--fs-15); line-height: 1.65; color: var(--text); overflow-wrap: anywhere; }
@@ -2206,6 +2214,10 @@ const ICONS = {
           <span><i class="fa-regular fa-note-sticky lead-ico"></i>All Notes</span>
           <span class="count" id="allNotesCount"></span>
         </div>
+        <div class="nav-item" id="todayNav" role="button" tabindex="0" onclick="noteToday()" title="Open today's note (⌥⌘T)">
+          <span><i class="fa-regular fa-calendar lead-ico"></i>Today</span>
+          <span class="count" id="todayCount"></span>
+        </div>
         <div class="nav-item" id="pinnedNav" oncontextmenu="openSmartViewMenu(event,'notes-pinned')" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('pinned')">
           <span><i class="fa-solid fa-thumbtack lead-ico"></i>Pinned</span>
           <span class="count" id="pinnedCount"></span>
@@ -2218,6 +2230,10 @@ const ICONS = {
         <div id="noteFolderList"></div>
       </div>
       <div class="sidebar-section">
+        <div class="nav-item" id="tplNav" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('templates')">
+          <span><i class="fa-regular fa-file-lines lead-ico"></i>Templates</span>
+          <span class="count" id="tplCount"></span>
+        </div>
         <div class="nav-item" id="trashNav" oncontextmenu="openSmartViewMenu(event,'notes-trash')" role="button" tabindex="0" aria-pressed="false" onclick="setNoteFolder('trash')">
           <span><i class="fa-regular fa-trash-can lead-ico"></i>Recently Deleted</span>
           <span class="count" id="trashCount"></span>
@@ -2415,12 +2431,12 @@ const ICONS = {
     <div class="notes-editor-pane">
       <!-- with no note open (an empty folder, or nothing selected) the bar stays, so New note is always one click away -->
       <div class="note-toolbar note-empty-bar" id="noteEmptyBar">
-        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button>
+        <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button><button type="button" class="btn note-more-btn note-tpl-btn" onclick="openNoteTemplateMenu(event)" title="New from template" aria-label="New from template" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-down"></svg></button>
       </div>
       <div class="notes-empty" id="notesEmpty"><i data-empty-ico="note-sticky"></i><div>No Note Selected</div></div>
       <div class="note-editor" id="noteEditor">
         <div class="note-toolbar" role="toolbar" aria-label="Formatting" onmousedown="if(!event.target.closest('select,input'))event.preventDefault()">
-          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button>
+          <button type="button" class="btn note-new-btn" onclick="createNote()" title="New note (N)" aria-label="New note"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="compose"></svg></button><button type="button" class="btn note-more-btn note-tpl-btn" onclick="openNoteTemplateMenu(event)" title="New from template" aria-label="New from template" aria-haspopup="menu"><svg class="tb-ico2" viewBox="0 0 24 24" aria-hidden="true" data-ico="chevron-down"></svg></button>
           <select id="noteStyleSelect" class="note-select note-fmt" aria-label="Text style" onchange="noteBlock(this.value)">
             <option value="p">Body</option><option value="h1">Title</option><option value="h2">Heading</option><option value="h3">Subheading</option><option value="blockquote">Quote</option><option value="pre">Code</option>
           </select>
@@ -2793,6 +2809,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong>, <strong>Notes</strong> and <strong>Prompts</strong> with the three icons at the top of the sidebar (a circled check, a note and curly braces; hover one for its name) or with <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
+          <div class="help-row"><i class="fa-regular fa-file-lines"></i><span><strong>Templates and the daily note</strong>: the arrow beside the compose button (<strong>New from Template</strong>) makes a new note from a template; <strong>Save as Template</strong> in a note’s menu turns the note into one. Templates are ordinary notes, kept under <em>Templates</em> in the sidebar and out of All Notes; edit them there. In a template, <code>{{date}}</code>, <code>{{weekday}}</code> and <code>{{time}}</code> are filled in, and <code>{{cursor}}</code> marks where the cursor lands. <strong>Today</strong> (<kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>T</kbd>) opens today’s note in the <em>Daily</em> folder, creating it from the template named Daily, and carries over unfinished checklist items from the last daily note (switch that off in the note’s menu).</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading, Quote, Code), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
@@ -6506,6 +6523,8 @@ function normalizeNotes(){
     if(!n.updatedAt) n.updatedAt = n.createdAt;
     n.locked = n.locked===true;
     n.pinned = n.pinned===true;
+    if(n.template!==true) delete n.template;                         // a template: shown under Templates, not in All Notes (see noteFromTemplate)
+    if(typeof n.day!=='string' || !/^\d{4}-\d\d-\d\d$/.test(n.day)) delete n.day;   // a daily note: the local day it belongs to (see noteToday)
     if(!Number.isFinite(n.order)) delete n.order;                    // the place in the Manual order (see reorderNote)
     if(!Number.isFinite(n.deletedAt)) delete n.deletedAt;            // in Recently Deleted since this time (see deleteNote)
     if(!Number.isFinite(n.baseAt)) n.baseAt = n.updatedAt;           // legacy / imported notes count as already in sync
@@ -6634,6 +6653,8 @@ function orderedFolders(){ const out = []; topFolders().forEach(f=>{ out.push(f)
 function folderPath(f){ const p = f && f.parentId ? folderById(f.parentId) : null; return f ? (p ? `${p.name} / ${f.name}` : f.name) : ''; }
 // Choosing a folder shows its own notes and those of its subfolders.
 function noteInFilter(n){
+  if(noteFolderFilter==='templates') return n.template===true;
+  if(n.template===true) return false;                              // a template is kept out of All Notes, Pinned and the folders (Templates lists them; a search finds them)
   if(noteFolderFilter==='all') return true;
   if(noteFolderFilter==='pinned') return n.pinned===true;
   return n.folderId===noteFolderFilter;                            // a folder shows only what is directly in it (its subfolders have their own lists)
@@ -7323,6 +7344,8 @@ function noteMenuHtml(id, opts){
     rowMenuSub('fa-regular fa-copy', 'Copy As', menuOpt(`noteMenuRun('copyas','rich')`, {none: true}, 'Rich Text') + menuOpt(`noteMenuRun('copyas','plain')`, {none: true}, 'Plain Text') + menuOpt(`noteMenuRun('copyas','markdown')`, {none: true}, 'Markdown') + menuOpt(`noteMenuRun('copyas','html')`, {none: true}, 'HTML')),
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('exportas','json')`, {svg: menuSvg('file-lines')}, 'Note File (.json)')),
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
+    ...(n.template ? [item('fa-regular fa-file-lines', 'New Note from Template', `noteMenuRun('usetpl')`)] : [item('fa-regular fa-file-lines', 'Save as Template', `noteMenuRun('savetpl')`)]),
+    ...(n.day ? [sep, item('fa-solid fa-list-check', noteCarryOn() ? 'Stop Carrying Over Open Items' : 'Carry Over Open Items', `noteMenuRun('carry')`)] : []),
     ...(noteSortKey==='manual' ? (()=>{ const g = noteReorderGroup(n), at = g.findIndex(x=>x.id===n.id); return [sep, item('fa-solid fa-arrow-up', 'Move Up', `noteMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `noteMenuRun('down')`, {off: at===-1 || at>=g.length - 1})]; })() : []),
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
@@ -7352,6 +7375,9 @@ function noteMenuRun(kind, value){
   else if(kind==='print') noteExportPrint(id);
   else if(kind==='restore') restoreNote(id);
   else if(kind==='clone') cloneNote(id);
+  else if(kind==='usetpl') noteFromTemplate(id);
+  else if(kind==='savetpl') noteSaveAsTemplate(id);
+  else if(kind==='carry') noteCarryToggle();
   else if(kind==='move') moveNote(id, value);
   else if(kind==='delete') deleteNote(id);
 }
@@ -7597,12 +7623,16 @@ function setFolderListHtml(list, html){
   list.innerHTML = html; list._html = html;
 }
 function renderNotesSidebar(){
-  const live = notes.filter(n=>!noteTrashed(n)), own = {}; live.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
+  const live = notes.filter(n=>!noteTrashed(n) && n.template!==true), own = {}; live.forEach(n=>{ own[n.folderId] = (own[n.folderId]||0) + 1; });
+  const tplCnt = document.getElementById('tplCount'), tplNav = document.getElementById('tplNav'), todayCnt = document.getElementById('todayCount');
+  if(tplCnt) tplCnt.textContent = notes.filter(n=>!noteTrashed(n) && n.template===true).length || '';
+  if(tplNav){ tplNav.classList.toggle('active', noteFolderFilter==='templates'); tplNav.setAttribute('aria-pressed', noteFolderFilter==='templates' ? 'true' : 'false'); }
+  if(todayCnt) todayCnt.textContent = new Date().getDate();
   const total = f=>own[f.id]||0;   // a folder's count is what is directly in it, the same as its list
   const all = document.getElementById('allNotesNav'), cnt = document.getElementById('allNotesCount');
   if(cnt) cnt.textContent = live.length;
   const trashNav = document.getElementById('trashNav'), trashCount = document.getElementById('trashCount');
-  if(trashCount) trashCount.textContent = notes.length - live.length || '';
+  if(trashCount) trashCount.textContent = notes.filter(noteTrashed).length || '';
   if(trashNav){ trashNav.classList.toggle('active', noteFolderFilter==='trash'); trashNav.setAttribute('aria-pressed', noteFolderFilter==='trash' ? 'true' : 'false'); }
   if(all){ all.classList.toggle('active', noteFolderFilter==='all'); all.setAttribute('aria-pressed', noteFolderFilter==='all' ? 'true' : 'false'); }
   const pinNav = document.getElementById('pinnedNav'), pinCount = document.getElementById('pinnedCount');
@@ -7633,14 +7663,14 @@ function renderNotesList(vis){
   const f = folderById(noteFolderFilter);
   const searching = !!noteSearchQuery.trim();                                   // a search looks through every folder
   const inTrash = noteFolderFilter==='trash';
-  if(title) title.textContent = inTrash ? 'Recently Deleted' : searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : noteFolderFilter==='pinned' ? 'Pinned' : (f ? f.name : 'Notes');
+  if(title) title.textContent = inTrash ? 'Recently Deleted' : searching ? 'Search results' : noteFolderFilter==='all' ? 'All Notes' : noteFolderFilter==='pinned' ? 'Pinned' : noteFolderFilter==='templates' ? 'Templates' : (f ? f.name : 'Notes');
   if(sub) sub.textContent = vis.length ? `${vis.length} note${vis.length===1?'':'s'}` : '';
   if(!list) return;
   if(!vis.length){
-    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No Matching Notes' : inTrash ? 'No Deleted Notes' : noteFolderFilter==='pinned' ? 'No Pinned Notes<div class="notes-list-empty-sub">Pin a note from its ⋯ menu or by right-clicking it.</div>' : 'No Notes'}</div>`;
+    list.innerHTML = `<div class="notes-list-empty">${noteSearchQuery.trim() ? 'No Matching Notes' : inTrash ? 'No Deleted Notes' : noteFolderFilter==='pinned' ? 'No Pinned Notes<div class="notes-list-empty-sub">Pin a note from its ⋯ menu or by right-clicking it.</div>' : noteFolderFilter==='templates' ? 'No Templates<div class="notes-list-empty-sub">Write one here with New note, or use Save as Template in a note’s ⋯ menu.</div>' : 'No Notes'}</div>`;
     return;
   }
-  const anyPinned = !inTrash && noteFolderFilter!=='pinned' && vis.some(n=>n.pinned);   // (the Pinned list needs no "Pinned" header)
+  const anyPinned = !inTrash && noteFolderFilter!=='pinned' && noteFolderFilter!=='templates' && vis.some(n=>n.pinned);   // (the Pinned list needs no "Pinned" header)
   let seen = '';                                                                   // section headers: "Pinned" then "Notes", only when something is pinned
   const banner = inTrash ? `<div class="notes-list-banner"><span>Deleted notes are removed after ${NOTE_TRASH_DAYS} days.</span><button type="button" class="btn btn-sm" onclick="emptyTrash()">Delete All</button></div>` : '';
   list.innerHTML = banner + vis.map(n=>{
@@ -7674,7 +7704,7 @@ function noteApplySearchHighlight(){
 function updateNoteMeta(n){
   const el = document.getElementById('noteMeta'); if(!el || !n) return;
   const fol = folderById(n.folderId);
-  el.innerHTML = `${noteTrashed(n) ? 'Deleted' : 'Edited'} ${esc(new Date(noteTrashed(n) ? n.deletedAt : n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''}`;
+  el.innerHTML = `${n.template ? 'Template · ' : ''}${noteTrashed(n) ? 'Deleted' : 'Edited'} ${esc(new Date(noteTrashed(n) ? n.deletedAt : n.updatedAt).toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'}))}${fol ? ' · ' + esc(folderPath(fol)) : ''}${n.locked ? ' · <span class="note-meta-locked"><i class="fa-solid fa-lock"></i> Locked</span>' : ''}${n.day && !noteTrashed(n) ? noteDayNavHtml(n) : ''}`;
 }
 function renderNoteEditor(){
   const n = notes.find(x=>x.id===selectedNoteId);
@@ -7726,7 +7756,7 @@ function rememberOpenItem(key, id, skip){
   try{ if(localStorage.getItem(key)!==id) localStorage.setItem(key, id); }catch(_){}
 }
 function renderNotes(){
-  if(noteFolderFilter!=='all' && noteFolderFilter!=='trash' && noteFolderFilter!=='pinned' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
+  if(noteFolderFilter!=='all' && noteFolderFilter!=='trash' && noteFolderFilter!=='pinned' && noteFolderFilter!=='templates' && !folderById(noteFolderFilter)) noteFolderFilter = 'all';
   const vis = visibleNotes();
   if(selectedNoteId && !notes.some(n=>n.id===selectedNoteId)) selectedNoteId = null;
   if(noteOpenPending){ const id = noteOpenPending; noteOpenPending = null; if(!selectedNoteId && vis.some(n=>n.id===id)) selectedNoteId = id; }      // the note you had open (once, at start)
@@ -7754,6 +7784,138 @@ function removeIfEmptyNote(id){
 }
 function syncSearchBox(){ const si = document.getElementById('searchInput'); if(si && appMode==='notes') si.value = noteSearchQuery; else if(si && appMode==='prompts') si.value = promptSearchQuery; }
 
+// ---- templates and the daily note ----
+// A template is an ordinary note with `template: true`: you write and format it like any note. It is kept out of All Notes, Pinned, the folders and their counts; the Templates row lists
+// them and a search still finds them. New from Template copies one into a new note and fills the placeholders: {{date}}, {{weekday}}, {{time}}, and {{cursor}} (not text: where the caret lands).
+// A daily note is a normal note with `day: 'YYYY-MM-DD'` in the Daily folder; Today (⌥⌘T) opens or creates it.
+const NOTE_DAILY_FOLDER = 'nf-daily', NOTE_DAILY_TPL = 'nt-daily', NOTE_TPL_SEED_KEY = 'cleardesk_note_templates_seeded', NOTE_CARRY_KEY = 'cleardesk_daily_carry';
+const NOTE_DAILY_BODY = '<h2>Plan</h2><ul class="cl"><li>{{cursor}}</li></ul><h2>Notes</h2><p><br></p>';
+const NOTE_STARTERS = [
+  { id:'nt-meeting', title:'Meeting Notes', body:'<p>{{weekday}}, {{date}} · {{time}}</p><h2>Agenda</h2><ul class="cl"><li><br></li></ul><h2>Notes</h2><p><br></p><h2>Actions</h2><ul class="cl"><li><br></li></ul>' },
+  { id:'nt-checklist', title:'Checklist', body:'<ul class="cl"><li>{{cursor}}</li><li><br></li><li><br></li></ul>' },
+  { id:'nt-journal', title:'Journal', body:'<h2>{{weekday}}, {{date}}</h2><h2>What happened</h2><p>{{cursor}}</p><h2>What I learned</h2><p><br></p>' },
+  { id:'nt-weekly', title:'Weekly Review', body:'<p>Week of {{date}}</p><h2>Wins</h2><ul><li>{{cursor}}</li></ul><h2>What slipped</h2><ul><li><br></li></ul><h2>Next week</h2><ul class="cl"><li><br></li></ul>' },
+  { id:'nt-project', title:'Project Plan', body:'<h2>Goal</h2><p>{{cursor}}</p><h2>Scope</h2><ul><li><br></li></ul><h2>Milestones</h2><ul class="cl"><li><br></li></ul><h2>Risks</h2><ul><li><br></li></ul>' },
+  { id:NOTE_DAILY_TPL, title:'Daily', body:NOTE_DAILY_BODY }
+];
+// First start only (per device): the starter templates. Fixed ids, so devices that sync do not end up with copies, and a starter you deleted (tombstone) stays deleted.
+function seedNoteTemplates(){
+  try{ if(localStorage.getItem(NOTE_TPL_SEED_KEY)) return; localStorage.setItem(NOTE_TPL_SEED_KEY, '1'); }catch(_){ return; }
+  const now = Date.now(); let added = false;
+  NOTE_STARTERS.forEach((t, i)=>{
+    if(notes.some(n=>n.id===t.id) || deletedNoteIds.some(x=>x.id===t.id)) return;
+    notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added = true;
+  });
+  if(added) save();
+}
+function noteDateTitle(d){ return d.toLocaleDateString(undefined, {weekday:'long', year:'numeric', month:'short', day:'numeric'}); }
+function noteTplFill(html, d){
+  d = d || new Date();
+  const vals = { date: d.toLocaleDateString(undefined, {year:'numeric', month:'short', day:'numeric'}), weekday: d.toLocaleDateString(undefined, {weekday:'long'}), time: d.toLocaleTimeString(undefined, {hour:'numeric', minute:'2-digit'}) };
+  return String(html).replace(/\{\{\s*(date|weekday|time)\s*\}\}/gi, (_, k)=>esc(vals[k.toLowerCase()]));
+}
+let noteCursorPending = null;
+// Put the caret where {{cursor}} was (the marker text is removed); a template without one leaves the caret in the title.
+function noteTplPlaceCursor(){
+  const id = noteCursorPending; noteCursorPending = null;
+  const body = document.getElementById('noteBody'), title = document.getElementById('noteTitle');
+  if(!id || id!==selectedNoteId || !body) return;
+  const w = document.createTreeWalker(body, NodeFilter.SHOW_TEXT); let t;
+  while((t = w.nextNode())){
+    const i = t.nodeValue.search(/\{\{\s*cursor\s*\}\}/i); if(i<0) continue;
+    const len = t.nodeValue.match(/\{\{\s*cursor\s*\}\}/i)[0].length;
+    t.nodeValue = t.nodeValue.slice(0, i) + t.nodeValue.slice(i + len);
+    const par = t.parentNode; if(!t.nodeValue){ if(par.childNodes.length===1) par.insertBefore(document.createElement('br'), t); t.remove(); }
+    const r = document.createRange();
+    if(t.parentNode){ r.setStart(t, Math.min(i, t.nodeValue.length)); } else { r.setStart(par, 0); }
+    r.collapse(true); body.focus(); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    onNoteInput(); return;
+  }
+  if(title) title.focus();
+}
+function noteMakeNote(fields){
+  flushNoteEdit();
+  if(noteFolderFilter==='trash' || noteFolderFilter==='pinned' || noteFolderFilter==='templates') noteFolderFilter = 'all';
+  const leaving = selectedNoteId, now = Date.now();
+  const n = { id: genId(), title:'', body:'', folderId: folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, createdAt: now, updatedAt: now, ...fields };
+  notes.push(n); selectedNoteId = n.id; noteEditorId = null;
+  if(leaving && leaving!==n.id) removeIfEmptyNote(leaving);
+  noteSearchQuery = ''; syncSearchBox();
+  return n;
+}
+function noteFromTemplate(id){
+  const t = notes.find(x=>x.id===id && x.template===true); if(!t) return;
+  const n = noteMakeNote({ body: noteTplFill(t.body) });
+  noteCursorPending = n.id; save(); render(); noteTplPlaceCursor();
+}
+function noteSaveAsTemplate(id){
+  const n = notes.find(x=>x.id===id); if(!n || n.template) return;
+  flushNoteEdit(); const now = Date.now();
+  const t = { id: genId(), title: n.title || 'Untitled template', body: n.body, folderId: NOTES_DEFAULT_FOLDER, template: true, createdAt: now, updatedAt: now };
+  notes.push(t); save(); renderNotesSidebar();
+  showToast(`Saved as a template: ${t.title}`, false, ()=>{ const i = notes.findIndex(x=>x.id===t.id); if(i>=0){ notes.splice(i, 1); tombstone(deletedNoteIds, t.id); } save(); render(); showToast('Template removed'); });
+}
+function openNoteTemplateMenu(e){
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  noteMenuId = null; folderMenuId = null;
+  const tpls = notes.filter(n=>n.template===true && !noteTrashed(n) && n.id!==NOTE_DAILY_TPL).sort((a, b)=>(a.title || '').localeCompare(b.title || ''));
+  const item = rowMenuItem, sep = '<div class="row-menu-sep"></div>';
+  menu.innerHTML = tidyMenuSeps([
+    ...tpls.map(t=>item('fa-regular fa-file-lines', esc(t.title || 'Untitled'), `closeRowMenu();noteFromTemplate('${t.id}')`)),
+    tpls.length ? sep : '',
+    item('fa-solid fa-plus', 'Blank Note', `closeRowMenu();createNote()`, {hint:'N'}),
+    item('fa-solid fa-sliders', 'Manage Templates…', `closeRowMenu();setNoteFolder('templates')`)
+  ].join(''));
+  const r = e.currentTarget.getBoundingClientRect();
+  menu.classList.add('open'); placeRowMenu(menu, r.left, r.bottom + 4, e.currentTarget);
+}
+function noteCarryOn(){ try{ return localStorage.getItem(NOTE_CARRY_KEY)!=='0'; }catch(_){ return true; } }
+function noteCarryToggle(){ const on = !noteCarryOn(); try{ localStorage.setItem(NOTE_CARRY_KEY, on ? '1' : '0'); }catch(_){} showToast(on ? 'Open items are carried over to the next daily note' : 'Open items stay where they are'); }
+function noteDailyList(){ return notes.filter(n=>n.day && !n.template && !noteTrashed(n)).sort((a, b)=>a.day < b.day ? -1 : a.day > b.day ? 1 : 0); }
+function noteOpenItems(n){                                                          // the unfinished, non-empty checklist items of a note
+  const out = [];
+  String(n.body).replace(/<ul class="cl">([\s\S]*?)<\/ul>/g, (_, inner)=>{ inner.replace(/<li( data-done="1")?>([\s\S]*?)<\/li>/g, (__, done, t)=>{ const x = noteText(t).trim(); if(!done && x) out.push(x); return ''; }); return ''; });
+  return out;
+}
+function noteToday(){
+  if(appMode!=='notes') setAppMode('notes');
+  const day = todayStr(); let n = noteDailyList().find(x=>x.day===day), toast = null;
+  if(!n){
+    if(!folderById(NOTE_DAILY_FOLDER)){ noteFolders.push({ id:NOTE_DAILY_FOLDER, name:'Daily', order: folderEndOrder(''), updatedAt: Date.now() }); untombstone(deletedNoteFolderIds, NOTE_DAILY_FOLDER); }
+    const tpl = notes.find(x=>x.id===NOTE_DAILY_TPL && x.template===true && !noteTrashed(x)), now = new Date();
+    const base = noteTplFill(tpl ? tpl.body : NOTE_DAILY_BODY, now), prev = noteDailyList().filter(x=>x.day < day).pop();
+    const open = prev && noteCarryOn() ? noteOpenItems(prev) : [];
+    const carried = open.length ? `<h2>Carried over</h2><ul class="cl">${open.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>` : '';
+    noteFolderFilter = NOTE_DAILY_FOLDER;
+    n = noteMakeNote({ title: noteDateTitle(now), body: carried + base, folderId: NOTE_DAILY_FOLDER, day });
+    noteCursorPending = n.id;
+    if(open.length){
+      const from = new Date(prev.day + 'T12:00:00').toLocaleDateString(undefined, {weekday:'long'}), id = n.id;
+      toast = ()=>showToast(`Carried over ${open.length} open item${open.length===1 ? '' : 's'} from ${from}`, false, ()=>{
+        const m = notes.find(x=>x.id===id); if(!m) return;
+        m.body = sanitizeNoteHtml(base); m.updatedAt = Date.now(); noteEditorId = null; save(); render(); showToast('Carry-over undone');
+      });
+    }
+    save();
+  } else {
+    flushNoteEdit(); const leaving = selectedNoteId; noteFolderFilter = n.folderId && folderById(n.folderId) ? n.folderId : 'all'; selectedNoteId = n.id; if(leaving && leaving!==n.id) removeIfEmptyNote(leaving);
+    noteSearchQuery = ''; syncSearchBox();
+  }
+  try{ localStorage.setItem(NOTES_FOLDER_KEY, noteFolderFilter); }catch(_){}
+  render(); if(noteCursorPending) noteTplPlaceCursor(); if(toast) toast();
+}
+function noteDayNavHtml(n){
+  const list = noteDailyList(), i = list.findIndex(x=>x.id===n.id);
+  const btn = (dir, label, icon, off)=>`<button type="button" class="note-day-btn" onclick="noteDayStep(${dir})" aria-label="${label}" title="${label}"${off ? ' disabled' : ''}>${menuSvg(icon)}</button>`;
+  return `<span class="note-day-nav">${btn(-1, 'Previous day with a note', 'chevron-left', i<=0)}${btn(1, 'Next day with a note', 'chevron-right', i<0 || i>=list.length - 1)}</span>`;
+}
+function noteDayStep(dir){
+  const list = noteDailyList(), i = list.findIndex(x=>x.id===selectedNoteId), j = i + dir;
+  if(i>=0 && j>=0 && j<list.length) selectNote(list[j].id);
+}
+
 // ---- actions ----
 function selectNote(id){
   if(id===selectedNoteId) return;
@@ -7764,10 +7926,12 @@ function selectNote(id){
 }
 function createNote(){
   flushNoteEdit();
+  const asTemplate = noteFolderFilter==='templates';                                         // New note inside Templates starts a template
   if(noteFolderFilter==='trash' || noteFolderFilter==='pinned') noteFolderFilter = 'all';   // a new note cannot live in Recently Deleted, and it is not pinned, so it would not show in Pinned
   const leaving = selectedNoteId;
   const now = Date.now();
   const n = { id: genId(), title:'', body:'', folderId: folderById(noteFolderFilter) ? noteFolderFilter : NOTES_DEFAULT_FOLDER, createdAt: now, updatedAt: now };
+  if(asTemplate) n.template = true;
   notes.push(n); selectedNoteId = n.id;
   if(leaving && leaving!==n.id) removeIfEmptyNote(leaving);
   noteSearchQuery = ''; syncSearchBox();
@@ -7839,7 +8003,7 @@ function moveNote(id, folderId){
 function setNoteFolder(id){
   flushNoteEdit();
   const leaving = selectedNoteId;
-  noteFolderFilter = (id==='all' || id==='trash' || id==='pinned' || folderById(id)) ? id : 'all';
+  noteFolderFilter = (id==='all' || id==='trash' || id==='pinned' || id==='templates' || folderById(id)) ? id : 'all';
   try{ localStorage.setItem(NOTES_FOLDER_KEY, noteFolderFilter); }catch(_){}
   const picked = folderById(noteFolderFilter);
   if(picked && picked.parentId && noteFoldersCollapsed.has(picked.parentId)){ noteFoldersCollapsed.delete(picked.parentId); try{ localStorage.setItem(NOTES_COLLAPSED_KEY, JSON.stringify([...noteFoldersCollapsed])); }catch(_){} }
@@ -11979,6 +12143,7 @@ function handleNotesKeys(e){
   if(e.key==='n' && !e.ctrlKey && !e.metaKey && !e.altKey && !typing){ e.preventDefault(); createNote(); return; }
   if((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey && e.key.toLowerCase()==='p' && selectedNoteId){ e.preventDefault(); noteExportPrint(selectedNoteId); return; }   // Print / Save as PDF: this note only
   if(((e.metaKey && e.ctrlKey) || (e.ctrlKey && e.altKey && !e.metaKey)) && !e.shiftKey && e.key.toLowerCase()==='c' && selectedNoteId){ e.preventDefault(); copyNote(selectedNoteId); return; }   // the whole note, for pasting into Mail
+  if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyT' && appMode==='notes'){ e.preventDefault(); noteToday(); return; }   // today's daily note
   if(e.altKey && (e.metaKey || e.ctrlKey) && e.code==='KeyI'){ e.preventDefault(); toggleNoteOutline(); return; }   // show or hide the Outline, like the Variables panel in Prompts
   if(!onList || typing) return;
   if(e.altKey && !e.metaKey && !e.ctrlKey && !e.shiftKey && (e.key==='ArrowUp' || e.key==='ArrowDown') && noteSortKey==='manual' && selectedNoteId){     // Manual order: move the selected note
@@ -13065,7 +13230,7 @@ function importNotesData(data, target){
     const id = isSafeId(String(x.id)) ? String(x.id) : genId();
     if(notes.some(n=>n.id===id)){ skipped++; return; }
     notes.push({ id, title: String(x.title || '').slice(0, 200), body: sanitizeNoteHtml(x.body), folderId: folderById(target) ? target : x.folderId ? resolve(x.folderId) : NOTES_DEFAULT_FOLDER,
-      pinned: x.pinned===true, locked: x.locked===true, createdAt: Number.isFinite(x.createdAt) ? x.createdAt : now, updatedAt: now });
+      pinned: x.pinned===true, locked: x.locked===true, ...(x.template===true ? {template: true} : {}), ...(typeof x.day==='string' ? {day: x.day} : {}), createdAt: Number.isFinite(x.createdAt) ? x.createdAt : now, updatedAt: now });
     untombstone(deletedNoteIds, id); added++; newNotes.push(id); first = first || id;
   });
   normalizeNotes();
@@ -13637,6 +13802,7 @@ function runLaunchAction(){
 })();
 try{ document.execCommand('defaultParagraphSeparator', false, 'p'); }catch(_){}   // Enter in the note editor makes <p>, not <div>
 load();
+seedNoteTemplates();
 purgeOldCompletedTasks();
 applyAppMode();
 render();

@@ -37,6 +37,7 @@
  "check-double": "<path d=\"m3.5 12.5 4 4L15 8M11 14l2 2.5L20.5 8\"/>",
  "check-thin": "<path d=\"m5.5 12.5 4.2 4.2 8.8-9.5\"/>",
  "chevron-down": "<path d=\"m6 9.5 6 6 6-6\"/>",
+ "chevron-left": "<path d=\"m14.5 6-6 6 6 6\"/>",
  "chevron-right": "<path d=\"m9.5 6 6 6-6 6\"/>",
  "chevron-up": "<path d=\"m6 14.5 6-6 6 6\"/>",
  "chevrons-up-down": "<path d=\"m8.5 9.5 3.5-3.5 3.5 3.5M8.5 14.5l3.5 3.5 3.5-3.5\"/>",

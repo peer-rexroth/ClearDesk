@@ -8,7 +8,7 @@ An Apple-style look for a web app (a PWA used mostly in desktop Chrome on macOS)
 |---|---|
 | `DESIGN.md` | this guide |
 | `tokens.css` | every colour, size, radius, shadow and motion token, light and dark, extracted from the app |
-| `icons.json` | the whole icon set (143 icons): name → inner SVG markup on a 24 grid |
+| `icons.json` | the whole icon set (144 icons): name → inner SVG markup on a 24 grid |
 | `icon-sheet.html` | a preview of every icon at 32px and the four drawn sizes (open it in a browser) |
 | `assets/` | the app-icon masters (`icon.svg`, `icon-maskable.svg`, `favicon.svg`) and `manifest.json`, as examples for section 14 |
 

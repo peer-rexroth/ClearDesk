@@ -515,6 +515,13 @@ parity.
   *Linked* (click → confirm → unlink), red *Reconnect*. It replaced the old
   split button + filename + unlink icon.
 
+## Note templates and the daily note
+
+- A **template** is an ordinary note with `template: true` (no special folder): `noteInFilter` keeps it out of All Notes, Pinned, folders and their counts; the **Templates** sidebar row (`noteFolderFilter==='templates'`) lists them, a search still finds them, and New note inside Templates starts a template. **New from Template** is the chevron beside each compose button (`openNoteTemplateMenu`, the shared `#rowMenu`); **Save as Template** / **New Note from Template** are in the note menu.
+- `noteFromTemplate` copies the body and fills `{{date}} {{weekday}} {{time}}` (`noteTplFill`). `{{cursor}}` is not text: `noteTplPlaceCursor` removes it from the live editor and puts the caret there (no marker: the title is focused).
+- Starters (`NOTE_STARTERS`, fixed ids `nt-*`, incl. `nt-daily`) are seeded once per device (`cleardesk_note_templates_seeded`) by `seedNoteTemplates`; fixed ids plus tombstones keep synced devices from duplicating or resurrecting them.
+- A **daily note** is a normal note with `day: 'YYYY-MM-DD'` (local day) in the `nf-daily` folder (re-created if missing). **Today** (sidebar row, ⌥⌘T, `noteToday`) opens or creates it from the `nt-daily` template (built-in fallback). Unfinished checklist items of the latest earlier daily note are carried over under "Carried over" (toast with Undo; switch in the note menu, `cleardesk_daily_carry`). ‹ › in the meta line step between daily notes.
+
 ## Layout: Apple-Notes style, no top bar
 
 There is **no top bar**. The sidebar runs the full window height: `.sb-head` (sidebar toggle + the Tasks | Notes `#modeSwitch`), the
