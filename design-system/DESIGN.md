@@ -241,6 +241,8 @@ One shape per job, so the same kind of thing always looks the same:
 - **Sortable headers:** click cycles ascending → descending → default; undated items stay last in both directions.
 - Truncate with an ellipsis and give the full text as a `title`.
 - **Board tile:** a title first, one quiet secondary line (status text only when not default, a flag for high priority, date with calendar glyph, repeat mark), tags as chips. Subtasks are indented to the title's text column; each level is a step smaller (14/600 → 13/400 secondary).
+- **Board tile progress:** a tile with subtasks shows a thin progress bar (4px, `--r-xs`) and `done/total` while its subtasks are collapsed (expanded, the list is the progress). The fill is the status colour: purple while open (like In Progress), green when every subtask is done; the accent stays for selection, links and the primary button. The bar keeps 30px free on the right for the floating ⋯ button.
+- **Board columns:** each column ends with a ghost **Add task** row (a faint "+" and a label, no box), sticky at the foot of the column's scroll area on an opaque `--col-bg`. It becomes a borderless input with a hairline that turns accent on focus; Enter adds and stays for the next one, Esc cancels, leaving it with text adds. A typed `#project` wins over the column; a message toast that explains a missing item ("Added, but a filter is hiding it", "…which is folded") stays until dismissed. A column folds into a 44px strip (chevron, count, icon, name set vertically) from its own **chevron disc** at the left of the header or from the right-click menu (Fold / Unfold Column; the header itself does nothing on click, so a stray click cannot fold it); clicking a strip unfolds it. A search with hits in a folded column shows it open. Fold state is per device (§16).
 - **Empty state:** a thin large icon (see 4.1) at 40% opacity over a title-style label ("No Tasks", "No Matching Notes"), centred; no call-to-action button where a quick-add row already exists.
 
 ### 5.5 Menus, popovers, context menus
@@ -250,7 +252,7 @@ One shape per job, so the same kind of thing always looks the same:
 - **A flyout is as wide as its longest label** (`width: max-content`, at least `--submenu-w`, at most 280px) so labels like "Plain Text (.txt)" never wrap onto a second line; it is measured while hidden and flips to the left when it would leave the window.
 - **Table menus** (cell, block, column, row, whole table) follow these rules: Cut / Copy / Paste (/ Clear Contents) first with their shortcut hints, then the commands that change the structure, then the colour dots (formatting comes last, as the tag dots do in Finder's menu: the last line of the body, above Delete), Delete the last group, red (Delete Table only in the table's own menu and the cell menu's Table submenu, never right under Delete Row / Column); at most three groups; commands that do not apply are left out. The most common edits, the four Insert commands, are one click away at the top of the cell menu (and not repeated in the submenus, which hold Duplicate, Sort, Align, Fit and Delete). The cell menu keeps the commands of each scope in one submenu (Row, Column, Table: `table-row`, `table-column`, `table-cells`), so the parent says what a command acts on; labels name their scope where it is not obvious ("Align Column Left", "Align Cells", "Column Colour"). The toolbar's table button opens the same popover when the caret is in a table.
 - **Context-menu rules:** Title-style labels ("Open Details", "Add Subtask", "Move to"); few items; **one level of submenu** (hover or click to open, flips left and nudges up when near the edge); **hide unavailable items** (do not dim); separators group (≤ 3 groups; the task row menu's four and the note menu's four (Pin / Lock, Copy / Export, Duplicate / Save as Template / Move to, Delete) are documented exceptions, U-07) and are cleaned up when a group empties; Delete is always its own last group, red; the ⌫ glyph hint, not "Del". A command that opens a dialog or asks for more input ends in an ellipsis ("Edit…", "Print / Save as PDF…"); a row that only acts does not. Move to lists its targets with an icon each (project icons in Tasks, the folder glyph in Notes and Prompts): icons on all rows or none.
-- **Coverage:** every row in the sidebar has a right-click menu: a project or folder (New Here, Edit…, Delete), a smart view or All / Pinned / Favorites row (New Task / Note / Prompt Here; Overdue also *Move All to Today*), and a Recently Deleted row (*Delete All…*, nothing while it is empty).
+- **Coverage:** every row in the sidebar has a right-click menu: a project or folder (New Here, Edit…, Delete), a smart view or All / Pinned / Favorites row (New Task / Note / Prompt Here; Overdue also *Move All to Today*), and a Recently Deleted row (*Delete All…*, nothing while it is empty). Board column headers and folded strips: Fold / Unfold Column first, then the project's own items (New Task Here, Edit…, Delete).
 - Every context-menu command also exists in a visible control (toolbar, panel, ⋯ button).
 - A menu **never changes the selection**; it acts on the whole selection if the clicked row is part of it, else on that row.
 - Position with the real layout rect (measure the zoom factor from an element), then pull the menu 16px inside the window edge.
@@ -346,7 +348,7 @@ The first-run "link a file" prompt is a **quiet banner**, never a modal; the dia
 - **Quick-add shorthand** (`!high`, `#project`, `@tag`, a date word) with a live preview; Shift+Enter bypasses parsing.
 - **Pickers show their value**: the quick-add project picker, the sort menu (Date edited / created / Title), toggles with ticks.
 - **Soft delete everywhere** ("Recently Deleted", 30 days) with Restore and Delete Permanently (the latter asks).
-- **Drag and drop:** an accent insertion line shows where it lands; a target that cannot accept gets the not-allowed pointer and a faint red edge; sub-steps only reorder within their parent.
+- **Drag and drop:** an accent insertion line shows where it lands; a target that cannot accept gets the not-allowed pointer and a faint red edge; sub-steps only reorder within their parent. The board has no manual order inside a column (cards follow the sort), so it draws no insertion line: the target column is tinted with a dashed "Drop to move here" row, a folded strip is tinted, and a card's own column shows no drop state (not-allowed pointer).
 - **Linked file sync** is a single quiet chip (amber Link file, green Linked, red Reconnect), merge by last-writer-wins with tombstones so deleted items never come back.
 - **Narrow windows:** the sidebar floats, the panel floats, toolbars give way in steps (buttons collapse into a menu; the order is documented per bar), and a bar stays one row down to a ~680px pane.
 
@@ -503,6 +505,7 @@ Table add bars and grips: closed (U-11, U-10). Their hit areas were measured at 
 - A synced file must never push one device's display choice onto another.
 
 ---
+- Board column fold state (`cleardesk_boardfolded`) and board grouping are per device (localStorage), not part of the synced file.
 
 ## 17. Smaller details worth knowing
 
@@ -515,6 +518,7 @@ Table add bars and grips: closed (U-11, U-10). Their hit areas were measured at 
 - **A "last resort" for headless checks:** the test suite evaluates the real code against a fake DOM in JavaScriptCore (no Node needed), which catches wrong-render-function bugs; real typing, measuring and focus need a browser driven over the DevTools protocol (see 18).
 
 ---
+- **Note templates:** a template is a note with `template: true`, kept out of All Notes, Pinned and folders and listed under Templates (search still finds them). New Note is joined to a chevron (one capsule, `--bar-ctl-h` high) that lists the templates; Save as Template is in the note menu; `{{date}}`, `{{weekday}}`, `{{time}}` and `{{cursor}}` are filled when a note is made from one.
 
 ## 18. How to verify like we did
 

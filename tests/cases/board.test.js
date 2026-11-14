@@ -179,6 +179,8 @@ test('a folded board column is remembered, drops its cards from keyboard navigat
   assertFalse(boardVisibleColumns().some(c => c.project && c.project.id === key), 'the folded column is skipped by keyboard navigation');
   const strip = boardFoldedColHtml(key, 'data-project="' + key + '"', 'fa-solid fa-folder', 'Name', 3);
   assertTrue(strip.includes('board-col folded') && strip.includes('Unfold column') && strip.includes('>3<'), 'strip with the count and the unfold tooltip');
+  assertTrue(boardFoldBtnHtml('k').includes('aria-label="Fold column"') && boardFoldBtnHtml('k').includes('aria-expanded="true"'), 'an open column has a named fold chevron');
+  assertFalse(/board-col-header" role="button"/.test(renderBoard.toString()), 'the open header itself is not a button: only the chevron folds');
   toggleBoardCol(key);
   assertDeepEqual(boardFolded, [], 'a second toggle unfolds it');
 });
@@ -217,4 +219,16 @@ test('a search with hits in a folded column shows that column open; the stored f
 
 test('the column add row sticks to the foot of the column scroll area', function () {
   assertTrue(boardAddRowHtml('proj-work').startsWith('<div class="board-add-wrap">'), 'the row sits in the sticky wrapper');
+});
+
+test('a card dragged over its own column gets no drop state; over another column it does', function () {
+  tasks = [{ id: 'd1', title: 'x', projectId: 'proj-work', status: 'todo', priority: 'medium', subtasks: [], tags: [] }];
+  draggingTaskId = 'd1';
+  const cls = new Set(); const mk = () => ({ preventDefault() { this.prevented = true; }, currentTarget: { classList: { add: c => cls.add(c), remove: c => cls.delete(c) } } });
+  const own = mk(); handleBoardDragOver(own, 'proj-work');
+  assertFalse(own.prevented, 'own column is not a drop target (not-allowed pointer)');
+  assertFalse(cls.has('drag-over'), 'and shows no drop state');
+  const other = mk(); handleBoardDragOver(other, 'proj-personal');
+  assertTrue(other.prevented && cls.has('drag-over'), 'another column accepts the drop and shows the state');
+  draggingTaskId = null;
 });

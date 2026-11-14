@@ -186,10 +186,12 @@ and they are **deliberately not at feature parity**:
   columns) and parses the rest like the top quick-add field (a typed `#project` wins over the
   column). The row is sticky at the foot of the column's scroll area (`.board-add-wrap`, opaque
   `--col-bg`). `boardAddFeedback` toasts when the new task is not on screen (a filter hides it, or
-  its column is folded).
+  its column is folded); that toast uses `showToast(..., hold=true)` and stays until dismissed.
+  Dragging a card over any column other than its own tints that column and shows a dashed "Drop to move here" row
+  (no insertion line: the board has no manual order); its own column shows no drop state.
 
-  Clicking a column header folds it into a slim strip (icon, count, name set vertically);
-  clicking the strip unfolds it, and a card can still be dropped on it. While a search has hits
+  A chevron disc at the left of a column header (and the right-click menu) folds it into a slim strip
+  (icon, count, name set vertically); the header itself does nothing on click. Clicking the strip unfolds it, and a card can still be dropped on it. While a search has hits
   in a folded column that column shows open (`boardColFolded`); the stored fold returns after. Right-click on a header or
   strip (`openBoardColMenu`) offers Fold / Unfold Column first, then New Task Here, Edit… and Delete on a
   project column. The fold state is a

@@ -351,7 +351,9 @@ const ICONS = {
 
   .board { display: flex; gap: 14px; padding: 16px var(--gutter) 20px; overflow-x: auto; flex: 1; align-items: flex-start; }
   .board-col { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--r-xl); width: 320px; flex-shrink: 0; display: flex; flex-direction: column; max-height: 100%; }
-  .board-col.drag-over { border-color: var(--blue-border); box-shadow: inset 0 0 0 1px var(--blue-border); }
+  .board-col.drag-over { border-color: var(--blue-border); box-shadow: inset 0 0 0 1px var(--blue-border); --col-bg: color-mix(in srgb, var(--accent) 12%, var(--bg)); background: var(--col-bg); }   /* the target is tinted and says what a drop does (the board has no manual order inside a column, so there is no insertion line to draw) */
+  .board-col.drag-over:not(.folded) .board-col-body::after { content: "Drop to move here"; display: flex; align-items: center; justify-content: center; min-height: 44px; border: 1px dashed var(--blue-border); border-radius: var(--r-m); color: var(--blue-text); font-size: var(--fs-12); font-weight: 500; flex-shrink: 0; order: 1; }
+  .board-col.folded.drag-over .board-col-name { color: var(--blue-text); }
   .board-col.dimmed { opacity: 0.45; }
   .board-col-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border-bottom: 0.5px solid var(--border); font-size: var(--fs-12); font-weight: 600; flex-shrink: 0; }
   .board-col-header .count { font-size: var(--fs-11); color: var(--text-2); font-weight: 500; flex-shrink: 0; margin-left: 8px; }
@@ -362,8 +364,11 @@ const ICONS = {
   .board-col-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 40px; }
   .board-col-body.is-scrolling .board-card { pointer-events: none; }   /* no hover repaints while the column scrolls (see boardScrollHover) */
   /* a folded column: a slim strip with the icon, the count and the name set vertically; clicking it unfolds it, and a card can still be dropped on it */
-  .board-col-header[role="button"] { cursor: default; user-select: none; }
+  .board-col-header { user-select: none; }
+  .board-col-header[role="button"] { cursor: default; }
   .board-col-header[role="button"]:hover { background: var(--hover); border-top-left-radius: inherit; border-top-right-radius: inherit; }
+  .board-col-fold { margin: 0 -2px 0 -6px; color: var(--text-3); }   /* the chevron disc sits in the header's left padding, so the icon lines up with the tiles' checkboxes */
+  .board-col.folded .fold-ico { font-size: var(--ico-12); color: var(--text-3); order: -2; }
   .board-col.folded { width: 44px; min-height: 120px; }
   .board-col.folded .board-col-header { flex-direction: column; justify-content: flex-start; gap: 10px; padding: 12px 0; border-bottom: 0; border-radius: inherit; flex: 1; }
   .board-col.folded .board-col-header .count { margin: 0; order: -1; }
@@ -371,7 +376,7 @@ const ICONS = {
   .board-col.folded .board-col-name { writing-mode: vertical-rl; overflow: visible; text-overflow: clip; }
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
   /* the add row at the foot of a column: a ghost row (DESIGN: a faint "+" and a label, no box); it turns into a borderless input with a hairline that goes accent on focus */
-  .board-add-wrap { position: sticky; bottom: 0; background: var(--col-bg); padding-bottom: 8px; flex-shrink: 0; }   /* stays at the foot of the column's scroll area, so a long column never hides it; opaque, so the cards slide under it */
+  .board-add-wrap { order: 2; position: sticky; bottom: 0; background: var(--col-bg); padding-bottom: 8px; flex-shrink: 0; }   /* stays at the foot of the column's scroll area, so a long column never hides it; opaque, so the cards slide under it */
   .board-col { --col-bg: var(--bg); }
   .board-col-body:has(> .board-add-wrap) { padding-bottom: 0; }
   .board-add { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 10px; border-radius: var(--r-m); color: var(--text-3); font-size: var(--fs-13); cursor: default; flex-shrink: 0; }
@@ -1026,6 +1031,7 @@ const ICONS = {
   html[data-scheme="glass"] .task-row { border-radius: var(--r-s); }
   html[data-scheme="glass"] .task-row:hover:not(.kbd-selected):not(.bulk-selected) { background: var(--bg-2); border-color: transparent; box-shadow: none; }
   html[data-scheme="glass"] .board-col { background: var(--bg-2); --col-bg: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
+  html[data-scheme="glass"] .board-col.drag-over { border-color: var(--blue-border); box-shadow: inset 0 0 0 1px var(--blue-border); --col-bg: color-mix(in srgb, var(--accent) 12%, var(--bg-2)); background: var(--col-bg); }   /* the Glass column rule above would otherwise hide the drop state */
   html[data-scheme="glass"] .board-card { background: var(--bg); border-color: transparent; box-shadow: none; }   /* no outline: the tile is set off from its column by its fill, like a notes row (the transparent border keeps the size) */
   html[data-scheme="glass"]:not([data-theme="dark"]) .board-card:not(.kbd-selected):not(.bulk-selected) { box-shadow: 0 1px 3px var(--glass-lift-1); }   /* light theme: white on near-white needs a whisper of a shadow */
 
@@ -4166,9 +4172,13 @@ function boardColMenuRun(){
   const key = boardMenuKey; closeRowMenu();
   if(key) toggleBoardCol(key);
 }
+// The fold control of an open column: a chevron disc at the left of the header (the subtask toggle's pattern); only it and the right-click menu fold, so a stray click on the title does nothing.
+function boardFoldBtnHtml(key){
+  return `<button type="button" class="icon-btn board-col-fold" title="Fold column" aria-label="Fold column" aria-expanded="true" onclick="toggleBoardCol('${key}')"><i class="fa-solid fa-chevron-down"></i></button>`;
+}
 function boardFoldedColHtml(key, attrs, icon, name, count, projectId){
   return `<div class="board-col folded" ${attrs}>
-    <div class="board-col-header" role="button" tabindex="0" aria-expanded="false" title="Unfold column" onclick="toggleBoardCol('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${key}')}" oncontextmenu="openBoardColMenu(event,'${key}'${projectId?`,'${projectId}'`:''})"><span class="count">${count}</span><span class="board-col-title"><i class="${icon} picon"></i><span class="board-col-name">${esc(name)}</span></span></div>
+    <div class="board-col-header" role="button" tabindex="0" aria-expanded="false" title="Unfold column" onclick="toggleBoardCol('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${key}')}" oncontextmenu="openBoardColMenu(event,'${key}'${projectId?`,'${projectId}'`:''})"><i class="fa-solid fa-chevron-right fold-ico" aria-hidden="true"></i><span class="count">${count}</span><span class="board-col-title"><i class="${icon} picon"></i><span class="board-col-name">${esc(name)}</span></span></div>
   </div>`;
 }
 // The add row at the foot of each board column. `key` is the project id (project columns) or 'status:<id>' (status columns); `boardAddKey` is the column whose row is an input right now.
@@ -4223,8 +4233,8 @@ function commitBoardAdd(key, typed){
 function boardAddFeedback(t){
   if(boardVisibleColumns().some(c=>c.tasks.some(x=>x.id===t.id))) return;
   const col = getBoardColumns().find(c=>c.tasks.some(x=>x.id===t.id));
-  if(col && boardColFolded(col)){ showToast(`Added to “${col.project ? col.project.name : col.status.label}”, which is folded`); return; }
-  showToast('Added, but a filter is hiding it');
+  if(col && boardColFolded(col)){ showToast(`Added to “${col.project ? col.project.name : col.status.label}”, which is folded`, false, null, true); return; }
+  showToast('Added, but a filter is hiding it', false, null, true);
 }
 function renderBoard(){
   const board = document.getElementById('board');
@@ -4240,7 +4250,7 @@ function renderBoard(){
       const skey = 'status:'+col.status.id, sdrop = `data-status="${col.status.id}" ondragover="handleBoardDragOver(event,'${col.status.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDropStatus(event,'${col.status.id}')"`;
       if(boardColFolded(col)) return boardFoldedColHtml(skey, sdrop, STATUS_ICONS[col.status.id]||'fa-regular fa-circle', col.status.label, col.allCount);
       return `<div class="board-col" ${sdrop}>
-        <div class="board-col-header" role="button" tabindex="0" aria-expanded="true" title="Fold column" onclick="toggleBoardCol('${skey}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${skey}')}" oncontextmenu="openBoardColMenu(event,'${skey}')"><span class="board-col-title"><i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
+        <div class="board-col-header" oncontextmenu="openBoardColMenu(event,'${skey}')"><span class="board-col-title">${boardFoldBtnHtml(skey)}<i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
         <div class="board-col-body">
           ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
           ${showMoreRow}
@@ -4257,7 +4267,7 @@ function renderBoard(){
     const pdrop = `data-project="${p.id}" ondragover="handleBoardDragOver(event,'${p.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDrop(event,'${p.id}')"`;
     if(boardColFolded(col)) return boardFoldedColHtml(p.id, pdrop, 'fa-solid fa-'+(p.icon||'folder'), p.name, col.allCount, p.id).replace('class="board-col folded"', `class="board-col folded${dimmed?' dimmed':''}"`);
     return `<div class="board-col${dimmed?' dimmed':''}" ${pdrop}>
-      <div class="board-col-header" role="button" tabindex="0" aria-expanded="true" title="Fold column" onclick="toggleBoardCol('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${p.id}')}" oncontextmenu="openBoardColMenu(event,'${p.id}','${p.id}')"><span class="board-col-title"><i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
+      <div class="board-col-header" oncontextmenu="openBoardColMenu(event,'${p.id}','${p.id}')"><span class="board-col-title">${boardFoldBtnHtml(p.id)}<i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
       <div class="board-col-body">
         ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
         ${showMoreRow}
@@ -4279,6 +4289,11 @@ function handleCardDragEnd(e){
   document.querySelectorAll('.board-col.drag-over').forEach(el=>el.classList.remove('drag-over'));
 }
 function handleBoardDragOver(e, projectId){
+  const t = draggingTaskId && tasks.find(x=>x.id===draggingTaskId);
+  if(t && (t.projectId===projectId || t.status===projectId)){   // the card's own column: nothing to move, so no drop state and the not-allowed pointer
+    e.currentTarget.classList.remove('drag-over');
+    return;
+  }
   e.preventDefault();
   e.currentTarget.classList.add('drag-over');
 }
@@ -13201,7 +13216,7 @@ function setThemeMode(mode){
 
 // ── Toast ─────────────────────────────────────────────────────────────────────
 let toastUndoAction = null, toastHideTimer = null;
-function showToast(msg, isError=false, undoAction=null){
+function showToast(msg, isError=false, undoAction=null, hold=false){   // hold: stays until dismissed, like an error, for a message that explains where something went
   const t = document.getElementById('toast');
   document.getElementById('toastMsg').textContent = msg;
   document.getElementById('toastIcon').className = isError ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-check';
@@ -13211,8 +13226,8 @@ function showToast(msg, isError=false, undoAction=null){
   t.classList.add('show');
   t.setAttribute('role', isError ? 'alert' : 'status');            // an error is announced at once, the rest politely
   toastHoldMs = undoAction ? 6000 : 2400;
-  document.getElementById('toastCloseBtn').style.display = isError ? 'inline-flex' : 'none';
-  if(isError){ clearTimeout(toastHideTimer); return; }   // an error stays until it is dismissed (HIG: avoid time-boxed messages people may need longer to read)
+  document.getElementById('toastCloseBtn').style.display = (isError||hold) ? 'inline-flex' : 'none';
+  if(isError||hold){ clearTimeout(toastHideTimer); return; }   // an error stays until it is dismissed (HIG: avoid time-boxed messages people may need longer to read)
   armToastTimer();
 }
 // The toast stays while the pointer is over it or focus is inside it, and the countdown starts again when they leave.

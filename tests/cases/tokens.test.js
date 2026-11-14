@@ -52,3 +52,9 @@ test('the danger alert disc uses the shared --red-bg, and the Help / Data menus 
   assertTrue(/data-scheme="glass"\]\s*:is\([^)]*\.split-btn-menu[^)]*\)\s*\{\s*-webkit-backdrop-filter/.test(css), 'button menus do not get the glass blur');
 });
 
+
+// Ratchet (audit X-04): `!important` grew from 56 to 97 in two weeks. New rules use a state class or specificity, not !important; lower this number when some are removed.
+test('the stylesheet has no more !important declarations than the recorded baseline', function () {
+  var n = (tokScanCss().match(/!important/g) || []).length;
+  assertTrue(n <= 97, 'found ' + n + ' !important declarations (baseline 97): use a state class or a layer instead of a new !important');
+});
