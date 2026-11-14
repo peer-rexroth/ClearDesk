@@ -42,3 +42,8 @@ test('tblFitWidths: fitted columns take what their text needs, the others give o
   var all = tblFitWidths([50, 50], 0, 1, [10, 30]);
   assertEqual(Math.round(all[0]) + ',' + Math.round(all[1]), '25,75', 'all columns: in proportion to what they need');
 });
+
+test('the table edge add bars (Claude style): hot strips along the last column and row run tblPlus; the old round plus buttons are gone', function () {
+  var src = tblHandlesShow.toString();
+  assertIncludes(src, 'tbl-add col'); assertIncludes(src, 'tbl-add row'); assertIncludes(src, "tblPlus(event,'colAfter'"); assertIncludes(src, "tblPlus(event,'rowAfter'"); assertNotIncludes(src, 'tbl-plus');
+});

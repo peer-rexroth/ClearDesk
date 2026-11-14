@@ -1425,12 +1425,20 @@ const ICONS = {
   .tbl-handles { position: absolute; left: 0; top: 0; width: 0; height: 0; z-index: 2; pointer-events: none; }
   .tbl-handles > * { pointer-events: auto; }
   .note-editor.locked .tbl-handles { display: none; }
-  .tbl-plus { position: absolute; width: 14px; height: 14px; box-sizing: border-box; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-8); cursor: default; transition: background var(--dur-fast) ease, color var(--dur-fast) ease, border-color var(--dur-fast) ease; }
+  /* Add a column / row: at the edge of the last column or row. Nothing shows until the pointer reaches the edge, then a bar the length of that edge appears (solid under the pointer). */
+  .tbl-add { position: absolute; display: flex; }
+  .tbl-add.col { width: 20px; }   /* the note leaves a 20px gutter beside a full-width table: the bar must fit in it */
+  .tbl-add.row { height: 20px; }
+  .tbl-addbar { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; color: var(--text-2); background: var(--cap-fill); border-radius: var(--r-xs); font-size: var(--gl-8); opacity: 0; transition: opacity var(--dur-fast) ease, background var(--dur-fast) ease, color var(--dur-fast) ease; cursor: default; }   /* the same grey as the other capsules (toolbar buttons) */
+  .tbl-add.col .tbl-addbar { left: 2px; top: 0; bottom: 0; width: 16px; }
+  .tbl-add.row .tbl-addbar { top: 2px; left: 0; right: 0; height: 16px; }
+  .tbl-add:hover .tbl-addbar { opacity: 1; }
+  .tbl-add:hover .tbl-addbar:hover { background: var(--cap-hover); color: var(--text); }
+  @media (hover: none) { .tbl-addbar { opacity: .6; } }
   .tbl-colrs { position: absolute; width: 9px; margin-left: -4px; cursor: col-resize; z-index: 1; }
   .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: var(--r-xs); background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; }
   .tbl-colrs:hover::after, .tbl-colrs.active::after { opacity: .75; }
   html.tbl-resizing, html.tbl-resizing * { cursor: col-resize !important; user-select: none; }
-  .tbl-plus:hover { background: var(--cap-hover); color: var(--text); }
   .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
   .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
   .note-title::placeholder { color: var(--text-3); }
@@ -1577,7 +1585,7 @@ const ICONS = {
   .note-toolbar .tool-split .list-caret { min-width: 0 !important; width: auto; padding: 0 10px 0 4px; color: var(--text-3); }   /* 22px wide: the split button's arrow is a target of its own (HIG minimum 20) */
   .note-list-menu .pop-label { white-space: nowrap; }
   .note-table-menu:not(:has(.tbl-picker)) .pop-label { white-space: nowrap; }   /* "Insert column right" must not wrap */
-  .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0 .8em; }
+  .note-body table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: 24px 0;   /* the same room above and below: the add bar sits in the space under the table, never over the next line */ }
   .note-body > table:first-child { margin-top: 24px; }
   .note-body th, .note-body td { border: 1px solid var(--border-2); padding: 6px 10px; vertical-align: top; text-align: left; overflow-wrap: anywhere; }
   .note-body th { background: var(--bg-2); font-weight: 600; }
@@ -2078,8 +2086,7 @@ const ICONS = {
   .pr-pill-wrap.has-x.on { background: var(--accent); color: var(--on-accent); }
   .pr-chip-wrap.has-x .pr-chip, .pr-pill-wrap.has-x .pr-pill { background: transparent; color: inherit; padding-right: 4px; border-radius: calc(var(--bar-ctl-h, 36px) / 2) 0 0 calc(var(--bar-ctl-h, 36px) / 2); }
   .pr-chip-wrap.has-x .pr-chip { padding-left: 12px; }
-  .pr-pill-x::before, .pr-chip-x::before, .tbl-plus::before, .tbl-grip.tbl::before, .tbl-grip.col::before, .tbl-grip.row::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
-  .tbl-plus::before { inset: -4px; }                          /* inset is from the padding box, inside a 1px border: 12px + 2 x 4 = 20 */
+  .pr-pill-x::before, .pr-chip-x::before, .tbl-grip.tbl::before, .tbl-grip.col::before, .tbl-grip.row::before { content: ""; position: absolute; inset: -2px; }     /* a hit area of at least 20 × 20 around the small controls */
   .tbl-grip.tbl::before { inset: -4px -8px -4px 0; }          /* 12 + 2 x 4 = 20 tall; the grip sits against the list resizer, so the width grows to the right only */
   .tbl-grip.col::before { inset: -4px 0; }                    /* the column / row grips were 14px across: 12 + 2 x 4 = 20 */
   .tbl-grip.row::before { inset: 0 -8px 0 0; }
@@ -11002,8 +11009,8 @@ function tblHandlesShow(table){
     const cs = table.rows[0].cells;
     for(let i=1; i<cols; i++) html += `<div class="tbl-colrs" style="left:${p((cs[i - 1].getBoundingClientRect().right - dr.left) / k)}px;top:${p(top)}px;height:${p(h)}px" title="Drag to resize the column · double-click to even out" onmousedown="event.preventDefault()" onpointerdown="tblColResizeDown(event,${i})" ondblclick="tblColsEven(event)"></div>`;
   }
-  html += `<div class="tbl-plus" style="left:${p(left + w + 6)}px;top:${p(top + h / 2 - 7)}px" role="button" aria-label="Add a column" title="Add column" onmousedown="event.preventDefault()" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div>`;
-  html += `<div class="tbl-plus" style="left:${p(left + w / 2 - 7)}px;top:${p(top + h + 6)}px" role="button" aria-label="Add a row" title="Add row" onmousedown="event.preventDefault()" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div>`;
+  html += `<div class="tbl-add col" style="left:${p(left + w)}px;top:${p(top)}px;height:${p(h)}px" onmousedown="event.preventDefault()"><div class="tbl-addbar" role="button" aria-label="Add a column" title="Add column" onclick="tblPlus(event,'colAfter',0,${Math.max(0, cols - 1)})"><i class="fa-solid fa-plus"></i></div></div>`;
+  html += `<div class="tbl-add row" style="left:${p(left)}px;top:${p(top + h)}px;width:${p(w)}px" onmousedown="event.preventDefault()"><div class="tbl-addbar" role="button" aria-label="Add a row" title="Add row" onclick="tblPlus(event,'rowAfter',${Math.max(0, rows - 1)},0)"><i class="fa-solid fa-plus"></i></div></div>`;
   layer.innerHTML = html;
 }
 // ---- table column widths ----
