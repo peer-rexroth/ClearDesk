@@ -1112,11 +1112,11 @@ test('the rich copy and the HTML export write the title and the body headings as
 });
 
 
-test('templates: normalize keeps template / day flags only when valid; a template is kept out of All Notes, Pinned, folders and counts but listed under Templates and found by a search', function () {
+test('templates: normalize keeps the template flag only when true (an old daily-note flag is dropped); a template is kept out of All Notes, Pinned, folders and counts but listed under Templates and found by a search', function () {
   notes = [ntNote({ id: 'a' }), ntNote({ id: 't', title: 'Tpl', template: true, pinned: true }), ntNote({ id: 'd', day: '2026-11-13' }), ntNote({ id: 'bad', day: 'tomorrow', template: 'yes' })];
   normalizeNotes();
   assertEqual(notes.find(function (n) { return n.id === 'bad'; }).day, undefined); assertEqual(notes.find(function (n) { return n.id === 'bad'; }).template, undefined);
-  assertEqual(notes.find(function (n) { return n.id === 'd'; }).day, '2026-11-13'); assertTrue(notes.find(function (n) { return n.id === 't'; }).template);
+  assertEqual(notes.find(function (n) { return n.id === 'd'; }).day, undefined); assertTrue(notes.find(function (n) { return n.id === 't'; }).template);
   noteFolderFilter = 'all'; noteSearchQuery = '';
   assertEqual(visibleNotes().map(function (n) { return n.id; }).sort().join(','), 'a,bad,d');
   noteFolderFilter = 'pinned'; assertEqual(visibleNotes().length, 0, 'a pinned template is not in Pinned');
@@ -1130,25 +1130,16 @@ test('templates: placeholders {{date}} {{weekday}} {{time}} are filled (case-ins
   var d = new Date(2026, 10, 13, 9, 5), out = noteTplFill('<p>{{weekday}} {{ Date }} {{time}} {{cursor}} {{other}}</p>', d);
   assertIncludes(out, d.toLocaleDateString(undefined, { weekday: 'long' })); assertIncludes(out, d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }));
   assertIncludes(out, '{{cursor}}'); assertIncludes(out, '{{other}}'); assertNotIncludes(out, '{{date}}');
-  assertEqual(noteDateTitle(d), d.toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' }));
 });
 
-test('templates: the starters are ordinary sanitized notes with fixed ids, and the daily template exists', function () {
-  assertTrue(NOTE_STARTERS.length >= 6); assertTrue(NOTE_STARTERS.some(function (t) { return t.id === NOTE_DAILY_TPL; }));
+test('templates: the starters are ordinary sanitized notes with fixed ids, ', function () {
+  assertTrue(NOTE_STARTERS.length >= 6); assertFalse(NOTE_STARTERS.some(function (t) { return t.id === 'nt-daily'; }), 'no Daily starter: there is no Today any more');
   NOTE_STARTERS.forEach(function (t) { assertEqual(sanitizeNoteHtml(t.body), t.body, t.title + ' survives the sanitizer unchanged'); });
   assertEqual(new Set(NOTE_STARTERS.map(function (t) { return t.id; })).size, NOTE_STARTERS.length);
 });
 
-test('templates: opening a daily note and the open items carried over (source-level)', function () {
-  var src = noteToday.toString();
-  assertIncludes(src, 'todayStr()', 'the local day'); assertIncludes(src, 'noteOpenItems(prev)'); assertIncludes(src, 'Carried over');
-  var box = { n: 0 };
-  notes = [ntNote({ id: 'p', day: '2026-11-12', body: '<ul class="cl"><li data-done="1">done</li><li>open</li><li> </li></ul><ul><li>plain</li></ul>' })];
-  assertEqual(noteOpenItems(notes[0]).join('|'), 'open', 'only unfinished, non-empty checklist items');
-});
-
 test('templates: Save as Template and New from Template are in the menus, the shortcut is ⌥⌘T, templates travel with import / export', function () {
-  assertIncludes(noteMenuHtml.toString(), "noteMenuRun('savetpl')"); assertIncludes(noteMenuHtml.toString(), "noteMenuRun('usetpl')"); assertIncludes(noteMenuHtml.toString(), "noteMenuRun('carry')");
-  var r = importNotesData({ notes: [{ id: 'imp1', title: 'T', body: '<p>x</p>', template: true, day: '2026-01-02' }] }, null);
-  var n = notes.find(function (x) { return x.id === 'imp1'; }); assertTrue(n.template); assertEqual(n.day, '2026-01-02');
+  assertIncludes(noteMenuHtml.toString(), "noteMenuRun('savetpl')"); assertIncludes(noteMenuHtml.toString(), "noteMenuRun('usetpl')"); 
+  var r = importNotesData({ notes: [{ id: 'imp1', title: 'T', body: '<p>x</p>', template: true }] }, null);
+  var n = notes.find(function (x) { return x.id === 'imp1'; }); assertTrue(n.template);
 });
