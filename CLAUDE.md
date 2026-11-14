@@ -183,10 +183,14 @@ and they are **deliberately not at feature parity**:
   project id or `status:<id>`; none in the Completed column). Click or Enter turns it into
   an input (Enter adds and stays for the next one, Esc cancels, leaving it with text adds, as in
   Reminders); `commitBoardAdd` takes the column's project (project columns) or status (status
-  columns) and parses the rest like the top quick-add field.
+  columns) and parses the rest like the top quick-add field (a typed `#project` wins over the
+  column). The row is sticky at the foot of the column's scroll area (`.board-add-wrap`, opaque
+  `--col-bg`). `boardAddFeedback` toasts when the new task is not on screen (a filter hides it, or
+  its column is folded).
 
   Clicking a column header folds it into a slim strip (icon, count, name set vertically);
-  clicking the strip unfolds it, and a card can still be dropped on it. Right-click on a header or
+  clicking the strip unfolds it, and a card can still be dropped on it. While a search has hits
+  in a folded column that column shows open (`boardColFolded`); the stored fold returns after. Right-click on a header or
   strip (`openBoardColMenu`) offers Fold / Unfold Column first, then New Task Here, Edit… and Delete on a
   project column. The fold state is a
   per-device preference (`boardFolded`, localStorage `cleardesk_boardfolded`, keys = project

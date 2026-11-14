@@ -371,6 +371,9 @@ const ICONS = {
   .board-col.folded .board-col-name { writing-mode: vertical-rl; overflow: visible; text-overflow: clip; }
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
   /* the add row at the foot of a column: a ghost row (DESIGN: a faint "+" and a label, no box); it turns into a borderless input with a hairline that goes accent on focus */
+  .board-add-wrap { position: sticky; bottom: 0; background: var(--col-bg); padding-bottom: 8px; flex-shrink: 0; }   /* stays at the foot of the column's scroll area, so a long column never hides it; opaque, so the cards slide under it */
+  .board-col { --col-bg: var(--bg); }
+  .board-col-body:has(> .board-add-wrap) { padding-bottom: 0; }
   .board-add { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 10px; border-radius: var(--r-m); color: var(--text-3); font-size: var(--fs-13); cursor: default; flex-shrink: 0; }
   .board-add:hover { background: var(--hover); color: var(--text-2); }
   .board-add i { font-size: var(--ico-14); flex: none; }
@@ -1022,7 +1025,7 @@ const ICONS = {
   html[data-scheme="glass"] .task-list-header { background: var(--bg); border-radius: 0; border-bottom: 1px solid var(--border); }
   html[data-scheme="glass"] .task-row { border-radius: var(--r-s); }
   html[data-scheme="glass"] .task-row:hover:not(.kbd-selected):not(.bulk-selected) { background: var(--bg-2); border-color: transparent; box-shadow: none; }
-  html[data-scheme="glass"] .board-col { background: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
+  html[data-scheme="glass"] .board-col { background: var(--bg-2); --col-bg: var(--bg-2); border: 1px solid var(--border); box-shadow: none; }
   html[data-scheme="glass"] .board-card { background: var(--bg); border-color: transparent; box-shadow: none; }   /* no outline: the tile is set off from its column by its fill, like a notes row (the transparent border keeps the size) */
   html[data-scheme="glass"]:not([data-theme="dark"]) .board-card:not(.kbd-selected):not(.bulk-selected) { box-shadow: 0 1px 3px var(--glass-lift-1); }   /* light theme: white on near-white needs a whisper of a shadow */
 
@@ -4135,7 +4138,7 @@ function getBoardColumns(){
 let boardFolded = [];
 try{ const v = JSON.parse(localStorage.getItem('cleardesk_boardfolded')||'[]'); if(Array.isArray(v)) boardFolded = v.filter(x=>typeof x==='string'); }catch(_){}
 function boardColKey(col){ return col.project ? col.project.id : 'status:'+col.status.id; }
-function boardColFolded(col){ return boardFolded.includes(boardColKey(col)); }
+function boardColFolded(col){ return boardFolded.includes(boardColKey(col)) && !(searchQuery && col.tasks.length); }   // a search with hits in a folded column shows it open (the stored fold stays, and returns when the search ends)
 function boardVisibleColumns(){ return getBoardColumns().filter(c=>!boardColFolded(c)); }   // the columns whose cards are on screen: the arrow keys and "first task" skip folded ones
 function toggleBoardCol(key){
   const i = boardFolded.indexOf(key);
@@ -4171,8 +4174,8 @@ function boardFoldedColHtml(key, attrs, icon, name, count, projectId){
 // The add row at the foot of each board column. `key` is the project id (project columns) or 'status:<id>' (status columns); `boardAddKey` is the column whose row is an input right now.
 let boardAddKey = null;
 function boardAddRowHtml(key){
-  if(boardAddKey===key) return `<div class="board-add editing"><i class="fa-solid fa-plus"></i><input spellcheck="true" type="text" id="boardAddInput" placeholder="Add a task" aria-label="Add a task to this column" onclick="event.stopPropagation()" onkeydown="boardAddKeydown(event,'${key}')" onblur="boardAddBlur(this)"></div>`;
-  return `<div class="board-add" role="button" tabindex="0" onclick="startBoardAdd('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startBoardAdd('${key}')}"><i class="fa-solid fa-plus"></i><span>Add task</span></div>`;
+  if(boardAddKey===key) return `<div class="board-add-wrap"><div class="board-add editing"><i class="fa-solid fa-plus"></i><input spellcheck="true" type="text" id="boardAddInput" placeholder="Add a task" aria-label="Add a task to this column" onclick="event.stopPropagation()" onkeydown="boardAddKeydown(event,'${key}')" onblur="boardAddBlur(this)"></div></div>`;
+  return `<div class="board-add-wrap"><div class="board-add" role="button" tabindex="0" onclick="startBoardAdd('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startBoardAdd('${key}')}"><i class="fa-solid fa-plus"></i><span>Add task</span></div></div>`;
 }
 function startBoardAdd(key){
   boardAddKey = key;
@@ -4205,7 +4208,7 @@ function commitBoardAdd(key, typed){
   const byStatus = key.startsWith('status:');
   tasks.unshift({
     id: genId(), title: pr.title, notes:'',
-    projectId: byStatus ? (pr.projectId || filterProjectId || quickAddDefaultProjectId()) : key,
+    projectId: pr.projectId || (byStatus ? (filterProjectId || quickAddDefaultProjectId()) : key),   // a typed #project wins over the column
     status: byStatus ? key.slice(7) : 'todo',
     priority: pr.priority || 'medium',
     dueDate: pr.dueDate || null,
@@ -4214,6 +4217,14 @@ function commitBoardAdd(key, typed){
     createdAt: Date.now(), updatedAt: Date.now()
   });
   save(); render();
+  boardAddFeedback(tasks[0]);
+}
+// Say so when the new task is not on screen: a filter hides it, or it went into a folded column (a typed #project can send it elsewhere).
+function boardAddFeedback(t){
+  if(boardVisibleColumns().some(c=>c.tasks.some(x=>x.id===t.id))) return;
+  const col = getBoardColumns().find(c=>c.tasks.some(x=>x.id===t.id));
+  if(col && boardColFolded(col)){ showToast(`Added to “${col.project ? col.project.name : col.status.label}”, which is folded`); return; }
+  showToast('Added, but a filter is hiding it');
 }
 function renderBoard(){
   const board = document.getElementById('board');

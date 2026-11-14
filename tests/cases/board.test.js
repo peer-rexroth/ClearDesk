@@ -191,3 +191,30 @@ test('the column right-click menu offers Fold / Unfold Column first, then the pr
   assertTrue(boardFoldedColHtml('k', '', 'x', 'N', 1, 'k').includes('openBoardColMenu'), 'a folded strip has the menu too');
   assertTrue(/oncontextmenu="openBoardColMenu\(event,'\$\{skey\}'\)"/.test(renderBoard.toString()), 'status columns have the menu');
 });
+
+test('column add row: a typed #project wins over the column; a task that is not on screen is announced', function () {
+  tasks = [];
+  commitBoardAdd('proj-work', 'Plan trip #personal');
+  assertEqual(tasks[0].projectId, 'proj-personal', 'the typed #project is honoured, not dropped');
+  assertEqual(tasks[0].title, 'Plan trip', 'and removed from the title');
+  assertTrue(/boardAddFeedback\(tasks\[0\]\)/.test(commitBoardAdd.toString()), 'every add checks that the task is visible');
+  assertTrue(/filter is hiding it/.test(boardAddFeedback.toString()) && /which is folded/.test(boardAddFeedback.toString()), 'both reasons have a message');
+});
+
+test('a search with hits in a folded column shows that column open; the stored fold returns afterwards', function () {
+  boardFolded = [];
+  tasks = [{ id: 'f1', title: 'Passport', projectId: 'proj-personal', status: 'todo', priority: 'medium', subtasks: [], tags: [] }];
+  filterProjectId = null; searchQuery = '';
+  toggleBoardCol('proj-personal');
+  const col = () => getBoardColumns().find(c => c.project && c.project.id === 'proj-personal');
+  assertTrue(boardColFolded(col()), 'folded without a search');
+  searchQuery = 'Passport';
+  assertFalse(boardColFolded(col()), 'open while the search has hits in it');
+  searchQuery = '';
+  assertTrue(boardColFolded(col()), 'folded again when the search ends');
+  boardFolded = [];
+});
+
+test('the column add row sticks to the foot of the column scroll area', function () {
+  assertTrue(boardAddRowHtml('proj-work').startsWith('<div class="board-add-wrap">'), 'the row sits in the sticky wrapper');
+});
