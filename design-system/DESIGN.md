@@ -436,7 +436,7 @@ The app was audited against Apple's Human Interface Guidelines (two passes: 29 f
 | Sidebar icons are neutral grey | sidebar icons use the accent colour by default | grey | a web app cannot read the system accent colour; a fixed blue would ignore it |
 | Native browser tooltips | consistent tooltips | `title` attributes | accepted; always paired with an `aria-label` |
 
-Table add bars and grips: closed (U-11, U-10). Their hit areas were measured at 20×20 or more with `elementFromPoint`; the add bar is a 16px pill drawn like the grips (`--cap-on`, 1px `--border-2`, `--r-s`, never blue, no transition) in a 20px strip at the edge of the last column / row, shown only while the pointer is in that strip (always faintly on touch screens); a table keeps 24px of room above and below so the bottom bar never covers the next line; there is a keyboard menu (Shift+F10).
+Table add bars and grips: closed (U-11, U-10). Their hit areas were measured at 20×20 or more with `elementFromPoint`; the add bar is a 16px pill drawn like the grips (`--cap-on`, no border, `--r-s`, never blue, no transition; the grips are borderless too) in a 20px strip at the edge of the last column / row, shown only while the pointer is in that strip (always faintly on touch screens); a table keeps 24px of room above and below so the bottom bar never covers the next line; there is a keyboard menu (Shift+F10).
 
 ---
 

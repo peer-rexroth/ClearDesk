@@ -1429,7 +1429,7 @@ const ICONS = {
   .tbl-add { position: absolute; display: flex; }
   .tbl-add.col { width: 20px; }   /* the note leaves a 20px gutter beside a full-width table: the bar must fit in it */
   .tbl-add.row { height: 20px; }
-  .tbl-addbar { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; color: var(--text-2); background: var(--cap-on); border: 1px solid var(--border-2); border-radius: var(--r-s); font-size: var(--gl-9); opacity: 0; cursor: default; }   /* hover is instant (DESIGN.md 2.5). Drawn exactly like the table grips beside it: --cap-on, 1px --border-2, --r-s, --cap-hover and --text on hover */
+  .tbl-addbar { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; color: var(--text-2); background: var(--cap-on); border-radius: var(--r-s); font-size: var(--gl-9); opacity: 0; cursor: default; }   /* hover is instant (DESIGN.md 2.5). Drawn exactly like the table grips beside it: --cap-on, --r-s, no border, --cap-hover and --text on hover */
   .tbl-add.col .tbl-addbar { left: 2px; top: 0; bottom: 0; width: 16px; }
   .tbl-add.row .tbl-addbar { top: 2px; left: 0; right: 0; height: 16px; }
   .tbl-add:hover .tbl-addbar { opacity: 1; }
@@ -1739,13 +1739,13 @@ const ICONS = {
   @container notepane (max-width: 540px) { .note-toolbar #noteLinkBtn { display: none; } }
   @container notepane (max-width: 500px) { .note-toolbar #noteStyleSelect { display: none; } }
   /* Apple Notes' table grips: small "···" tabs above the caret's column and beside its row; clicking one selects it with an accent outline */
-  .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: var(--r-s); background: var(--cap-on); border: 1px solid var(--border-2); color: var(--text-2); font-size: var(--gl-9); cursor: default; }
+  .tbl-grip { position: absolute; display: flex; align-items: center; justify-content: center; box-sizing: border-box; border-radius: var(--r-s); background: var(--cap-on); border: 0; color: var(--text-2); font-size: var(--gl-9); cursor: default; }   /* a borderless tinted capsule like every other control in the app */
   .tbl-grip.col:not(.sel) { width: 32px; height: 14px; }
   .tbl-grip.tbl { width: 14px; height: 14px; border-radius: var(--r-xs); font-size: var(--gl-8); }
   .tbl-grip.tbl:not(.sel) { color: var(--text-3); }   /* the one handle drawn as a shape rather than dots: kept light so it does not outweigh the others */
   .tbl-grip.row:not(.sel) { width: 14px; height: 32px; }
   .tbl-grip:hover { background: var(--cap-hover); color: var(--text); }
-  .tbl-grip.sel { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .tbl-grip.sel { background: var(--accent); color: var(--on-accent); }
   .tbl-grip.col.sel { height: 22px; border-radius: var(--r-s) var(--r-s) 0 0; gap: 6px; justify-content: center; position: absolute; }
   .tbl-grip.row.sel { width: 22px; border-radius: var(--r-s) 0 0 var(--r-s); }
   .tbl-block { position: absolute; box-sizing: border-box; border: 2px solid var(--accent); background: var(--accent-tint); pointer-events: none !important; }
