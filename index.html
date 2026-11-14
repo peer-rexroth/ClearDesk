@@ -1336,6 +1336,14 @@ const ICONS = {
   .sec-status .sdot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
   .sec-repeat { font-size: var(--ico-16); color: var(--text-3); }
   .board-card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  /* subtask progress: a thin track with the count, under the tags, only while the subtasks are collapsed (expanded, the list is the progress). Fills with the accent, green once every subtask is done; on a selected tile it is white on a translucent white track. */
+  .board-card-prog { display: flex; align-items: center; gap: 8px; font-size: var(--fs-11); color: var(--text-3); padding-right: 30px; }   /* clear of the round more button that floats in the card's bottom-right corner on hover */
+  .board-card-prog .bar { flex: 1 1 auto; height: 4px; border-radius: var(--r-xs); background: var(--cap-hover); overflow: hidden; }
+  .board-card-prog .bar i { display: block; height: 100%; background: var(--purple-text); }   /* the status colours (DESIGN §7): purple while in progress, green when done; the accent is reserved for selection, links and the primary button */
+  .board-card-prog.full .bar i { background: var(--green-text); }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .board-card-prog { color: var(--sel-text-3); }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .board-card-prog .bar { background: var(--sel-fill); }
+  html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected) .board-card-prog .bar i { background: var(--on-accent); }
   /* subtasks read as children of the title: indented to the title's text column (the margin-left on the container), a step smaller in text, and a little air above; the circles keep the app-wide 16px so a checkbox is the same size in the list, on a card and in the panel */
   .board-card > .task-subtasks { margin-top: 4px; }
   .board-card .task-subtask-row { font-size: var(--fs-13); }
@@ -4010,7 +4018,7 @@ function renderList(){
 
 // ── Board view ────────────────────────────────────────────────────────────────
 function boardCardHtml(t){
-  const subTotal = (t.subtasks||[]).length;
+  const subTotal = (t.subtasks||[]).length, subDone = (t.subtasks||[]).filter(s=>s.done).length;
   // Apple-style tile: the title gets the width; everything else is one quiet secondary line (status only when it is not the default, a flag for high priority, the date, a repeat mark) and the tags. Status / due stay clickable (same popovers as before); the status and "set due date" buttons are also in the hover capsule so nothing becomes unreachable.
   const sec = [];
   if(t.status==='doing' && boardGroup!=='status') sec.push(`<span class="cell-host editable sec-host" role="button" tabindex="0" title="Change status" onclick="openCellPop(event,'${t.id}','status')"><span class="sec-status"><i class="sdot"></i>${statusLabel(t.status)}</span></span>`);
@@ -4035,6 +4043,7 @@ function boardCardHtml(t){
         </div>
         ${sec.length?`<div class="board-card-sec">${sec.join('')}</div>`:''}
         ${tagChips?`<div class="board-card-tags">${tagChips}</div>`:''}
+        ${(subTotal>0 && collapsedTaskIds.has(t.id) && inlineAddSubtaskTaskId!==t.id)?`<div class="board-card-prog${subDone===subTotal?' full':''}" title="${subDone} of ${subTotal} subtasks done"><span class="bar"><i style="width:${Math.round(subDone/subTotal*100)}%"></i></span><span class="num">${subDone}/${subTotal}</span></div>`:''}
       </div>
     </div>
     ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks ind-28">${t.subtasks.map(s=>`

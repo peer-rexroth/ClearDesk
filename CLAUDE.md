@@ -175,6 +175,10 @@ and they are **deliberately not at feature parity**:
   roughly uniform heights), which is why steps (and now sub-steps) collapse
   by default there.
 
+  A card with subtasks also shows a thin progress bar and `done/total` (top-level
+  subtasks only; `.board-card-prog`, purple fill like the In Progress status, green when all are done; the accent stays for selection),
+  shown only while the card's subtasks are collapsed (expanded, the list is the progress).
+
   Board columns are **projects**, not status (`getBoardColumns()` maps over
   `projects`, one column each). Status is a per-card badge instead, and
   dragging a card to a different column sets `projectId` (`handleBoardDrop`),

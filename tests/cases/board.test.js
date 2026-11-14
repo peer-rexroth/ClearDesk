@@ -141,3 +141,15 @@ test('board arrow keys keep working with the task panel open: they move the sele
   handleBoardKeyNav(enter);
   assertEqual(activeTaskId, second, 'other keys are still ignored while the panel is open');
 });
+
+test('a collapsed board card with subtasks shows a progress bar with done/total, green when complete; none when expanded or without subtasks', function () {
+  const mk = (subs) => ({ id: 'tp', title: 'T', projectId: 'proj-work', status: 'todo', priority: 'medium', tags: [], subtasks: subs.map((d, i) => ({ id: 's' + i, text: 'S' + i, done: d, subtasks: [] })) });
+  collapsedTaskIds.add('tp');
+  const part = boardCardHtml(mk([true, false, false]));
+  assertTrue(part.includes('board-card-prog') && part.includes('1/3') && part.includes('width:33%'), 'partial progress shows 1/3 at 33%');
+  assertFalse(part.includes('board-card-prog full'), 'not green while subtasks are open');
+  assertTrue(boardCardHtml(mk([true, true])).includes('board-card-prog full'), 'green when every subtask is done');
+  assertFalse(boardCardHtml(mk([])).includes('board-card-prog'), 'no bar without subtasks');
+  collapsedTaskIds.delete('tp');
+  assertFalse(boardCardHtml(mk([true, false])).includes('board-card-prog'), 'no bar while the subtasks are expanded');
+});
