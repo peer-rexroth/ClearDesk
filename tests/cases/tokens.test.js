@@ -53,8 +53,14 @@ test('the danger alert disc uses the shared --red-bg, and the Help / Data menus 
 });
 
 
-// Ratchet (audit X-04): `!important` grew from 56 to 97 in two weeks. New rules use a state class or specificity, not !important; lower this number when some are removed.
+// Ratchet (audit X-04): `!important` grew from 56 to 97 in two weeks. Checked rule by rule on 2026-11-14: they are the print and reduced-motion blocks, the focus-ring overrides of the global field ring (which is itself !important), drag-state locks (`html.*-resizing`), mode hiding (`html[data-mode]`), selected-row colour locks and narrow-bar sizing. None is removable without re-layering the selection and bar styles, which has no pixel test behind it. New rules use a state class or specificity, not !important; lower this number when some are removed.
 test('the stylesheet has no more !important declarations than the recorded baseline', function () {
   var n = (tokScanCss().match(/!important/g) || []).length;
   assertTrue(n <= 97, 'found ' + n + ' !important declarations (baseline 97): use a state class or a layer instead of a new !important');
+});
+
+// The compose button and its template arrow are one capsule. These rules were once deleted by accident together with unrelated CSS, and the buttons silently became two separate discs.
+test('the compose button and the template arrow are styled as one joined capsule', function () {
+  var css = tokScanCss();
+  assertTrue(/\.note-new-btn:has\(\+ \.note-tpl-btn\)/.test(css) && /\.note-more-btn\.note-tpl-btn \{[^}]*margin-left: -6px/.test(css), 'the joined-capsule rules exist');
 });

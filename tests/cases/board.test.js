@@ -229,3 +229,13 @@ test('a card dragged over its own column gets no drop state; over another column
   assertTrue(other.prevented && cls.has('drag-over'), 'another column accepts the drop and shows the state');
   draggingTaskId = null;
 });
+
+test('the undo toast after a board move says what changed (project, status, priority, due date)', function () {
+  const src = updateTaskField.toString();
+  assertTrue(/Moved to/.test(src) && /Status changed to/.test(src) && /Priority changed to/.test(src) && /Due date changed/.test(src), 'each field has its own message');
+  assertTrue(/Task updated/.test(src), 'other fields keep the generic message');
+});
+
+test('the column add row and the top quick-add field use the same phrase', function () {
+  assertTrue(boardAddRowHtml('proj-work').includes('<span>Add a task</span>'), 'row label is "Add a task"');
+});

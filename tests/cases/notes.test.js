@@ -1143,3 +1143,8 @@ test('templates: Save as Template and New from Template are in the menus, the sh
   var r = importNotesData({ notes: [{ id: 'imp1', title: 'T', body: '<p>x</p>', template: true }] }, null);
   var n = notes.find(function (x) { return x.id === 'imp1'; }); assertTrue(n.template);
 });
+
+test('a template found in a list outside Templates carries a template mark; inside Templates it does not', function () {
+  const src = renderNotesList.toString ? renderNotesList.toString() : '';
+  assertTrue(/note-row-tpl/.test(src) && /noteFolderFilter!=='templates'/.test(src), 'the mark is drawn only outside the Templates list');
+});
