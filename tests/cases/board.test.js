@@ -153,3 +153,19 @@ test('a collapsed board card with subtasks shows a progress bar with done/total,
   collapsedTaskIds.delete('tp');
   assertFalse(boardCardHtml(mk([true, false])).includes('board-card-prog'), 'no bar while the subtasks are expanded');
 });
+
+test('the column add row: project columns add to that project, status columns set that status, the add row is skipped for Completed in the source', function () {
+  tasks = [];
+  commitBoardAdd('proj-work', 'Write the report');
+  assertEqual(tasks.length, 1, 'one task added');
+  assertEqual(tasks[0].projectId, 'proj-work', 'a project column adds to its own project');
+  assertEqual(tasks[0].status, 'todo', 'new tasks start as todo');
+  commitBoardAdd('status:doing', 'In flight');
+  assertEqual(tasks[0].status, 'doing', 'a status column sets that status');
+  assertTrue(boardAddRowHtml('proj-work').includes('startBoardAdd(\'proj-work\')'), 'idle row starts the add');
+  boardAddKey = 'proj-work';
+  assertTrue(boardAddRowHtml('proj-work').includes('id="boardAddInput"'), 'the active column shows the input');
+  assertFalse(boardAddRowHtml('proj-personal').includes('boardAddInput'), 'other columns stay idle');
+  boardAddKey = null;
+  assertTrue(/col\.status\.id==='done' \? '' : boardAddRowHtml/.test(renderBoard.toString()), 'no add row in the Completed column');
+});

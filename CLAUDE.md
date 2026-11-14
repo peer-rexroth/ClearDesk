@@ -179,6 +179,12 @@ and they are **deliberately not at feature parity**:
   subtasks only; `.board-card-prog`, purple fill like the In Progress status, green when all are done; the accent stays for selection),
   shown only while the card's subtasks are collapsed (expanded, the list is the progress).
 
+  Each column ends with a ghost **"+ Add task" row** (`boardAddRowHtml`, state `boardAddKey` =
+  project id or `status:<id>`; none in the Completed column). Click or Enter turns it into
+  an input (Enter adds and stays for the next one, Esc cancels, leaving it with text adds, as in
+  Reminders); `commitBoardAdd` takes the column's project (project columns) or status (status
+  columns) and parses the rest like the top quick-add field.
+
   Board columns are **projects**, not status (`getBoardColumns()` maps over
   `projects`, one column each). Status is a per-card badge instead, and
   dragging a card to a different column sets `projectId` (`handleBoardDrop`),

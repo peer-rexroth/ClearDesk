@@ -362,6 +362,15 @@ const ICONS = {
   .board-col-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 40px; }
   .board-col-body.is-scrolling .board-card { pointer-events: none; }   /* no hover repaints while the column scrolls (see boardScrollHover) */
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
+  /* the add row at the foot of a column: a ghost row (DESIGN: a faint "+" and a label, no box); it turns into a borderless input with a hairline that goes accent on focus */
+  .board-add { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 10px; border-radius: var(--r-m); color: var(--text-3); font-size: var(--fs-13); cursor: default; flex-shrink: 0; }
+  .board-add:hover { background: var(--hover); color: var(--text-2); }
+  .board-add i { font-size: var(--ico-14); flex: none; }
+  .board-add.editing { cursor: text; }
+  .board-add.editing:hover { background: none; }
+  .board-add input { flex: 1; min-width: 0; border: 0 solid transparent; border-bottom: 1px solid var(--border-2); border-radius: 0; background: none; color: var(--text); font: inherit; padding: 2px 0; outline: none; }
+  .board-add input:focus, .board-add input:focus-visible { outline: none; box-shadow: none !important; border-color: transparent transparent var(--accent) !important; }   /* the global field ring is a hard square: here only the hairline under the text turns accent */
+  .board-add input::placeholder { color: var(--text-3); }
   .show-more-row { text-align: center; color: var(--text-2); font-size: var(--fs-12); font-weight: 500; padding: 8px; cursor: default; border-radius: var(--r-m); }
   .show-more-row:hover { background: var(--bg-2); color: var(--text); }
   .board-card { position: relative; background: var(--bg-2); border: 0.5px solid var(--border); border-radius: var(--r-m); padding: 8px 10px; cursor: default; display: flex; flex-direction: column; gap: 8px; }
@@ -4114,6 +4123,53 @@ function getBoardColumns(){
     return { project: p, tasks: visible, allCount: sorted.length, hiddenCount, doneTotal };
   });
 }
+// The add row at the foot of each board column. `key` is the project id (project columns) or 'status:<id>' (status columns); `boardAddKey` is the column whose row is an input right now.
+let boardAddKey = null;
+function boardAddRowHtml(key){
+  if(boardAddKey===key) return `<div class="board-add editing"><i class="fa-solid fa-plus"></i><input spellcheck="true" type="text" id="boardAddInput" placeholder="Add a task" aria-label="Add a task to this column" onclick="event.stopPropagation()" onkeydown="boardAddKeydown(event,'${key}')" onblur="boardAddBlur(this)"></div>`;
+  return `<div class="board-add" role="button" tabindex="0" onclick="startBoardAdd('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();startBoardAdd('${key}')}"><i class="fa-solid fa-plus"></i><span>Add task</span></div>`;
+}
+function startBoardAdd(key){
+  boardAddKey = key;
+  render();
+  const input = document.getElementById('boardAddInput'); if(input) input.focus();
+}
+function boardAddKeydown(e, key){
+  e.stopPropagation();
+  if(e.key==='Escape'){ e.preventDefault(); boardAddKey = null; render(); return; }
+  if(e.key!=='Enter') return;
+  e.preventDefault();
+  const input = e.target, typed = input.value.trim();
+  if(!typed){ boardAddKey = null; render(); return; }
+  input.value = '';                               // so the blur of the rebuilt row sees nothing to commit
+  commitBoardAdd(key, typed);
+  const next = document.getElementById('boardAddInput'); if(next) next.focus();   // stay in the row: add the next one straight away
+}
+function boardAddBlur(input){
+  const key = boardAddKey, val = input.value;
+  setTimeout(()=>{
+    if(boardAddKey!==key) return;
+    const cur = document.getElementById('boardAddInput');
+    if(cur && document.activeElement===cur) return;   // the row was rebuilt and refocused
+    if(val.trim()) commitBoardAdd(key, val.trim());   // leaving the row with text adds it, as in Reminders
+    boardAddKey = null; render();
+  }, 0);
+}
+function commitBoardAdd(key, typed){
+  const pr = parseQuickAdd(typed);
+  const byStatus = key.startsWith('status:');
+  tasks.unshift({
+    id: genId(), title: pr.title, notes:'',
+    projectId: byStatus ? (pr.projectId || filterProjectId || quickAddDefaultProjectId()) : key,
+    status: byStatus ? key.slice(7) : 'todo',
+    priority: pr.priority || 'medium',
+    dueDate: pr.dueDate || null,
+    tags: pr.tags,
+    subtasks: [],
+    createdAt: Date.now(), updatedAt: Date.now()
+  });
+  save(); render();
+}
 function renderBoard(){
   const board = document.getElementById('board');
   if(!board) return;
@@ -4130,6 +4186,7 @@ function renderBoard(){
         <div class="board-col-body">
           ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
           ${showMoreRow}
+          ${col.status.id==='done' ? '' : boardAddRowHtml('status:'+col.status.id)}
         </div>
       </div>`;
     }
@@ -4144,6 +4201,7 @@ function renderBoard(){
       <div class="board-col-body">
         ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
         ${showMoreRow}
+        ${boardAddRowHtml(p.id)}
       </div>
     </div>`;
   }).join('');
