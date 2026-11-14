@@ -169,3 +169,25 @@ test('the column add row: project columns add to that project, status columns se
   boardAddKey = null;
   assertTrue(/col\.status\.id==='done' \? '' : boardAddRowHtml/.test(renderBoard.toString()), 'no add row in the Completed column');
 });
+
+test('a folded board column is remembered, drops its cards from keyboard navigation and renders as a strip', function () {
+  boardFolded = [];
+  const key = visibleProjects()[0].id;
+  assertTrue(boardVisibleColumns().length === getBoardColumns().length, 'nothing folded: every column is visible');
+  toggleBoardCol(key);
+  assertDeepEqual(boardFolded, [key], 'the key is stored');
+  assertFalse(boardVisibleColumns().some(c => c.project && c.project.id === key), 'the folded column is skipped by keyboard navigation');
+  const strip = boardFoldedColHtml(key, 'data-project="' + key + '"', 'fa-solid fa-folder', 'Name', 3);
+  assertTrue(strip.includes('board-col folded') && strip.includes('Unfold column') && strip.includes('>3<'), 'strip with the count and the unfold tooltip');
+  toggleBoardCol(key);
+  assertDeepEqual(boardFolded, [], 'a second toggle unfolds it');
+});
+
+test('the column right-click menu offers Fold / Unfold Column first, then the project items on a project column', function () {
+  boardFolded = [];
+  const src = openBoardColMenu.toString();
+  assertTrue(src.includes("'Unfold Column'") && src.includes("'Fold Column'"), 'both labels exist');
+  assertTrue(src.includes('projectMenuHtml(projectId)'), 'a project column also gets its own items');
+  assertTrue(boardFoldedColHtml('k', '', 'x', 'N', 1, 'k').includes('openBoardColMenu'), 'a folded strip has the menu too');
+  assertTrue(/oncontextmenu="openBoardColMenu\(event,'\$\{skey\}'\)"/.test(renderBoard.toString()), 'status columns have the menu');
+});

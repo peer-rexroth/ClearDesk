@@ -185,6 +185,14 @@ and they are **deliberately not at feature parity**:
   Reminders); `commitBoardAdd` takes the column's project (project columns) or status (status
   columns) and parses the rest like the top quick-add field.
 
+  Clicking a column header folds it into a slim strip (icon, count, name set vertically);
+  clicking the strip unfolds it, and a card can still be dropped on it. Right-click on a header or
+  strip (`openBoardColMenu`) offers Fold / Unfold Column first, then New Task Here, Edit… and Delete on a
+  project column. The fold state is a
+  per-device preference (`boardFolded`, localStorage `cleardesk_boardfolded`, keys = project
+  id or `status:<id>`), not synced. Folded columns are skipped by the arrow keys and
+  "first task" (`boardVisibleColumns()`), and the selection is cleared if its card folds away.
+
   Board columns are **projects**, not status (`getBoardColumns()` maps over
   `projects`, one column each). Status is a per-card badge instead, and
   dragging a card to a different column sets `projectId` (`handleBoardDrop`),

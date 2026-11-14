@@ -361,6 +361,14 @@ const ICONS = {
   .board-col-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .board-col-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex: 1; min-height: 40px; }
   .board-col-body.is-scrolling .board-card { pointer-events: none; }   /* no hover repaints while the column scrolls (see boardScrollHover) */
+  /* a folded column: a slim strip with the icon, the count and the name set vertically; clicking it unfolds it, and a card can still be dropped on it */
+  .board-col-header[role="button"] { cursor: default; user-select: none; }
+  .board-col-header[role="button"]:hover { background: var(--hover); border-top-left-radius: inherit; border-top-right-radius: inherit; }
+  .board-col.folded { width: 44px; min-height: 120px; }
+  .board-col.folded .board-col-header { flex-direction: column; justify-content: flex-start; gap: 10px; padding: 12px 0; border-bottom: 0; border-radius: inherit; flex: 1; }
+  .board-col.folded .board-col-header .count { margin: 0; order: -1; }
+  .board-col.folded .board-col-title { flex-direction: column; gap: 10px; }
+  .board-col.folded .board-col-name { writing-mode: vertical-rl; overflow: visible; text-overflow: clip; }
   .board-empty { text-align: center; color: var(--text-3); font-size: var(--fs-12); padding: 16px 0; }
   /* the add row at the foot of a column: a ghost row (DESIGN: a faint "+" and a label, no box); it turns into a borderless input with a hairline that goes accent on focus */
   .board-add { display: flex; align-items: center; gap: 8px; min-height: 28px; padding: 4px 10px; border-radius: var(--r-m); color: var(--text-3); font-size: var(--fs-13); cursor: default; flex-shrink: 0; }
@@ -4123,6 +4131,43 @@ function getBoardColumns(){
     return { project: p, tasks: visible, allCount: sorted.length, hiddenCount, doneTotal };
   });
 }
+// Folded board columns: a per-device display preference (localStorage, like the board grouping), not part of the synced data. Keys are the project id or 'status:<id>', so project and status boards fold independently.
+let boardFolded = [];
+try{ const v = JSON.parse(localStorage.getItem('cleardesk_boardfolded')||'[]'); if(Array.isArray(v)) boardFolded = v.filter(x=>typeof x==='string'); }catch(_){}
+function boardColKey(col){ return col.project ? col.project.id : 'status:'+col.status.id; }
+function boardColFolded(col){ return boardFolded.includes(boardColKey(col)); }
+function boardVisibleColumns(){ return getBoardColumns().filter(c=>!boardColFolded(c)); }   // the columns whose cards are on screen: the arrow keys and "first task" skip folded ones
+function toggleBoardCol(key){
+  const i = boardFolded.indexOf(key);
+  if(i>=0) boardFolded.splice(i,1); else boardFolded.push(key);
+  try{ localStorage.setItem('cleardesk_boardfolded', JSON.stringify(boardFolded)); }catch(_){}
+  if(boardAddKey===key) boardAddKey = null;
+  if(kbdSelectedTaskId && !boardVisibleColumns().some(c=>c.tasks.some(t=>t.id===kbdSelectedTaskId))) kbdSelectedTaskId = null;   // the selected card went out of sight
+  render();
+}
+// Right-click on a column header (or a folded strip): Fold / Unfold Column, then the project's own items on a project column.
+let boardMenuKey = null;
+function openBoardColMenu(e, key, projectId){
+  if(document.querySelector('.modal-bg.open')) return;
+  e.preventDefault(); e.stopPropagation();
+  const menu = document.getElementById('rowMenu'); if(!menu) return;
+  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
+  boardMenuKey = key; projectMenuId = projectId || null; folderMenuId = null; noteMenuId = null;
+  const folded = boardFolded.includes(key);
+  const parts = [rowMenuItem(folded ? 'fa-solid fa-angles-up' : 'fa-solid fa-angles-down', folded ? 'Unfold Column' : 'Fold Column', `boardColMenuRun()`)];
+  if(projectId){ const ph = projectMenuHtml(projectId); if(ph) parts.push('<div class="row-menu-sep"></div>', ph); }
+  menu.innerHTML = tidyMenuSeps(parts.join(''));
+  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
+}
+function boardColMenuRun(){
+  const key = boardMenuKey; closeRowMenu();
+  if(key) toggleBoardCol(key);
+}
+function boardFoldedColHtml(key, attrs, icon, name, count, projectId){
+  return `<div class="board-col folded" ${attrs}>
+    <div class="board-col-header" role="button" tabindex="0" aria-expanded="false" title="Unfold column" onclick="toggleBoardCol('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${key}')}" oncontextmenu="openBoardColMenu(event,'${key}'${projectId?`,'${projectId}'`:''})"><span class="count">${count}</span><span class="board-col-title"><i class="${icon} picon"></i><span class="board-col-name">${esc(name)}</span></span></div>
+  </div>`;
+}
 // The add row at the foot of each board column. `key` is the project id (project columns) or 'status:<id>' (status columns); `boardAddKey` is the column whose row is an input right now.
 let boardAddKey = null;
 function boardAddRowHtml(key){
@@ -4181,8 +4226,10 @@ function renderBoard(){
       const showMoreRow = col.doneTotal>MAX_COMPLETED_SHOWN
         ? `<div class="show-more-row" onclick="toggleShowAllCompletedProject('${col.key}')">${expanded?'Show fewer completed':`Show ${col.hiddenCount} more completed`}</div>`
         : '';
-      return `<div class="board-col" data-status="${col.status.id}" ondragover="handleBoardDragOver(event,'${col.status.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDropStatus(event,'${col.status.id}')">
-        <div class="board-col-header"><span class="board-col-title"><i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
+      const skey = 'status:'+col.status.id, sdrop = `data-status="${col.status.id}" ondragover="handleBoardDragOver(event,'${col.status.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDropStatus(event,'${col.status.id}')"`;
+      if(boardColFolded(col)) return boardFoldedColHtml(skey, sdrop, STATUS_ICONS[col.status.id]||'fa-regular fa-circle', col.status.label, col.allCount);
+      return `<div class="board-col" ${sdrop}>
+        <div class="board-col-header" role="button" tabindex="0" aria-expanded="true" title="Fold column" onclick="toggleBoardCol('${skey}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${skey}')}" oncontextmenu="openBoardColMenu(event,'${skey}')"><span class="board-col-title"><i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
         <div class="board-col-body">
           ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
           ${showMoreRow}
@@ -4196,8 +4243,10 @@ function renderBoard(){
     const showMoreRow = col.doneTotal>MAX_COMPLETED_SHOWN
       ? `<div class="show-more-row" onclick="toggleShowAllCompletedProject('${p.id}')">${expanded?'Show fewer completed':`Show ${col.hiddenCount} more completed`}</div>`
       : '';
-    return `<div class="board-col${dimmed?' dimmed':''}" data-project="${p.id}" ondragover="handleBoardDragOver(event,'${p.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDrop(event,'${p.id}')">
-      <div class="board-col-header" oncontextmenu="openProjectMenu(event,'${p.id}')"><span class="board-col-title" title="${esc(p.name)}"><i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
+    const pdrop = `data-project="${p.id}" ondragover="handleBoardDragOver(event,'${p.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDrop(event,'${p.id}')"`;
+    if(boardColFolded(col)) return boardFoldedColHtml(p.id, pdrop, 'fa-solid fa-'+(p.icon||'folder'), p.name, col.allCount, p.id).replace('class="board-col folded"', `class="board-col folded${dimmed?' dimmed':''}"`);
+    return `<div class="board-col${dimmed?' dimmed':''}" ${pdrop}>
+      <div class="board-col-header" role="button" tabindex="0" aria-expanded="true" title="Fold column" onclick="toggleBoardCol('${p.id}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${p.id}')}" oncontextmenu="openBoardColMenu(event,'${p.id}','${p.id}')"><span class="board-col-title"><i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
       <div class="board-col-body">
         ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
         ${showMoreRow}
@@ -4259,7 +4308,7 @@ function handleBoardKeyNav(e){
     return;
   }
 
-  const columns = getBoardColumns();
+  const columns = boardVisibleColumns();
   let colIdx=-1, rowIdx=-1;
   for(let i=0;i<columns.length;i++){
     const idx = columns[i].tasks.findIndex(t=>t.id===kbdSelectedTaskId);
@@ -5015,7 +5064,7 @@ function updateQuickAddPreview(){
 // ArrowDown out of the quick-add field selects the first task; ArrowUp from the first task goes back in (like Mail's search field).
 function selectFirstTaskFromQuickAdd(){
   setSelZone('list');
-  const first = viewMode==='board' ? (getBoardColumns().find(c=>c.tasks.length)||{tasks:[]}).tasks[0] : getVisibleListTasks().tasks[0];
+  const first = viewMode==='board' ? (boardVisibleColumns().find(c=>c.tasks.length)||{tasks:[]}).tasks[0] : getVisibleListTasks().tasks[0];
   const input = document.getElementById('quickAddInput'); if(input && input.blur) input.blur();
   if(!first) return;
   selectTaskInList(first.id);
@@ -5029,7 +5078,7 @@ function selectTaskInList(id){
 }
 // Is this task on screen right now (it can be hidden by a filter, or folded away on the board)?
 function taskIsListed(id){
-  return viewMode==='board' ? getBoardColumns().some(c=>c.tasks.some(t=>t.id===id)) : getVisibleListTasks().tasks.some(t=>t.id===id);
+  return viewMode==='board' ? boardVisibleColumns().some(c=>c.tasks.some(t=>t.id===id)) : getVisibleListTasks().tasks.some(t=>t.id===id);
 }
 function leaveTasksToQuickAdd(){
   kbdSelectedTaskId = null; selectedTaskIds.clear(); paintSelection();
