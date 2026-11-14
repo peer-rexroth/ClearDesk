@@ -190,11 +190,10 @@ and they are **deliberately not at feature parity**:
   Dragging a card over any column other than its own tints that column and shows a dashed "Drop to move here" row
   (no insertion line: the board has no manual order); its own column shows no drop state.
 
-  A chevron disc at the left of a column header (and the right-click menu) folds it into a slim strip
+  A chevron disc at the left of a column header folds it into a slim strip
   (icon, count, name set vertically); the header itself does nothing on click. Clicking the strip unfolds it, and a card can still be dropped on it. While a search has hits
-  in a folded column that column shows open (`boardColFolded`); the stored fold returns after. Right-click on a header or
-  strip (`openBoardColMenu`) offers Fold / Unfold Column first, then New Task Here, Edit… and Delete on a
-  project column. The fold state is a
+  in a folded column that column shows open (`boardColFolded`); the stored fold returns after. There is no fold item in a right-click menu: a project column's header and strip keep the project menu
+  (New Task Here, Edit…, Delete), a status column has none. The fold state is a
   per-device preference (`boardFolded`, localStorage `cleardesk_boardfolded`, keys = project
   id or `status:<id>`), not synced. Folded columns are skipped by the arrow keys and
   "first task" (`boardVisibleColumns()`), and the selection is cleared if its card folds away.

@@ -4154,31 +4154,13 @@ function toggleBoardCol(key){
   if(kbdSelectedTaskId && !boardVisibleColumns().some(c=>c.tasks.some(t=>t.id===kbdSelectedTaskId))) kbdSelectedTaskId = null;   // the selected card went out of sight
   render();
 }
-// Right-click on a column header (or a folded strip): Fold / Unfold Column, then the project's own items on a project column.
-let boardMenuKey = null;
-function openBoardColMenu(e, key, projectId){
-  if(document.querySelector('.modal-bg.open')) return;
-  e.preventDefault(); e.stopPropagation();
-  const menu = document.getElementById('rowMenu'); if(!menu) return;
-  closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
-  boardMenuKey = key; projectMenuId = projectId || null; folderMenuId = null; noteMenuId = null;
-  const folded = boardFolded.includes(key);
-  const parts = [rowMenuItem(folded ? 'fa-solid fa-angles-up' : 'fa-solid fa-angles-down', folded ? 'Unfold Column' : 'Fold Column', `boardColMenuRun()`)];
-  if(projectId){ const ph = projectMenuHtml(projectId); if(ph) parts.push('<div class="row-menu-sep"></div>', ph); }
-  menu.innerHTML = tidyMenuSeps(parts.join(''));
-  placeRowMenu(menu, e.clientX, e.clientY, e.currentTarget);
-}
-function boardColMenuRun(){
-  const key = boardMenuKey; closeRowMenu();
-  if(key) toggleBoardCol(key);
-}
 // The fold control of an open column: a chevron disc at the left of the header (the subtask toggle's pattern); only it and the right-click menu fold, so a stray click on the title does nothing.
 function boardFoldBtnHtml(key){
   return `<button type="button" class="icon-btn board-col-fold" title="Fold column" aria-label="Fold column" aria-expanded="true" onclick="toggleBoardCol('${key}')"><i class="fa-solid fa-chevron-down"></i></button>`;
 }
 function boardFoldedColHtml(key, attrs, icon, name, count, projectId){
   return `<div class="board-col folded" ${attrs}>
-    <div class="board-col-header" role="button" tabindex="0" aria-expanded="false" title="Unfold column" onclick="toggleBoardCol('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${key}')}" oncontextmenu="openBoardColMenu(event,'${key}'${projectId?`,'${projectId}'`:''})"><i class="fa-solid fa-chevron-right fold-ico" aria-hidden="true"></i><span class="count">${count}</span><span class="board-col-title"><i class="${icon} picon"></i><span class="board-col-name">${esc(name)}</span></span></div>
+    <div class="board-col-header" role="button" tabindex="0" aria-expanded="false" title="Unfold column" onclick="toggleBoardCol('${key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleBoardCol('${key}')}" ${projectId?`oncontextmenu="openProjectMenu(event,'${projectId}')"`:''}><i class="fa-solid fa-chevron-right fold-ico" aria-hidden="true"></i><span class="count">${count}</span><span class="board-col-title"><i class="${icon} picon"></i><span class="board-col-name">${esc(name)}</span></span></div>
   </div>`;
 }
 // The add row at the foot of each board column. `key` is the project id (project columns) or 'status:<id>' (status columns); `boardAddKey` is the column whose row is an input right now.
@@ -4250,7 +4232,7 @@ function renderBoard(){
       const skey = 'status:'+col.status.id, sdrop = `data-status="${col.status.id}" ondragover="handleBoardDragOver(event,'${col.status.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDropStatus(event,'${col.status.id}')"`;
       if(boardColFolded(col)) return boardFoldedColHtml(skey, sdrop, STATUS_ICONS[col.status.id]||'fa-regular fa-circle', col.status.label, col.allCount);
       return `<div class="board-col" ${sdrop}>
-        <div class="board-col-header" oncontextmenu="openBoardColMenu(event,'${skey}')"><span class="board-col-title">${boardFoldBtnHtml(skey)}<i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
+        <div class="board-col-header"><span class="board-col-title">${boardFoldBtnHtml(skey)}<i class="${STATUS_ICONS[col.status.id]||'fa-regular fa-circle'} picon"></i><span class="board-col-name">${esc(col.status.label)}</span></span><span class="count">${col.allCount}</span></div>
         <div class="board-col-body">
           ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
           ${showMoreRow}
@@ -4267,7 +4249,7 @@ function renderBoard(){
     const pdrop = `data-project="${p.id}" ondragover="handleBoardDragOver(event,'${p.id}')" ondragleave="handleBoardDragLeave(event)" ondrop="handleBoardDrop(event,'${p.id}')"`;
     if(boardColFolded(col)) return boardFoldedColHtml(p.id, pdrop, 'fa-solid fa-'+(p.icon||'folder'), p.name, col.allCount, p.id).replace('class="board-col folded"', `class="board-col folded${dimmed?' dimmed':''}"`);
     return `<div class="board-col${dimmed?' dimmed':''}" ${pdrop}>
-      <div class="board-col-header" oncontextmenu="openBoardColMenu(event,'${p.id}','${p.id}')"><span class="board-col-title">${boardFoldBtnHtml(p.id)}<i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
+      <div class="board-col-header" oncontextmenu="openProjectMenu(event,'${p.id}')"><span class="board-col-title">${boardFoldBtnHtml(p.id)}<i class="fa-solid fa-${p.icon||'folder'} picon"></i><span class="board-col-name">${esc(p.name)}</span></span><span class="count">${col.allCount}</span></div>
       <div class="board-col-body">
         ${colTasks.length===0 ? `<div class="board-empty">No tasks</div>` : colTasks.map(t=>boardCardHtml(t)).join('')}
         ${showMoreRow}

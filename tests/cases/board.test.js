@@ -185,13 +185,10 @@ test('a folded board column is remembered, drops its cards from keyboard navigat
   assertDeepEqual(boardFolded, [], 'a second toggle unfolds it');
 });
 
-test('the column right-click menu offers Fold / Unfold Column first, then the project items on a project column', function () {
-  boardFolded = [];
-  const src = openBoardColMenu.toString();
-  assertTrue(src.includes("'Unfold Column'") && src.includes("'Fold Column'"), 'both labels exist');
-  assertTrue(src.includes('projectMenuHtml(projectId)'), 'a project column also gets its own items');
-  assertTrue(boardFoldedColHtml('k', '', 'x', 'N', 1, 'k').includes('openBoardColMenu'), 'a folded strip has the menu too');
-  assertTrue(/oncontextmenu="openBoardColMenu\(event,'\$\{skey\}'\)"/.test(renderBoard.toString()), 'status columns have the menu');
+test('folding is only by the header chevron or the strip: no Fold / Unfold item in a right-click menu', function () {
+  assertTrue(typeof openBoardColMenu === 'undefined', 'the column fold menu is gone');
+  assertTrue(/oncontextmenu="openProjectMenu\(event,'\$\{p\.id\}'\)"/.test(renderBoard.toString()), 'a project column header keeps the project menu');
+  assertFalse(/Fold Column|Unfold Column/.test(renderBoard.toString() + boardFoldedColHtml.toString()), 'no Fold Column item anywhere');
 });
 
 test('column add row: a typed #project wins over the column; a task that is not on screen is announced', function () {
