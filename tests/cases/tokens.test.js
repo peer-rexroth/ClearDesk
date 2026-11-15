@@ -53,10 +53,10 @@ test('the danger alert disc uses the shared --red-bg, and the Help / Data menus 
 });
 
 
-// Ratchet (audit X-04): `!important` grew from 56 to 97 in two weeks. Checked rule by rule on 2026-11-14: they are the print and reduced-motion blocks, the focus-ring overrides of the global field ring (which is itself !important), drag-state locks (`html.*-resizing`), mode hiding (`html[data-mode]`), selected-row colour locks and narrow-bar sizing. None is removable without re-layering the selection and bar styles, which has no pixel test behind it. New rules use a state class or specificity, not !important; lower this number when some are removed.
+// Ratchet (audit X-04): `!important` had grown from 56 to 97. On 2026-11-15 it went down to 41 with a pixel check (122 screenshots, light/dark, list/board/drawer/notes/prompts, narrow and collapsed layouts, mouse and keyboard focus on every field): the per-field focus-ring opt-outs became an exclusion list on the global ring (`:where(:not(...))`), and the mode-hiding, toolbar-padding and similar layout overrides now win by selector instead. What is left is deliberate: print and reduced-motion blocks, the global focus ring and its white / underline replacements, drag-state locks (`html.*-resizing`), pointer-events locks on table blocks, the selected-row pill colours (tag badges carry inline colours), the sidebar menu position and the notes toolbar's min-width chain. New rules use a state class or specificity, not !important; lower this number when some are removed.
 test('the stylesheet has no more !important declarations than the recorded baseline', function () {
   var n = (tokScanCss().match(/!important/g) || []).length;
-  assertTrue(n <= 97, 'found ' + n + ' !important declarations (baseline 97): use a state class or a layer instead of a new !important');
+  assertTrue(n <= 41, 'found ' + n + ' !important declarations (baseline 41): use a state class, the focus-ring exclusion list or a layer instead of a new !important');
 });
 
 // The compose button and its template arrow are one capsule. These rules were once deleted by accident together with unrelated CSS, and the buttons silently became two separate discs.

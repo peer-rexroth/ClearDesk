@@ -385,7 +385,7 @@ const ICONS = {
   .board-add.editing { cursor: text; }
   .board-add.editing:hover { background: none; }
   .board-add input { flex: 1; min-width: 0; border: 0 solid transparent; border-bottom: 1px solid var(--border-2); border-radius: 0; background: none; color: var(--text); font: inherit; padding: 2px 0; outline: none; }
-  .board-add input:focus, .board-add input:focus-visible { outline: none; box-shadow: none !important; border-color: transparent transparent var(--accent) !important; }   /* the global field ring is a hard square: here only the hairline under the text turns accent */
+  .board-add input:focus, .board-add input:focus-visible { outline: none; box-shadow: none; border-color: transparent transparent var(--accent); }   /* the global field ring is a hard square: here only the hairline under the text turns accent */
   .board-add input::placeholder { color: var(--text-3); }
   .show-more-row { text-align: center; color: var(--text-2); font-size: var(--fs-12); font-weight: 500; padding: 8px; cursor: default; border-radius: var(--r-m); }
   .show-more-row:hover { background: var(--bg-2); color: var(--text); }
@@ -1220,8 +1220,8 @@ const ICONS = {
      for keyboard focus only. */
   :root { --focus-ring: #9bbcf6; --focus-edge: #89aae6; }
   html[data-theme="dark"] { --focus-ring: #417391; --focus-edge: #3c6f8c; }
-  :is(input:where(:not([type=checkbox]):not([type=radio]):not([type=file])), textarea):focus-visible,
-  html.kbd-input select:focus-visible {   /* :where() keeps the exclusions at zero specificity, so the per-surface overrides below can out-rank this; selects only ring after a key press (Chromium counts a mouse click on a <select> as :focus-visible) */
+  :is(input:where(:not([type=checkbox]):not([type=radio]):not([type=file])), textarea):where(:not(.board-add input, .quickadd input, .drawer-header input.title-input, .drow-notes, .drow-in, .task-subtask-add-row input, .add-row input, html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input), .nlp-row input, .note-title, .find-field input, .pr-tpl textarea, .inc-search input)):focus-visible,
+  html.kbd-input select:focus-visible {   /* Fields that draw no ring of their own (borderless fields inside another surface) are listed in the :where(:not(...)) exclusion above: add a new such field THERE, never with an important flag on its own rule. The exclusion is wrapped in :where() so it adds no specificity. Selects only ring after a key press (Chromium counts a mouse click on a <select> as :focus-visible) */
     outline: none !important;
     border-color: var(--focus-edge) !important;
     box-shadow: 0 0 0 3px var(--focus-ring) !important;
@@ -1236,9 +1236,9 @@ const ICONS = {
      the blue outline was left behind after a plain click. */
   select:focus-visible, select:focus { outline: none; }
   /* the borderless fields that live inside another surface */
-  .quickadd input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+  .quickadd input:focus-visible { box-shadow: none; border-color: transparent; }
   .quickadd:has(#quickAddInput:focus-visible) { border-color: var(--focus-edge); box-shadow: 0 0 0 3px var(--focus-ring); }
-  .drawer-header input.title-input:focus-visible { box-shadow: none !important; border-color: transparent !important; border-radius: 0; }   /* mouse: just the caret, like the panel's other fields */
+  .drawer-header input.title-input:focus-visible { box-shadow: none; border-color: transparent; border-radius: 0; }   /* mouse: just the caret, like the panel's other fields */
   html.kbd-input .drawer-header input.title-input:focus-visible { box-shadow: 0 2px 0 var(--focus-ring) !important; }   /* keyboard: an underline */
   /* inside a selected (blue) row the neutral ring would vanish: use white */
   html:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card:is(.kbd-selected, .bulk-selected)) :is(input, select, textarea):not(.cell-pop *):not(.task-subtasks *):focus-visible { border-color: var(--on-accent) !important; box-shadow: 0 0 0 3px var(--sel-halo-strong) !important; }
@@ -1286,7 +1286,7 @@ const ICONS = {
   .drow .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
   .drow-sel, .drow-ov { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; font-size: 16px; cursor: default; appearance: none; }   /* the real control, over the whole row */
   html.kbd-input .drow:has(.drow-sel:focus-visible, .drow-ov:focus-visible, .drow-notes:focus-visible, .drow-in:focus-visible) { box-shadow: 0 0 0 3px var(--focus-ring); border-radius: var(--r-m); }
-  .drow-notes:focus-visible, .drow-in:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the global field ring is a hard square inside a rounded row: with the mouse these fields show only the caret (as the note body does), and by keyboard the whole rounded row is ringed (the line above) */
+  .drow-notes:focus-visible, .drow-in:focus-visible { box-shadow: none; border-color: transparent; }   /* the global field ring is a hard square inside a rounded row: with the mouse these fields show only the caret (as the note body does), and by keyboard the whole rounded row is ringed (the line above) */
   .drow.due { cursor: default; }
   .drow.due .cell-pop { left: auto; right: 0; }
   .drow.notes { align-items: flex-start; }
@@ -1309,7 +1309,7 @@ const ICONS = {
   html[data-scheme="glass"] .drawer .btn.btn-text-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
   .drawer .subtask-row .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 0; }
   .drawer .subtask-row:is(:hover, :focus-within) .icon-btn:not(.sub-step-toggle):not(.sub-del) { opacity: 1; }   /* same :not() chain as the hide rule, or that out-ranks this */
-  .task-subtask-add-row input:focus-visible, .add-row input:focus-visible { box-shadow: none !important; border-color: transparent !important; }
+  .task-subtask-add-row input:focus-visible, .add-row input:focus-visible { box-shadow: none; border-color: transparent; }
   /* in the list and on board cards the ghost circle of the add-subtask row lines up with the real subtask circles above it: the same 16px, and the row starts 2px left so that circle (inside the row's 2px padding) sits on their column while the focus tint, which is the row, starts on the card's edge like the title checkbox and the pills */
   :is(.task-row, .board-card) .task-subtask-add-row { margin-left: -2px; }
   :is(.task-row, .board-card) .task-subtask-add-row::before { width: 16px; height: 16px; }
@@ -1320,8 +1320,8 @@ const ICONS = {
   .task-row.keep-actions .row-actions, .board-card.keep-actions .row-actions { transition: none; }   /* a rebuilt row under a still pointer: buttons stay, no fade-in */
   /* Inline rename fields are quiet, like the ghost add rows: a soft tint and the caret/selected text are the indicator. The
      boxed field with the global 3px focus halo (white on the blue row) read as a heavy bar across the whole row. */
-  html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input) { border: 0 !important; border-radius: var(--r-s); padding: 1px 6px; background: var(--bg-3); box-shadow: none !important; outline: none !important; }
-  html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input):is(:focus, :focus-visible) { border: 0 !important; box-shadow: none !important; outline: none !important; }
+  html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input) { border: 0; border-radius: var(--r-s); padding: 1px 6px; background: var(--bg-3); box-shadow: none; outline: none; }
+  html[data-scheme="glass"] :is(.task-row, .board-card, .drawer) :is(.task-subtask-text-input, .task-title-input, .sub-text-input):is(:focus, :focus-visible) { border: 0; box-shadow: none; outline: none; }
   html[data-scheme="glass"]:not(.sel-inactive) :is(.task-row.kbd-selected, .task-row.bulk-selected, .board-card.kbd-selected, .board-card.bulk-selected) .task-title-input { background: var(--sel-fill); }
   .task-subtask-text-input { max-width: 420px; }   /* a rename field should be a field, not a bar across the whole row */
   html:not(.sel-inactive) .task-row.kbd-selected .row-actions, html:not(.sel-inactive) .board-card:is(.kbd-selected, .bulk-selected):not(.has-subs) .row-actions { background: var(--sel-fill); border-color: var(--sel-halo); }   /* the on-blue look; a tile whose button sits on the light subtask tint keeps the normal one (next rules) */
@@ -1396,8 +1396,8 @@ const ICONS = {
   /* In Notes the task sections of the sidebar, the task area and the side panel give way to the folder list and the notes area. */
   #notesSide { display: none; flex-direction: column; flex: 1; min-height: 0; }
   html[data-mode="notes"] #notesSide { display: flex; }
-  html[data-mode="notes"] .sidebar > :not(.sidebar-search):not(#notesSide):not(.sb-head):not(.sb-tools) { display: none !important; }
-  html[data-mode="notes"] .main, html[data-mode="notes"] .drawer { display: none !important; }
+  html[data-mode="notes"] .sidebar > :not(.sidebar-search):not(#notesSide):not(.sb-head):not(.sb-tools) { display: none; }
+  html[data-mode="notes"] .main, html[data-mode="notes"] .drawer { display: none; }
   .notes-main { display: none; flex: 1; min-width: 0; overflow: hidden; background: var(--bg); }
   html[data-mode="notes"] #notesMain { display: flex; }
   .notes-list-pane { width: var(--list-w, var(--notes-list-w, 300px)); flex-shrink: 0; display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--border); }
@@ -1445,7 +1445,7 @@ const ICONS = {
   .nlp-row { display: flex; align-items: center; gap: 10px; padding: 8px 12px; cursor: text; }
   .nlp-row + .nlp-row { border-top: 1px solid var(--border); }
   .nlp-row span { flex: none; width: 34px; font-size: var(--fs-12); color: var(--text-3); }
-  .nlp-row input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); outline: none; box-shadow: none !important; padding: 2px 0; }
+  .nlp-row input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); outline: none; box-shadow: none; padding: 2px 0; }
   .nlp-hint { min-height: 15px; padding: 6px 12px 0; font-size: var(--fs-11); color: var(--text-3); }
   .nlp-hint.bad { color: var(--red-text); }
   .nlp-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
@@ -1473,8 +1473,8 @@ const ICONS = {
   .tbl-colrs::after { content: ""; position: absolute; top: 0; bottom: 0; left: 3px; width: 3px; border-radius: var(--r-xs); background: var(--accent); opacity: 0; transition: opacity var(--dur-fast) ease; }
   .tbl-colrs:hover::after, .tbl-colrs.active::after { opacity: .75; }
   html.tbl-resizing, html.tbl-resizing * { cursor: col-resize !important; user-select: none; }
-  .note-title { width: 100%; border: 0 !important; background: transparent; box-shadow: none !important; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
-  .note-title:focus, .note-title:focus-visible { outline: none !important; box-shadow: none !important; border: 0 !important; }
+  .note-title { width: 100%; border: 0; background: transparent; box-shadow: none; padding: 10px 0 2px; font: 700 28px/1.25 var(--font); letter-spacing: -0.015em; color: var(--text); outline: none; }
+  .note-title:focus, .note-title:focus-visible { outline: none; box-shadow: none; border: 0; }
   .note-title::placeholder { color: var(--text-3); }
   /* text colour / highlight: palette names stored in the note, shades chosen per theme */
   html { --nc-red: #d92d20; --nc-orange: #c2570c; --nc-green: #1a7f37; --nc-blue: #2563eb; --nc-purple: #7c3aed; --nc-gray: #6b7280; --nh-yellow: rgba(255,214,10,.42); --nh-green: rgba(52,199,89,.32); --nh-blue: rgba(10,132,255,.30); --nh-pink: rgba(255,55,95,.30); --nh-purple: rgba(175,82,222,.30); --nh-gray: rgba(142,142,147,.34); }
@@ -1500,7 +1500,7 @@ const ICONS = {
   .tbl-bg-pick { padding: 6px 12px 8px; }
   .tbl-bg-pick .nc-row { padding: 0; }
   .note-body mark { color: inherit; border-radius: var(--r-xs); padding: 0 1px; }
-  .note-color-menu { width: max-content; min-width: 0 !important; padding: 8px 10px 10px; }
+  .note-color-menu { width: max-content; min-width: 0; padding: 8px 10px 10px; }
   .nc-label { margin: 4px 2px 8px; font-size: var(--fs-12); font-weight: 600; color: var(--text-2); }   /* title-style labels (HIG), not capitals */
   .nc-row { display: flex; gap: 8px; padding: 0 2px 4px; }
   /* flat filled dots (text colours are filled with their colour via currentColor, highlights with their tint), a hairline edge, and a ring only on the colour in use */
@@ -1560,7 +1560,7 @@ const ICONS = {
   .note-body :is(td, th)[data-al="right"] { text-align: right; }
   .note-body ul, .note-body ol { margin: .2em 0 .5em; padding-left: 26px; }
   .note-body li { margin: .1em 0; }
-  .note-body :is(h1,h2,h3,h4,h5,h6) :is(b,strong,span) { font-weight: inherit !important; }   /* a heading keeps its weight whatever the editor wraps in it; bold in a heading is not saved either */
+  .note-body :is(h1,h2,h3,h4,h5,h6) :is(b,strong,span) { font-weight: inherit; }   /* a heading keeps its weight whatever the editor wraps in it; bold in a heading is not saved either */
   .note-body li > p { margin: 0; }   /* lists pasted from Claude, Copilot or Docs put a paragraph in each item */
   .note-body a { color: var(--blue-text); text-decoration: underline; text-underline-offset: 2px; }
   .note-body blockquote { margin: .5em 0; padding-left: 14px; border-left: 3px solid var(--border-2); color: var(--text-2); }
@@ -1655,17 +1655,17 @@ const ICONS = {
   html.sidebar-collapsed .sb-float { display: flex; }
   #fileSyncMini .file-chip { padding: 6px 8px; font-size: 0; }      /* icon only while the sidebar is hidden; its tooltip still says Linked / Link file */
   #fileSyncMini .file-chip i { font-size: var(--ico-16); }
-  html.sidebar-collapsed .main-toolbar, html.sidebar-collapsed .notes-list-head { padding-left: 104px !important; }
+  html.sidebar-collapsed .main-toolbar, html.sidebar-collapsed .notes-list-head { padding-left: 104px; }
   /* one baseline: every column's bar is 52px with a hairline under it */
-  .main-toolbar { min-height: 52px; box-sizing: border-box; padding: 0 20px !important; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
-  .notes-list-head { height: 52px; box-sizing: border-box; padding: 0 14px 0 16px !important; border-bottom: 1px solid var(--border); }
+  .main-toolbar { min-height: 52px; box-sizing: border-box; padding: 0 20px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .notes-list-head { height: 52px; box-sizing: border-box; padding: 0 14px 0 16px; border-bottom: 1px solid var(--border); }
   .nl-titles { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; line-height: 1.2; }
-  .notes-list-head h2 { flex: none !important; font-size: var(--fs-17) !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .nl-titles .notes-list-sub { padding: 0 !important; min-height: 0 !important; font-size: var(--fs-12); }
-  .note-toolbar { min-height: 52px; box-sizing: border-box; padding: 8px var(--gutter) 8px !important; gap: 6px; border-bottom: 1px solid var(--border); }   /* 8 + the 36px controls + 7 + the 1px hairline = the 52px every column bar has */
-  .note-scroll { padding-top: 18px !important; }
+  .notes-list-head h2 { flex: none; font-size: var(--fs-17); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .nl-titles .notes-list-sub { padding: 0; min-height: 0; font-size: var(--fs-12); }
+  .note-toolbar { min-height: 52px; box-sizing: border-box; padding: 8px var(--gutter) 8px; gap: 6px; border-bottom: 1px solid var(--border); }   /* 8 + the 36px controls + 7 + the 1px hairline = the 52px every column bar has */
+  .note-scroll { padding-top: 18px; }
   .notes-list-pane :is(#notesList, #pList) { padding-top: 6px; }
-  @media (max-width: 800px) { .note-toolbar { padding-left: 14px !important; padding-right: 14px !important; } }
+  @media (max-width: 800px) { .note-toolbar { padding-left: 14px; padding-right: 14px; } }
 
   /* ── Bar controls like Apple Notes ─────────────────────────────────────────
      The capsules in the column bars (formatting groups, selection actions, the list/board and Project/Status switches, the
@@ -1708,7 +1708,7 @@ const ICONS = {
   html[data-scheme="glass"] .main-toolbar .main-title-wrap { justify-content: center; line-height: 1.2; }
   html[data-scheme="glass"] .main-toolbar .main-title { font-size: var(--fs-17); font-weight: 700; letter-spacing: -0.01em; line-height: 1.2; }
   html[data-scheme="glass"] .main-toolbar .main-subtitle { font-size: var(--fs-12); line-height: 1.2; margin-top: 0; }
-  html[data-scheme="glass"] .main-toolbar { padding-left: var(--gutter) !important; }
+  html[data-scheme="glass"] .main-toolbar { padding-left: var(--gutter); }
   /* Notes toolbar icons share the Tasks toolbar's weight: thin outline glyphs (stroke drawn at the size of Font Awesome's regular style) and plain-text B / I / U / S */
   .tb-ico2 { width: 18px; height: 18px; display: block; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
   .tb-txt { font-family: var(--font); font-size: var(--fs-15); line-height: 1; font-weight: 600; }
@@ -1744,7 +1744,7 @@ const ICONS = {
   .sidebar-scroll > .sidebar-section.tags-section { border-top: 0; }
   /* while the sidebar is hidden the floating toggle + sync chip sit over the first column's bar: keep its title clear of them.
      Written last and with the Glass prefix so no earlier padding rule can win (the Tasks title rule did, once). */
-  html[data-scheme="glass"].sidebar-collapsed .main-toolbar, html[data-scheme="glass"].sidebar-collapsed .notes-list-head { padding-left: 112px !important; }
+  html[data-scheme="glass"].sidebar-collapsed .main-toolbar, html[data-scheme="glass"].sidebar-collapsed .notes-list-head { padding-left: 112px; }
   /* the floating toggle and the collapsed file-status chip are round 36px buttons like the compose button, icons dead centre */
   html[data-scheme="glass"] #fileSyncMini .file-chip { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; padding: 0; gap: 0; border: 0; border-radius: 50%; background: var(--cap-fill); }
   #fileSyncMini .file-chip i { margin: 0; width: 1em; line-height: 1; }   /* 1em, not auto: a masked icon has no content, so auto collapsed it to nothing and the button was an empty circle */
@@ -1770,8 +1770,8 @@ const ICONS = {
   /* keep the editor bar on ONE row in a narrower pane: the bar tightens */
   .notes-editor-pane { container-type: inline-size; container-name: notepane; }
   @container notepane (max-width: 740px) { .note-toolbar .tool-btn { min-width: 28px !important; } .note-toolbar .tool-group { gap: 0; } .note-toolbar .note-clear-btn { display: none; } }
-  @container notepane (max-width: 720px) { .note-toolbar { gap: 4px; padding-left: 8px !important; padding-right: 8px !important; } .note-toolbar #noteStyleSelect { max-width: 66px; padding-right: 18px; } .note-toolbar .note-new-btn { min-width: 32px; } .note-toolbar .tool-group:has(#noteUndoBtn) { display: none; } }   /* Undo / Redo step aside in a narrow pane (⌘Z still works) */   /* the rarest button steps aside so the bar stays on one row */
-  @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px !important; padding-right: 12px !important; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
+  @container notepane (max-width: 720px) { .note-toolbar { gap: 4px; padding-left: 8px; padding-right: 8px; } .note-toolbar #noteStyleSelect { max-width: 66px; padding-right: 18px; } .note-toolbar .note-new-btn { min-width: 32px; } .note-toolbar .tool-group:has(#noteUndoBtn) { display: none; } }   /* Undo / Redo step aside in a narrow pane (⌘Z still works) */   /* the rarest button steps aside so the bar stays on one row */
+  @container notepane (max-width: 760px) { .note-toolbar { gap: 4px; padding-left: 12px; padding-right: 12px; } .note-toolbar .tool-btn { min-width: 30px !important; } .note-toolbar #noteStyleSelect { max-width: 96px; padding-left: 10px; padding-right: 22px; } }
   /* The Notes bar keeps ONE row down to a 460px pane (a 680px window: V-02): the text-style menu shrinks, then Table and Link step aside (the / menu inserts a table, ⌘K a link), then the style menu goes (Title / Heading are in the / menu and the Markdown shortcuts) */
   @container notepane (max-width: 640px) { .note-toolbar #noteStyleSelect { max-width: 56px; } }
   @container notepane (max-width: 560px) { .note-toolbar #noteTableDropdown { display: none; } }
@@ -1848,8 +1848,8 @@ const ICONS = {
      template (a monospace field with its placeholders tinted) and, on the right, a Variables inspector that slides in and out (⌥⌘I). */
   #promptsSide { display: none; flex-direction: column; flex: 1; min-height: 0; }
   html[data-mode="prompts"] #promptsSide { display: flex; }
-  html[data-mode="prompts"] .sidebar > :not(.sidebar-search):not(#promptsSide):not(.sb-head):not(.sb-tools) { display: none !important; }
-  html[data-mode="prompts"] .main, html[data-mode="prompts"] .drawer { display: none !important; }
+  html[data-mode="prompts"] .sidebar > :not(.sidebar-search):not(#promptsSide):not(.sb-head):not(.sb-tools) { display: none; }
+  html[data-mode="prompts"] .main, html[data-mode="prompts"] .drawer { display: none; }
   html[data-mode="prompts"] #promptsMain { display: flex; }
   .pr-doc { width: 100%; max-width: var(--note-max-w, 900px); position: relative; }
   .pr-section-label { font-size: var(--fs-12); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); margin: 24px 0 8px; display: flex; align-items: center; justify-content: space-between; }
@@ -1877,7 +1877,7 @@ const ICONS = {
   .find-field { min-width: 0; width: 100%; box-sizing: border-box; display: flex; align-items: center; gap: 4px; height: 28px; padding: 0 12px 0 4px; border-radius: 999px; background: var(--cap-fill); }
   .find-field:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
   .find-field input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; color: var(--text); font: inherit; font-size: var(--fs-13); }
-  .find-field input:focus, .find-field input:focus-visible { outline: none !important; border: 0 !important; box-shadow: none !important; }
+  .find-field input:focus, .find-field input:focus-visible { outline: none; border: 0; box-shadow: none; }
   .find-field input::placeholder { color: var(--text-3); }
   .find-rep { padding-left: 47px; }   /* the Replace text starts under the Find text (the magnifier button is 33px wide) */
   .find-opts { flex: none; display: inline-flex; align-items: center; gap: 2px; height: 24px; padding: 0 6px 0 8px; border: 0; border-radius: 999px; background: transparent; color: var(--text-3); }
@@ -1943,7 +1943,7 @@ const ICONS = {
   .pdiff-msg { font-size: var(--fs-13); color: var(--text-2); }
   .pdiff-foot .modal-actions { margin-top: 0; }
   @media (max-width: 800px) { .pdiff-modal { height: 94vh; padding: 14px; } }
-  .pr-tpl textarea:focus-visible { box-shadow: none !important; border-color: transparent !important; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
+  .pr-tpl textarea:focus-visible { box-shadow: none; border-color: transparent; }   /* the rounded wrapper draws the ring; the square one the global rule gives a textarea showed as a rectangle around rounded corners */
   .pr-tpl:focus-within { box-shadow: 0 0 0 3px var(--focus-ring); }
   .ph { border-radius: var(--r-xs); padding: 1px 0; font-weight: 600; }
   /* Markdown / XML-tag colouring of the template: colour, weight, italic, underline and background only, never size or spacing, so the painted copy keeps the textarea's metrics. Variables stay filled pills and win over these. Apple's accessible system colours; colour is never the only cue (bold headings and markers, chips on tags and code). */
@@ -1996,7 +1996,7 @@ const ICONS = {
   .inc-pick { width: 280px; max-width: 80vw; }   /* the menu is 300px at most, padding included: a wider list ran past its right edge */
   .inc-search { display: flex; align-items: center; gap: 6px; height: 28px; margin: 5px 6px 8px;   /* inset enough for the 3px focus ring to sit inside the menu, clear of its edge */ padding: 0 10px; border-radius: 999px; background: var(--cap-fill); }
   .inc-search i { font-size: var(--ico-14); color: var(--text-3); }
-  .inc-search input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0 !important; border-radius: 0; padding: 0; background: transparent; box-shadow: none !important; outline: none !important; color: var(--text); font: inherit; font-size: var(--fs-13); }
+  .inc-search input { flex: 1 1 auto; min-width: 0; height: 100%; border: 0; border-radius: 0; padding: 0; background: transparent; box-shadow: none; outline: none; color: var(--text); font: inherit; font-size: var(--fs-13); }
   .inc-search:has(input:focus) { box-shadow: 0 0 0 3px var(--focus-ring); }
   .inc-list { max-height: min(50vh, 320px); overflow-y: auto; }
   .inc-head { padding: 8px 10px 4px; font-size: var(--fs-11); font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--text-3); }
@@ -2011,7 +2011,7 @@ const ICONS = {
   /* Recently Deleted (Tasks): replaces the list, board, quick-add and the selection tools while it is open */
   .task-trash-list { display: none; flex: 1; min-height: 0; overflow-y: auto; padding: 6px 10px 16px; }
   html.task-trash .task-trash-list { display: block; }
-  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, .sort-wrap, #collapseAllBtnBoard) { display: none !important; }
+  html.task-trash :is(.quickadd, .quickadd-preview, #taskListWrap, #board, #selToolbar, #filterDropdown, #filterClearBtn, #viewSwitch, #boardGroupSwitch, .sort-wrap, #collapseAllBtnBoard) { display: none; }
   #trashTools { display: none; }
   html.task-trash #trashTools { display: inline-flex; }
   /* The note Outline (a list of the headings) is a panel on the right like Prompts' Variables: it slides in and out (⌥⌘I) and floats over the note in a narrow pane. */
@@ -2081,11 +2081,11 @@ const ICONS = {
   .sort-ico { display: none; }
   /* Below the Filter step the Sort pull-down is an icon (its value is in the tooltip): a value cut to "Smart ord…" reads as a bug */
   @container mainpane (max-width: 780px) {
-    .sort-wrap #sortSelect { width: var(--bar-ctl-h, 36px); padding: 0; color: transparent; background-image: none !important; }
+    .sort-wrap #sortSelect { width: var(--bar-ctl-h, 36px); padding: 0; color: transparent; background-image: none; }
     .sort-wrap #sortSelect option { color: var(--text); background-color: var(--bg); }
     .sort-wrap .sort-ico { display: block; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; color: var(--text-2); pointer-events: none; }
   }
-  @container mainpane (max-width: 560px) { #boardGroupSwitch { display: none !important; } }
+  @container mainpane (max-width: 560px) { #boardGroupSwitch { display: none; } }
   .pr-split.insp-closed .pr-insp-inner { opacity: 0; pointer-events: none; }
   .pr-insp-head { font-size: var(--fs-17); font-weight: 700; letter-spacing: -.01em; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
   .pr-insp-sub { font-size: var(--fs-12); font-weight: 500; color: var(--text-3); letter-spacing: 0; }
@@ -7929,6 +7929,14 @@ const NOTE_STARTERS = [
   { id:'nt-problem', title:'Problem Statement', body:'<h2>Situation</h2><p>What is true today, in two or three sentences that nobody will dispute.</p><h2>Complication</h2><p>What changed, or what is not working?</p><h2>Key question</h2><p>{{cursor}}</p><h2>Success criteria</h2><ul><li><br></li></ul><h2>Scope</h2><ul><li>In: </li><li>Out: </li></ul><h2>Decision-maker and deadline</h2><p><b>Decision-maker:</b> </p><p><b>Deadline:</b> </p>' },
   { id:'nt-raci', title:'RACI', body:'<p>R Responsible (does it) · A Accountable (owns the result, one per task) · C Consulted · I Informed</p><table><tbody><tr><th>Task</th><th>Name</th><th>Name</th><th>Name</th><th>Name</th></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr></tbody></table><p><br></p>' },
   { id:'nt-decision', title:'Decision Matrix', body:'<h2>Decision</h2><p>{{cursor}}</p><p>Score each option 1–5 per criterion, multiply by the weight and add up.</p><table><tbody><tr><th>Option</th><th>Criterion 1</th><th>Criterion 2</th><th>Criterion 3</th><th>Criterion 4</th><th>Total</th></tr><tr><td><b>Weight</b></td><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td><td><br></td></tr></tbody></table><p><br></p><h2>Recommendation</h2><p><br></p><h2>Risks and open points</h2><ul><li><br></li></ul>' },
+  { id:'nt-handover', title:'Vacation Handover', body:(()=>{
+    const tbl = (head, rows, first)=>'<table><tbody><tr>' + head.map(h=>'<th>'+h+'</th>').join('') + '</tr>' + rows.map((r, ri)=>'<tr>' + head.map((_, ci)=>'<td>' + (first && ri===0 && ci===0 ? first : '<br>') + '</td>').join('') + '</tr>').join('') + '</tbody></table>';
+    return '<h2>Absence details</h2>' + tbl(['Away from', 'Back on', 'Contact'], [0], '{{cursor}}')
+      + '<h2>Cover and delegation</h2>' + tbl(['Area / responsibility', 'Cover person'], [0, 1, 2])
+      + '<h2>Topic status</h2>' + tbl(['Topic / project', 'Status', 'Where it stands', 'Next step', 'Due', 'Taken over by', 'Docs / links'], [0, 1, 2, 3])
+      + '<h2>Recurring tasks and deadlines while I\'m away</h2>' + tbl(['Date / frequency', 'What happens', 'Who handles it', 'Notes'], [0, 1, 2])
+      + '<h2>Handover checklist</h2><ul class="cl"><li>Out-of-office reply active</li><li>Calendar entries handed over or declined</li><li>Cover person briefed</li><li>Status table shared with the team</li></ul>';
+  })() },
 ];
 // First start only (per device): the starter templates. Fixed ids, so devices that sync do not end up with copies, and a starter you deleted (tombstone) stays deleted.
 function seedNoteTemplates(){

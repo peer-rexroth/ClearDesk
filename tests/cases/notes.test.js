@@ -1148,3 +1148,14 @@ test('a template found in a list outside Templates carries a template mark; insi
   const src = renderNotesList.toString ? renderNotesList.toString() : '';
   assertTrue(/note-row-tpl/.test(src) && /noteFolderFilter!=='templates'/.test(src), 'the mark is drawn only outside the Templates list');
 });
+
+test('the Vacation Handover starter has the five sections, four tables with the right columns, a checklist and a cursor in the first cell', function () {
+  const t = NOTE_STARTERS.find(x => x.id === 'nt-handover');
+  assertTrue(!!t && t.title === 'Vacation Handover', 'the starter exists');
+  assertEqual((t.body.match(/<h2>/g) || []).length, 5, 'five sections');
+  assertEqual((t.body.match(/<table>/g) || []).length, 4, 'four tables');
+  assertTrue(t.body.includes('<th>Topic / project</th><th>Status</th><th>Where it stands</th><th>Next step</th><th>Due</th><th>Taken over by</th><th>Docs / links</th>'), 'the topic status table has its seven columns');
+  assertEqual((t.body.match(/<ul class="cl"><li>/g) || []).length, 1, 'one checklist');
+  assertEqual((t.body.match(/\{\{cursor\}\}/g) || []).length, 1, 'one cursor marker');
+  assertTrue(/<td>\{\{cursor\}\}<\/td>/.test(t.body), 'the cursor is in the first table cell');
+});
