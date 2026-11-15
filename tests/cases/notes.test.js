@@ -1159,3 +1159,28 @@ test('the Vacation Handover starter has the five sections, four tables with the 
   assertEqual((t.body.match(/\{\{cursor\}\}/g) || []).length, 1, 'one cursor marker');
   assertTrue(/<td>\{\{cursor\}\}<\/td>/.test(t.body), 'the cursor is in the first table cell');
 });
+
+test('Restore Starter Templates brings back deleted and trashed starters, leaves edited ones alone, and Undo reverses it', function () {
+  const ids = NOTE_STARTERS.map(t => t.id);
+  notes = NOTE_STARTERS.map((t, i) => ({ id: t.id, title: t.title, body: t.body, template: true, folderId: NOTES_DEFAULT_FOLDER, createdAt: 1000 + i, updatedAt: 1000 + i }));
+  deletedNoteIds = [];
+  assertEqual(noteStartersMissing().length, 0, 'nothing is missing at first');
+  notes = notes.filter(n => n.id !== 'nt-raci'); tombstone(deletedNoteIds, 'nt-raci');            // deleted for good
+  notes.find(n => n.id === 'nt-journal').deletedAt = Date.now();                                   // in Recently Deleted
+  notes.find(n => n.id === 'nt-checklist').body = '<p>mine</p>';                                   // edited
+  assertDeepEqual(noteStartersMissing().map(t => t.id).sort(), ['nt-journal', 'nt-raci'], 'the deleted and the trashed one are missing');
+  noteRestoreStarters();
+  assertEqual(noteStartersMissing().length, 0, 'both are back');
+  assertFalse(deletedNoteIds.some(x => x.id === 'nt-raci'), 'the tombstone is gone');
+  assertEqual(notes.find(n => n.id === 'nt-checklist').body, '<p>mine</p>', 'an edited starter is not touched');
+  assertTrue(noteStarterEdited(notes.find(n => n.id === 'nt-checklist')) && !noteStarterEdited(notes.find(n => n.id === 'nt-raci')), 'only the edited starter offers Reset to Original');
+  toastUndoAction();
+  assertDeepEqual(noteStartersMissing().map(t => t.id).sort(), ['nt-journal', 'nt-raci'], 'Undo puts both back where they were');
+  noteRestoreStarters(); noteResetStarter('nt-checklist');
+  assertEqual(notes.find(n => n.id === 'nt-checklist').body, NOTE_STARTERS.find(t => t.id === 'nt-checklist').body, 'Reset to Original restores the starter text');
+});
+
+test('the restore item only shows while a starter is missing (hide, do not dim)', function () {
+  assertTrue(/noteStartersMissing\(\)\.length \? item\('fa-solid fa-rotate-left', 'Restore Starter Templates'/.test(openNoteTemplateMenu.toString()), 'in the New-from-template menu');
+  assertTrue(/noteStartersMissing\(\)\.length \? item\('fa-solid fa-rotate-left', 'Restore Starter Templates'/.test(smartViewMenuHtml.toString()), 'in the Templates row menu');
+});

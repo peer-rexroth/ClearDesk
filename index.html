@@ -2846,7 +2846,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong>, <strong>Notes</strong> and <strong>Prompts</strong> with the three icons at the top of the sidebar (a circled check, a note and curly braces; hover one for its name) or with <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
-          <div class="help-row"><i class="fa-regular fa-template"></i><span><strong>Templates</strong>: the arrow beside the compose button (<strong>New from Template</strong>) makes a new note from a template; <strong>Save as Template</strong> in a note’s menu turns the note into one. Templates are ordinary notes, kept under <em>Templates</em> in the sidebar and out of All Notes; edit them there. In a template, <code>{{date}}</code>, <code>{{weekday}}</code> and <code>{{time}}</code> are filled in, and <code>{{cursor}}</code> marks where the cursor lands.</span></div>
+          <div class="help-row"><i class="fa-regular fa-template"></i><span><strong>Templates</strong>: the arrow beside the compose button (<strong>New from Template</strong>) makes a new note from a template; <strong>Save as Template</strong> in a note’s menu turns the note into one. Templates are ordinary notes, kept under <em>Templates</em> in the sidebar and out of All Notes; edit them there. In a template, <code>{{date}}</code>, <code>{{weekday}}</code> and <code>{{time}}</code> are filled in, and <code>{{cursor}}</code> marks where the cursor lands. <strong>Restore Starter Templates</strong>: if you deleted one of the built-in templates, it comes back from the arrow next to New Note or from the right-click menu of <em>Templates</em> (an item that only shows while one is missing). A built-in template you changed can be set back with <em>Reset to Original</em> in its right-click menu.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading, Quote, Code), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
@@ -7477,7 +7477,7 @@ function noteMenuHtml(id, opts){
     rowMenuSub('fa-solid fa-arrow-up-from-bracket', 'Export', menuOpt(`noteMenuRun('exportas','plain')`, {svg: menuSvg('file-lines')}, 'Plain Text (.txt)') + menuOpt(`noteMenuRun('exportas','markdown')`, {svg: menuSvg('file-lines')}, 'Markdown (.md)') + menuOpt(`noteMenuRun('exportas','html')`, {svg: menuSvg('file-lines')}, 'HTML (.html)') + menuOpt(`noteMenuRun('print')`, {svg: menuSvg('print')}, 'Print / Save as PDF…') + '<div class="row-menu-sep"></div>' + menuOpt(`noteMenuRun('exportas','json')`, {svg: menuSvg('file-lines')}, 'Note File (.json)')),
     sep,
     item('fa-regular fa-duplicate', 'Duplicate', `noteMenuRun('clone')`),
-    ...(n.template ? [item('fa-regular fa-template', 'New Note from Template', `noteMenuRun('usetpl')`)] : [item('fa-regular fa-template', 'Save as Template', `noteMenuRun('savetpl')`)]),
+    ...(n.template ? [item('fa-regular fa-template', 'New Note from Template', `noteMenuRun('usetpl')`), ...(noteStarterEdited(n) ? [item('fa-solid fa-rotate-left', 'Reset to Original', `noteMenuRun('resettpl')`)] : [])] : [item('fa-regular fa-template', 'Save as Template', `noteMenuRun('savetpl')`)]),
     ...(noteSortKey==='manual' ? (()=>{ const g = noteReorderGroup(n), at = g.findIndex(x=>x.id===n.id); return [sep, item('fa-solid fa-arrow-up', 'Move Up', `noteMenuRun('up')`, {off: at<=0}), item('fa-solid fa-arrow-down', 'Move Down', `noteMenuRun('down')`, {off: at===-1 || at>=g.length - 1})]; })() : []),
     (n.locked ? rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts).replace('class="row-menu-item sub-parent"', 'class="row-menu-item sub-parent" disabled title="Unlock the note to move it"').replace(MENU_CHEVRON, 'Unlock First') : rowMenuSub('fa-regular fa-folder', 'Move to', moveOpts)),
     sep,
@@ -7508,6 +7508,7 @@ function noteMenuRun(kind, value){
   else if(kind==='restore') restoreNote(id);
   else if(kind==='clone') cloneNote(id);
   else if(kind==='usetpl') noteFromTemplate(id);
+  else if(kind==='resettpl') noteResetStarter(id);
   else if(kind==='savetpl') noteSaveAsTemplate(id);
   else if(kind==='move') moveNote(id, value);
   else if(kind==='delete') deleteNote(id);
@@ -7607,7 +7608,7 @@ let smartMenuKind = null;
 function smartViewMenuHtml(kind){
   const item = rowMenuItem;
   if(kind==='notes-all' || kind==='notes-pinned') return item('fa-solid fa-plus', 'New Note Here', `smartViewMenuRun('newnote')`);
-  if(kind==='notes-templates') return item('fa-solid fa-plus', 'New Template Here', `smartViewMenuRun('newnote')`);
+  if(kind==='notes-templates') return item('fa-solid fa-plus', 'New Template Here', `smartViewMenuRun('newnote')`) + (noteStartersMissing().length ? item('fa-solid fa-rotate-left', 'Restore Starter Templates', `smartViewMenuRun('restorestarters')`) : '');
   if(kind==='prompts-all' || kind==='prompts-favorites') return item('fa-solid fa-plus', 'New Prompt Here', `smartViewMenuRun('newprompt')`);
   if(kind==='tasks-trash' || kind==='notes-trash' || kind==='prompts-trash'){   // Recently Deleted rows: the one thing to do is empty it (nothing to offer while it is empty)
     const n = kind==='tasks-trash' ? trashedTasks.length : kind==='notes-trash' ? notes.filter(noteTrashed).length : prompts.filter(promptTrashed).length;
@@ -7633,6 +7634,7 @@ function smartViewMenuRun(op){
   const kind = smartMenuKind; closeRowMenu(); smartMenuKind = null;
   if(!kind) return;
   if(op==='emptytrash'){ (kind==='tasks-trash' ? emptyTaskTrash : kind==='notes-trash' ? emptyTrash : emptyPromptTrash)(); return; }
+  if(op==='restorestarters'){ noteRestoreStarters(); return; }
   if(op==='newnote'){ setNoteFolder(kind==='notes-pinned' ? 'pinned' : kind==='notes-templates' ? 'templates' : 'all'); createNote(); return; }
   if(op==='newprompt'){ setPromptFolder(kind==='prompts-favorites' ? 'favorites' : 'all'); createPrompt(); return; }
   if(op==='today'){ bulkSetDueDate(todayStr(), tasks.filter(isOverdue).map(t=>t.id)); return; }
@@ -7999,6 +8001,38 @@ function noteSaveAsTemplate(id){
   notes.push(t); save(); renderNotesSidebar();
   showToast(`Saved as a template: ${t.title}`, false, ()=>{ const i = notes.findIndex(x=>x.id===t.id); if(i>=0){ notes.splice(i, 1); tombstone(deletedNoteIds, t.id); } save(); render(); showToast('Template removed'); });
 }
+// The bundled starters can be brought back: one that was deleted (or is in Recently Deleted) returns as new; one you edited is only reset when you ask for that template ("Reset to Original").
+const noteStarterOf = n=>n && n.template===true ? NOTE_STARTERS.find(t=>t.id===n.id) : null;
+const noteStarterEdited = n=>{ const t = noteStarterOf(n); return !!t && !noteTrashed(n) && (n.title!==t.title || n.body!==t.body); };
+function noteStartersMissing(){ return NOTE_STARTERS.filter(t=>!notes.some(n=>n.id===t.id && n.template===true && !noteTrashed(n))); }
+function noteRestoreStarters(){
+  const missing = noteStartersMissing();
+  flushNoteEdit(); const now = Date.now(), added = [], untrashed = [];
+  missing.forEach((t, i)=>{
+    const ex = notes.find(n=>n.id===t.id);
+    if(ex){ if(noteTrashed(ex) && ex.template===true){ untrashed.push({ id:ex.id, deletedAt:ex.deletedAt }); delete ex.deletedAt; ex.updatedAt = now; } return; }
+    untombstone(deletedNoteIds, t.id);
+    notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added.push(t.id);
+  });
+  const n = added.length + untrashed.length;
+  if(!n){ showToast('All starter templates are already there'); return; }
+  save(); render();
+  showToast(`Restored ${n} starter template${n===1 ? '' : 's'}`, false, ()=>{
+    added.forEach(id=>{ const i = notes.findIndex(x=>x.id===id); if(i>=0){ notes.splice(i, 1); tombstone(deletedNoteIds, id); } });
+    untrashed.forEach(u=>{ const x = notes.find(y=>y.id===u.id); if(x){ x.deletedAt = u.deletedAt; x.updatedAt = Date.now(); } });
+    save(); render(); showToast('Restore undone');
+  });
+}
+function noteResetStarter(id){
+  const n = notes.find(x=>x.id===id), t = noteStarterOf(n); if(!n || !t) return;
+  flushNoteEdit(); const prev = { title:n.title, body:n.body, updatedAt:n.updatedAt };
+  n.title = t.title; n.body = t.body; n.updatedAt = Date.now(); noteEditorId = null;
+  save(); render();
+  showToast(`${t.title} reset to the original`, false, ()=>{
+    const x = notes.find(y=>y.id===id); if(!x) return;
+    x.title = prev.title; x.body = prev.body; x.updatedAt = Date.now(); noteEditorId = null; save(); render(); showToast('Reset undone');
+  });
+}
 function openNoteTemplateMenu(e){
   e.preventDefault(); e.stopPropagation();
   const menu = document.getElementById('rowMenu'); if(!menu) return;
@@ -8010,7 +8044,8 @@ function openNoteTemplateMenu(e){
     ...tpls.map(t=>item('fa-regular fa-template', esc(t.title || 'Untitled'), `closeRowMenu();noteFromTemplate('${t.id}')`)),
     tpls.length ? sep : '',
     item('fa-solid fa-plus', 'Blank Note', `closeRowMenu();createNote()`, {hint:'N'}),
-    item('fa-regular fa-template', 'Manage Templates', `closeRowMenu();setNoteFolder('templates')`)
+    item('fa-regular fa-template', 'Manage Templates', `closeRowMenu();setNoteFolder('templates')`),
+    noteStartersMissing().length ? item('fa-solid fa-rotate-left', 'Restore Starter Templates', `closeRowMenu();noteRestoreStarters()`) : ''
   ].join(''));
   const r = e.currentTarget.getBoundingClientRect();
   menu.classList.add('open'); placeRowMenu(menu, r.left, r.bottom + 4, e.currentTarget);
