@@ -64,3 +64,7 @@ test('the compose button and the template arrow are styled as one joined capsule
   var css = tokScanCss();
   assertTrue(/\.note-new-btn:has\(\+ \.note-tpl-btn\)/.test(css) && /\.note-more-btn\.note-tpl-btn \{[^}]*margin-left: -6px/.test(css), 'the joined-capsule rules exist');
 });
+
+test('the last line of a board card (the subtask field, or the last subtask row) keeps clear of the floating ⋯ disc', function () {
+  assertTrue(/\.board-card \.task-subtask-add-row[^{]*\{ padding-right: 30px; \}/.test(tokScanCss()), 'the add row reserves room for the ⋯ button');
+});
