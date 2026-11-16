@@ -7855,7 +7855,7 @@ function renderNoteEditor(){
       body.replaceWith(fresh); body = fresh; noteSavedRange = null;
       if(had) fresh.focus();
     }
-    title.value = n.title; body.innerHTML = n.body; noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
+    title.value = n.title; body.innerHTML = n.body; noteLiftTablesOutOfHeadings(body); noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
     if(!body.firstElementChild && !body.textContent) body.innerHTML = '<p><br></p>';             // an empty note starts with its paragraph (see noteEnsureParagraph)
     noteWrapLeadingInline(body);                                            // a first line stored as loose text becomes a paragraph, so its spacing matches the others
     noteAutoLinkDom(body);                                                  // links, e-mail addresses and phone numbers in existing text
@@ -10876,6 +10876,18 @@ function noteTableNextWidth(table, dir){
   const lower = NOTE_TABLE_WIDTH_STEPS.filter(x=>x < w - 0.5 && x>=lowest);
   return lower.length ? lower[lower.length - 1] : null;
 }
+// A table must never sit inside a heading (its cells would be drawn in the heading's size and weight). Chrome puts an inserted block inside an EMPTY heading (the line you get by pressing Enter at the start of one), so the table is lifted out: the heading goes if it held nothing else, otherwise the table follows it.
+function noteLiftTablesOutOfHeadings(root){
+  let changed = false;
+  root.querySelectorAll('h1 table, h2 table, h3 table, h4 table, h5 table, h6 table').forEach(t=>{
+    const h = t.closest('h1, h2, h3, h4, h5, h6'); if(!h || !root.contains(h)) return;
+    const own = h.cloneNode(true); own.querySelectorAll('table').forEach(x=>x.remove());
+    if(!own.textContent.trim()){ while(h.firstChild) h.before(h.firstChild); h.remove(); }
+    else h.after(t);
+    changed = true;
+  });
+  return changed;
+}
 function noteTableInsert(rows, cols){
   rows = Math.max(1, Math.min(NOTE_TABLE_MAX, rows|0)); cols = Math.max(1, Math.min(NOTE_TABLE_MAX, cols|0));
   closeNoteTableMenu();
@@ -10889,7 +10901,10 @@ function noteTableInsert(rows, cols){
     if(!nx || nx.tagName==='TABLE' || nx.tagName==='PRE'){ nx = document.createElement('p'); nx.innerHTML = '<br>'; pre.after(nx); }
     const r = document.createRange(); r.setStart(nx, 0); r.collapse(true); sel0.removeAllRanges(); sel0.addRange(r);
   }
+  const hd = sel0 && sel0.rangeCount ? ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'].map(t=>noteClosest(sel0.anchorNode, t)).find(Boolean) : null;
+  if(hd && !hd.textContent.trim()) document.execCommand('formatBlock', false, 'p');                 // an empty heading line becomes a plain line before the table goes in
   document.execCommand('insertHTML', false, noteTableHtml(rows, cols));
+  noteLiftTablesOutOfHeadings(body);
   const fresh = [...body.querySelectorAll('table')].find(t=>!before.has(t));
   if(fresh) noteCaretIn(fresh.rows[0].cells[0]);
   onNoteInput(); updateNoteToolbarState();

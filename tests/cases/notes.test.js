@@ -1187,3 +1187,9 @@ test('the restore item only shows while a starter is missing (hide, do not dim)'
   assertTrue(/noteStartersMissing\(\)\.length \? item\('fa-solid fa-rotate-left', 'Restore Starter Templates'/.test(openNoteTemplateMenu.toString()), 'in the New-from-template menu');
   assertTrue(/noteStartersMissing\(\)\.length \? item\('fa-solid fa-rotate-left', 'Restore Starter Templates'/.test(smartViewMenuHtml.toString()), 'in the Templates row menu');
 });
+
+test('a table is never left inside a heading: an empty heading line becomes a paragraph first, and a stray one is lifted out on insert and on open', function () {
+  const ins = noteTableInsert.toString();
+  assertTrue(/formatBlock', false, 'p'/.test(ins) && /noteLiftTablesOutOfHeadings\(body\)/.test(ins), 'the insert path converts an empty heading line and checks the result');
+  assertTrue(/noteLiftTablesOutOfHeadings/.test(renderNoteEditor ? renderNoteEditor.toString() : ''), 'a note that already has the problem is repaired when it is opened');
+});
