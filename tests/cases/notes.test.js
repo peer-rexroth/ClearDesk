@@ -1133,7 +1133,7 @@ test('templates: placeholders {{date}} {{weekday}} {{time}} are filled (case-ins
 });
 
 test('templates: the starters are ordinary sanitized notes with fixed ids, ', function () {
-  assertTrue(NOTE_STARTERS.length >= 6); assertFalse(NOTE_STARTERS.some(function (t) { return t.id === 'nt-daily'; }), 'no Daily starter: there is no Today any more');
+  assertEqual(NOTE_STARTERS.length, 2, 'the bundle is the Checklist and the Vacation Handover'); assertFalse(NOTE_STARTERS.some(function (t) { return t.id === 'nt-daily'; }), 'no Daily starter: there is no Today any more');
   NOTE_STARTERS.forEach(function (t) { assertEqual(sanitizeNoteHtml(t.body), t.body, t.title + ' survives the sanitizer unchanged'); });
   assertEqual(new Set(NOTE_STARTERS.map(function (t) { return t.id; })).size, NOTE_STARTERS.length);
 });
@@ -1161,23 +1161,26 @@ test('the Vacation Handover starter has the five sections, four tables with the 
 });
 
 test('Restore Starter Templates brings back deleted and trashed starters, leaves edited ones alone, and Undo reverses it', function () {
-  const ids = NOTE_STARTERS.map(t => t.id);
-  notes = NOTE_STARTERS.map((t, i) => ({ id: t.id, title: t.title, body: t.body, template: true, folderId: NOTES_DEFAULT_FOLDER, createdAt: 1000 + i, updatedAt: 1000 + i }));
-  deletedNoteIds = [];
+  assertDeepEqual(NOTE_STARTERS.map(t => t.id), ['nt-checklist', 'nt-handover'], 'the bundle is the Checklist and the Vacation Handover');
+  const fresh = () => { notes = NOTE_STARTERS.map((t, i) => ({ id: t.id, title: t.title, body: t.body, template: true, folderId: NOTES_DEFAULT_FOLDER, createdAt: 1000 + i, updatedAt: 1000 + i })); deletedNoteIds = []; };
+  fresh();
   assertEqual(noteStartersMissing().length, 0, 'nothing is missing at first');
-  notes = notes.filter(n => n.id !== 'nt-raci'); tombstone(deletedNoteIds, 'nt-raci');            // deleted for good
-  notes.find(n => n.id === 'nt-journal').deletedAt = Date.now();                                   // in Recently Deleted
-  notes.find(n => n.id === 'nt-checklist').body = '<p>mine</p>';                                   // edited
-  assertDeepEqual(noteStartersMissing().map(t => t.id).sort(), ['nt-journal', 'nt-raci'], 'the deleted and the trashed one are missing');
+  notes = notes.filter(n => n.id !== 'nt-handover'); tombstone(deletedNoteIds, 'nt-handover');   // deleted for good
+  notes.find(n => n.id === 'nt-checklist').body = '<p>mine</p>';                                  // edited
+  assertDeepEqual(noteStartersMissing().map(t => t.id), ['nt-handover'], 'only the deleted one is missing');
   noteRestoreStarters();
-  assertEqual(noteStartersMissing().length, 0, 'both are back');
-  assertFalse(deletedNoteIds.some(x => x.id === 'nt-raci'), 'the tombstone is gone');
+  assertEqual(noteStartersMissing().length, 0, 'it is back');
+  assertFalse(deletedNoteIds.some(x => x.id === 'nt-handover'), 'the tombstone is gone');
   assertEqual(notes.find(n => n.id === 'nt-checklist').body, '<p>mine</p>', 'an edited starter is not touched');
-  assertTrue(noteStarterEdited(notes.find(n => n.id === 'nt-checklist')) && !noteStarterEdited(notes.find(n => n.id === 'nt-raci')), 'only the edited starter offers Reset to Original');
+  assertTrue(noteStarterEdited(notes.find(n => n.id === 'nt-checklist')) && !noteStarterEdited(notes.find(n => n.id === 'nt-handover')), 'only the edited starter offers Reset to Original');
   toastUndoAction();
-  assertDeepEqual(noteStartersMissing().map(t => t.id).sort(), ['nt-journal', 'nt-raci'], 'Undo puts both back where they were');
+  assertDeepEqual(noteStartersMissing().map(t => t.id), ['nt-handover'], 'Undo puts it back where it was');
   noteRestoreStarters(); noteResetStarter('nt-checklist');
   assertEqual(notes.find(n => n.id === 'nt-checklist').body, NOTE_STARTERS.find(t => t.id === 'nt-checklist').body, 'Reset to Original restores the starter text');
+  fresh(); notes.find(n => n.id === 'nt-checklist').deletedAt = Date.now();                       // in Recently Deleted
+  assertDeepEqual(noteStartersMissing().map(t => t.id), ['nt-checklist'], 'a trashed starter counts as missing');
+  noteRestoreStarters();
+  assertFalse(noteTrashed(notes.find(n => n.id === 'nt-checklist')), 'and comes back out of Recently Deleted');
 });
 
 test('the restore item only shows while a starter is missing (hide, do not dim)', function () {
