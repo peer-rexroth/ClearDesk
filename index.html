@@ -4316,6 +4316,7 @@ function handleBoardDragOver(e, projectId){
   e.currentTarget.classList.add('drag-over');
 }
 function handleBoardDragLeave(e){
+  if(e.relatedTarget && e.currentTarget.contains(e.relatedTarget)) return;   // dragleave also fires when the pointer moves onto a card or a child inside the column: that is not leaving it (it made the drop state flicker)
   e.currentTarget.classList.remove('drag-over');
 }
 function handleBoardDrop(e, projectId){

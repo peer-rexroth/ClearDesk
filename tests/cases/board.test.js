@@ -272,3 +272,7 @@ test('rebuilding the board keeps each column\'s scroll position (adding a subtas
   const src = renderBoard.toString();
   assertTrue(/keepScroll/.test(src) && /scrollTop = y/.test(src), 'renderBoard saves and restores the column scroll');
 });
+
+test('a drag moving between children inside a column does not drop the column\'s drop state (no flicker)', function () {
+  assertTrue(/relatedTarget[\s\S]*contains\(e\.relatedTarget\)\) return/.test(handleBoardDragLeave.toString()), 'dragleave into a child is ignored');
+});
