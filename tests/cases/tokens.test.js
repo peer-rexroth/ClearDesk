@@ -72,3 +72,6 @@ test('the last line of a board card (the subtask field, or the last subtask row)
 test('the board tile\'s ⋯ disc has no border (a fill only, like the other round buttons)', function () {
   assertTrue(/\.board-card > \.row-actions \{[^}]*border: 0;/.test(tokScanCss()), 'borderless');
 });
+test('a collapsed board card with only a title keeps the fold chevron and the more button apart', function(){
+  assertTrue(/\.board-card-titlerow \+ \.board-card-prog \{ margin-top: 8px; \}/.test(tokScanCss()), 'the progress row sits 8px lower');
+});

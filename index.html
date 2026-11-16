@@ -1366,6 +1366,7 @@ const ICONS = {
   /* the floating ⋯ disc sits in the card's bottom-right corner: the last line of a card (the subtask field, or the last subtask row) keeps clear of it */
   .board-card .task-subtask-add-row, .board-card > .task-subtasks > .task-subtask-row:last-child { padding-right: 30px; }
   .board-card-prog { display: flex; align-items: center; gap: 8px; font-size: var(--fs-11); color: var(--text-3); padding-right: 30px; }   /* clear of the round more button that floats in the card's bottom-right corner on hover */
+  .board-card-titlerow + .board-card-prog { margin-top: 8px; }   /* a collapsed card with only a title: the fold chevron (top) and the round more button (bottom) get 8px between them instead of touching */
   .board-card-prog .bar { flex: 1 1 auto; height: 4px; border-radius: var(--r-xs); background: var(--cap-hover); overflow: hidden; }
   .board-card-prog .bar i { display: block; height: 100%; background: var(--purple-text); }   /* the status colours (DESIGN §7): purple while in progress, green when done; the accent is reserved for selection, links and the primary button */
   .board-card-prog.full .bar i { background: var(--green-text); }
