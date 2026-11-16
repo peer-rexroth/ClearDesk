@@ -4291,7 +4291,14 @@ function handleCardDragEnd(e){
   document.querySelectorAll('.board-card.dragging').forEach(el=>el.classList.remove('dragging'));
   document.querySelectorAll('.board-col.drag-over').forEach(el=>el.classList.remove('drag-over'));
 }
+// On the board a subtask / step / sub-step belongs to its own card: another card's rows, and the columns, are not drop targets for it.
+function boardCardIdOf(el){ const c = el && el.closest && el.closest('.board-card'); return c ? c.dataset.id : null; }
+function dragIsForeignCard(e){
+  const own = (draggedItem && draggedItem.cardId) || (draggedSubstep && draggedSubstep.cardId);
+  return !!own && boardCardIdOf(e.currentTarget) !== own;
+}
 function handleBoardDragOver(e, projectId){
+  if(!draggingTaskId) return;   // a subtask / step drag is not a card drag: columns offer no drop for it
   const t = draggingTaskId && tasks.find(x=>x.id===draggingTaskId);
   if(t && (t.projectId===projectId || t.status===projectId)){   // the card's own column: nothing to move, so no drop state and the not-allowed pointer
     e.currentTarget.classList.remove('drag-over');
@@ -5851,6 +5858,7 @@ function handleProjectDrop(e, targetId){
 // ── Subtask reordering ────────────────────────────────────────────────────────
 function handleHierarchyDragStart(e, type, subId, stepId){
   draggedItem = type==='subtask' ? {type, subId} : {type, subId, stepId};
+  draggedItem.cardId = boardCardIdOf(e.currentTarget);
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', stepId||subId);
   e.currentTarget.classList.add('dragging');
@@ -5868,6 +5876,7 @@ function isNoOpHierarchyTarget(targetType, targetSubId, targetStepId){
   return false;
 }
 function handleHierarchyDragOver(e, targetType, targetSubId, targetStepId){
+  if((draggedItem||draggedSubstep) && dragIsForeignCard(e)){ denySubstepDrop(e); return; }   // board: never onto another card
   if(draggedSubstep){ denySubstepDrop(e); return; }   // a sub-step never moves onto a subtask or step row
   if(isNoOpHierarchyTarget(targetType, targetSubId, targetStepId)) return;
   e.preventDefault();
@@ -5960,6 +5969,7 @@ function handleHierarchyDrop(e, taskId, targetType, targetSubId, targetStepId){
 let draggedSubstep = null; // {taskId, subId, stepId, substepId}
 function handleSubstepDragStart(e, taskId, subId, stepId, substepId){
   draggedSubstep = {taskId, subId, stepId, substepId};
+  draggedSubstep.cardId = boardCardIdOf(e.currentTarget);
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', substepId);
   e.currentTarget.classList.add('dragging');
@@ -5978,6 +5988,7 @@ function denySubstepDrop(e){
   e.currentTarget.classList.add('drag-denied');
 }
 function handleSubstepDragOver(e, stepId, substepId){
+  if(draggedSubstep && dragIsForeignCard(e)){ denySubstepDrop(e); return; }
   if(draggedSubstep && draggedSubstep.stepId!==stepId){ denySubstepDrop(e); return; }
   if(!draggedSubstep || draggedSubstep.substepId===substepId) return;
   e.preventDefault();

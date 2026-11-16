@@ -256,3 +256,10 @@ test('the card drag handler leaves a drag that starts inside the subtasks alone 
   const src = handleCardDragStart.toString();
   assertTrue(/closest\('\.task-subtasks'\)\) return;/.test(src) && !/preventDefault/.test(src), 'it returns without cancelling');
 });
+
+test('a subtask drag on the board offers no drop outside its own card (columns and other cards deny it)', function () {
+  assertTrue(/if\(!draggingTaskId\) return;/.test(handleBoardDragOver.toString()), 'columns ignore drags that are not a card drag');
+  assertTrue(/dragIsForeignCard\(e\)/.test(handleHierarchyDragOver.toString()), 'subtask/step rows of another card deny');
+  assertTrue(/dragIsForeignCard\(e\)/.test(handleSubstepDragOver.toString()), 'sub-step rows of another card deny');
+  assertTrue(/cardId = boardCardIdOf/.test(handleHierarchyDragStart.toString()) && /cardId = boardCardIdOf/.test(handleSubstepDragStart.toString()), 'the drag remembers its card');
+});
