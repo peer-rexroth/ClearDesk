@@ -124,7 +124,7 @@ test('a scrolling board column makes its cards ignore the pointer (no hover repa
 test('board subtasks are indented to the title\'s text column (28px = the checkbox column), and a step is a further 21px in', function () {
   const t = { id: 't1', title: 'Parent', projectId: 'proj-inbox', status: 'todo', priority: 'medium', tags: [], dueDate: null, repeat: 'none', createdAt: 1, updatedAt: 1, subtasks: [{ id: 's1', text: 'Sub', done: false, subtasks: [{ id: 'ss1', text: 'Step', done: false, subtasks: [] }] }] };
   const h = boardCardHtml(t);
-  assertIncludes(h, '<div class="task-subtasks ind-28">', 'the first level');
+  assertIncludes(h, '<div class="task-subtasks ind-28"', 'the first level');
   assertIncludes(h, '<div class="task-subtasks ind-21">', 'steps step in from there');
 });
 
@@ -238,4 +238,21 @@ test('the undo toast after a board move says what changed (project, status, prio
 
 test('the column add row and the top quick-add field use the same phrase', function () {
   assertTrue(boardAddRowHtml('proj-work').includes('<span>Add a task</span>'), 'row label is "Add a task"');
+});
+
+test('board subtasks, steps and sub-steps can be dragged like in the list; the card does not start its own drag from inside them', function () {
+  tasks = [{ id: 'bt', title: 'P', projectId: 'proj-work', status: 'todo', priority: 'medium', tags: [], subtasks: [{ id: 'bs1', text: 'S', done: false, subtasks: [{ id: 'bss1', text: 'St', done: false, subtasks: [{ id: 'bsss1', text: 'Ss', done: false, subtasks: [] }] }] }] }];
+  collapsedTaskIds.clear(); collapsedSubIds.clear(); collapsedSubSubIds.clear();
+  const h = boardCardHtml(tasks[0]);
+  assertIncludes(h, "handleHierarchyDragStart(event,'subtask','bs1')", 'a subtask row drags');
+  assertIncludes(h, "handleHierarchyDragStart(event,'step','bs1','bss1')", 'a step row drags');
+  assertIncludes(h, "handleSubstepDragStart(event,'bt','bs1','bss1','bsss1')", 'a sub-step row drags');
+  assertIncludes(h, "ondrop=\"handleHierarchyDrop(event,'bt','subtask','bs1')\"", 'and drops');
+  assertIncludes(h, 'onmousedown="boardSubDragArm(this)"', 'pressing in the subtask area switches the card drag off');
+  assertTrue(/closest\('\.task-subtasks'\)/.test(handleCardDragStart.toString()), 'a drag that starts in the subtasks never moves the card');
+});
+
+test('the card drag handler leaves a drag that starts inside the subtasks alone (no preventDefault: that would cancel the row drag)', function () {
+  const src = handleCardDragStart.toString();
+  assertTrue(/closest\('\.task-subtasks'\)\) return;/.test(src) && !/preventDefault/.test(src), 'it returns without cancelling');
 });

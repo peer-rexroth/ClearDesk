@@ -68,3 +68,7 @@ test('the compose button and the template arrow are styled as one joined capsule
 test('the last line of a board card (the subtask field, or the last subtask row) keeps clear of the floating ⋯ disc', function () {
   assertTrue(/\.board-card \.task-subtask-add-row[^{]*\{ padding-right: 30px; \}/.test(tokScanCss()), 'the add row reserves room for the ⋯ button');
 });
+
+test('the board tile\'s ⋯ disc has no border (a fill only, like the other round buttons)', function () {
+  assertTrue(/\.board-card > \.row-actions \{[^}]*border: 0;/.test(tokScanCss()), 'borderless');
+});

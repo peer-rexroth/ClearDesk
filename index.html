@@ -1342,7 +1342,7 @@ const ICONS = {
   /* the capsule is centred on the task-main cell, which is 1px off the solid band's centre: plain row 1px high, row with subtasks (band 5px up / 3px down) 1px low */
   .task-row > .task-main > .row-actions { top: calc(50% + 1px); }
   .task-row.has-subs > .task-main > .row-actions { top: calc(50% - 1px); }
-  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; padding: 0; width: 26px; height: 26px; border-radius: 50%; justify-content: center; gap: 0; }   /* one round button: a circle, not a capsule with a second shape inside it */
+  .board-card > .row-actions { top: auto; bottom: 6px; right: 6px; transform: none; padding: 0; width: 26px; height: 26px; border: 0; border-radius: 50%; justify-content: center; gap: 0; }   /* one round button: a circle, not a capsule with a second shape inside it */
   .board-card > .row-actions .icon-btn { width: 100%; height: 100%; padding: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; }   /* just the more button, so little can be covered */   /* a floating corner capsule: it never changes the card's height, and only hides what is under it while you point at the card */
   /* the tile: title first, one quiet secondary line, then the tags */
   .board-card-top { gap: 8px; }
@@ -2848,7 +2848,7 @@ const ICONS = {
           <div class="help-list">
           <div class="help-row"><i class="fa-regular fa-note-sticky"></i><span>Switch between <strong>Tasks</strong>, <strong>Notes</strong> and <strong>Prompts</strong> with the three icons at the top of the sidebar (a circled check, a note and curly braces; hover one for its name) or with <kbd>Option</kbd>+<kbd>Cmd</kbd>+<kbd>1</kbd> / <kbd>2</kbd> / <kbd>3</kbd>. Notes are kept in <strong>folders</strong>: the sidebar lists <em>All Notes</em>, <em>Pinned</em> (every pinned note, from any folder) and your folders, the middle column lists the notes (newest edit first) and the right side is the editor.</span></div>
           <div class="help-row"><i class="fa-solid fa-plus"></i><span><strong>New note</strong>: the <em>New</em> button, or <kbd>N</kbd>. Give it a title and start typing — it saves as you type. A note you leave completely empty is removed again.</span></div>
-          <div class="help-row"><i class="fa-regular fa-template"></i><span><strong>Templates</strong>: the arrow beside the compose button (<strong>New from Template</strong>) makes a new note from a template; <strong>Save as Template</strong> in a note’s menu turns the note into one. Templates are ordinary notes, kept under <em>Templates</em> in the sidebar and out of All Notes; edit them there. In a template, <code>{{date}}</code>, <code>{{weekday}}</code> and <code>{{time}}</code> are filled in, and <code>{{cursor}}</code> marks where the cursor lands. <strong>Restore Starter Templates</strong>: if you deleted one of the built-in templates, it comes back from the arrow next to New Note or from the right-click menu of <em>Templates</em> (an item that only shows while one is missing). A built-in template you changed can be set back with <em>Reset to Original</em> in its right-click menu.</span></div>
+          <div class="help-row"><i class="fa-regular fa-template"></i><span><strong>Templates</strong>: the arrow beside the compose button (<strong>New from Template</strong>) makes a new note from a template; <strong>Save as Template</strong> in a note’s menu turns the note into one. Templates are ordinary notes, kept under <em>Templates</em> in the sidebar and out of All Notes; edit them there. In a template, <code>{{date}}</code>, <code>{{weekday}}</code> and <code>{{time}}</code> are filled in, and <code>{{cursor}}</code> marks where the cursor lands. <strong>Restore Starter Templates</strong>: if you deleted one of the built-in templates, it comes back from the arrow next to New Note or from the right-click menu of <em>Templates</em> (an item that only shows while one is missing). The built-in templates come <strong>locked</strong> (read-only): unlock one from its right-click menu to change or delete it. A built-in template you changed can be set back with <em>Reset to Original</em> in its right-click menu.</span></div>
           <div class="help-row"><i class="fa-solid fa-bold"></i><span><strong>Formatting</strong>: the toolbar has a text style (Body, Title, Heading, Subheading, Quote, Code), bold, italic, underline, strikethrough, bulleted and numbered lists, <strong>checklists</strong> (click a circle to tick it), links (<kbd>Cmd/Ctrl</kbd>+<kbd>K</kbd>) and clear formatting. <kbd>Cmd/Ctrl</kbd>+<kbd>B</kbd>, <kbd>Cmd/Ctrl</kbd>+<kbd>I</kbd> and <kbd>Cmd/Ctrl</kbd>+<kbd>U</kbd> work as usual, and <kbd>Tab</kbd> indents a list item. <kbd>Cmd/Ctrl</kbd>+<kbd>click</kbd> opens a link.</span></div>
           <div class="help-row"><i class="fa-solid fa-link"></i><span><strong>Links, e-mail addresses and phone numbers</strong> (also the link button, <kbd>⌘K</kbd>: type a web address, an e-mail address or a phone number; right-click a link to open, copy, edit or remove it) are recognised and linked: a web or e-mail address as soon as you type the space after it, and everything on a line (phone numbers too) when you finish it with <kbd>↵</kbd> or move to another line; also when a note opens. <kbd>⌘</kbd>-click opens one (in a locked note a plain click does). Web addresses open in a new tab, e-mail addresses in your mail app, phone numbers in your phone app.</span></div>
           <div class="help-row"><i class="fa-solid fa-thumbtack"></i><span><strong>Pin a note</strong>: <strong>⋯</strong> → <em>Pin Note</em> (or right-click it in the list) keeps it at the top of its list under a <em>Pinned</em> heading. <em>Unpin Note</em> puts it back.</span></div>
@@ -4079,8 +4079,10 @@ function boardCardHtml(t){
         ${(subTotal>0 && collapsedTaskIds.has(t.id) && inlineAddSubtaskTaskId!==t.id)?`<div class="board-card-prog${subDone===subTotal?' full':''}" title="${subDone} of ${subTotal} subtasks done"><span class="bar"><i style="width:${Math.round(subDone/subTotal*100)}%"></i></span><span class="num">${subDone}/${subTotal}</span></div>`:''}
       </div>
     </div>
-    ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks ind-28">${t.subtasks.map(s=>`
-      <div class="task-subtask-row ${s.done?'done':''}">
+    ${((subTotal>0 && !collapsedTaskIds.has(t.id))||inlineAddSubtaskTaskId===t.id)?`<div class="task-subtasks ind-28" onmousedown="boardSubDragArm(this)">${t.subtasks.map(s=>`
+      <div class="task-subtask-row ${s.done?'done':''}" draggable="true"
+        ondragstart="handleHierarchyDragStart(event,'subtask','${s.id}')" ondragend="handleHierarchyDragEnd(event)"
+        ondragover="handleHierarchyDragOver(event,'subtask','${s.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','subtask','${s.id}')">
         <div class="mini-check ${s.done?'checked':''} ${s.id===justCompletedSubId?'pop':''}" role="checkbox" aria-checked="${s.done}" aria-label="Mark subtask done" tabindex="0" onclick="event.stopPropagation();toggleSubtask('${t.id}','${s.id}')"><i class="fa-solid fa-check"></i></div>
         ${renamingSubtask && renamingSubtask.taskId===t.id && renamingSubtask.subId===s.id
           ? `<input spellcheck="true" type="text" class="task-subtask-text-input" id="renameSubtaskInputBoard" value="${esc(s.text)}" onclick="event.stopPropagation()" onblur="commitRenameSubtask('${t.id}','${s.id}', this.value)" onkeydown="event.stopPropagation(); if(event.key==='Enter'){ this.blur(); } else if(event.key==='Escape'){ event.preventDefault(); cancelRenameSubtask(); } else if(event.key==='Tab'){ event.preventDefault(); this.blur(); }">`
@@ -4088,13 +4090,17 @@ function boardCardHtml(t){
         ${(s.subtasks||[]).length>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleSubCollapse('${s.id}');this.blur()" title="${collapsedSubIds.has(s.id)?'Expand':'Collapse'} steps"><i class="fa-solid fa-chevron-${collapsedSubIds.has(s.id)?'right':'down'}"></i></button>`:''}
       </div>
       ${(((s.subtasks||[]).length>0 && !collapsedSubIds.has(s.id))||(inlineAddSubtaskTaskId===t.id && inlineAddParentSubId===s.id))?`<div class="task-subtasks ind-21">${s.subtasks.map(ss=>`
-        <div class="task-subtask-row ${ss.done?'done':''}">
+        <div class="task-subtask-row ${ss.done?'done':''}" draggable="true"
+          ondragstart="handleHierarchyDragStart(event,'step','${s.id}','${ss.id}')" ondragend="handleHierarchyDragEnd(event)"
+          ondragover="handleHierarchyDragOver(event,'step','${s.id}','${ss.id}')" ondragleave="handleHierarchyDragLeave(event)" ondrop="handleHierarchyDrop(event,'${t.id}','step','${s.id}','${ss.id}')">
           <div class="mini-check ${ss.done?'checked':''} ${ss.id===justCompletedSubSubId?'pop':''}" role="checkbox" aria-checked="${ss.done}" aria-label="Mark subtask done" tabindex="0" onclick="event.stopPropagation();toggleSubSubtask('${t.id}','${s.id}','${ss.id}')"><i class="fa-solid fa-check"></i></div>
           <span onclick="event.stopPropagation()">${highlightMatch(ss.text, searchQuery)}</span>
           ${(ss.subtasks||[]).length>0?`<button class="icon-btn subtask-toggle" onclick="event.stopPropagation();toggleSubSubCollapse('${ss.id}');this.blur()" title="${collapsedSubSubIds.has(ss.id)?'Expand':'Collapse'} sub-steps"><i class="fa-solid fa-chevron-${collapsedSubSubIds.has(ss.id)?'right':'down'}"></i></button>`:''}
         </div>
         ${(ss.subtasks||[]).length>0 && !collapsedSubSubIds.has(ss.id)?`<div class="task-subtasks ind-21">${ss.subtasks.map(sss=>`
-          <div class="task-subtask-row ${sss.done?'done':''}">
+          <div class="task-subtask-row ${sss.done?'done':''}" draggable="true"
+            ondragstart="handleSubstepDragStart(event,'${t.id}','${s.id}','${ss.id}','${sss.id}')" ondragend="handleSubstepDragEnd(event)"
+            ondragover="handleSubstepDragOver(event,'${ss.id}','${sss.id}')" ondragleave="handleSubstepDragLeave(event)" ondrop="handleSubstepDrop(event,'${t.id}','${s.id}','${ss.id}','${sss.id}')">
             <div class="mini-check ${sss.done?'checked':''} ${sss.id===justCompletedSubSubSubId?'pop':''}" role="checkbox" aria-checked="${sss.done}" aria-label="Mark sub-step done" tabindex="0" onclick="event.stopPropagation();toggleSubSubSubtask('${t.id}','${s.id}','${ss.id}','${sss.id}')"><i class="fa-solid fa-check"></i></div>
             <span onclick="event.stopPropagation()">${highlightMatch(sss.text, searchQuery)}</span>
           </div>
@@ -4267,7 +4273,15 @@ function renderBoard(){
   setTaskListHtml(board, html, '.board-card');   // the same rule as the list: no rebuild when nothing changed, and the card under the pointer keeps its button
   updateCollapseAllIcon();
 }
+// A subtask row is draggable inside a draggable card. Pressing in the subtask area turns the card's own drag off until the mouse is released or the drag ends, so the browser can only pick the row (nested draggables are unreliable across browsers).
+function boardSubDragArm(el){
+  const card = el.closest('.board-card'); if(!card) return;
+  card.draggable = false;
+  const back = ()=>{ card.draggable = true; document.removeEventListener('mouseup', back, true); document.removeEventListener('dragend', back, true); };
+  document.addEventListener('mouseup', back, true); document.addEventListener('dragend', back, true);
+}
 function handleCardDragStart(e, id){
+  if(e.target && e.target.closest && e.target.closest('.task-subtasks')) return;   // a drag that starts in the subtasks is the row's own (dragstart bubbles up to the card; cancelling it here would cancel the row's drag too)
   draggingTaskId = id;
   e.dataTransfer.effectAllowed = 'move';
   e.target.closest('.board-card').classList.add('dragging');
@@ -7935,7 +7949,7 @@ const NOTE_STARTERS = [
   })() },
 
 ];
-// First start only (per device): the starter templates. Fixed ids, so devices that sync do not end up with copies, and a starter you deleted (tombstone) stays deleted.
+// First start only (per device): the starter templates. They come locked (read-only until you unlock one to change or delete it). Fixed ids, so devices that sync do not end up with copies, and a starter you deleted (tombstone) stays deleted.
 function seedNoteTemplates(){
   let done = [];
   try{ const v = localStorage.getItem(NOTE_TPL_SEED_KEY); done = v==='1' ? ['nt-meeting', 'nt-checklist', 'nt-journal', 'nt-weekly', 'nt-project', 'nt-daily'] : JSON.parse(v || '[]'); if(!Array.isArray(done)) done = []; }catch(_){ return; }   // '1' = the first six, seeded by the first version
@@ -7946,7 +7960,7 @@ function seedNoteTemplates(){
   const now = Date.now(); let added = false;
   todo.forEach((t, i)=>{
     if(notes.some(n=>n.id===t.id) || deletedNoteIds.some(x=>x.id===t.id)) return;
-    notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added = true;
+    notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, locked:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added = true;
   });
   if(added) save();
 }
@@ -8007,7 +8021,7 @@ function noteRestoreStarters(){
     const ex = notes.find(n=>n.id===t.id);
     if(ex){ if(noteTrashed(ex) && ex.template===true){ untrashed.push({ id:ex.id, deletedAt:ex.deletedAt }); delete ex.deletedAt; ex.updatedAt = now; } return; }
     untombstone(deletedNoteIds, t.id);
-    notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added.push(t.id);
+    notes.push({ id:t.id, title:t.title, body:t.body, folderId:NOTES_DEFAULT_FOLDER, template:true, locked:true, createdAt:now - i, updatedAt:now - i, baseAt:now - i }); added.push(t.id);
   });
   const n = added.length + untrashed.length;
   if(!n){ showToast('All starter templates are already there'); return; }

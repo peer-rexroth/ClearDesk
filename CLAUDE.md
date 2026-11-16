@@ -164,16 +164,19 @@ and they are **deliberately not at feature parity**:
   UI for it, since it's a dedicated single-task editor.
 - **Board view** (`boardCardHtml`, `renderBoard`) — intentionally lighter.
   Subtasks support toggle/rename/add (mirroring list view), but steps and
-  sub-steps are strictly read + toggle-done only — no rename/delete/add/drag
+  sub-steps are read + toggle-done + drag only — no rename/delete/add
   for either on a card. Sub-steps share the same chevron/collapse pattern as
   steps (`collapsedSubSubIds`, the same Set list view uses, so collapsing a
-  step's sub-steps in one view collapses it everywhere). There is also **no
-  drag-and-drop** for subtasks/steps/sub-steps within a card. Reason:
-  `.board-card` is itself `draggable="true"` for column-to-column moves;
-  nesting another `draggable="true"` row inside it is unreliable across
-  browsers. Card height is also a real constraint (kanban columns want
-  roughly uniform heights), which is why steps (and now sub-steps) collapse
-  by default there.
+  step's sub-steps in one view collapses it everywhere). **Subtask, step and sub-step
+  rows drag exactly as in the list view** (the same `handleHierarchyDrag*` / `handleSubstepDrag*`
+  handlers and drop-line CSS; within one task, never onto another card). `.board-card` is itself
+  `draggable="true"` for column moves, and nested draggables are unreliable across browsers, so
+  pressing in the subtask area (`boardSubDragArm`, on the `.task-subtasks ind-28` container) turns
+  the card's own drag off until mouseup / dragend, and `handleCardDragStart` ignores a drag that
+  starts inside `.task-subtasks` WITHOUT calling `preventDefault` (a dragstart bubbles up from the
+  row; cancelling it would cancel the row's drag). Verified in Chromium only (Safari and Firefox
+  are untested). Card height is a real constraint (kanban columns want roughly uniform heights),
+  which is why steps (and sub-steps) collapse by default there.
 
   A card with subtasks also shows a thin progress bar and `done/total` (top-level
   subtasks only; `.board-card-prog`, purple fill like the In Progress status, green when all are done; the accent stays for selection),
@@ -545,6 +548,7 @@ parity.
 - Starters (`NOTE_STARTERS`, fixed ids `nt-*`) are seeded once per device, each starter once (`cleardesk_note_templates_seeded` lists the ids seen, so a new starter reaches existing users); fixed ids plus tombstones keep synced devices from duplicating or resurrecting them.
 - **The board tile's ⋯ disc floats over its bottom-right corner**: anything that runs to the card's right edge on its last line needs `padding-right: 30px` (the subtask field, the progress bar `.board-card-prog`, the last subtask row), or the typed text runs under the button.
 - **No table inside a heading**: Chrome puts an inserted table inside an EMPTY heading (the line you get by pressing Enter at the start of one), and the cells then draw in the heading's size and weight. `noteTableInsert` turns an empty heading line into a paragraph first, and `noteLiftTablesOutOfHeadings` lifts any table out of a heading afterwards and whenever a note is opened (so notes that already have the problem repair themselves on the next edit).
+- **The bundled starters come locked** (`locked:true` in `seedNoteTemplates` and `noteRestoreStarters`): read-only, and they cannot be deleted until unlocked from the note menu or the lock button. A note made from one is an ordinary unlocked note. Devices that already had a starter unlocked keep it as it was.
 - **Restoring starters** (`noteRestoreStarters`, `noteResetStarter`): "Restore Starter Templates" (the arrow menu next to New Note and the Templates row's right-click menu, shown only while a starter is missing) re-adds every deleted starter (clears its tombstone) and un-trashes one in Recently Deleted, leaves edited starters alone, and has an Undo. An edited starter (`noteStarterEdited`: title or body differs from `NOTE_STARTERS`) gets "Reset to Original" in its note menu, also with Undo. A template you made yourself has neither.
 - There is **no Today / daily note** any more (built and removed on request, 2026-11-14): `seedNoteTemplates` removes an unedited `nt-daily` starter, `normalizeNotes` drops a leftover `day` flag; old daily notes stay as normal notes in their "Daily" folder.
 - **Focus ring and `!important`** (audit X-04, 2026-11-15): the global field focus ring (the rule before "Clickable non-<input> things" in the stylesheet) is the only one that wins by `!important`. A field that must draw no ring (a borderless field inside another surface) is added to its `:where(:not(...))` exclusion list; do not give that field's own rule an `!important`. A test caps the stylesheet at 41 `!important` declarations (print, reduced motion, the ring and its replacements, drag-state locks, table pointer locks, selected-row pill colours, the sidebar menu position, the notes toolbar min-width chain). When you lower or raise it, compare screenshots of every screen and every field's mouse and keyboard focus before and after: the audit's check caught real regressions in several candidates it tried (the notes toolbar min-width chain, the sidebar menu position, the subtask ghost-row circle).

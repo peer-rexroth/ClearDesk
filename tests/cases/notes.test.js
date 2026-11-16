@@ -1193,3 +1193,9 @@ test('a table is never left inside a heading: an empty heading line becomes a pa
   assertTrue(/formatBlock', false, 'p'/.test(ins) && /noteLiftTablesOutOfHeadings\(body\)/.test(ins), 'the insert path converts an empty heading line and checks the result');
   assertTrue(/noteLiftTablesOutOfHeadings/.test(renderNoteEditor ? renderNoteEditor.toString() : ''), 'a note that already has the problem is repaired when it is opened');
 });
+
+test('the bundled templates are seeded and restored locked; a note made from one is not', function () {
+  assertTrue(/template:true, locked:true/.test(seedNoteTemplates.toString()), 'first-start seeding locks them');
+  assertTrue(/template:true, locked:true/.test(noteRestoreStarters.toString()), 'Restore Starter Templates locks them too');
+  assertFalse(/locked/.test(noteFromTemplate.toString()), 'a note made from a template does not inherit the lock');
+});
