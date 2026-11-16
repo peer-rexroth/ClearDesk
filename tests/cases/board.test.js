@@ -263,3 +263,12 @@ test('a subtask drag on the board offers no drop outside its own card (columns a
   assertTrue(/dragIsForeignCard\(e\)/.test(handleSubstepDragOver.toString()), 'sub-step rows of another card deny');
   assertTrue(/cardId = boardCardIdOf/.test(handleHierarchyDragStart.toString()) && /cardId = boardCardIdOf/.test(handleSubstepDragStart.toString()), 'the drag remembers its card');
 });
+
+test('every level of a board card has the row menu (no early return for steps and sub-steps)', function () {
+  assertTrue(!/surface==='board' && ref\.level>1\) return/.test(globalThis.__APP_HTML), 'the board no longer skips steps and sub-steps');
+});
+
+test('rebuilding the board keeps each column\'s scroll position (adding a subtask must not jump to the top)', function () {
+  const src = renderBoard.toString();
+  assertTrue(/keepScroll/.test(src) && /scrollTop = y/.test(src), 'renderBoard saves and restores the column scroll');
+});

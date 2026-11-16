@@ -4270,7 +4270,10 @@ function renderBoard(){
       </div>
     </div>`;
   }).join('');
+  const colKey = c=>c.dataset.project || (c.dataset.status ? 'status:'+c.dataset.status : ''), keepScroll = {};
+  board.querySelectorAll('.board-col').forEach(c=>{ const b = c.querySelector('.board-col-body'); if(b && b.scrollTop) keepScroll[colKey(c)] = b.scrollTop; });   // a rebuild would throw every column's scroll away
   setTaskListHtml(board, html, '.board-card');   // the same rule as the list: no rebuild when nothing changed, and the card under the pointer keeps its button
+  board.querySelectorAll('.board-col').forEach(c=>{ const y = keepScroll[colKey(c)], b = y && c.querySelector('.board-col-body'); if(b) b.scrollTop = y; });
   updateCollapseAllIcon();
 }
 // A subtask row is draggable inside a draggable card. Pressing in the subtask area turns the card's own drag off until the mouse is released or the drag ends, so the browser can only pick the row (nested draggables are unreliable across browsers).
@@ -7597,7 +7600,6 @@ document.addEventListener('contextmenu', e=>{
   const cb = row.querySelector(':scope > [role="checkbox"]') || row.querySelector('[role="checkbox"]');
   const ref = cb && subRowRefFromHandler(cb.getAttribute('onclick')); if(!ref) return;
   const surface = row.closest('.board-card') ? 'board' : row.closest('#drawer') ? 'drawer' : 'list';
-  if(surface==='board' && ref.level>1) return;
   const menu = document.getElementById('rowMenu'); if(!menu) return;
   e.preventDefault(); e.stopPropagation();
   closeCellPop(); closeFilterMenu(); closeHelpMenu(); closeUiScaleMenu();
