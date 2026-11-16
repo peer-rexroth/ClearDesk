@@ -75,3 +75,9 @@ test('the board tile\'s ⋯ disc has no border (a fill only, like the other roun
 test('a collapsed board card with only a title keeps the fold chevron and the more button apart', function(){
   assertTrue(/\.board-card-titlerow \+ \.board-card-prog \{ margin-top: 8px; \}/.test(tokScanCss()), 'the progress row sits 8px lower');
 });
+test('the board drop outline is drawn above the sticky add row, and the column body clips to the rounded foot', function(){
+  var css = tokScanCss();
+  assertTrue(/\.board-col\.drag-over::after \{[^}]*pointer-events: none; z-index: 2;/.test(css), 'the outline is a pseudo-element above the children');
+  assertTrue(/\.board-col-body \{ border-radius: 0 0 var\(--r-xl\) var\(--r-xl\); \}/.test(css), 'the scroll area follows the rounded foot');
+  assertTrue(/\.board-add-wrap::before \{[^}]*linear-gradient/.test(css), 'cards fade under the add row');
+});
