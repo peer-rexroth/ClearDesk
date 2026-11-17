@@ -10383,8 +10383,34 @@ function noteSelStartsInHeading(){
   return false;
 }
 function noteCmd(cmd, val){ if(cmd==='bold'){ noteFocusBody(); if(!noteSelInHeading()) noteBold(); onNoteInput(); updateNoteToolbarState(); return; } noteFocusBody(); document.execCommand(cmd, false, val); onNoteInput(); updateNoteToolbarState(); }
+// A heading (or paragraph) typed with Shift+Enter is ONE block with <br>s in it, so a style change would restyle every line of it (and formatBlock nested a <p> inside the <h1>). Split such a block into one block per line first, and leave the selection on the lines it covered.
+function noteSplitLines(){
+  const body = document.getElementById('noteBody'), sel = window.getSelection && window.getSelection();
+  if(!body || !sel || !sel.rangeCount) return;
+  const r = sel.getRangeAt(0);
+  const blockOf = n=>{ for(; n && n.parentNode!==body; n = n.parentNode); return n && n.nodeType===1 && /^(H[1-6]|P|DIV)$/.test(n.tagName) ? n : null; };
+  const B = blockOf(r.startContainer); if(!B || B!==blockOf(r.endContainer) || !B.querySelector(':scope > br')) return;
+  const kids = [...B.childNodes];
+  const segOf = (node, off)=>{
+    let c = node===B ? B.childNodes[off] : node; while(c && c.parentNode!==B) c = c.parentNode;
+    const at = c ? kids.indexOf(c) : kids.length;
+    return kids.slice(0, at).filter(k=>k.nodeName==='BR').length;
+  };
+  const a = segOf(r.startContainer, r.startOffset), z = segOf(r.endContainer, r.endOffset), collapsed = r.collapsed;
+  const segs = [[]]; kids.forEach(k=>{ if(k.nodeName==='BR') segs.push([]); else segs[segs.length-1].push(k); });
+  const tag = B.tagName.toLowerCase();
+  const html = segs.map(g=>{ const d = document.createElement('div'); g.forEach(k=>d.appendChild(k.cloneNode(true))); return `<${tag}>${d.innerHTML || '<br>'}</${tag}>`; }).join('');
+  const at = [...body.children].indexOf(B);
+  const whole = document.createRange(); whole.selectNode(B); sel.removeAllRanges(); sel.addRange(whole);
+  document.execCommand('insertHTML', false, html);
+  const made = [...body.children].slice(at, at + segs.length); if(made.length!==segs.length) return;
+  const nr = document.createRange(); nr.setStart(made[a], 0); nr.setEnd(made[z], made[z].childNodes.length);
+  if(collapsed) nr.collapse(false);
+  sel.removeAllRanges(); sel.addRange(nr);
+}
 function noteBlock(tag){
   noteFocusBody();
+  if(tag!=='blockquote' || !noteSelStartsInHeading()) noteSplitLines();
   const inQuote = ()=>{ const q = window.getSelection(); return q && q.rangeCount && noteClosest(q.anchorNode, 'BLOCKQUOTE'); };
   if(tag==='blockquote' && inQuote()){ updateNoteToolbarState(); return; }                          // already a quote: do not nest another
   if(tag==='p') for(let i = 0; i<6 && inQuote(); i++) document.execCommand('outdent', false);      // formatBlock <p> would leave the paragraph inside its quote

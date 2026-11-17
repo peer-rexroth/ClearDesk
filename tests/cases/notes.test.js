@@ -1204,3 +1204,8 @@ test('refocusing the note body for a style change restores the last caret (Shift
   assertTrue(/noteBodyRange/.test(noteFocusBody.toString()) && /addRange\(r\)/.test(noteFocusBody.toString()), 'noteFocusBody restores the remembered range');
   assertTrue(/noteRememberBodyRange\(\)/.test(globalThis.__APP_HTML), 'the caret is remembered on selection changes');
 });
+
+test('a style change on a Shift+Enter line splits the block first, so only that line changes', function () {
+  assertTrue(/noteSplitLines\(\)/.test(noteBlock.toString()), 'noteBlock splits before formatting');
+  assertTrue(/:scope > br/.test(noteSplitLines.toString()) && /insertHTML/.test(noteSplitLines.toString()), 'a block with line breaks becomes one block per line (one native undo step)');
+});
