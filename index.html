@@ -10341,7 +10341,15 @@ function noteClosest(node, tag){
   while(node && node!==body){ if(node.nodeType===1 && node.tagName===tag) return node; node = node.parentNode; }
   return null;
 }
-function noteFocusBody(){ const b = document.getElementById('noteBody'); if(b && document.activeElement!==b) b.focus(); }
+// Where the caret was last inside the note body. Shift+Tab outside a list moves focus to the title; a style change from the toolbar / menu then refocuses the body, and without this the caret would be at the very start (the first heading was restyled instead of the line being edited).
+let noteBodyRange = null;
+function noteRememberBodyRange(){ const b = document.getElementById('noteBody'), sel = window.getSelection && window.getSelection(); if(b && sel && sel.rangeCount && b.contains(sel.anchorNode) && b.contains(sel.focusNode)) noteBodyRange = sel.getRangeAt(0).cloneRange(); }
+function noteFocusBody(){
+  const b = document.getElementById('noteBody'); if(!b || document.activeElement===b) return;
+  b.focus();
+  const r = noteBodyRange, sel = window.getSelection && window.getSelection();
+  if(r && sel && b.contains(r.startContainer) && b.contains(r.endContainer)){ try{ sel.removeAllRanges(); sel.addRange(r); }catch(_){} }
+}
 // Headings are bold by their style, so Bold does nothing when the whole selection (or the caret) is in one.
 function noteSelInHeading(){
   const sel = window.getSelection ? window.getSelection() : null; if(!sel || !sel.rangeCount) return false;
@@ -12305,7 +12313,7 @@ document.addEventListener('mousedown', e=>{
   if(pop && pop.classList.contains('open') && !pop.contains(e.target) && !(e.target.closest && e.target.closest('#noteLinkBtn'))) closeNoteLinkBar(false);
 });
 function onNoteLinkKey(e){ if(e.key==='Enter'){ e.preventDefault(); applyNoteLink(); } else if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closeNoteLinkBar(); } }
-document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ updateNoteToolbarState(); noteLeaveLineCheck(); noteSlashFollow(); noteCodeCopyMark(); } });
+document.addEventListener('selectionchange', ()=>{ if(appMode==='notes'){ noteRememberBodyRange(); updateNoteToolbarState(); noteLeaveLineCheck(); noteSlashFollow(); noteCodeCopyMark(); } });
 window.addEventListener('beforeunload', ()=>{ flushNoteEdit(); flushPromptEdit(); });
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden'){ flushNoteEdit(); flushPromptEdit(); } });
 

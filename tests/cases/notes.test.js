@@ -1199,3 +1199,8 @@ test('the bundled templates are seeded and restored locked; a note made from one
   assertTrue(/template:true, locked:true/.test(noteRestoreStarters.toString()), 'Restore Starter Templates locks them too');
   assertFalse(/locked/.test(noteFromTemplate.toString()), 'a note made from a template does not inherit the lock');
 });
+
+test('refocusing the note body for a style change restores the last caret (Shift+Tab to the title must not send the style to the first block)', function () {
+  assertTrue(/noteBodyRange/.test(noteFocusBody.toString()) && /addRange\(r\)/.test(noteFocusBody.toString()), 'noteFocusBody restores the remembered range');
+  assertTrue(/noteRememberBodyRange\(\)/.test(globalThis.__APP_HTML), 'the caret is remembered on selection changes');
+});
