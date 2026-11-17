@@ -7890,7 +7890,7 @@ function renderNoteEditor(){
       body.replaceWith(fresh); body = fresh; noteSavedRange = null;
       if(had) fresh.focus();
     }
-    title.value = n.title; body.innerHTML = n.body; noteLiftTablesOutOfHeadings(body); noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
+    title.value = n.title; body.innerHTML = n.body; noteLiftTablesOutOfHeadings(body); noteNormalizeStructure(body, false); noteEditorId = n.id; noteEditorStamp = n.updatedAt; noteEditCount = 0; tblHandlesHide();
     if(!body.firstElementChild && !body.textContent) body.innerHTML = '<p><br></p>';             // an empty note starts with its paragraph (see noteEnsureParagraph)
     noteWrapLeadingInline(body);                                            // a first line stored as loose text becomes a paragraph, so its spacing matches the others
     noteAutoLinkDom(body);                                                  // links, e-mail addresses and phone numbers in existing text
@@ -7940,7 +7940,8 @@ function commitNoteEdit(){
   noteSaveTimer = null;
   const n = notes.find(x=>x.id===noteEditorId); if(!n || n.locked) return;
   const title = (document.getElementById('noteTitle').value || '').slice(0,200);
-  const body = sanitizeNoteHtml(document.getElementById('noteBody').innerHTML);
+  const copy = document.getElementById('noteBody').cloneNode(true); noteNormalizeStructure(copy, false);
+  const body = sanitizeNoteHtml(copy.innerHTML);
   if(title===n.title && body===n.body) return;
   n.title = title; n.body = body; n.updatedAt = Date.now(); noteEditorStamp = n.updatedAt;
   save(); renderNotesList(); updateNoteMeta(n);
@@ -10957,6 +10958,76 @@ function noteLiftTablesOutOfHeadings(root){
   });
   return changed;
 }
+// Structural repair of a note's markup. Chromium's editing commands (and typing next to a rule, a quote, a list) can leave markup that is not valid HTML: a list, quote, rule or heading inside a heading / paragraph /
+// code block / bold run, bare text straight in the body, a list directly inside a list. `noteNormalizeStructure(root)` mends that by MOVING nodes (never copying text), so a caret that sits in a moved node stays valid.
+// live = false (save, open) also turns <ul><ul> into <ul><li><ul>; the live editor keeps Chromium's own nesting, which its indent / outdent commands expect.
+const NOTE_BLOCK_RE = /^(H[1-6]|P|DIV|UL|OL|LI|BLOCKQUOTE|PRE|TABLE|HR)$/, NOTE_TEXT_BLOCK_RE = /^(H[1-6]|P|PRE)$/, NOTE_INLINE_RE = /^(B|STRONG|I|EM|U|S|STRIKE|SPAN|A|CODE|MARK)$/;
+function noteNormalizeStructure(root, live){
+  let changed = false;
+  if(!root || typeof root.querySelectorAll!=='function' || !root.childNodes || !root.querySelectorAll('*')) return false;   // (the test harness's stand-in DOM has no real tree)
+  const hasContent = el=>[...el.childNodes].some(n=>n.nodeType===1 || (n.nodeType===3 && n.nodeValue.trim()));
+  const split = (parent, child)=>{                                  // parent (inline / heading / paragraph / code) cannot hold the block `child`: lift the child out, the text around it keeps the parent's tag
+    const before = parent.cloneNode(false), after = parent.cloneNode(false);
+    let seen = false;
+    [...parent.childNodes].forEach(n=>{ if(n===child){ seen = true; return; } (seen ? after : before).appendChild(n); });
+    const parts = [];
+    if(hasContent(before)) parts.push(before);
+    parts.push(child);
+    if(hasContent(after)) parts.push(after);
+    parent.replaceWith(...parts);
+  };
+  for(let guard = 0; guard<500; guard++){
+    let did = false;
+    const bad = [...root.querySelectorAll('*')].find(c=>{
+      const par = c.parentNode; if(!par || par===root || par.nodeType!==1) return false;
+      return NOTE_BLOCK_RE.test(c.tagName) && (NOTE_TEXT_BLOCK_RE.test(par.tagName) || NOTE_INLINE_RE.test(par.tagName));
+    });
+    if(bad){ split(bad.parentNode, bad); did = true; changed = true; }
+    if(!did) break;
+  }
+  // bare text / inline runs straight in the body get a paragraph
+  let run = [];
+  const flush = ()=>{ if(run.length && run.some(n=>n.nodeType===1 || n.nodeValue.trim())){ const p = document.createElement('p'); run[0].before(p); run.forEach(n=>p.appendChild(n)); changed = true; } run = []; };
+  [...root.childNodes].forEach(n=>{ if((n.nodeType===3) || (n.nodeType===1 && (NOTE_INLINE_RE.test(n.tagName) || n.tagName==='BR'))) run.push(n); else flush(); });
+  flush();
+  root.querySelectorAll('ul, ol').forEach(l=>{                       // a list holds only items (and, live, Chromium's own nested lists): a heading, quote or paragraph directly in one gets an item of its own
+    [...l.childNodes].forEach(n=>{
+      if(n.nodeType===3 ? !n.nodeValue.trim() : (n.nodeType!==1 || n.tagName==='LI' || (live && /^(UL|OL)$/.test(n.tagName)))) return;
+      if(n.nodeType===1 && /^(UL|OL)$/.test(n.tagName)) return;     // (nested lists are mended on save / open below)
+      const li = document.createElement('li'); n.before(li); li.appendChild(n); changed = true;
+    });
+  });
+  root.querySelectorAll('li').forEach(li=>{                          // a list item outside a list (it ended up in a table cell, a quote, a paragraph): give it a list
+    if(li.parentNode && !/^(UL|OL)$/.test(li.parentNode.tagName)){ const ul = document.createElement('ul'); li.before(ul); ul.appendChild(li); changed = true; }
+  });
+  if(!live){
+    root.querySelectorAll('ul > ul, ul > ol, ol > ul, ol > ol').forEach(l=>{
+      const prev = l.previousElementSibling;
+      if(prev && prev.tagName==='LI') prev.appendChild(l);
+      else { const li = document.createElement('li'); l.before(li); li.appendChild(l); }
+      changed = true;
+    });
+  }
+  return changed;
+}
+// Live version for the open editor: repairs #noteBody and puts the caret back where it was (nodes are moved, so the saved points stay valid).
+function noteFixStructure(){
+  const body = document.getElementById('noteBody'); if(!body || !body.querySelectorAll || noteIsLocked(noteEditorId)) return;
+  const sel = window.getSelection && window.getSelection(), r = sel && sel.rangeCount ? sel.getRangeAt(0) : null;
+  const inBody = r && body.contains(r.startContainer) && body.contains(r.endContainer);
+  // a caret between two elements is (parent, index), and the index shifts when nodes move: remember the nodes around it instead
+  const pt = (n, o)=>n.nodeType===3 ? { n, o } : { n, o, next: n.childNodes[o] || null, prev: n.childNodes[o-1] || null };
+  const a = inBody ? pt(r.startContainer, r.startOffset) : null, z = inBody ? pt(r.endContainer, r.endOffset) : null;
+  if(!noteNormalizeStructure(body, true)) return;
+  const back = (q, setter)=>{
+    if(q.next && q.next.isConnected) setter(q.next.parentNode, [...q.next.parentNode.childNodes].indexOf(q.next));
+    else if(q.prev && q.prev.isConnected) setter(q.prev.parentNode, [...q.prev.parentNode.childNodes].indexOf(q.prev) + 1);
+    else if(q.n.isConnected) setter(q.n, Math.min(q.o, q.n.nodeType===3 ? q.n.nodeValue.length : q.n.childNodes.length));
+    else return false;
+    return true;
+  };
+  if(a && z){ try{ const nr = document.createRange(); if(back(a, (n, o)=>nr.setStart(n, o)) && back(z, (n, o)=>nr.setEnd(n, o))){ sel.removeAllRanges(); sel.addRange(nr); } }catch(_){} }
+}
 function noteTableInsert(rows, cols){
   rows = Math.max(1, Math.min(NOTE_TABLE_MAX, rows|0)); cols = Math.max(1, Math.min(NOTE_TABLE_MAX, cols|0));
   closeNoteTableMenu();
@@ -11938,6 +12009,7 @@ function onNoteInput(e){
     if(li) li.removeAttribute('data-done');
   }
   noteEditCount++;
+  noteFixStructure();
   noteEnsureParagraph(body);
   noteSafariGapFix(e);
   noteAutoInline(e);

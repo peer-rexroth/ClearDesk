@@ -1209,3 +1209,11 @@ test('a style change on a Shift+Enter line splits the block first, so only that 
   assertTrue(/noteSplitLines\(\)/.test(noteBlock.toString()), 'noteBlock splits before formatting');
   assertTrue(/:scope > br/.test(noteSplitLines.toString()) && /insertHTML/.test(noteSplitLines.toString()), 'a block with line breaks becomes one block per line (one native undo step)');
 });
+
+test('note markup is repaired structurally: live in the editor, and on save and open', function () {
+  var src = globalThis.__APP_HTML;
+  assertTrue(/function noteNormalizeStructure\(root, live\)/.test(src), 'the repair exists');
+  assertTrue(/noteFixStructure\(\);\s*\n\s*noteEnsureParagraph/.test(onNoteInput.toString().replace(/\n\s*/g, '\n')) || /noteFixStructure\(\)/.test(onNoteInput.toString()), 'it runs on every edit');
+  assertTrue(/noteNormalizeStructure\(copy, false\)/.test(src), 'a copy is repaired before it is saved');
+  assertTrue(/noteNormalizeStructure\(body, false\)/.test(src), 'and when a note is opened');
+});
