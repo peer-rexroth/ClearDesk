@@ -83,6 +83,6 @@ test('the board drop outline is drawn above the sticky add row, and the column b
 });
 test('whatever is the last line of a board card (title, due line, tags) keeps clear of the corner more button', function(){
   var css = tokScanCss();
-  assertTrue(/\.board-card > \.board-card-top:has\(\+ \.row-actions\) \.board-card-main > \.board-card-titlerow:last-child \.board-card-title \{ padding-right: 30px; \}/.test(css), 'the title as the last line');
+  assertTrue(/\.board-card > \.board-card-top:has\(\+ \.row-actions\) \.board-card-main > \.board-card-titlerow \.board-card-title \{ padding-right: 30px; \}/.test(css), 'the title');
   assertTrue(/\.board-card-top:has\(\+ \.row-actions\) \.board-card-main > :is\(\.board-card-sec, \.board-card-tags\):last-child/.test(css), 'the due line and the tags as the last line');
 });
